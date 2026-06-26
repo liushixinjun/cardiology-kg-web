@@ -297,6 +297,47 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
   display: none;
 }
 .nw-path-overlay.show { display: block; }
+
+/* ==================== First-screen guidance ==================== */
+.nw-graph-guide {
+  position: absolute; top: 14px; left: 14px; z-index: 9;
+  width: 330px; padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(26,29,39,.94), rgba(17,20,30,.88));
+  border: 1px solid rgba(79,140,255,.45); border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.35);
+  pointer-events: none;
+}
+.nw-graph-guide .guide-title { font-size: 14px; font-weight: 900; color: var(--ink); margin-bottom: 8px; }
+.nw-graph-guide .guide-text { font-size: 12px; line-height: 1.7; color: var(--muted); }
+.nw-graph-guide .guide-text b { color: var(--accent); }
+.nw-graph-guide .guide-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.nw-guide-btn {
+  pointer-events: auto; border: 1px solid rgba(79,140,255,.45); border-radius: 999px;
+  background: rgba(79,140,255,.10); color: var(--accent); padding: 4px 9px;
+  font-size: 11px; font-weight: 800; cursor: pointer;
+}
+.nw-guide-btn:hover { background: rgba(79,140,255,.18); border-color: var(--accent); }
+.nw-overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.nw-overview-card {
+  background: var(--bg3); border: 1px solid var(--rule); border-radius: 9px;
+  padding: 10px;
+}
+.nw-overview-card .num { font-size: 20px; font-weight: 900; color: var(--accent); }
+.nw-overview-card .txt { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.nw-starter-list { display: flex; flex-direction: column; gap: 6px; }
+.nw-starter-item {
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--bg3);
+  padding: 8px; cursor: pointer; transition: all .15s;
+}
+.nw-starter-item:hover { border-color: var(--accent); background: rgba(79,140,255,.08); }
+.nw-starter-item .name { font-size: 12px; color: var(--ink); font-weight: 800; }
+.nw-starter-item .desc { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.nw-path-hint {
+  border: 1px solid rgba(79,140,255,.35); background: rgba(79,140,255,.07);
+  border-radius: 9px; padding: 9px; color: var(--muted); font-size: 11px; line-height: 1.55;
+}
+.nw-path-hint b { color: var(--ink); }
+.nw-path-hint .path-line { color: var(--accent); margin-top: 5px; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -371,6 +412,14 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
   <!-- Center Graph -->
   <div class="nw-graph-wrap" id="nw-graph-wrap">
     <div id="nw-graph"></div>
+    <div class="nw-graph-guide" id="nw-graph-guide">
+      <div class="guide-title">默认展示：专病关联网络</div>
+      <div class="guide-text">
+        已为你自动选择<b>高价值示例疾病</b>，展示疾病、症状、检查、检验、药物、手术及相邻疾病之间的关系。<br>
+        单击节点看详情，双击疾病切换中心，双击实体继续扩展。
+      </div>
+      <div class="guide-actions" id="nw-guide-actions"></div>
+    </div>
     <div class="nw-path-overlay" id="nw-path-overlay"></div>
   </div>
 
@@ -430,8 +479,10 @@ var PATH_SELECT_COUNT = 0;
 var PATH_START = null;
 var ALL_GRAPH_NODES = {};       // name -> nodeData
 var ALL_GRAPH_EDGES = [];       // all edges for BFS
+var LAST_GRAPH_DATA = { nodes: [], links: [] };
 var NODE_EXPANDED = {};         // entityName -> bool (level 1 expanded)
 var SEARCH_RESULTS = null;      // search filtered node names
+var DEFAULT_DISEASE_NAMES = ['急性心肌梗死', '心房颤动', '主动脉夹层', '高血压', '心力衰竭'];
 
 /* ---------- Init ---------- */
 loadData(function(d) {
@@ -440,10 +491,9 @@ loadData(function(d) {
   initDimFilters();
   renderLegend();
   bindLevelRadio();
-  // default: select first disease
-  var keys = Object.keys(d.diseases);
-  if (keys.length > 0) {
-    document.getElementById('nw-disease-select').value = keys[0];
+  var defaultCode = chooseDefaultDisease(d);
+  if (defaultCode) {
+    document.getElementById('nw-disease-select').value = defaultCode;
     onDiseaseSelect();
   }
 });
@@ -451,6 +501,30 @@ loadData(function(d) {
 /* ================================================================
    Disease Select
    ================================================================ */
+function chooseDefaultDisease(d) {
+  for (var i = 0; i < DEFAULT_DISEASE_NAMES.length; i++) {
+    var target = DEFAULT_DISEASE_NAMES[i];
+    var found = null;
+    Object.keys(d.diseases).forEach(function(code) {
+      if (!found && d.diseases[code].info.name === target) found = code;
+    });
+    if (found) return found;
+  }
+
+  var bestCode = null;
+  var bestScore = -1;
+  Object.keys(d.diseases).forEach(function(code) {
+    var item = d.diseases[code];
+    var score = 0;
+    DIM_KEYS.forEach(function(k) { score += (item.dimensions[k] || []).length; });
+    if (score > bestScore) {
+      bestScore = score;
+      bestCode = code;
+    }
+  });
+  return bestCode;
+}
+
 function populateDiseaseSelect(d) {
   var sel = document.getElementById('nw-disease-select');
   var groups = {};
@@ -488,8 +562,11 @@ function setCenter(code) {
   PATH_SELECT_COUNT = 0;
   PATH_START = null;
   PATH_MODE = false;
+  SEARCH_RESULTS = null;
+  document.getElementById('nw-entity-search').value = '';
   document.getElementById('btn-path-mode').classList.remove('active');
   updateCenterCard(code);
+  renderDimFilters();
   updatePathList();
   renderGraph();
 }
@@ -499,7 +576,7 @@ function updateCenterCard(code) {
   if (!d) return;
   document.getElementById('cc-name').textContent = d.info.name;
   document.getElementById('cc-code').textContent = d.info.code;
-  document.getElementById('cc-type').textContent = '疾病 / Disease';
+  document.getElementById('cc-type').textContent = '疾病';
   document.getElementById('nw-center-name').textContent = d.info.name;
 }
 
@@ -520,7 +597,7 @@ function renderDimFilters() {
     html += '<input type="checkbox" ' + (DIM_FILTERS[k] ? 'checked' : '') +
             ' onchange="onDimToggle(\'' + k + '\', this.checked)">';
     html += '<span class="dim-dot" style="background:' + color + '"></span>';
-    html += '<span class="dim-label">' + DIM_LABELS[k] + ' ' + k + '</span>';
+    html += '<span class="dim-label">' + DIM_LABELS[k] + '</span>';
     html += '<span class="dim-count">' + count + '</span>';
     html += '</label>';
   });
@@ -787,6 +864,7 @@ function renderGraph() {
 
   GRAPH_CHART = echarts.init(container, null, { renderer: 'canvas' });
   var gd = buildGraphData();
+  LAST_GRAPH_DATA = gd;
 
   /* Apply search filter */
   if (SEARCH_RESULTS !== null) {
@@ -813,7 +891,10 @@ function renderGraph() {
           return p.data.source + ' → ' + p.data.target;
         }
         var info = ALL_GRAPH_NODES[p.name];
-        var t = (info && DIM_LABELS[info.type]) ? DIM_LABELS[info.type] : (info ? info.type : '');
+        var t = '';
+        if (info) {
+          t = info.type === 'Disease' ? '疾病' : (DIM_LABELS[info.type] || info.type || '');
+        }
         return '<b>' + p.name + '</b>' + (t ? '<br><span style="color:#8b90a0">' + t + '</span>' : '');
       }
     },
@@ -906,15 +987,131 @@ function renderGraph() {
   window.addEventListener('resize', function() {
     if (GRAPH_CHART) GRAPH_CHART.resize();
   });
+
+  renderGraphGuide(gd);
+  showGraphOverview(gd);
+  setTimeout(function() {
+    if (GRAPH_CHART) GRAPH_CHART.resize();
+  }, 120);
+}
+
+/* ================================================================
+   First-screen Overview
+   ================================================================ */
+function renderGraphGuide(gd) {
+  var el = document.getElementById('nw-guide-actions');
+  if (!el || !CURRENT_DISEASE_CODE) return;
+  var d = KG_DATA.diseases[CURRENT_DISEASE_CODE];
+  var starters = getStarterEntities(d, 4);
+  var html = '';
+  starters.forEach(function(s) {
+    html += '<button class="nw-guide-btn" onclick="focusEntity(\'' + safeJs(s.name) + '\')">' + s.name + '</button>';
+  });
+  html += '<button class="nw-guide-btn" onclick="enterFullscreen()">全屏查看</button>';
+  el.innerHTML = html;
+}
+
+function showGraphOverview(gd) {
+  var empty = document.getElementById('nw-detail-empty');
+  var content = document.getElementById('nw-detail-content');
+  if (!empty || !content || !CURRENT_DISEASE_CODE) return;
+  var d = KG_DATA.diseases[CURRENT_DISEASE_CODE];
+  if (!d) return;
+  empty.style.display = 'none';
+  content.style.display = 'block';
+
+  var dimCount = 0;
+  var entityCount = 0;
+  DIM_KEYS.forEach(function(k) {
+    var len = (d.dimensions[k] || []).length;
+    if (len > 0) dimCount++;
+    entityCount += len;
+  });
+  var starters = getStarterEntities(d, 5);
+  var h = '';
+  h += '<div class="nw-detail-name">' + d.info.name + '</div>';
+  h += '<div class="nw-detail-code">默认中心疾病 · ' + d.info.code + '</div>';
+  h += '<span class="nw-dim-tag" style="background:' + DISEASE_COLOR + '">疾病</span>';
+  h += '<div class="nw-overview-grid">';
+  h += overviewCard(gd.nodes.length, '当前可见节点');
+  h += overviewCard(gd.links.length, '当前可见关系');
+  h += overviewCard(dimCount, '覆盖知识维度');
+  h += overviewCard(entityCount, '中心实体总量');
+  h += '</div>';
+  h += '<div class="nw-detail-section"><h4>先看什么</h4>';
+  h += '<div class="nw-starter-list">';
+  starters.forEach(function(s) {
+    h += '<div class="nw-starter-item" onclick="focusEntity(\'' + safeJs(s.name) + '\')">';
+    h += '<div class="name"><span style="color:' + s.color + '">●</span> ' + s.name + '</div>';
+    h += '<div class="desc">' + s.dim + '实体 · 点击后右侧展示关联疾病、跨维度共现与扩展入口</div>';
+    h += '</div>';
+  });
+  h += '</div></div>';
+  h += '<div class="nw-detail-section"><h4>推荐操作</h4>';
+  h += '<div class="nw-path-hint"><b>默认已经不是空白页：</b>中间是自动展开的疾病关联网络。<div class="path-line">建议路径：先点“胸痛/心电图/肌钙蛋白”等核心节点，再看关联疾病与跨维度实体。</div></div>';
+  h += '</div>';
+  h += '<button class="nw-expand-btn" onclick="enterFullscreen()">进入全屏探索</button>';
+  content.innerHTML = h;
+}
+
+function overviewCard(num, label) {
+  return '<div class="nw-overview-card"><div class="num">' + num + '</div><div class="txt">' + label + '</div></div>';
+}
+
+function getStarterEntities(d, limit) {
+  var preferredDims = ['Symptom', 'Exam', 'LabTest', 'Medication', 'Procedure', 'RiskFactor', 'Complication'];
+  var result = [];
+  preferredDims.forEach(function(k) {
+    if (result.length >= limit) return;
+    var items = d.dimensions[k] || [];
+    items.slice(0, 2).forEach(function(e) {
+      if (result.length < limit) {
+        result.push({ name: e.name, dim: DIM_LABELS[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
+      }
+    });
+  });
+  if (result.length < limit) {
+    DIM_KEYS.forEach(function(k) {
+      if (result.length >= limit) return;
+      (d.dimensions[k] || []).forEach(function(e) {
+        if (result.length < limit && !result.some(function(x) { return x.name === e.name; })) {
+          result.push({ name: e.name, dim: DIM_LABELS[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
+        }
+      });
+    });
+  }
+  return result;
+}
+
+function focusEntity(name) {
+  var nd = ALL_GRAPH_NODES[name];
+  if (!nd) {
+    document.getElementById('nw-entity-search').value = name;
+    onEntitySearch();
+    return;
+  }
+  showNodeDetail(name, nd);
+  addPathNode(name);
+  if (GRAPH_CHART) {
+    GRAPH_CHART.dispatchAction({ type: 'highlight', name: name });
+    GRAPH_CHART.dispatchAction({ type: 'showTip', seriesIndex: 0, name: name });
+  }
+}
+
+function safeJs(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 /* ================================================================
    Reset Graph
    ================================================================ */
 function resetGraph() {
+  SEARCH_RESULTS = null;
+  document.getElementById('nw-entity-search').value = '';
   if (GRAPH_CHART) {
     GRAPH_CHART.dispatchAction({ type: 'restore' });
   }
+  renderGraph();
 }
 
 /* ================================================================
@@ -965,7 +1162,7 @@ function showDiseaseDetail(name, nd) {
   var h = '';
   h += '<div class="nw-detail-name">' + info.name + '</div>';
   h += '<div class="nw-detail-code">' + info.code + (info.name_en ? ' / ' + info.name_en : '') + '</div>';
-  h += '<span class="nw-dim-tag" style="background:' + DISEASE_COLOR + '">疾病 Disease</span>';
+  h += '<span class="nw-dim-tag" style="background:' + DISEASE_COLOR + '">疾病</span>';
   h += '<div class="nw-detail-rows">';
   h += detailRow('关联疾病', (d.relations_summary ? d.relations_summary.length : 0) + ' 条');
   h += detailRow('完整率', Math.round(cov) + '%');
@@ -1014,7 +1211,7 @@ function showDiseaseDetail(name, nd) {
         h += '</div>';
       }
       if (relatedDiseases.length > 10) {
-        h += '<div class="nw-related-more">+' + (relatedDiseases.length - 10) + ' more</div>';
+        h += '<div class="nw-related-more">另有 ' + (relatedDiseases.length - 10) + ' 个关联疾病</div>';
       }
       h += '</div></div>';
     }
@@ -1031,7 +1228,7 @@ function showEntityDetailPanel(name, nd) {
 
   var color = DIM_COLORS[nd.type] || '#888';
   var dimLabel = DIM_LABELS[nd.type] || nd.type;
-  h += '<span class="nw-dim-tag" style="background:' + color + '">' + dimLabel + ' ' + nd.type + '</span>';
+  h += '<span class="nw-dim-tag" style="background:' + color + '">' + dimLabel + '</span>';
 
   /* Count associated diseases */
   var assocDiseases = findAssociatedDiseases(name);
@@ -1084,7 +1281,7 @@ function showEntityDetailPanel(name, nd) {
       h += '</div>';
     }
     if (assocDiseases.length > 8) {
-      h += '<div class="nw-related-more">+' + (assocDiseases.length - 8) + ' more</div>';
+      h += '<div class="nw-related-more">另有 ' + (assocDiseases.length - 8) + ' 个关联疾病</div>';
     }
     h += '</div></div>';
 
@@ -1207,10 +1404,21 @@ function addPathNode(name) {
   updatePathList();
 }
 
+function getDefaultPathHint() {
+  if (!CURRENT_DISEASE_CODE || !KG_DATA || !KG_DATA.diseases[CURRENT_DISEASE_CODE]) {
+    return '选择疾病 → 查看核心实体 → 继续扩展关联疾病';
+  }
+  var d = KG_DATA.diseases[CURRENT_DISEASE_CODE];
+  var starters = getStarterEntities(d, 2);
+  if (starters.length >= 2) return d.info.name + ' → ' + starters[0].name + ' → ' + starters[1].name;
+  if (starters.length === 1) return d.info.name + ' → ' + starters[0].name + ' → 关联疾病';
+  return d.info.name + ' → 核心实体 → 关联疾病';
+}
+
 function updatePathList() {
   var el = document.getElementById('nw-path-list');
   if (EXPLORE_PATH.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:11px;">点击节点开始探索</div>';
+    el.innerHTML = '<div class="nw-path-hint"><b>推荐探索：</b><div class="path-line">' + getDefaultPathHint() + '</div><div style="margin-top:5px;">点击图谱节点后，这里会记录你的探索轨迹。</div></div>';
     return;
   }
   var html = '';

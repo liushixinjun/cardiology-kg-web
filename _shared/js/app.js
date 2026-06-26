@@ -75,7 +75,7 @@ function renderFooter() {
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.0.0</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.2</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
   
   // 检查弹窗是否已存在，不存在则创建
   if (!document.getElementById('changelog-modal')) {
@@ -101,6 +101,21 @@ function hideChangelog() {
 
 function renderChangelog() {
   var list = [
+    { v: 'v1.1.2', date: '2026-06-26', items: [
+      '优化网络探索默认首屏，进入页面自动选择高价值示例疾病并展示关联网络',
+      '新增图谱引导浮层、推荐探索节点、右侧默认概览与可见节点/关系统计',
+      '修复网络探索维度计数在默认疾病选中后不刷新的问题',
+      '减少页面可见英文标签，实体标签和补充说明统一中文展示'
+    ]},
+    { v: 'v1.1.1', date: '2026-06-26', items: [
+      '修复网络探索页面缺少共享导航的问题',
+      '调整网络探索页面布局高度，适配顶部导航栏',
+      '首页和全局菜单均可进入网络探索'
+    ]},
+    { v: 'v1.1.0', date: '2026-06-26', items: [
+      '新增网络探索页面，支持节点点击展开、三级探索、路径模式和全屏浏览',
+      '左侧支持多维度筛选，右侧展示实体详情、标签颜色和关联疾病'
+    ]},
     { v: 'v1.0.0', date: '2026-06-26', items: [
       '新增心血管内科专科知识图谱 Web 测试平台',
       '新增专病知识总览驾驶舱，按疾病大类展示17维度完整率',
