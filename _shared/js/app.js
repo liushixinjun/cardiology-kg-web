@@ -75,7 +75,7 @@ function renderFooter() {
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.2</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.3</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
   
   // 检查弹窗是否已存在，不存在则创建
   if (!document.getElementById('changelog-modal')) {
@@ -101,6 +101,11 @@ function hideChangelog() {
 
 function renderChangelog() {
   var list = [
+    { v: 'v1.1.3', date: '2026-06-26', items: [
+      '修复网络探索图谱空白/空数据问题，节点与关系构建改为去重后再渲染',
+      '优化力导向图布局参数，默认图谱进入页面即可散开显示',
+      '右侧详情默认保持图谱概览，避免鼠标移出后回到空状态'
+    ]},
     { v: 'v1.1.2', date: '2026-06-26', items: [
       '优化网络探索默认首屏，进入页面自动选择高价值示例疾病并展示关联网络',
       '新增图谱引导浮层、推荐探索节点、右侧默认概览与可见节点/关系统计',

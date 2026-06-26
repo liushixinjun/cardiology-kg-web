@@ -483,6 +483,8 @@ var LAST_GRAPH_DATA = { nodes: [], links: [] };
 var NODE_EXPANDED = {};         // entityName -> bool (level 1 expanded)
 var SEARCH_RESULTS = null;      // search filtered node names
 var DEFAULT_DISEASE_NAMES = ['急性心肌梗死', '心房颤动', '主动脉夹层', '高血压', '心力衰竭'];
+var DEFAULT_VISIBLE_DIMS = ['Symptom', 'Exam', 'LabTest', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan'];
+var MAX_OTHER_DISEASES = 24;
 
 /* ---------- Init ---------- */
 loadData(function(d) {
@@ -584,7 +586,7 @@ function updateCenterCard(code) {
    Dimension Filters
    ================================================================ */
 function initDimFilters() {
-  DIM_KEYS.forEach(function(k) { DIM_FILTERS[k] = true; });
+  DIM_KEYS.forEach(function(k) { DIM_FILTERS[k] = DEFAULT_VISIBLE_DIMS.indexOf(k) !== -1; });
   renderDimFilters();
 }
 
@@ -652,6 +654,38 @@ function bindLevelRadio() {
 /* ================================================================
    Build Graph Data
    ================================================================ */
+function pushUniqueNode(nodes, node) {
+  if (!node || !node.name) return;
+  if (ALL_GRAPH_NODES[node.name]) {
+    var existing = ALL_GRAPH_NODES[node.name];
+    if (node.nodeType === 'disease' || node.nodeType === 'disease-other') {
+      existing.nodeType = node.nodeType;
+      existing.type = node.type;
+      existing.category = node.category;
+      existing.level = Math.min(existing.level || node.level || 1, node.level || 1);
+      existing.symbolSize = Math.max(existing.symbolSize || 0, node.symbolSize || 0);
+      existing.itemStyle = node.itemStyle || existing.itemStyle;
+      existing.label = node.label || existing.label;
+      existing.code = node.code || existing.code;
+    }
+    return;
+  }
+  nodes.push(node);
+  ALL_GRAPH_NODES[node.name] = node;
+}
+
+function pushUniqueLink(links, link) {
+  if (!link || !link.source || !link.target || link.source === link.target) return;
+  if (!ALL_GRAPH_NODES[link.source] || !ALL_GRAPH_NODES[link.target]) return;
+  var keyA = link.source + '→' + link.target + '→' + (link.value || '');
+  var keyB = link.target + '→' + link.source + '→' + (link.value || '');
+  if (!pushUniqueLink._seen) pushUniqueLink._seen = {};
+  if (pushUniqueLink._seen[keyA] || pushUniqueLink._seen[keyB]) return;
+  pushUniqueLink._seen[keyA] = true;
+  links.push(link);
+  ALL_GRAPH_EDGES.push({ a: link.source, b: link.target });
+}
+
 function buildGraphData() {
   var nodes = [], links = [];
   var disease = KG_DATA.diseases[CURRENT_DISEASE_CODE];
@@ -659,6 +693,7 @@ function buildGraphData() {
 
   ALL_GRAPH_NODES = {};
   ALL_GRAPH_EDGES = [];
+  pushUniqueLink._seen = {};
 
   /* Center node */
   var centerNode = {
@@ -676,8 +711,7 @@ function buildGraphData() {
     },
     label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#fff' }
   };
-  nodes.push(centerNode);
-  ALL_GRAPH_NODES[disease.info.name] = centerNode;
+  pushUniqueNode(nodes, centerNode);
 
   /* Level 1: Dimension entities */
   DIM_KEYS.forEach(function(k, idx) {
@@ -697,107 +731,62 @@ function buildGraphData() {
         itemStyle: { color: color },
         label: { show: true, fontSize: 10, color: '#e8eaf0' }
       };
-      nodes.push(n);
-      ALL_GRAPH_NODES[e.name] = n;
-      var lk = {
+      pushUniqueNode(nodes, n);
+      pushUniqueLink(links, {
         source: disease.info.name,
         target: e.name,
         value: k,
         lineStyle: { color: color, width: 2, type: 'dashed', opacity: 0.6 }
-      };
-      links.push(lk);
-      ALL_GRAPH_EDGES.push({ a: disease.info.name, b: e.name });
+      });
     });
   });
 
   /* Level 2+: Entity-associated other diseases via shared entities */
   if (MAX_LEVEL >= 2) {
-    var seenL2 = {};
+    var sharedDiseaseScore = {};
+    var sharedDiseaseLinks = {};
     Object.keys(KG_DATA.diseases).forEach(function(dc) {
       if (dc === CURRENT_DISEASE_CODE) return;
       var dd = KG_DATA.diseases[dc];
       DIM_KEYS.forEach(function(k) {
         if (!DIM_FILTERS[k]) return;
         (dd.dimensions[k] || []).forEach(function(e) {
-          if (ALL_GRAPH_NODES[e.name] && !seenL2[e.name]) {
-            seenL2[e.name] = true;
-            /* This entity already exists at level 1, add a link from the other disease */
-            var otherDiseaseNode = {
-              name: dd.info.name,
-              code: dd.info.code,
-              nodeType: 'disease-other',
-              type: 'Disease',
-              category: 0,
-              level: 2,
-              symbolSize: 22,
-              itemStyle: { color: '#4f8cff', opacity: 0.5 },
-              label: { show: true, fontSize: 9, color: '#8b90a0' }
-            };
-            if (!ALL_GRAPH_NODES[dd.info.name]) {
-              nodes.push(otherDiseaseNode);
-              ALL_GRAPH_NODES[dd.info.name] = otherDiseaseNode;
-            }
-            links.push({
-              source: dd.info.name,
-              target: e.name,
-              value: k,
-              lineStyle: { color: DIM_COLORS[k] || '#888', width: 1, opacity: 0.35 }
-            });
-            ALL_GRAPH_EDGES.push({ a: dd.info.name, b: e.name });
+          if (ALL_GRAPH_NODES[e.name]) {
+            if (!sharedDiseaseScore[dc]) sharedDiseaseScore[dc] = 0;
+            if (!sharedDiseaseLinks[dc]) sharedDiseaseLinks[dc] = [];
+            sharedDiseaseScore[dc]++;
+            sharedDiseaseLinks[dc].push({ entity: e.name, dim: k });
           }
         });
       });
     });
 
-    /* Also find shared entities between center disease and other diseases */
-    if (MAX_LEVEL >= 2) {
-      var centerEntities = {};
-      DIM_KEYS.forEach(function(k) {
-        (disease.dimensions[k] || []).forEach(function(e) {
-          centerEntities[e.name] = k;
-        });
-      });
-      Object.keys(KG_DATA.diseases).forEach(function(dc) {
-        if (dc === CURRENT_DISEASE_CODE) return;
+    Object.keys(sharedDiseaseScore)
+      .sort(function(a, b) { return sharedDiseaseScore[b] - sharedDiseaseScore[a]; })
+      .slice(0, MAX_OTHER_DISEASES)
+      .forEach(function(dc) {
         var dd = KG_DATA.diseases[dc];
-        DIM_KEYS.forEach(function(k) {
-          (dd.dimensions[k] || []).forEach(function(e) {
-            if (centerEntities[e.name]) {
-              /* This entity connects to both center disease and other disease */
-              if (!ALL_GRAPH_NODES[dd.info.name]) {
-                var nd = {
-                  name: dd.info.name,
-                  code: dd.info.code,
-                  nodeType: 'disease-other',
-                  type: 'Disease',
-                  category: 0,
-                  level: 2,
-                  symbolSize: 22,
-                  itemStyle: { color: '#4f8cff', opacity: 0.5 },
-                  label: { show: true, fontSize: 9, color: '#8b90a0' }
-                };
-                nodes.push(nd);
-                ALL_GRAPH_NODES[dd.info.name] = nd;
-              }
-              /* Add link if not already present */
-              var exists = links.some(function(l) {
-                return (l.source === dd.info.name && l.target === e.name) ||
-                       (l.source === e.name && l.target === dd.info.name);
-              });
-              if (!exists) {
-                links.push({
-                  source: dd.info.name,
-                  target: e.name,
-                  value: k,
-                  lineStyle: { color: DIM_COLORS[k] || '#888', width: 1, opacity: 0.35 }
-                });
-                ALL_GRAPH_EDGES.push({ a: dd.info.name, b: e.name });
-              }
-            }
+        var otherDiseaseNode = {
+          name: dd.info.name,
+          code: dd.info.code,
+          nodeType: 'disease-other',
+          type: 'Disease',
+          category: 0,
+          level: 2,
+          symbolSize: Math.min(34, 18 + sharedDiseaseScore[dc]),
+          itemStyle: { color: '#4f8cff', opacity: 0.62 },
+          label: { show: true, fontSize: 9, color: '#8b90a0' }
+        };
+        pushUniqueNode(nodes, otherDiseaseNode);
+        sharedDiseaseLinks[dc].slice(0, 8).forEach(function(x) {
+          pushUniqueLink(links, {
+            source: dd.info.name,
+            target: x.entity,
+            value: x.dim,
+            lineStyle: { color: DIM_COLORS[x.dim] || '#888', width: 1, opacity: 0.35 }
           });
         });
       });
-    }
   }
 
   /* Level 3: Entities of other diseases that share same entity */
@@ -828,15 +817,13 @@ function buildGraphData() {
               itemStyle: { color: DIM_COLORS[k] || '#888', opacity: 0.4 },
               label: { show: false }
             };
-            nodes.push(n);
-            ALL_GRAPH_NODES[e.name] = n;
-            links.push({
+            pushUniqueNode(nodes, n);
+            pushUniqueLink(links, {
               source: dName,
               target: e.name,
               value: k,
               lineStyle: { color: DIM_COLORS[k] || '#888', width: 0.8, opacity: 0.25 }
             });
-            ALL_GRAPH_EDGES.push({ a: dName, b: e.name });
           }
         });
       });
@@ -862,9 +849,12 @@ function renderGraph() {
   if (!container) return;
   if (GRAPH_CHART) { GRAPH_CHART.dispose(); }
 
-  GRAPH_CHART = echarts.init(container, null, { renderer: 'canvas' });
   var gd = buildGraphData();
   LAST_GRAPH_DATA = gd;
+  renderGraphGuide(gd);
+  showGraphOverview(gd);
+
+  GRAPH_CHART = echarts.init(container, null, { renderer: 'canvas' });
 
   /* Apply search filter */
   if (SEARCH_RESULTS !== null) {
@@ -922,9 +912,9 @@ function renderGraph() {
         lineStyle: { width: 4 }
       },
       force: {
-        repulsion: 180,
-        gravity: 0.05,
-        edgeLength: [60, 200],
+        repulsion: 360,
+        gravity: 0.04,
+        edgeLength: [90, 260],
         friction: 0.6,
         layoutAnimation: true
       }
@@ -988,11 +978,15 @@ function renderGraph() {
     if (GRAPH_CHART) GRAPH_CHART.resize();
   });
 
-  renderGraphGuide(gd);
-  showGraphOverview(gd);
   setTimeout(function() {
-    if (GRAPH_CHART) GRAPH_CHART.resize();
+    if (GRAPH_CHART) {
+      GRAPH_CHART.resize();
+      GRAPH_CHART.dispatchAction({ type: 'restore' });
+    }
   }, 120);
+  setTimeout(function() {
+    if (GRAPH_CHART) GRAPH_CHART.dispatchAction({ type: 'restore' });
+  }, 700);
 }
 
 /* ================================================================
@@ -1137,6 +1131,10 @@ function onEntitySearch() {
    Detail Panel
    ================================================================ */
 function showEmptyDetail() {
+  if (CURRENT_DISEASE_CODE && LAST_GRAPH_DATA && LAST_GRAPH_DATA.nodes) {
+    showGraphOverview(LAST_GRAPH_DATA);
+    return;
+  }
   document.getElementById('nw-detail-empty').style.display = 'block';
   document.getElementById('nw-detail-content').style.display = 'none';
 }
@@ -1348,19 +1346,23 @@ function expandFromEntity(entityName) {
 function toggleEntityExpand(entityName, nd) {
   if (NODE_EXPANDED[entityName]) {
     NODE_EXPANDED[entityName] = false;
-    /* Re-render to remove expanded nodes */
     renderGraph();
     return;
   }
   NODE_EXPANDED[entityName] = true;
-  /* Find all diseases that have this entity and add them as neighbors */
   var assocDiseases = findAssociatedDiseases(entityName);
-  var newNodes = [];
-  var newLinks = [];
+  var option = GRAPH_CHART.getOption();
+  var chartNodes = (option.series[0].data || []).slice();
+  var chartLinks = (option.series[0].links || []).slice();
+  var nodeNames = {};
+  chartNodes.forEach(function(n) { nodeNames[n.name] = true; });
+  var linkKeys = {};
+  chartLinks.forEach(function(l) { linkKeys[l.source + '→' + l.target + '→' + (l.value || '')] = true; });
+
   assocDiseases.forEach(function(dc) {
     if (dc === CURRENT_DISEASE_CODE) return;
     var dd = KG_DATA.diseases[dc];
-    if (!ALL_GRAPH_NODES[dd.info.name]) {
+    if (!nodeNames[dd.info.name]) {
       var n = {
         name: dd.info.name,
         code: dd.info.code,
@@ -1372,26 +1374,26 @@ function toggleEntityExpand(entityName, nd) {
         itemStyle: { color: '#4f8cff', opacity: 0.5 },
         label: { show: true, fontSize: 9, color: '#8b90a0' }
       };
-      newNodes.push(n);
+      chartNodes.push(n);
       ALL_GRAPH_NODES[dd.info.name] = n;
+      nodeNames[dd.info.name] = true;
     }
-    newLinks.push({
-      source: dd.info.name,
-      target: entityName,
-      value: nd.dimKey || '',
-      lineStyle: { color: DIM_COLORS[nd.type] || '#888', width: 1, opacity: 0.35 }
-    });
+    var key = dd.info.name + '→' + entityName + '→' + (nd.dimKey || nd.type || '');
+    if (!linkKeys[key]) {
+      chartLinks.push({
+        source: dd.info.name,
+        target: entityName,
+        value: nd.dimKey || nd.type || '',
+        lineStyle: { color: DIM_COLORS[nd.type] || '#888', width: 1, opacity: 0.35 }
+      });
+      ALL_GRAPH_EDGES.push({ a: dd.info.name, b: entityName });
+      linkKeys[key] = true;
+    }
   });
 
-  if (newNodes.length > 0 || newLinks.length > 0) {
-    /* Add to existing chart */
-    GRAPH_CHART.setOption({
-      series: [{
-        data: GRAPH_CHART.getOption().series[0].data.concat(newNodes),
-        links: GRAPH_CHART.getOption().series[0].links.concat(newLinks)
-      }]
-    });
-  }
+  GRAPH_CHART.setOption({
+    series: [{ data: chartNodes, links: chartLinks }]
+  });
 }
 
 /* ================================================================
