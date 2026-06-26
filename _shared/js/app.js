@@ -75,7 +75,7 @@ function renderFooter() {
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.3</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.4</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
   
   // 检查弹窗是否已存在，不存在则创建
   if (!document.getElementById('changelog-modal')) {

@@ -300,19 +300,32 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 
 /* ==================== First-screen guidance ==================== */
 .nw-graph-guide {
-  position: absolute; top: 14px; left: 14px; z-index: 9;
-  width: 330px; padding: 14px 16px;
+  position: absolute; top: 12px; left: 12px; z-index: 9;
+  width: 30px; min-width: 30px;
   background: linear-gradient(135deg, rgba(26,29,39,.94), rgba(17,20,30,.88));
   border: 1px solid rgba(79,140,255,.45); border-radius: 12px;
-  box-shadow: 0 12px 34px rgba(0,0,0,.35);
-  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  overflow: hidden; cursor: pointer;
+  transition: width .3s ease, min-width .3s ease, padding .3s ease;
 }
+.nw-graph-guide:hover { border-color: var(--accent); }
+.nw-graph-guide.expanded {
+  width: 330px; min-width: 330px; padding: 14px 16px;
+  pointer-events: auto; cursor: default;
+}
+.nw-graph-guide .guide-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 36px; font-size: 16px; color: var(--accent);
+}
+.nw-graph-guide .guide-body { display: none; }
+.nw-graph-guide.expanded .guide-toggle { display: none; }
+.nw-graph-guide.expanded .guide-body { display: block; }
 .nw-graph-guide .guide-title { font-size: 14px; font-weight: 900; color: var(--ink); margin-bottom: 8px; }
 .nw-graph-guide .guide-text { font-size: 12px; line-height: 1.7; color: var(--muted); }
 .nw-graph-guide .guide-text b { color: var(--accent); }
 .nw-graph-guide .guide-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .nw-guide-btn {
-  pointer-events: auto; border: 1px solid rgba(79,140,255,.45); border-radius: 999px;
+  border: 1px solid rgba(79,140,255,.45); border-radius: 999px;
   background: rgba(79,140,255,.10); color: var(--accent); padding: 4px 9px;
   font-size: 11px; font-weight: 800; cursor: pointer;
 }
@@ -412,13 +425,16 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
   <!-- Center Graph -->
   <div class="nw-graph-wrap" id="nw-graph-wrap">
     <div id="nw-graph"></div>
-    <div class="nw-graph-guide" id="nw-graph-guide">
-      <div class="guide-title">默认展示：专病关联网络</div>
-      <div class="guide-text">
-        已为你自动选择<b>高价值示例疾病</b>，展示疾病、症状、检查、检验、药物、手术及相邻疾病之间的关系。<br>
-        单击节点看详情，双击疾病切换中心，双击实体继续扩展。
+    <div class="nw-graph-guide" id="nw-graph-guide" onclick="toggleGuide(event)">
+      <div class="guide-toggle" title="展开指引">💡</div>
+      <div class="guide-body">
+        <div class="guide-title">默认展示：专病关联网络 <span style="float:right;font-size:11px;color:var(--muted);font-weight:400;cursor:pointer" onclick="collapseGuide(event)">收起</span></div>
+        <div class="guide-text">
+          已为你自动选择<b>高价值示例疾病</b>，展示疾病、症状、检查、检验、药物、手术及相邻疾病之间的关系。<br>
+          单击节点看详情，双击疾病切换中心，双击实体继续扩展。
+        </div>
+        <div class="guide-actions" id="nw-guide-actions"></div>
       </div>
-      <div class="guide-actions" id="nw-guide-actions"></div>
     </div>
     <div class="nw-path-overlay" id="nw-path-overlay"></div>
   </div>
@@ -999,9 +1015,9 @@ function renderGraphGuide(gd) {
   var starters = getStarterEntities(d, 4);
   var html = '';
   starters.forEach(function(s) {
-    html += '<button class="nw-guide-btn" onclick="focusEntity(\'' + safeJs(s.name) + '\')">' + s.name + '</button>';
+    html += '<button class="nw-guide-btn" onclick="event.stopPropagation(); focusEntity(\'' + safeJs(s.name) + '\')">' + s.name + '</button>';
   });
-  html += '<button class="nw-guide-btn" onclick="enterFullscreen()">全屏查看</button>';
+  html += '<button class="nw-guide-btn" onclick="event.stopPropagation(); enterFullscreen()">全屏查看</button>';
   el.innerHTML = html;
 }
 
@@ -1094,6 +1110,18 @@ function focusEntity(name) {
 
 function safeJs(s) {
   return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function toggleGuide(e) {
+  if (e.target.classList.contains('nw-guide-btn') || e.target.getAttribute('onclick') === 'collapseGuide(event)') return;
+  document.getElementById('nw-graph-guide').classList.toggle('expanded');
+  if (GRAPH_CHART) setTimeout(function() { GRAPH_CHART.resize(); }, 320);
+}
+
+function collapseGuide(e) {
+  e.stopPropagation();
+  document.getElementById('nw-graph-guide').classList.remove('expanded');
+  if (GRAPH_CHART) setTimeout(function() { GRAPH_CHART.resize(); }, 320);
 }
 
 /* ================================================================
