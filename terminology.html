@@ -7,112 +7,492 @@
 <title>专科知识图谱 · 心血管内科 - 医学术语知识库</title>
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
-/* ========== Hero ========== */
-.term-hero{background:linear-gradient(135deg,rgba(34,184,207,.15),rgba(79,140,255,.12),rgba(204,93,232,.08));border:1px solid rgba(34,184,207,.22);border-radius:16px;padding:32px 36px;margin-bottom:24px;position:relative;overflow:hidden}
-.term-hero:after{content:'';position:absolute;right:-100px;top:-100px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(34,184,207,.1),transparent 70%)}
-.term-hero::before{content:'';position:absolute;left:-60px;bottom:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(79,140,255,.08),transparent 70%)}
-.term-hero .hero-kicker{font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;position:relative;z-index:1}
-.term-hero h1{font-size:32px;font-weight:900;margin-bottom:10px;color:var(--ink);position:relative;z-index:1}
-.term-hero .hero-sub{font-size:14px;color:var(--muted);line-height:1.8;max-width:820px;position:relative;z-index:1}
+/* ========== Reset & Full-Viewport Layout ========== */
+html, body { height: 100%; overflow: hidden; }
+body { display: flex; flex-direction: column; }
+.nav { flex-shrink: 0; }
+.page { flex: 1; display: flex; flex-direction: column; padding: 12px 16px 0 16px; max-width: 100%; overflow: hidden; }
 
-/* ========== KPI Row ========== */
-.term-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.term-kpi .kpi{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px 18px;transition:border-color .2s,transform .15s}
-.term-kpi .kpi:hover{border-color:var(--accent);transform:translateY(-2px)}
-.term-kpi .kpi-icon{font-size:22px;margin-bottom:8px}
-.term-kpi .kpi-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em;margin-bottom:6px}
-.term-kpi .kpi-value{font-size:28px;font-weight:900;color:var(--accent);line-height:1}
-.term-kpi .kpi-desc{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+/* ========== Hero (Compact) ========== */
+.term-hero {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(34,184,207,.12), rgba(79,140,255,.10), rgba(204,93,232,.06));
+  border: 1px solid rgba(34,184,207,.18);
+  border-radius: 12px;
+  padding: 14px 24px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  max-height: 100px;
+}
+.term-hero::after {
+  content: '';
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,184,207,.08), transparent 70%);
+}
+.term-hero-left { position: relative; z-index: 1; flex: 1; }
+.term-hero .hero-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.term-hero h1 { font-size: 20px; font-weight: 900; color: var(--ink); margin-bottom: 3px; line-height: 1.2; }
+.term-hero .hero-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.term-hero-stats {
+  display: flex;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin-left: 24px;
+}
+.term-hero-stat { text-align: center; }
+.term-hero-stat .stat-val { font-size: 22px; font-weight: 900; color: var(--accent); line-height: 1; }
+.term-hero-stat .stat-lbl { font-size: 9px; color: var(--muted); font-weight: 700; letter-spacing: .03em; margin-top: 2px; }
 
-/* ========== Search ========== */
-.term-search-wrap{margin-bottom:24px;display:flex;gap:12px;align-items:center}
-.term-search-box{flex:1;position:relative}
-.term-search-box .input{padding-left:38px;font-size:14px;height:46px;border-radius:10px}
-.term-search-box::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;z-index:2}
-.term-search-info{font-size:12px;color:var(--muted);white-space:nowrap;min-width:120px;text-align:right}
-.term-search-clear{padding:8px 16px;border:1px solid var(--rule);border-radius:8px;background:var(--bg3);color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.term-search-clear:hover{border-color:var(--accent);color:var(--accent)}
+/* ========== Three-Column Layout ========== */
+.term-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
 
-/* ========== Bar Chart ========== */
-.term-chart{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:22px 24px;margin-bottom:24px}
-.term-chart h2{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
-.term-chart .chart-note{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6}
-.term-bar-row{display:flex;align-items:center;margin-bottom:10px;gap:10px}
-.term-bar-label{width:110px;font-size:12px;color:var(--ink);font-weight:700;text-align:right;flex-shrink:0}
-.term-bar-track{flex:1;height:26px;background:var(--bg4);border-radius:6px;overflow:hidden;position:relative}
-.term-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:11px;font-weight:800;color:#fff;min-width:36px;transition:width .6s cubic-bezier(.22,1,.36,1)}
-.term-bar-count{width:50px;font-size:12px;color:var(--muted);font-weight:700;text-align:left;flex-shrink:0}
+/* ========== Left Panel: Dimension Nav ========== */
+.term-left {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+.term-left-search {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.term-left-search input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 7px 10px 7px 30px;
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.term-left-search input:focus { border-color: var(--accent); }
+.term-left-search { position: relative; }
+.term-left-search::before {
+  content: '\1F50D';
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  z-index: 2;
+  pointer-events: none;
+}
+.term-dim-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  min-height: 0;
+}
+.term-dim-list::-webkit-scrollbar { width: 3px; }
+.term-dim-list::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
 
-/* ========== Tabs ========== */
-.term-tabs-wrap{margin-bottom:20px}
-.term-tabs{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:2px}
-.term-tab{padding:8px 16px;font-size:12px;font-weight:700;border:1px solid var(--rule);border-radius:8px;background:var(--bg2);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
-.term-tab:hover{border-color:var(--accent);color:var(--ink)}
-.term-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.term-tab .tab-count{margin-left:5px;font-size:10px;opacity:.7}
-.term-tab-desc{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7;padding:12px 16px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;border-left:3px solid var(--accent)}
+.term-dim-item {
+  display: flex;
+  flex-direction: column;
+  padding: 7px 12px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .12s;
+}
+.term-dim-item:hover { background: rgba(79,140,255,.05); }
+.term-dim-item.active {
+  background: rgba(79,140,255,.08);
+  border-left-color: var(--accent);
+}
+.term-dim-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.term-dim-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.term-dim-item.active .term-dim-name { color: var(--accent); }
+.term-dim-icon { font-size: 11px; }
+.term-dim-en { font-size: 9px; color: var(--muted); font-weight: 600; margin-left: 2px; }
+.term-dim-count {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--bg4);
+  padding: 1px 6px;
+  border-radius: 8px;
+  min-width: 24px;
+  text-align: center;
+}
+.term-dim-item.active .term-dim-count { color: var(--accent); background: rgba(79,140,255,.15); }
+.term-dim-bar-track {
+  height: 3px;
+  background: var(--bg4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.term-dim-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .5s cubic-bezier(.22,1,.36,1);
+}
 
-/* ========== Term Cards ========== */
-.term-cards-container{margin-bottom:24px}
-.term-disease-group{margin-bottom:20px}
-.term-disease-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--rule);border-radius:10px;border-left:3px solid var(--accent)}
-.term-disease-header .disease-icon{font-size:18px}
-.term-disease-header .disease-name{font-size:14px;font-weight:800;color:var(--ink)}
-.term-disease-header .disease-code{font-size:11px;color:var(--muted);font-family:monospace;margin-left:auto}
-.term-disease-header .disease-term-count{font-size:11px;color:var(--accent);background:rgba(79,140,255,.1);padding:3px 10px;border-radius:999px;font-weight:700}
-.term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.term-card{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;transition:all .2s;position:relative;overflow:hidden}
-.term-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--cyan));opacity:0;transition:opacity .2s}
-.term-card:hover{border-color:rgba(79,140,255,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
-.term-card:hover::before{opacity:1}
-.term-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.term-name{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
-.term-name.search-highlight{background:rgba(255,210,59,.25);color:var(--yellow);padding:0 3px;border-radius:3px}
-.term-code{font-size:10px;color:var(--muted);font-family:monospace;background:var(--bg4);padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-left:8px}
-.term-code.search-highlight{background:rgba(255,210,59,.2);color:var(--yellow)}
-.term-meta{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.term-dim{font-size:11px;color:var(--accent);background:rgba(79,140,255,.1);padding:2px 8px;border-radius:4px;font-weight:700}
-.term-disease-count{font-size:11px;color:var(--muted)}
-.term-diseases{display:flex;flex-wrap:wrap;gap:5px}
-.disease-tag{font-size:10px;padding:3px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--rule);color:var(--muted);font-weight:600;transition:all .15s}
-.disease-tag:hover{border-color:var(--accent);color:var(--accent)}
+/* Left bottom stats */
+.term-left-footer {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.term-left-stat { text-align: center; }
+.term-left-stat .fl-val { font-size: 14px; font-weight: 900; color: var(--accent); line-height: 1; }
+.term-left-stat .fl-lbl { font-size: 8px; color: var(--muted); font-weight: 700; margin-top: 1px; letter-spacing: .02em; }
 
-/* ========== Empty / Loading ========== */
-.term-empty{text-align:center;padding:60px 20px;color:var(--muted)}
-.term-empty .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
-.term-empty .empty-text{font-size:14px;font-weight:600}
-.term-empty .empty-hint{font-size:12px;margin-top:6px;color:var(--muted);opacity:.6}
-.term-loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
-.term-loading::before{content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--rule);border-top-color:var(--accent);border-radius:50%;animation:term-spin .6s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes term-spin{to{transform:rotate(360deg)}}
+/* ========== Center Panel: Content ========== */
+.term-center {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+.term-center-header {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.term-center-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-center-title .count-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(79,140,255,.12);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+.term-center-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  flex: 1;
+  margin-left: 12px;
+}
+.term-center-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  min-height: 0;
+}
+.term-center-body::-webkit-scrollbar { width: 4px; }
+.term-center-body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
 
-/* ========== Section Divider ========== */
-.term-section{margin-bottom:28px}
-.term-section-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.term-section-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+/* Term Cards Grid */
+.term-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 6px;
+}
+.term-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .12s;
+  min-height: 44px;
+}
+.term-card:hover {
+  border-color: rgba(79,140,255,.3);
+  background: rgba(79,140,255,.04);
+}
+.term-card.selected {
+  border-color: var(--accent);
+  background: rgba(79,140,255,.08);
+}
+.term-card-left { flex: 1; min-width: 0; }
+.term-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.term-card-name.search-highlight {
+  background: rgba(255,210,59,.25);
+  color: var(--yellow);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+.term-card-code {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.term-card-code.search-highlight {
+  background: rgba(255,210,59,.2);
+  color: var(--yellow);
+}
+.term-card-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+.term-card-dcount {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.term-card-arrow {
+  font-size: 10px;
+  color: var(--rule);
+  transition: color .12s, transform .12s;
+}
+.term-card:hover .term-card-arrow { color: var(--accent); transform: translateX(2px); }
 
-/* ========== Result Counter ========== */
-.term-result-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:10px 16px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px}
-.term-result-count{font-size:13px;color:var(--ink);font-weight:700}
-.term-result-count span{color:var(--accent)}
-.term-view-toggle{display:flex;gap:6px}
-.term-view-btn{padding:5px 12px;font-size:11px;font-weight:700;border:1px solid var(--rule);border-radius:6px;background:var(--bg3);color:var(--muted);cursor:pointer;transition:all .15s}
-.term-view-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.term-view-btn:hover:not(.active){border-color:var(--accent);color:var(--ink)}
+/* Empty state */
+.term-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.term-empty .empty-icon { font-size: 32px; margin-bottom: 8px; opacity: .4; }
+.term-empty .empty-text { font-size: 13px; font-weight: 600; }
+.term-empty .empty-hint { font-size: 11px; margin-top: 4px; opacity: .6; }
 
-/* ========== List View ========== */
-.term-list{display:flex;flex-direction:column;gap:6px}
-.term-list-item{display:grid;grid-template-columns:1fr 100px 80px 1fr;align-items:center;padding:10px 14px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;font-size:12px;transition:all .15s;gap:8px}
-.term-list-item:hover{border-color:rgba(79,140,255,.4);background:var(--bg3)}
-.term-list-name{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.term-list-code{font-family:monospace;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.term-list-dim{font-size:11px;color:var(--accent);font-weight:700}
-.term-list-diseases{display:flex;flex-wrap:wrap;gap:4px}
-.term-list-disease{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--bg4);color:var(--muted)}
+/* Loading */
+.term-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.term-loading::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--rule);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: tspin .6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+@keyframes tspin { to { transform: rotate(360deg); } }
+
+/* ========== Right Panel: Detail ========== */
+.term-right {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+.term-right-header {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-right-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  min-height: 0;
+}
+.term-right-body::-webkit-scrollbar { width: 3px; }
+.term-right-body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+
+/* Detail: empty state */
+.term-detail-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
+}
+.term-detail-empty .de-icon { font-size: 28px; margin-bottom: 10px; opacity: .3; }
+.term-detail-empty .de-text { font-size: 12px; font-weight: 600; line-height: 1.6; }
+
+/* Detail: content */
+.term-detail-name {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.term-detail-code {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--muted);
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+.term-detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.term-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.term-detail-row .dr-label { color: var(--muted); font-weight: 600; min-width: 64px; flex-shrink: 0; }
+.term-detail-row .dr-value { color: var(--ink); font-weight: 700; }
+.term-detail-row .dr-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.term-detail-section {
+  margin-bottom: 14px;
+}
+.term-detail-section-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule);
+}
+.term-disease-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.term-disease-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--ink);
+  font-weight: 600;
+  transition: background .1s;
+  cursor: default;
+}
+.term-disease-item:hover { background: var(--bg3); }
+.term-disease-item .di-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.term-disease-more {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.term-disease-more:hover { text-decoration: underline; }
+
+.term-similar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.term-similar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .1s;
+}
+.term-similar-item:hover { background: var(--bg3); }
+.term-similar-name { color: var(--ink); font-weight: 600; }
+.term-similar-dcount { color: var(--muted); font-size: 10px; }
 
 /* ========== Responsive ========== */
-@media(max-width:960px){.term-kpi{grid-template-columns:repeat(2,1fr)}.term-grid{grid-template-columns:1fr}.term-list-item{grid-template-columns:1fr 1fr;gap:4px}.term-list-code,.term-list-dim{grid-column:span 1}}
-@media(max-width:560px){.term-kpi{grid-template-columns:1fr}.term-hero h1{font-size:24px}.term-bar-label{width:70px;font-size:11px}.term-tabs{gap:4px}.term-tab{padding:6px 10px;font-size:11px}}
+@media (max-width: 1100px) {
+  .term-layout { grid-template-columns: 220px 1fr 280px; }
+}
+@media (max-width: 900px) {
+  .term-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+  .term-left { max-height: 200px; }
+  .term-right { max-height: 300px; }
+  .term-hero { flex-direction: column; align-items: flex-start; }
+  .term-hero-stats { margin-left: 0; margin-top: 8px; }
+}
 </style>
 </head>
 <body>
@@ -121,353 +501,384 @@
 
   <!-- Hero -->
   <section class="term-hero">
-    <div class="hero-kicker">CARDIOVASCULAR TERMINOLOGY KNOWLEDGE BASE</div>
-    <h1>心血管医学术语知识库</h1>
-    <div class="hero-sub">涵盖症状、体征、检查、检验、药物、手术、危险因素等17个维度的医学术语，按疾病关联组织，支持检索与分类浏览。</div>
-  </section>
-
-  <!-- KPI -->
-  <section class="term-kpi" id="term-kpi">
-    <div class="kpi"><div class="kpi-icon">📖</div><div class="kpi-label">术语总量</div><div class="kpi-value" id="k-total">-</div><div class="kpi-desc">去重后的独立医学术语数</div></div>
-    <div class="kpi"><div class="kpi-icon">📐</div><div class="kpi-label">维度覆盖数</div><div class="kpi-value" id="k-dims">-</div><div class="kpi-desc">涵盖的知识维度数量</div></div>
-    <div class="kpi"><div class="kpi-icon">🫀</div><div class="kpi-label">疾病覆盖数</div><div class="kpi-value" id="k-diseases">-</div><div class="kpi-desc">关联的专病数量</div></div>
-    <div class="kpi"><div class="kpi-icon">📊</div><div class="kpi-label">平均术语密度</div><div class="kpi-value" id="k-density">-</div><div class="kpi-desc">每种疾病的平均术语数</div></div>
-  </section>
-
-  <!-- Bar Chart -->
-  <section class="term-chart" id="term-chart">
-    <h2>各维度术语数量分布</h2>
-    <div class="chart-note">展示心血管专科知识图谱中，各知识维度所包含的独立术语数量。条形宽度按最大值比例缩放。</div>
-    <div id="term-bars"></div>
-  </section>
-
-  <!-- Search -->
-  <section class="term-search-wrap">
-    <div class="term-search-box">
-      <input class="input" id="term-search" type="text" placeholder="搜索术语名称、编码...  例：胸痛、SYM-CARD-001">
+    <div class="term-hero-left">
+      <div class="hero-kicker">CARDIOVASCULAR TERMINOLOGY KNOWLEDGE BASE</div>
+      <h1>🧬 心血管医学术语知识库</h1>
+      <div class="hero-sub">涵盖77种专病 x 17个知识维度的医学术语体系，支持按维度分类浏览、全局搜索和术语详情查看</div>
     </div>
-    <div class="term-search-info" id="term-search-info"></div>
-    <button class="term-search-clear" id="term-search-clear" style="display:none" onclick="clearSearch()">清除搜索</button>
-  </section>
-
-  <!-- Tabs -->
-  <section class="term-tabs-wrap">
-    <div class="term-tabs" id="term-tabs"></div>
-    <div class="term-tab-desc" id="term-tab-desc"></div>
-  </section>
-
-  <!-- Result Bar -->
-  <section class="term-result-bar" id="term-result-bar" style="display:none">
-    <div class="term-result-count" id="term-result-count"></div>
-    <div class="term-view-toggle">
-      <button class="term-view-btn active" data-view="card" onclick="switchView('card')">卡片视图</button>
-      <button class="term-view-btn" data-view="list" onclick="switchView('list')">列表视图</button>
+    <div class="term-hero-stats">
+      <div class="term-hero-stat"><div class="stat-val" id="hs-total">-</div><div class="stat-lbl">独立术语</div></div>
+      <div class="term-hero-stat"><div class="stat-val" id="hs-dims">-</div><div class="stat-lbl">知识维度</div></div>
+      <div class="term-hero-stat"><div class="stat-val" id="hs-diseases">-</div><div class="stat-lbl">专病覆盖</div></div>
     </div>
   </section>
 
-  <!-- Terms Container -->
-  <section id="term-container" class="term-cards-container">
-    <div class="term-loading">正在加载术语数据...</div>
+  <!-- Three-Column Layout -->
+  <section class="term-layout">
+
+    <!-- Left: Dimension Navigation -->
+    <div class="term-left">
+      <div class="term-left-search">
+        <input id="term-search" type="text" placeholder="搜索术语名称或编码...">
+      </div>
+      <div class="term-dim-list" id="dim-list">
+        <div class="term-loading">加载中...</div>
+      </div>
+      <div class="term-left-footer">
+        <div class="term-left-stat"><div class="fl-val" id="lf-total">-</div><div class="fl-lbl">术语总量</div></div>
+        <div class="term-left-stat"><div class="fl-val" id="lf-dims">-</div><div class="fl-lbl">维度数</div></div>
+        <div class="term-left-stat"><div class="fl-val" id="lf-diseases">-</div><div class="fl-lbl">疾病数</div></div>
+      </div>
+    </div>
+
+    <!-- Center: Term Content -->
+    <div class="term-center">
+      <div class="term-center-header">
+        <div class="term-center-title" id="center-title">症状 <span class="count-badge" id="center-count">0</span></div>
+        <div class="term-center-desc" id="center-desc"></div>
+      </div>
+      <div class="term-center-body" id="center-body">
+        <div class="term-loading">正在加载术语数据...</div>
+      </div>
+    </div>
+
+    <!-- Right: Detail Panel -->
+    <div class="term-right">
+      <div class="term-right-header">📋 术语详情</div>
+      <div class="term-right-body" id="detail-body">
+        <div class="term-detail-empty">
+          <div class="de-icon">🧬</div>
+          <div class="de-text">选择一个术语查看详情<br>点击左侧维度导航浏览术语<br>点击术语卡片查看详情</div>
+        </div>
+      </div>
+    </div>
+
   </section>
 
-</div>
-
-<!-- Entity Modal -->
-<div class="modal-overlay" id="entity-modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal-content"></div>
 </div>
 
 <script src="./_shared/js/app.js"></script>
 <script>
 /* ================================================================
-   Medical Terminology Knowledge Base — 心血管医学术语知识库
+   Medical Terminology Knowledge Base — Three-Column Layout
    ================================================================ */
 
+var ALL_TERMS = {};      // key: dimKey + '::' + entityName
+var DIM_STATS = {};      // dimKey -> count
+var DIM_DISEASE_COV = {};// dimKey -> number of diseases with data
+var CURRENT_DIM = 'Symptom';
+var CURRENT_TERM_KEY = null;
+var SEARCH_TERM = '';
+var TOTAL_TERMS = 0;
+var TOTAL_DISEASES = 0;
+
+/* Dimension descriptions */
 var DIM_DESC = {
-  Symptom: '症状（Symptom）是患者主观感受到的不适或异常感觉，如胸痛、呼吸困难、心悸等。症状是临床诊断的第一线索，也是患者就诊的主要原因。',
-  Sign: '体征（Sign）是医生通过视诊、触诊、叩诊、听诊等方法在患者身上发现的客观异常表现，如心脏杂音、颈静脉怒张、水肿等。',
-  Exam: '检查（Exam）指借助仪器设备进行的辅助检查项目，包括心电图、超声心动图、冠脉CTA、冠脉造影等，是明确诊断的重要依据。',
-  LabTest: '检验（LabTest）指通过实验室分析血液、尿液等标本获得的生化指标和数据，如肌钙蛋白、BNP、血脂等，对疾病诊断和监测至关重要。',
-  Medication: '药物（Medication）是心血管疾病治疗的核心手段，涵盖抗血小板药、他汀类、ACEI/ARB、β受体阻滞剂、抗凝药等多类药物。',
-  Procedure: '手术/操作（Procedure）指通过外科手术或介入操作对疾病进行治疗，如PCI、CABG、起搏器植入、射频消融等有创操作。',
-  RiskFactor: '危险因素（RiskFactor）指增加疾病发生风险的因素，如高血压、糖尿病、吸烟、高脂血症等，是预防和早期干预的关键。',
-  Complication: '并发症（Complication）指在疾病发展过程中出现的其他疾病或症状，如心力衰竭、心律失常、心源性休克等。',
-  Etiology: '病因（Etiology）指导致疾病发生的根本原因，如冠状动脉粥样硬化、心肌缺血、遗传因素等，是理解疾病本质的基础。',
-  DiagnosisCriteria: '诊断标准（DiagnosisCriteria）指对疾病进行诊断时需要满足的条件和规范，如急性心肌梗死的诊断标准、心力衰竭的分级标准等。',
-  TreatmentPlan: '治疗方案（TreatmentPlan）指针对特定疾病制定的系统治疗策略，包括药物治疗方案、手术方案、综合管理计划等。',
-  DifferentialDiagnosis: '鉴别诊断（DifferentialDiagnosis）指需要与当前疾病区分的其他相似疾病，帮助临床医生缩小诊断范围、避免误诊。',
-  RiskStratification: '风险分层（RiskStratification）指根据患者特征和检查结果将其分为不同风险等级，以指导个体化治疗决策。',
-  Prognosis: '预后（Prognosis）指疾病的发展趋势和最终结局，包括生存率、复发率、生活质量等，帮助患者和医生做出合理的治疗选择。',
-  FollowUp: '随访（FollowUp）指对出院患者进行定期复查和追踪管理，监测疾病进展和治疗效果，及时调整治疗方案。',
-  Epidemiology: '流行病学（Epidemiology）指疾病在人群中的分布规律和影响因素，包括发病率、患病率、危险因素分布等，为公共卫生决策提供依据。',
-  Pathophysiology: '病理生理（Pathophysiology）指疾病发生发展的内在机制和过程，如心肌重构、血流动力学改变等，是理解疾病的基础。'
+  Symptom: '患者主观感受到的不适或异常感觉，如胸痛、呼吸困难、心悸等。症状是临床诊断的第一线索。',
+  Sign: '医生通过视诊、触诊、叩诊、听诊等方法发现的客观异常表现，如心脏杂音、颈静脉怒张等。',
+  Exam: '借助仪器设备进行的辅助检查项目，包括心电图、超声心动图、冠脉CTA等。',
+  LabTest: '通过实验室分析血液、尿液等标本获得的生化指标和数据，如肌钙蛋白、BNP等。',
+  Medication: '心血管疾病治疗的核心药物，涵盖抗血小板药、他汀类、ACEI/ARB等多类药物。',
+  Procedure: '通过外科手术或介入操作进行的治疗，如PCI、CABG、起搏器植入等。',
+  RiskFactor: '增加疾病发生风险的因素，如高血压、糖尿病、吸烟等。',
+  Complication: '疾病发展过程中出现的其他疾病或症状，如心力衰竭、心律失常等。',
+  Etiology: '导致疾病发生的根本原因，如冠状动脉粥样硬化、心肌缺血等。',
+  DiagnosisCriteria: '对疾病进行诊断时需要满足的条件和规范。',
+  TreatmentPlan: '针对特定疾病制定的系统治疗策略，包括药物治疗方案、手术方案等。',
+  DifferentialDiagnosis: '需要与当前疾病区分的其他相似疾病，帮助缩小诊断范围。',
+  RiskStratification: '根据患者特征和检查结果将其分为不同风险等级，指导个体化治疗。',
+  Prognosis: '疾病的发展趋势和最终结局，包括生存率、复发率等。',
+  FollowUp: '对出院患者进行定期复查和追踪管理，监测疾病进展。',
+  Epidemiology: '疾病在人群中的分布规律和影响因素，包括发病率、患病率等。',
+  Pathophysiology: '疾病发生发展的内在机制和过程，如心肌重构、血流动力学改变等。'
 };
 
-var DIM_ICONS = {Symptom:'🩺',Sign:'👁️',Exam:'🔬',LabTest:'🧪',Medication:'💊',Procedure:'🔧',RiskFactor:'⚠️',Complication:'🔗',Etiology:'❓',DiagnosisCriteria:'📋',TreatmentPlan:'💊',DifferentialDiagnosis:'🔄',RiskStratification:'📊',Prognosis:'📈',FollowUp:'📅',Epidemiology:'🌍',Pathophysiology:'🧬'};
+/* Dimension colors for progress bars */
+var DIM_COLORS = [
+  '#4f8cff','#22b8cf','#51cf66','#ffd43b','#ff922b',
+  '#cc5de8','#f06595','#ff6b6b','#4f8cff','#22b8cf',
+  '#51cf66','#ffd43b','#ff922b','#cc5de8','#f06595',
+  '#ff6b6b','#4f8cff'
+];
 
-var allTerms = {};     // key: dimKey + '::' + entityName
-var dimStats = {};     // dimKey -> count
-var activeDim = 'Symptom';
-var searchTerm = '';
-var currentView = 'card';
-var globalTermCount = 0;
-var totalDiseaseCount = 0;
-
-/* ---- Build terminology index ---- */
+/* ============ Build terminology index ============ */
 function buildTermIndex(d) {
-  allTerms = {};
-  dimStats = {};
-  var diseases = d.diseases;
-  var diseaseCodes = Object.keys(diseases);
-  totalDiseaseCount = diseaseCodes.length;
+  ALL_TERMS = {};
+  DIM_STATS = {};
+  DIM_DISEASE_COV = {};
 
-  DIM_KEYS.forEach(function(k) { dimStats[k] = 0; });
+  var diseaseCodes = Object.keys(d.diseases);
+  TOTAL_DISEASES = diseaseCodes.length;
+
+  DIM_KEYS.forEach(function(k) {
+    DIM_STATS[k] = 0;
+    DIM_DISEASE_COV[k] = 0;
+  });
 
   diseaseCodes.forEach(function(code) {
-    var dis = diseases[code];
+    var dis = d.diseases[code];
     var disName = dis.info.name;
     DIM_KEYS.forEach(function(k) {
       var entities = dis.dimensions[k] || [];
+      if (entities.length > 0) DIM_DISEASE_COV[k]++;
       entities.forEach(function(e) {
         var key = k + '::' + e.name;
-        if (!allTerms[key]) {
-          allTerms[key] = { name: e.name, code: e.code || '', dim: k, diseases: [] };
-          dimStats[k]++;
+        if (!ALL_TERMS[key]) {
+          ALL_TERMS[key] = { name: e.name, code: e.code || '', dim: k, diseases: [] };
+          DIM_STATS[k]++;
         }
-        if (allTerms[key].diseases.indexOf(disName) === -1) {
-          allTerms[key].diseases.push(disName);
+        if (ALL_TERMS[key].diseases.indexOf(disName) === -1) {
+          ALL_TERMS[key].diseases.push(disName);
         }
       });
     });
   });
 
-  globalTermCount = Object.keys(allTerms).length;
+  TOTAL_TERMS = Object.keys(ALL_TERMS).length;
 }
 
-/* ---- Render KPI ---- */
-function renderKPI() {
-  document.getElementById('k-total').textContent = globalTermCount.toLocaleString();
-  var activeDims = DIM_KEYS.filter(function(k) { return dimStats[k] > 0; }).length;
-  document.getElementById('k-dims').textContent = activeDims;
-  document.getElementById('k-diseases').textContent = totalDiseaseCount;
-  var density = totalDiseaseCount > 0 ? (globalTermCount / totalDiseaseCount).toFixed(1) : '0';
-  document.getElementById('k-density').textContent = density;
+/* ============ Render hero stats ============ */
+function renderHeroStats() {
+  document.getElementById('hs-total').textContent = TOTAL_TERMS.toLocaleString();
+  var activeDims = DIM_KEYS.filter(function(k) { return DIM_STATS[k] > 0; }).length;
+  document.getElementById('hs-dims').textContent = activeDims + '/17';
+  document.getElementById('hs-diseases').textContent = TOTAL_DISEASES;
+  document.getElementById('lf-total').textContent = TOTAL_TERMS.toLocaleString();
+  document.getElementById('lf-dims').textContent = activeDims;
+  document.getElementById('lf-diseases').textContent = TOTAL_DISEASES;
 }
 
-/* ---- Render Bar Chart ---- */
-function renderBars() {
+/* ============ Render left panel dimension list ============ */
+function renderDimList() {
   var maxCount = 0;
   DIM_KEYS.forEach(function(k) {
-    if (dimStats[k] > maxCount) maxCount = dimStats[k];
+    if (DIM_STATS[k] > maxCount) maxCount = DIM_STATS[k];
   });
 
-  var colors = ['#4f8cff','#22b8cf','#51cf66','#ffd43b','#ff922b','#cc5de8','#f06595','#ff6b6b','#4f8cff','#22b8cf','#51cf66','#ffd43b','#ff922b','#cc5de8','#f06595','#ff6b6b','#4f8cff'];
   var html = '';
   DIM_KEYS.forEach(function(k, i) {
-    var count = dimStats[k] || 0;
-    var pct = maxCount > 0 ? (count / maxCount * 100) : 0;
-    var color = colors[i % colors.length];
-    html += '<div class="term-bar-row">';
-    html += '  <div class="term-bar-label">' + DIM_NAMES[k] + '</div>';
-    html += '  <div class="term-bar-track"><div class="term-bar-fill" style="width:' + pct + '%;background:' + color + '">' + count + '</div></div>';
-    html += '  <div class="term-bar-count">' + count + ' 个</div>';
+    var count = DIM_STATS[k] || 0;
+    var cov = TOTAL_DISEASES > 0 ? Math.round(DIM_DISEASE_COV[k] / TOTAL_DISEASES * 100) : 0;
+    var barPct = maxCount > 0 ? Math.round(count / maxCount * 100) : 0;
+    var color = DIM_COLORS[i % DIM_COLORS.length];
+    var activeCls = k === CURRENT_DIM ? ' active' : '';
+    var icon = (typeof DIM_ICONS !== 'undefined' && DIM_ICONS[k]) ? DIM_ICONS[k] : '';
+
+    html += '<div class="term-dim-item' + activeCls + '" onclick="selectDim(\'' + k + '\')" data-dim="' + k + '">';
+    html += '  <div class="term-dim-top">';
+    html += '    <div class="term-dim-name">';
+    html += '      <span class="term-dim-icon">' + icon + '</span>';
+    html += '      ' + DIM_NAMES[k];
+    html += '      <span class="term-dim-en">' + k + '</span>';
+    html += '    </div>';
+    html += '    <span class="term-dim-count">' + count + '</span>';
+    html += '  </div>';
+    html += '  <div class="term-dim-bar-track">';
+    html += '    <div class="term-dim-bar-fill" style="width:' + barPct + '%;background:' + color + '"></div>';
+    html += '  </div>';
     html += '</div>';
   });
-  document.getElementById('term-bars').innerHTML = html;
+  document.getElementById('dim-list').innerHTML = html;
 }
 
-/* ---- Render Tabs ---- */
-function renderTabs() {
-  var html = '';
-  DIM_KEYS.forEach(function(k) {
-    var cls = k === activeDim ? ' active' : '';
-    html += '<div class="term-tab' + cls + '" onclick="switchDim(\'' + k + '\')">';
-    html += (DIM_ICONS[k] || '') + ' ' + DIM_NAMES[k];
-    html += '<span class="tab-count">' + (dimStats[k] || 0) + '</span>';
-    html += '</div>';
+/* ============ Select dimension ============ */
+function selectDim(dimKey) {
+  CURRENT_DIM = dimKey;
+  CURRENT_TERM_KEY = null;
+
+  /* Update left panel active state */
+  document.querySelectorAll('.term-dim-item').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-dim') === dimKey);
   });
-  document.getElementById('term-tabs').innerHTML = html;
-  renderTabDesc();
+
+  /* Scroll active item into view */
+  var activeEl = document.querySelector('.term-dim-item.active');
+  if (activeEl) activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  /* Update center header */
+  var icon = (typeof DIM_ICONS !== 'undefined' && DIM_ICONS[dimKey]) ? DIM_ICONS[dimKey] : '';
+  document.getElementById('center-title').innerHTML = icon + ' ' + DIM_NAMES[dimKey] + ' <span class="count-badge">' + (DIM_STATS[dimKey] || 0) + '</span>';
+  document.getElementById('center-desc').textContent = DIM_DESC[dimKey] || '';
+
+  renderCenterCards();
+  renderDetailEmpty();
 }
 
-function renderTabDesc() {
-  var desc = DIM_DESC[activeDim] || '';
-  document.getElementById('term-tab-desc').innerHTML = '<strong>' + DIM_NAMES[activeDim] + '</strong>：' + desc;
-}
-
-/* ---- Filter terms for current dim + search ---- */
+/* ============ Get filtered terms for current dimension ============ */
 function getFilteredTerms() {
   var result = [];
-  Object.keys(allTerms).forEach(function(key) {
-    var t = allTerms[key];
-    if (t.dim !== activeDim) return;
-    if (searchTerm) {
-      var s = searchTerm.toLowerCase();
+  Object.keys(ALL_TERMS).forEach(function(key) {
+    var t = ALL_TERMS[key];
+    if (t.dim !== CURRENT_DIM) return;
+    if (SEARCH_TERM) {
+      var s = SEARCH_TERM.toLowerCase();
       if (t.name.toLowerCase().indexOf(s) === -1 && t.code.toLowerCase().indexOf(s) === -1) return;
     }
     result.push(t);
   });
-  result.sort(function(a, b) { return b.diseases.length - a.diseases.length || a.name.localeCompare(b.name, 'zh'); });
+  result.sort(function(a, b) {
+    return b.diseases.length - a.diseases.length || a.name.localeCompare(b.name, 'zh');
+  });
   return result;
 }
 
-/* ---- Highlight search term in text ---- */
+/* ============ Highlight search term ============ */
 function hl(text) {
-  if (!searchTerm) return text;
-  var idx = text.toLowerCase().indexOf(searchTerm.toLowerCase());
-  if (idx === -1) return text;
-  return text.substring(0, idx) + '<span class="search-highlight">' + text.substring(idx, idx + searchTerm.length) + '</span>' + text.substring(idx + searchTerm.length);
+  if (!SEARCH_TERM) return escHtml(text);
+  var lower = text.toLowerCase();
+  var sLower = SEARCH_TERM.toLowerCase();
+  var idx = lower.indexOf(sLower);
+  if (idx === -1) return escHtml(text);
+  return escHtml(text.substring(0, idx)) +
+    '<span class="search-highlight">' + escHtml(text.substring(idx, idx + SEARCH_TERM.length)) + '</span>' +
+    escHtml(text.substring(idx + SEARCH_TERM.length));
 }
 
-/* ---- Render Terms (Card View) ---- */
-function renderTermsCard(terms) {
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ============ Render center cards ============ */
+function renderCenterCards() {
+  var terms = getFilteredTerms();
+  var container = document.getElementById('center-body');
+
   if (terms.length === 0) {
-    document.getElementById('term-container').innerHTML = '<div class="term-empty"><div class="empty-icon">🔍</div><div class="empty-text">未找到匹配的术语</div><div class="empty-hint">请尝试其他关键词，或切换到其他维度</div></div>';
+    container.innerHTML = '<div class="term-empty"><div class="empty-icon">🔍</div><div class="empty-text">未找到匹配的术语</div><div class="empty-hint">请尝试其他关键词，或切换到其他维度</div></div>';
     return;
   }
 
-  /* Group by disease */
-  var groups = {};
+  var html = '<div class="term-cards-grid">';
   terms.forEach(function(t) {
-    t.diseases.forEach(function(d) {
-      if (!groups[d]) groups[d] = [];
-      groups[d].push(t);
-    });
-  });
-  var groupNames = Object.keys(groups).sort(function(a, b) { return groups[b].length - groups[a].length; });
-
-  var html = '';
-  groupNames.forEach(function(dName) {
-    var termsInGroup = groups[dName];
-    html += '<div class="term-disease-group">';
-    html += '  <div class="term-disease-header">';
-    html += '    <span class="disease-icon">🫀</span>';
-    html += '    <span class="disease-name">' + dName + '</span>';
-    html += '    <span class="disease-term-count">' + termsInGroup.length + ' 个术语</span>';
+    var key = t.dim + '::' + t.name;
+    var selectedCls = key === CURRENT_TERM_KEY ? ' selected' : '';
+    html += '<div class="term-card' + selectedCls + '" onclick="selectTerm(\'' + escAttr(key) + '\')" data-key="' + escAttr(key) + '">';
+    html += '  <div class="term-card-left">';
+    html += '    <div class="term-card-name">' + hl(t.name) + '</div>';
+    html += '    <div class="term-card-code">' + (t.code ? hl(t.code) : '') + '</div>';
     html += '  </div>';
-    html += '  <div class="term-grid">';
-    termsInGroup.forEach(function(t) {
-      html += '<div class="term-card">';
-      html += '  <div class="term-header">';
-      html += '    <span class="term-name">' + hl(t.name) + '</span>';
-      if (t.code) html += '  <span class="term-code">' + hl(t.code) + '</span>';
-      html += '  </div>';
-      html += '  <div class="term-meta">';
-      html += '    <span class="term-dim">' + (DIM_ICONS[t.dim] || '') + ' ' + DIM_NAMES[t.dim] + ' / ' + t.dim + '</span>';
-      html += '    <span class="term-disease-count">关联 ' + t.diseases.length + ' 种疾病</span>';
-      html += '  </div>';
-      html += '  <div class="term-diseases">';
-      t.diseases.forEach(function(d) {
-        html += '<span class="disease-tag">' + d + '</span>';
-      });
-      html += '  </div>';
-      html += '</div>';
-    });
-    html += '  </div>';
-    html += '</div>';
-  });
-  document.getElementById('term-container').innerHTML = html;
-}
-
-/* ---- Render Terms (List View) ---- */
-function renderTermsList(terms) {
-  if (terms.length === 0) {
-    document.getElementById('term-container').innerHTML = '<div class="term-empty"><div class="empty-icon">🔍</div><div class="empty-text">未找到匹配的术语</div><div class="empty-hint">请尝试其他关键词，或切换到其他维度</div></div>';
-    return;
-  }
-  var html = '<div class="term-list">';
-  terms.forEach(function(t) {
-    html += '<div class="term-list-item">';
-    html += '  <div class="term-list-name">' + hl(t.name) + '</div>';
-    html += '  <div class="term-list-code">' + hl(t.code || '-') + '</div>';
-    html += '  <div class="term-list-dim">' + DIM_NAMES[t.dim] + '</div>';
-    html += '  <div class="term-list-diseases">';
-    var showCount = Math.min(t.diseases.length, 5);
-    for (var i = 0; i < showCount; i++) {
-      html += '<span class="term-list-disease">' + t.diseases[i] + '</span>';
-    }
-    if (t.diseases.length > 5) html += '<span class="term-list-disease">+' + (t.diseases.length - 5) + '</span>';
+    html += '  <div class="term-card-right">';
+    html += '    <span class="term-card-dcount">' + t.diseases.length + '种</span>';
+    html += '    <span class="term-card-arrow">▸</span>';
     html += '  </div>';
     html += '</div>';
   });
   html += '</div>';
-  document.getElementById('term-container').innerHTML = html;
+  container.innerHTML = html;
 }
 
-/* ---- Render Terms Wrapper ---- */
-function renderTerms() {
-  var terms = getFilteredTerms();
-
-  /* Show result bar only in search mode */
-  var resultBar = document.getElementById('term-result-bar');
-  if (searchTerm) {
-    resultBar.style.display = '';
-    document.getElementById('term-result-count').innerHTML = '搜索 "<strong>' + searchTerm + '</strong>" 在 ' + DIM_NAMES[activeDim] + ' 维度中匹配到 <span>' + terms.length + '</span> 个术语';
-  } else {
-    resultBar.style.display = 'none';
-  }
-
-  if (currentView === 'card') {
-    renderTermsCard(terms);
-  } else {
-    renderTermsList(terms);
-  }
+function escAttr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-/* ---- Switch Dimension ---- */
-function switchDim(dim) {
-  activeDim = dim;
-  renderTabs();
-  renderTerms();
-}
+/* ============ Select term ============ */
+function selectTerm(key) {
+  CURRENT_TERM_KEY = key;
 
-/* ---- Switch View ---- */
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.term-view-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+  /* Update card selected state */
+  document.querySelectorAll('.term-card').forEach(function(el) {
+    el.classList.toggle('selected', el.getAttribute('data-key') === key);
   });
-  renderTerms();
+
+  /* Scroll selected card into view */
+  var selectedCard = document.querySelector('.term-card.selected');
+  if (selectedCard) selectedCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  renderDetail();
 }
 
-/* ---- Search ---- */
-document.getElementById('term-search').addEventListener('input', function(e) {
-  searchTerm = e.target.value.trim();
-  var clearBtn = document.getElementById('term-search-clear');
-  var info = document.getElementById('term-search-info');
-  if (searchTerm) {
-    clearBtn.style.display = '';
-    var total = Object.keys(allTerms).length;
-    var matched = 0;
-    Object.keys(allTerms).forEach(function(k) {
-      var t = allTerms[k];
-      var s = searchTerm.toLowerCase();
-      if (t.name.toLowerCase().indexOf(s) !== -1 || t.code.toLowerCase().indexOf(s) !== -1) matched++;
-    });
-    info.textContent = '全部维度匹配 ' + matched + ' / ' + total;
-  } else {
-    clearBtn.style.display = 'none';
-    info.textContent = '';
+/* ============ Render detail panel ============ */
+function renderDetail() {
+  if (!CURRENT_TERM_KEY || !ALL_TERMS[CURRENT_TERM_KEY]) {
+    renderDetailEmpty();
+    return;
   }
-  renderTerms();
+
+  var t = ALL_TERMS[CURRENT_TERM_KEY];
+  var container = document.getElementById('detail-body');
+  var html = '';
+
+  /* Term name and code */
+  html += '<div class="term-detail-name">' + escHtml(t.name) + '</div>';
+  if (t.code) html += '<div class="term-detail-code">' + escHtml(t.code) + '</div>';
+
+  /* Meta info */
+  var icon = (typeof DIM_ICONS !== 'undefined' && DIM_ICONS[t.dim]) ? DIM_ICONS[t.dim] : '';
+  html += '<div class="term-detail-meta">';
+  html += '  <div class="term-detail-row">';
+  html += '    <span class="dr-label">维度</span>';
+  html += '    <span class="dr-badge" style="background:rgba(79,140,255,.12);color:var(--accent)">' + icon + ' ' + DIM_NAMES[t.dim] + ' / ' + t.dim + '</span>';
+  html += '  </div>';
+  html += '  <div class="term-detail-row">';
+  html += '    <span class="dr-label">关联疾病</span>';
+  html += '    <span class="dr-value">' + t.diseases.length + ' 种</span>';
+  html += '  </div>';
+  html += '</div>';
+
+  /* Disease list */
+  html += '<div class="term-detail-section">';
+  html += '  <div class="term-detail-section-title">关联疾病列表</div>';
+  html += '  <div class="term-disease-list">';
+  var showLimit = 10;
+  var showCount = Math.min(t.diseases.length, showLimit);
+  for (var i = 0; i < showCount; i++) {
+    html += '<div class="term-disease-item"><span class="di-dot"></span>' + escHtml(t.diseases[i]) + '</div>';
+  }
+  if (t.diseases.length > showLimit) {
+    html += '<div class="term-disease-more">+' + (t.diseases.length - showLimit) + ' more</div>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  /* Similar terms in same dimension */
+  var similar = [];
+  Object.keys(ALL_TERMS).forEach(function(k) {
+    if (k !== CURRENT_TERM_KEY && ALL_TERMS[k].dim === t.dim) {
+      similar.push(ALL_TERMS[k]);
+    }
+  });
+  similar.sort(function(a, b) { return b.diseases.length - a.diseases.length; });
+  similar = similar.slice(0, 10);
+
+  if (similar.length > 0) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">同维度其他术语</div>';
+    html += '  <div class="term-similar-list">';
+    similar.forEach(function(s) {
+      var skey = s.dim + '::' + s.name;
+      html += '<div class="term-similar-item" onclick="selectTerm(\'' + escAttr(skey) + '\')">';
+      html += '  <span class="term-similar-name">' + escHtml(s.name) + '</span>';
+      html += '  <span class="term-similar-dcount">' + s.diseases.length + '种</span>';
+      html += '</div>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function renderDetailEmpty() {
+  document.getElementById('detail-body').innerHTML =
+    '<div class="term-detail-empty">' +
+    '<div class="de-icon">🧬</div>' +
+    '<div class="de-text">选择一个术语查看详情<br>点击左侧维度导航浏览术语<br>点击术语卡片查看详情</div>' +
+    '</div>';
+}
+
+/* ============ Search ============ */
+document.getElementById('term-search').addEventListener('input', function(e) {
+  SEARCH_TERM = e.target.value.trim();
+  renderCenterCards();
 });
 
-function clearSearch() {
-  searchTerm = '';
-  document.getElementById('term-search').value = '';
-  document.getElementById('term-search-clear').style.display = 'none';
-  document.getElementById('term-search-info').textContent = '';
-  renderTerms();
-}
-
-/* ---- Init ---- */
+/* ============ Init ============ */
 loadData(function(d) {
   buildTermIndex(d);
   renderNav('terminology');
-  renderKPI();
-  renderBars();
-  renderTabs();
-  renderTerms();
+  renderHeroStats();
+  renderDimList();
+  selectDim('Symptom');
 });
 </script>
 </body>

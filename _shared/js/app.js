@@ -64,7 +64,70 @@ function renderNav(activePage) {
   h += '<a class="nav-config-btn" href="config.html" title="系统配置">⚙</a>';
   h += '</div>';
   document.querySelector('.nav').innerHTML = h;
+  renderFooter();
 }
+
+/* Footer & Changelog */
+function renderFooter() {
+  // 如果已存在则跳过
+  if (document.getElementById('app-footer')) return;
+  var footer = document.createElement('div');
+  footer.id = 'app-footer';
+  footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.0.0</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  
+  // 检查弹窗是否已存在，不存在则创建
+  if (!document.getElementById('changelog-modal')) {
+    var modal = document.createElement('div');
+    modal.id = 'changelog-modal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)';
+    modal.innerHTML = '<div style="position:absolute;inset:0" onclick="hideChangelog()"></div><div style="position:relative;max-width:640px;margin:80px auto;background:#1a1d27;border:1px solid #2e3348;border-radius:14px;padding:28px 32px;max-height:70vh;overflow-y:auto"><button onclick="hideChangelog()" style="position:absolute;top:16px;right:18px;background:none;border:none;color:#8b90a0;font-size:20px;cursor:pointer">✕</button><h2 style="font-size:18px;font-weight:800;color:#e8eaf0;margin-bottom:6px">📋 更新记录</h2><div style="font-size:12px;color:#8b90a0;margin-bottom:20px">专科知识图谱 · 心血管内科 平台版本历史</div><div id="changelog-list"></div></div>';
+    document.body.appendChild(modal);
+  }
+  document.body.appendChild(footer);
+  renderChangelog();
+}
+
+function showChangelog() {
+  var m = document.getElementById('changelog-modal');
+  if (m) m.style.display = 'block';
+}
+
+function hideChangelog() {
+  var m = document.getElementById('changelog-modal');
+  if (m) m.style.display = 'none';
+}
+
+function renderChangelog() {
+  var list = [
+    { v: 'v1.0.0', date: '2026-06-26', items: [
+      '新增心血管内科专科知识图谱 Web 测试平台',
+      '新增专病知识总览驾驶舱，按疾病大类展示17维度完整率',
+      '新增图谱探索工作台，融合疾病视角、关系视角、实体视角',
+      '新增数据覆盖分析热力图，77种专病×17维度',
+      '新增临床诊断模拟，支持17维度加权匹配',
+      '新增图谱数据字典，展示实体类型、关系类型、疾病分类',
+      '新增 Schema 标准定义页，展示建模规范和字段约束',
+      '新增医学术语知识库，按维度分类浏览所有术语',
+      '新增系统配置页，支持动态配置 Neo4j 服务器地址',
+      '已部署到服务器 192.168.3.27:4001'
+    ]}
+  ];
+  var html = '';
+  list.forEach(function(release) {
+    html += '<div style="margin-bottom:18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:14px;font-weight:800;color:#e8eaf0">' + release.v + '</span><span style="font-size:11px;color:#555;background:#242836;padding:2px 8px;border-radius:6px">' + release.date + '</span></div><ul style="list-style:none;padding:0;margin:0">';
+    release.items.forEach(function(item) {
+      html += '<li style="font-size:12px;color:#8b90a0;padding:3px 0;line-height:1.6;padding-left:12px;position:relative"><span style="position:absolute;left:0;color:#51cf66">●</span>' + item + '</li>';
+    });
+    html += '</ul></div>';
+  });
+  var el = document.getElementById('changelog-list');
+  if (el) el.innerHTML = html;
+}
+
+// 导出函数到 window 对象
+window.showChangelog = showChangelog;
+window.hideChangelog = hideChangelog;
 
 /* Entity Modal */
 function showEntityModal(diseaseCode,dimKey,entityCode) {
