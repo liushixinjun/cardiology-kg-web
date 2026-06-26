@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>专科知识图谱 · 心血管内科 - 医学术语知识库</title>
+<title>医学术语知识库 - 多专科知识图谱</title>
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
 /* ========== Reset & Full-Viewport Layout ========== */
@@ -502,9 +502,9 @@ body { display: flex; flex-direction: column; }
   <!-- Hero -->
   <section class="term-hero">
     <div class="term-hero-left">
-      <div class="hero-kicker">CARDIOVASCULAR TERMINOLOGY KNOWLEDGE BASE</div>
-      <h1>🧬 心血管医学术语知识库</h1>
-      <div class="hero-sub">涵盖77种专病 x 17个知识维度的医学术语体系，支持按维度分类浏览、全局搜索和术语详情查看</div>
+      <div class="hero-kicker">医学术语知识库</div>
+      <h1>🧬 医学术语知识库</h1>
+      <div class="hero-sub">当前加载：心血管内科 · 覆盖77种专病 × 17个知识维度 · 支持按维度分类浏览、全局搜索、术语详情与关联关系查看</div>
     </div>
     <div class="term-hero-stats">
       <div class="term-hero-stat"><div class="stat-val" id="hs-total">-</div><div class="stat-lbl">独立术语</div></div>
@@ -771,7 +771,9 @@ function escAttr(s) {
   return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-/* ============ Select term ============ */
+/* ============ Disease data cache ============ */
+var KG_DISEASES = null;
+
 function selectTerm(key) {
   CURRENT_TERM_KEY = key;
 
@@ -785,6 +787,70 @@ function selectTerm(key) {
   if (selectedCard) selectedCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
   renderDetail();
+}
+
+/* ============ Find all relation types for a term ============ */
+function findTermRelations(termName, dimKey) {
+  if (!KG_DISEASES) return [];
+  var relMap = {};  // relType -> count of diseases
+  Object.keys(KG_DISEASES).forEach(function(code) {
+    var d = KG_DISEASES[code];
+    (d.relations_summary || []).forEach(function(r) {
+      if (r.name === termName) {
+        if (!relMap[r.rel]) relMap[r.rel] = { rel: r.rel, count: 0, diseases: [] };
+        relMap[r.rel].count++;
+        if (relMap[r.rel].diseases.length < 3) relMap[r.rel].diseases.push(d.info.name);
+      }
+    });
+  });
+  return Object.values(relMap).sort(function(a, b) { return b.count - a.count; });
+}
+
+/* ============ Check if term appears in other dimensions ============ */
+function findCrossDimRefs(termName, currentDim) {
+  if (!KG_DISEASES) return [];
+  var refs = [];
+  Object.keys(KG_DISEASES).forEach(function(code) {
+    var d = KG_DISEASES[code];
+    DIM_KEYS.forEach(function(k) {
+      if (k === currentDim) return;
+      var items = d.dimensions[k] || [];
+      items.forEach(function(e) {
+        if (e.name === termName) {
+          refs.push({ dim: k, disease: d.info.name });
+        }
+      });
+    });
+  });
+  return refs;
+}
+
+/* ============ Find related terms via diseases ============ */
+function findRelatedTerms(termName, dimKey) {
+  if (!KG_DISEASES) return [];
+  var diseaseNames = ALL_TERMS[dimKey + '::' + termName]
+    ? ALL_TERMS[dimKey + '::' + termName].diseases
+    : [];
+  if (diseaseNames.length === 0) return [];
+  var relatedMap = {};
+  Object.keys(KG_DISEASES).forEach(function(code) {
+    var d = KG_DISEASES[code];
+    if (diseaseNames.indexOf(d.info.name) === -1) return;
+    DIM_KEYS.forEach(function(k) {
+      if (k === dimKey) return;
+      (d.dimensions[k] || []).forEach(function(e) {
+        if (e.name === termName) return;
+        var rKey = k + '::' + e.name;
+        if (!relatedMap[rKey]) relatedMap[rKey] = { name: e.name, dim: k, diseases: [] };
+        if (relatedMap[rKey].diseases.length < 5 && relatedMap[rKey].diseases.indexOf(d.info.name) === -1) {
+          relatedMap[rKey].diseases.push(d.info.name);
+        }
+      });
+    });
+  });
+  var result = Object.values(relatedMap);
+  result.sort(function(a, b) { return b.diseases.length - a.diseases.length; });
+  return result.slice(0, 8);
 }
 
 /* ============ Render detail panel ============ */
@@ -830,7 +896,83 @@ function renderDetail() {
   html += '  </div>';
   html += '</div>';
 
-  /* Similar terms in same dimension */
+  /* ============ 关联关系 (Relation types) ============ */
+  var relations = findTermRelations(t.name, t.dim);
+  if (relations.length > 0) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">🔗 关联关系</div>';
+    html += '  <div class="term-disease-list">';
+    relations.forEach(function(r) {
+      html += '<div class="term-disease-item">';
+      html += '  <span class="di-dot" style="background:#cc5de8"></span>';
+      html += '  <span style="flex:1">' + escHtml(r.rel) + '</span>';
+      html += '  <span style="color:var(--muted);font-size:10px">' + r.count + '种疾病</span>';
+      html += '</div>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  /* ============ 跨维度引用 (Cross-dimension references) ============ */
+  var crossRefs = findCrossDimRefs(t.name, t.dim);
+  if (crossRefs.length > 0) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">🔀 跨维度引用</div>';
+    html += '  <div class="term-disease-list">';
+    crossRefs.slice(0, 8).forEach(function(ref) {
+      html += '<div class="term-disease-item">';
+      html += '  <span class="di-dot" style="background:#22b8cf"></span>';
+      html += '  <span style="flex:1">' + escHtml(DIM_NAMES[ref.dim]) + ' · ' + escHtml(ref.disease) + '</span>';
+      html += '</div>';
+    });
+    if (crossRefs.length > 8) {
+      html += '<div class="term-disease-more">+' + (crossRefs.length - 8) + ' more</div>';
+    }
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  /* ============ 共现术语 (Related terms via shared diseases) ============ */
+  var related = findRelatedTerms(t.name, t.dim);
+  if (related.length > 0) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">🧩 共现术语（在相同疾病中同时出现）</div>';
+    html += '  <div class="term-disease-list">';
+    related.forEach(function(r) {
+      html += '<div class="term-disease-item" style="cursor:pointer" onclick="selectTerm(\'' + escAttr(r.dim + '::' + r.name) + '\')">';
+      html += '  <span class="di-dot" style="background:#ffd43b"></span>';
+      html += '  <span style="flex:1">' + escHtml(r.name) + '</span>';
+      html += '  <span style="font-size:9px;color:var(--muted)">' + escHtml(DIM_NAMES[r.dim]) + '</span>';
+      html += '  <span style="color:var(--muted);font-size:10px">' + r.diseases.length + '种</span>';
+      html += '</div>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  /* ============ 英文别名 (English name alias from diseases) ============ */
+  var enNames = [];
+  t.diseases.forEach(function(dn) {
+    Object.keys(KG_DISEASES || {}).forEach(function(code) {
+      if (KG_DISEASES[code].info.name === dn && KG_DISEASES[code].info.name_en) {
+        if (enNames.indexOf(KG_DISEASES[code].info.name_en) === -1) {
+          enNames.push(KG_DISEASES[code].info.name_en);
+        }
+      }
+    });
+  });
+  if (enNames.length > 0 && enNames.length <= 5) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">🌐 关联疾病英文名</div>';
+    html += '  <div style="display:flex;flex-wrap:wrap;gap:4px">';
+    enNames.forEach(function(en) {
+      html += '<span style="font-size:10px;padding:2px 7px;background:var(--bg3);border:1px solid var(--rule);border-radius:4px;color:var(--muted);font-style:italic">' + escHtml(en) + '</span>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  /* ============ 同维度其他术语 (Similar terms in same dimension) ============ */
   var similar = [];
   Object.keys(ALL_TERMS).forEach(function(k) {
     if (k !== CURRENT_TERM_KEY && ALL_TERMS[k].dim === t.dim) {
@@ -842,7 +984,7 @@ function renderDetail() {
 
   if (similar.length > 0) {
     html += '<div class="term-detail-section">';
-    html += '  <div class="term-detail-section-title">同维度其他术语</div>';
+    html += '  <div class="term-detail-section-title">📋 同维度术语</div>';
     html += '  <div class="term-similar-list">';
     similar.forEach(function(s) {
       var skey = s.dim + '::' + s.name;
@@ -874,6 +1016,7 @@ document.getElementById('term-search').addEventListener('input', function(e) {
 
 /* ============ Init ============ */
 loadData(function(d) {
+  KG_DISEASES = d.diseases;
   buildTermIndex(d);
   renderNav('terminology');
   renderHeroStats();
