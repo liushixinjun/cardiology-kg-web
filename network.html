@@ -112,14 +112,6 @@
 }
 
 /* Legend */
-.nw-legend-list { display: flex; flex-direction: column; gap: 4px; }
-.nw-legend-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 11px; color: var(--muted);
-}
-.nw-legend-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-}
 
 /* Path */
 .nw-path-list { font-size: 12px; }
@@ -395,12 +387,6 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
         <div class="nw-dim-list" id="nw-dim-filters"></div>
       </div>
 
-      <!-- Legend -->
-      <div class="nw-section">
-        <div class="nw-section-title">图例</div>
-        <div class="nw-legend-list" id="nw-legend"></div>
-      </div>
-
       <!-- Exploration path -->
       <div class="nw-section">
         <div class="nw-section-title">探索路径</div>
@@ -507,7 +493,6 @@ loadData(function(d) {
   renderNav('network');
   populateDiseaseSelect(d);
   initDimFilters();
-  renderLegend();
   bindLevelRadio();
   var defaultCode = chooseDefaultDisease(d);
   if (defaultCode) {
@@ -632,26 +617,6 @@ function getDimCount(dimKey) {
 function onDimToggle(dimKey, checked) {
   DIM_FILTERS[dimKey] = checked;
   renderGraph();
-}
-
-/* ================================================================
-   Legend
-   ================================================================ */
-function renderLegend() {
-  var items = [
-    { name: '疾病', color: DISEASE_COLOR }
-  ];
-  DIM_KEYS.forEach(function(k) {
-    items.push({ name: DIM_LABELS[k], color: DIM_COLORS[k] || '#888' });
-  });
-  var html = '';
-  items.forEach(function(it) {
-    html += '<div class="nw-legend-item">';
-    html += '<span class="nw-legend-dot" style="background:' + it.color + '"></span>';
-    html += '<span>' + it.name + '</span>';
-    html += '</div>';
-  });
-  document.getElementById('nw-legend').innerHTML = html;
 }
 
 /* ================================================================
