@@ -49,6 +49,7 @@ function renderNav(activePage) {
   var pages = [
     {id:'index',label:'数据总览',icon:'📊'},
     {id:'explore',label:'图谱探索',icon:'🧭'},
+    {id:'network',label:'网络探索',icon:'🕸️'},
     {id:'heatmap',label:'数据覆盖分析',icon:'🗺️'},
     {id:'diagnosis',label:'临床诊断模拟',icon:'🔍'},
     {id:'schema',label:'图谱数据字典',icon:'📐'},
