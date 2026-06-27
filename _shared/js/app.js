@@ -30,10 +30,47 @@ function getServerConfig() {
 }
 function saveServerConfig(cfg) { localStorage.setItem('kg_server_config', JSON.stringify(cfg)); }
 
-/* Data loading */
+/* Data loading - 动态API模式 */
 function loadData(callback) {
-  if (KG_DATA) { callback(KG_DATA); return; }
-  fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){KG_DATA=d;callback(d)}).catch(function(e){console.error('Load failed:',e)});
+  if (KG_DATA && KG_DATA._loaded) { callback(KG_DATA); return; }
+  // 并行加载疾病列表 + 全局统计
+  Promise.all([
+    fetch('/api/kg/diseases').then(function(r){return r.json()}),
+    fetch('/api/kg/stats').then(function(r){return r.json()})
+  ]).then(function(results){
+    var diseaseList = results[0];
+    var stats = results[1];
+    var diseases = {};
+    diseaseList.forEach(function(d){
+      // 先建骨架，完整数据按需加载
+      diseases[d.code] = { info: d, dimensions: {}, relations_summary: [], evidence_count: 0, _loaded: false };
+    });
+    KG_DATA = {
+      diseases: diseases,
+      stats: stats,
+      data_source: { type: 'Neo4j实时', export_time: new Date().toLocaleString('zh-CN') },
+      _loaded: true
+    };
+    callback(KG_DATA);
+  }).catch(function(e){
+    console.error('API load failed:', e);
+    // 降级到静态JSON
+    fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){KG_DATA=d;KG_DATA._loaded=true;callback(d)}).catch(function(e2){console.error('Fallback also failed:',e2)});
+  });
+}
+
+/* 按需加载单个疾病完整数据 */
+function loadDiseaseData(code, callback) {
+  if (!KG_DATA) { callback(null); return; }
+  if (KG_DATA.diseases[code] && KG_DATA.diseases[code]._loaded) { callback(KG_DATA.diseases[code]); return; }
+  fetch('/api/kg/disease/' + encodeURIComponent(code)).then(function(r){return r.json()}).then(function(d){
+    d._loaded = true;
+    KG_DATA.diseases[code] = d;
+    callback(d);
+  }).catch(function(e){
+    console.error('Load disease failed:', code, e);
+    callback(null);
+  });
 }
 
 function getCoverage(code) {

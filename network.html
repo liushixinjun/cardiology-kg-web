@@ -512,7 +512,9 @@ loadData(function(d) {
   var defaultCode = chooseDefaultDisease(d);
   if (defaultCode) {
     document.getElementById('nw-disease-select').value = defaultCode;
-    onDiseaseSelect();
+    loadDiseaseData(defaultCode, function(dd) {
+      if (dd) onDiseaseSelect();
+    });
   }
   renderDataSourceBar(d);
 });
@@ -568,7 +570,10 @@ function populateDiseaseSelect(d) {
 function onDiseaseSelect() {
   var code = document.getElementById('nw-disease-select').value;
   if (!code) return;
-  setCenter(code);
+  // 先确保完整数据已加载
+  loadDiseaseData(code, function(d) {
+    if (d) setCenter(code);
+  });
 }
 
 /* ================================================================
@@ -995,7 +1000,7 @@ function renderGraph() {
       var dc = findDiseaseCodeByName(params.name);
       if (dc) {
         document.getElementById('nw-disease-select').value = dc;
-        setCenter(dc);
+        loadDiseaseData(dc, function(d) { if (d) setCenter(dc); });
       }
     } else {
       /* Entity: expand its associated diseases */
@@ -1434,7 +1439,9 @@ function findAssociatedDiseases(entityName) {
 
 function jumpToDisease(dc) {
   document.getElementById('nw-disease-select').value = dc;
-  setCenter(dc);
+  loadDiseaseData(dc, function(d) {
+    if (d) setCenter(dc);
+  });
 }
 
 function expandFromEntity(entityName) {
