@@ -49,7 +49,13 @@
 <script>
 var CURRENT_DISEASE=null,CURRENT_VIEW='disease',GRAPH=null,ALL_ENTITIES=[];
 var COLORS=['#51cf66','#ff6b6b','#ffd43b','#ff922b','#cc5de8','#22b8cf','#748ffc','#f06595','#94d82d','#fab005','#15aabf','#e599f7','#66d9e8','#fcc419','#a9e34b','#da77f2','#63e6be'];
-loadData(function(){renderNav('explore');buildDiseaseTree();buildEntityIndex();renderCurrent();});
+loadData(function(){renderNav('explore');buildDiseaseTree();renderCurrent();
+  // 自动选择第一个疾病
+  var firstCode = Object.keys(KG_DATA.diseases)[0];
+  if (firstCode) selectDisease(firstCode);
+  // 异步加载实体索引
+  buildEntityIndexAsync();
+});
 function buildDiseaseTree(){
   var ds=KG_DATA.diseases,groups={};
   Object.keys(ds).forEach(function(code){var info=ds[code].info,g=parseParentCode(info.parent).group;if(!groups[g])groups[g]=[];groups[g].push({code:code,name:info.name,cov:getCoverage(code)});});
@@ -58,13 +64,36 @@ function buildDiseaseTree(){
 }
 function toggleGroup(el){el.parentElement.classList.toggle('open')}
 document.getElementById('disease-search').addEventListener('input',function(e){var q=e.target.value.toLowerCase();document.querySelectorAll('.ex-group').forEach(function(g){var visible=false;g.querySelectorAll('.ex-disease').forEach(function(d){var s=(d.textContent+d.dataset.code).toLowerCase(),show=!q||s.indexOf(q)!==-1;d.style.display=show?'flex':'none';if(show)visible=true;});g.style.display=visible?'block':'none';if(q&&visible)g.classList.add('open');});});
-function selectDisease(code){CURRENT_DISEASE=code;document.querySelectorAll('.ex-disease').forEach(function(el){el.classList.toggle('active',el.dataset.code===code)});renderCurrent();showDiseaseSummary(code);}
+function selectDisease(code){
+  // 先确保完整数据已加载
+  loadDiseaseData(code, function(d) {
+    if (!d) return;
+    CURRENT_DISEASE = code;
+    document.querySelectorAll('.ex-disease').forEach(function(el){el.classList.toggle('active',el.dataset.code===code)});
+    renderCurrent();
+    showDiseaseSummary(code);
+  });
+}
 function switchView(view){CURRENT_VIEW=view;document.querySelectorAll('.ex-tab').forEach(function(t){t.classList.toggle('active',t.dataset.view===view)});renderCurrent();}
 function renderCurrent(){if(CURRENT_VIEW==='entity'){renderEntityView();return;}if(!CURRENT_DISEASE){document.getElementById('workspace').innerHTML='<div class="ex-empty">请先从左侧选择一种疾病</div>';return;}if(CURRENT_VIEW==='disease')renderDiseaseView(CURRENT_DISEASE);else renderGraphView(CURRENT_DISEASE);}
 function renderDiseaseView(code){var d=KG_DATA.diseases[code],info=d.info,cv=getCoverage(code),h='';h+='<div class="ex-head"><h1>'+info.name+'</h1><div class="ex-meta"><span class="ex-code">'+info.code+'</span>'+(info.name_en?' · '+info.name_en:'')+' · 17维度完整率 <b style="color:var(--accent)">'+Math.round(cv)+'%</b> · 证据 <b style="color:var(--accent)">'+(d.evidence_count||0)+'</b> 条 · 关系 <b style="color:var(--accent)">'+(d.relations_summary?d.relations_summary.length:0)+'</b> 条</div></div>';h+='<div class="ex-dim-grid">';DIM_KEYS.forEach(function(k){var it=d.dimensions[k]||[],cls=it.length?'ok':'zz';h+='<div class="ex-card"><div class="ex-card-head"><span class="ex-card-title">'+DIM_NAMES[k]+'</span><span class="ex-card-count '+cls+'">'+it.length+'</span></div><div class="ex-tags">';if(!it.length)h+='<span style="font-size:12px;color:var(--muted)">暂无数据</span>';it.forEach(function(e){h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+(e.code||'')+'\')">'+e.name+'</span>';});h+='</div></div>';});h+='</div>';document.getElementById('workspace').innerHTML=h;}
 function renderGraphView(code){var d=KG_DATA.diseases[code];var h='<div class="ex-graph-box"><div class="ex-graph-toolbar"><div><div class="ex-graph-title">'+d.info.name+' 关系网络</div><div class="ex-graph-note">疾病 → 维度 → 实体，点击节点查看右侧详情</div></div></div><div id="explore-graph"></div></div>';document.getElementById('workspace').innerHTML=h;setTimeout(function(){drawGraph(code)},50);}
 function drawGraph(code){var el=document.getElementById('explore-graph');if(!el)return;if(GRAPH)GRAPH.dispose();GRAPH=echarts.init(el,null,{renderer:'svg'});var d=KG_DATA.diseases[code],nodes=[],links=[];nodes.push({name:d.info.name,nodeType:'disease',code:code,symbolSize:64,itemStyle:{color:'#4f8cff',shadowBlur:22,shadowColor:'rgba(79,140,255,.65)'},label:{fontSize:14,fontWeight:'bold',color:'#fff'}});DIM_KEYS.forEach(function(k,idx){var it=d.dimensions[k]||[];if(!it.length)return;var dimName=DIM_NAMES[k]+' ('+it.length+')';nodes.push({name:dimName,nodeType:'dim',dimKey:k,symbolSize:Math.min(18+it.length*2,46),itemStyle:{color:COLORS[idx]},label:{fontSize:11,fontWeight:'bold'}});links.push({source:d.info.name,target:dimName,value:'has_'+k,lineStyle:{color:COLORS[idx],width:3,opacity:.7}});it.slice(0,12).forEach(function(e){nodes.push({name:e.name,nodeType:'entity',dimKey:k,entityCode:e.code||'',diseaseCode:code,symbolSize:13,itemStyle:{color:COLORS[idx]+'cc'}});links.push({source:dimName,target:e.name,value:k,lineStyle:{color:COLORS[idx]+'66',width:1.5,opacity:.55}});});});GRAPH.setOption({tooltip:{formatter:function(p){return p.dataType==='edge'?p.data.source+' → '+p.data.target:p.data.name}},series:[{type:'graph',layout:'force',data:nodes,links:links,roam:true,label:{show:true,fontSize:9,color:'#e8eaf0'},lineStyle:{curveness:.14},emphasis:{focus:'adjacency'},force:{repulsion:170,gravity:.06,edgeLength:[55,190],friction:.6}}]});GRAPH.on('click',function(p){if(p.dataType==='node'){if(p.data.nodeType==='entity')showEntityDetail(p.data.diseaseCode,p.data.dimKey,p.data.entityCode);else if(p.data.nodeType==='disease')showDiseaseSummary(code);else showDimensionDetail(code,p.data.dimKey);}});}
-function buildEntityIndex(){ALL_ENTITIES=[];Object.keys(KG_DATA.diseases).forEach(function(dc){var d=KG_DATA.diseases[dc];DIM_KEYS.forEach(function(k){(d.dimensions[k]||[]).forEach(function(e){ALL_ENTITIES.push({name:e.name,code:e.code||'',dim:k,dimName:DIM_NAMES[k],disease:d.info.name,diseaseCode:dc});});});});}
+function buildEntityIndexAsync(){
+  fetch('/api/kg/diseases/summary').then(function(r){return r.json()}).then(function(data){
+    ALL_ENTITIES=[];
+    Object.keys(data).forEach(function(dc){
+      var dims=data[dc].dimensions;
+      DIM_KEYS.forEach(function(k){
+        (dims[k]||[]).forEach(function(e){
+          ALL_ENTITIES.push({name:e.name,code:e.code||'',dim:k,dimName:DIM_NAMES[k],disease:data[dc].info.name,diseaseCode:dc});
+        });
+      });
+    });
+    // 如果当前在实体视角，刷新
+    if(CURRENT_VIEW==='entity') filterEntities();
+  }).catch(function(e){console.error('Entity index load failed:',e);});
+}
 function renderEntityView(){var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
 function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim);}).slice(0,500);var html=rows.map(function(e){return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
 function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['完整率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}

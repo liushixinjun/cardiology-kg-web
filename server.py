@@ -59,7 +59,7 @@ def get_driver():
 
 
 def query_disease_list():
-    """获取所有疾病列表"""
+    """获取所有疾病列表（含维度数量）"""
     d = get_driver()
     with d.session() as sess:
         results = sess.run("""
@@ -67,7 +67,60 @@ def query_disease_list():
             RETURN d.code as code, d.name as name, d.parentCode as parent
             ORDER BY d.parentCode, d.code
         """)
-        return [dict(r) for r in results]
+        disease_list = [dict(r) for r in results]
+
+        # 获取每个疾病的维度数量（一次查询）
+        dim_counts = {}
+        for dim, rel in REL_MAP.items():
+            rows = sess.run(f"""
+                MATCH (d:Disease)-[:{rel}]->(n)
+                RETURN d.code as code, count(DISTINCT n) as cnt
+            """)
+            for r in rows:
+                code = r["code"]
+                if code not in dim_counts:
+                    dim_counts[code] = {}
+                dim_counts[code][dim] = r["cnt"]
+
+        for d in disease_list:
+            d["dim_counts"] = dim_counts.get(d["code"], {})
+
+        return disease_list
+
+
+def query_diseases_summary():
+    """获取所有疾病的维度实体摘要（用于实体索引构建）"""
+    d = get_driver()
+    with d.session() as sess:
+        diseases = sess.run("""
+            MATCH (d:Disease)
+            RETURN d.code as code, d.name as name
+            ORDER BY d.code
+        """)
+        disease_list = [dict(r) for r in diseases]
+
+        result = {}
+        for d_info in disease_list:
+            code = d_info["code"]
+            dims = {}
+            for dim, rel in REL_MAP.items():
+                rows = sess.run(f"""
+                    MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
+                    RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref
+                    ORDER BY n.name LIMIT 30
+                """, code=code)
+                items = []
+                seen = set()
+                for r in rows:
+                    name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                    if name in SHELL_NAMES or name in seen:
+                        continue
+                    seen.add(name)
+                    items.append({"name": name, "code": r["ncode"]})
+                dims[dim] = items
+            result[code] = {"info": d_info, "dimensions": dims}
+
+        return result
 
 
 def query_disease_full(code):
@@ -203,6 +256,10 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
         # API 路由
         if path == '/api/kg/diseases':
             self._json_response(query_disease_list())
+            return
+
+        if path == '/api/kg/diseases/summary':
+            self._json_response(query_diseases_summary())
             return
 
         if path == '/api/kg/stats':

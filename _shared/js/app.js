@@ -42,8 +42,8 @@ function loadData(callback) {
     var stats = results[1];
     var diseases = {};
     diseaseList.forEach(function(d){
-      // 先建骨架，完整数据按需加载
-      diseases[d.code] = { info: d, dimensions: {}, relations_summary: [], evidence_count: 0, _loaded: false };
+      // 建骨架对象，含 dim_counts 用于 getCoverage
+      diseases[d.code] = { info: d, dimensions: {}, dim_counts: d.dim_counts || {}, relations_summary: [], evidence_count: 0, _loaded: false };
     });
     KG_DATA = {
       diseases: diseases,
@@ -75,9 +75,20 @@ function loadDiseaseData(code, callback) {
 
 function getCoverage(code) {
   if(!KG_DATA||!KG_DATA.diseases[code])return 0;
-  var dims=KG_DATA.diseases[code].dimensions,f=0;
-  DIM_KEYS.forEach(function(k){if(dims[k]&&dims[k].length>0)f++});
-  return(f/DIM_KEYS.length)*100;
+  var d=KG_DATA.diseases[code];
+  // 优先用已加载的 dimensions
+  if(d._loaded && d.dimensions) {
+    var f=0;
+    DIM_KEYS.forEach(function(k){if(d.dimensions[k]&&d.dimensions[k].length>0)f++});
+    return(f/DIM_KEYS.length)*100;
+  }
+  // 降级用 dim_counts（骨架对象）
+  if(d.dim_counts) {
+    var f=0;
+    DIM_KEYS.forEach(function(k){if(d.dim_counts[k]&&d.dim_counts[k]>0)f++});
+    return(f/DIM_KEYS.length)*100;
+  }
+  return 0;
 }
 function covClass(c){return c===100?'cov-full':c>=70?'cov-good':c>=40?'cov-mid':'cov-low';}
 
