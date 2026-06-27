@@ -279,6 +279,7 @@ body.nw-fullscreen .nw-right:hover .nw-detail-body { display: block; }
 body.nw-fullscreen .nw-right-icon {
   display: flex; align-items: center; justify-content: center;
   padding: 8px 0; font-size: 20px; color: var(--accent);
+  flex-direction: column;
 }
 .nw-right-summary {
   display: flex; flex-direction: column; align-items: center;
@@ -286,6 +287,10 @@ body.nw-fullscreen .nw-right-icon {
 }
 .nw-right-summary .nrs-label { color: var(--muted); font-weight: 700; }
 .nw-right-summary .nrs-val { color: var(--accent); font-size: 13px; font-weight: 900; }
+
+/* 非全屏模式下隐藏折叠条图标 */
+.nw-right-icon { display: none; }
+.nw-left-icon { display: none; }
 
 body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 
