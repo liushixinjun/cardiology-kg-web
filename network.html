@@ -292,24 +292,25 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 /* ==================== Path mode highlight ==================== */
 .nw-path-overlay {
   position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-  background: var(--bg2); border: 1px solid var(--accent); border-radius: 8px;
+  background: var(--bg2); border: 1px solid var(--accent); border-radius: 10px;
   padding: 10px 18px; font-size: 12px; color: var(--ink);
   box-shadow: 0 4px 20px rgba(0,0,0,.5); z-index: 10;
-  display: none; max-width: 700px; text-align: center;
+  display: none; max-width: 85vw; text-align: center;
+  line-height: 1.8;
 }
 .nw-path-overlay.show { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
-.nw-path-overlay .po-step { display: flex; align-items: center; gap: 6px; }
+.nw-path-overlay .po-step { display: inline-flex; align-items: center; gap: 6px; }
 .nw-path-overlay .po-num {
-  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 900; flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0;
 }
 .nw-path-overlay .po-num.pending { background: var(--rule); color: var(--muted); }
 .nw-path-overlay .po-num.active { background: var(--accent); color: #fff; }
 .nw-path-overlay .po-num.done { background: #51cf66; color: #fff; }
 .nw-path-overlay .po-label { font-size: 12px; color: var(--muted); }
-.nw-path-overlay .po-name { font-weight: 800; color: var(--accent); }
-.nw-path-overlay .po-arrow { color: var(--rule); font-size: 14px; }
-.nw-path-overlay .po-result { font-size: 13px; color: var(--ink); font-weight: 600; width: 100%; }
+.nw-path-overlay .po-name { font-weight: 800; color: var(--accent); font-size: 13px; }
+.nw-path-overlay .po-arrow { color: #ff922b; font-size: 12px; font-weight: 700; padding: 0 2px; }
+.nw-path-overlay .po-result { font-size: 13px; color: var(--ink); font-weight: 600; width: 100%; line-height: 2; }
 
 /* ==================== First-screen guidance ==================== */
 .nw-graph-guide {
@@ -391,6 +392,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
   </div>
   <div class="nw-toolbar-actions">
     <button onclick="resetGraph()" title="重置视图">重置</button>
+    <button id="btn-path-mode" onclick="togglePathMode()" title="路径模式: 点击两个实体节点，查找它们之间的关联路径">🔗 路径</button>
     <button onclick="enterFullscreen()" id="btn-fullscreen">全屏</button>
     <button onclick="exitFullscreen()" id="btn-exit-fullscreen" style="display:none">退出全屏</button>
   </div>
@@ -1611,21 +1613,27 @@ function onPathNodeClick(name, nd) {
   if (PATH_SELECT_COUNT === 1) {
     PATH_START = name;
     var overlay = document.getElementById('nw-path-overlay');
-    overlay.innerHTML = '<div class="po-step"><span class="po-num done">1</span><span class="po-name">' + name + '</span></div><div class="po-step"><span class="po-arrow">→</span></div><div class="po-step"><span class="po-num active">2</span><span class="po-label">点击另一个节点</span></div><div class="po-step"><button class="nw-guide-btn" onclick="cancelPathStart()">取消</button></div>';
+    overlay.innerHTML = '<div class="po-step"><span class="po-num done">①</span><span class="po-name">' + name + '</span></div><div class="po-step"><span class="po-arrow">→</span></div><div class="po-step"><span class="po-num active">②</span><span class="po-label">点击终点节点</span></div><div class="po-step"><button class="nw-guide-btn" onclick="cancelPathStart()">取消</button></div>';
     highlightNodes([name], []);
   } else if (PATH_SELECT_COUNT === 2) {
     var PATH_END = name;
     var path = findShortestPath(PATH_START, PATH_END);
     var overlay = document.getElementById('nw-path-overlay');
-    if (path) {
-      var arrowHtml = path.map(function(p, i) {
-        if (i === 0) return '<span class="po-num done">1</span><span class="po-name">' + p + '</span>';
-        return '<span class="po-arrow">→</span><span class="po-num done">' + (i+1) + '</span><span class="po-name">' + p + '</span>';
-      }).join('');
-      overlay.innerHTML = '<div class="po-result">' + arrowHtml + '</div><div class="po-step"><button class="nw-guide-btn" onclick="clearPathMode()">新路径</button></div>';
-      highlightPath(path);
+    if (path && path.nodes.length > 1) {
+      /* 构建临床可读路径: "实体A --[关系]--> 实体B" */
+      var parts = [];
+      parts.push('<span class="po-name">' + path.nodes[0] + '</span>');
+      for (var i = 0; i < path.edges.length; i++) {
+        var edgeLabel = DIM_LABELS[path.edges[i].label] || path.edges[i].label || '';
+        parts.push('<span class="po-arrow">—[' + edgeLabel + ']→</span>');
+        parts.push('<span class="po-name">' + path.nodes[i + 1] + '</span>');
+      }
+      var resultHtml = '<div class="po-result">' + parts.join(' ') + '</div>';
+      resultHtml += '<div class="po-step"><button class="nw-guide-btn" onclick="clearPathMode()">新路径</button></div>';
+      overlay.innerHTML = resultHtml;
+      highlightPath(path.nodes);
     } else {
-      overlay.innerHTML = '<div class="po-result"><span style="color:var(--red)">未找到路径</span>：' + PATH_START + ' → ' + PATH_END + '</div><div class="po-step"><button class="nw-guide-btn" onclick="clearPathMode()">重试</button></div>';
+      overlay.innerHTML = '<div class="po-result"><span style="color:#ff6b6b">未找到路径</span>：' + PATH_START + ' ↔ ' + PATH_END + ' 不在当前图谱中相连</div><div class="po-step"><button class="nw-guide-btn" onclick="clearPathMode()">重试</button></div>';
     }
     PATH_SELECT_COUNT = 0;
     PATH_START = null;
@@ -1705,39 +1713,42 @@ function highlightPath(path) {
 }
 
 /* ================================================================
-   BFS Shortest Path
+   BFS Shortest Path (with relationship labels)
    ================================================================ */
 function findShortestPath(startName, endName) {
-  if (startName === endName) return [startName];
+  if (startName === endName) return { nodes: [startName], edges: [] };
 
-  /* Build adjacency list from ALL_GRAPH_EDGES */
+  /* Build adjacency list WITH edge labels from GRAPH_CHART data */
+  var option = GRAPH_CHART.getOption();
+  var links = option.series[0].links || [];
   var adj = {};
-  ALL_GRAPH_EDGES.forEach(function(e) {
-    if (!adj[e.a]) adj[e.a] = [];
-    if (!adj[e.b]) adj[e.b] = [];
-    if (adj[e.a].indexOf(e.b) === -1) adj[e.a].push(e.b);
-    if (adj[e.b].indexOf(e.a) === -1) adj[e.b].push(e.a);
+  links.forEach(function(l) {
+    if (!adj[l.source]) adj[l.source] = [];
+    if (!adj[l.target]) adj[l.target] = [];
+    adj[l.source].push({ node: l.target, label: l.value || '' });
+    adj[l.target].push({ node: l.source, label: l.value || '' });
   });
 
-  /* BFS */
-  var queue = [[startName]];
+  /* BFS — returns { nodes: [...], edges: [{label}] } */
+  var queue = [{ nodes: [startName], edges: [] }];
   var visited = {};
   visited[startName] = true;
 
   while (queue.length > 0) {
-    var path = queue.shift();
-    var current = path[path.length - 1];
-
-    if (current === endName) return path;
+    var curr = queue.shift();
+    var current = curr.nodes[curr.nodes.length - 1];
+    if (current === endName) return curr;
 
     var neighbors = adj[current] || [];
     for (var i = 0; i < neighbors.length; i++) {
-      var next = neighbors[i];
-      if (!visited[next]) {
-        visited[next] = true;
-        queue.push(path.concat([next]));
-        /* Limit BFS depth for performance */
-        if (path.length > 8) return null;
+      var nb = neighbors[i];
+      if (!visited[nb.node]) {
+        visited[nb.node] = true;
+        queue.push({
+          nodes: curr.nodes.concat([nb.node]),
+          edges: curr.edges.concat([{ label: nb.label }])
+        });
+        if (curr.nodes.length > 6) return null;
       }
     }
   }
