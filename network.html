@@ -39,7 +39,7 @@
 /* ==================== Main Layout ==================== */
 .nw-layout {
   display: grid; grid-template-columns: 280px 1fr 360px;
-  height: calc(100vh - 96px); overflow: hidden;
+  height: calc(100vh - 96px - 28px); overflow: hidden;
 }
 
 /* ==================== Left Panel ==================== */
@@ -240,6 +240,7 @@
 /* ==================== Fullscreen Mode ==================== */
 body.nw-fullscreen .nw-toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
 body.nw-fullscreen .nw-layout { height: 100vh; padding-top: 48px; }
+body.nw-fullscreen .nw-datasource { display: none; }
 body.nw-fullscreen .nw-left {
   width: 48px; min-width: 48px; overflow: hidden;
   transition: width .3s ease;
@@ -343,6 +344,17 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 }
 .nw-path-hint b { color: var(--ink); }
 .nw-path-hint .path-line { color: var(--accent); margin-top: 5px; font-weight: 800; }
+
+/* ==================== Data Source Bar ==================== */
+.nw-datasource {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: var(--bg2); border-top: 1px solid var(--rule);
+  padding: 4px 16px; display: flex; align-items: center; gap: 16px;
+  font-size: 10px; color: var(--muted); line-height: 1.4;
+}
+.nw-datasource .ds-label { color: var(--accent); font-weight: 700; }
+.nw-datasource .ds-sep { color: var(--rule); }
+.nw-datasource .ds-val { color: var(--ink); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -444,6 +456,9 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
   </aside>
 </div>
 
+<!-- Data Source Bar -->
+<div class="nw-datasource" id="nw-datasource"></div>
+
 <script src="./_shared/js/echarts.min.js"></script>
 <script src="./_shared/js/app.js"></script>
 <script>
@@ -499,6 +514,7 @@ loadData(function(d) {
     document.getElementById('nw-disease-select').value = defaultCode;
     onDiseaseSelect();
   }
+  renderDataSourceBar(d);
 });
 
 /* ================================================================
@@ -719,6 +735,52 @@ function buildGraphData() {
         value: k,
         lineStyle: { color: color, width: 2, type: 'dashed', opacity: 0.6 }
       });
+
+      /* 1.5-hop: TreatmentPlan → sub_medication / sub_procedure */
+      if (k === 'TreatmentPlan' && (e.sub_medication || e.sub_procedure)) {
+        var subColor = '#ff922b';
+        (e.sub_medication || []).forEach(function(sm) {
+          pushUniqueNode(nodes, {
+            name: sm.name, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
+            category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
+            symbolSize: 26, itemStyle: { color: subColor },
+            label: { show: true, fontSize: 9, color: '#e8eaf0' }
+          });
+          pushUniqueLink(links, {
+            source: e.name, target: sm.name, value: 'includes_medication',
+            lineStyle: { color: subColor, width: 1.5, type: 'dotted', opacity: 0.7 }
+          });
+        });
+        (e.sub_procedure || []).forEach(function(sp) {
+          pushUniqueNode(nodes, {
+            name: sp.name, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
+            category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 1.5,
+            symbolSize: 26, itemStyle: { color: '#f06595' },
+            label: { show: true, fontSize: 9, color: '#e8eaf0' }
+          });
+          pushUniqueLink(links, {
+            source: e.name, target: sp.name, value: 'includes_procedure',
+            lineStyle: { color: '#f06595', width: 1.5, type: 'dotted', opacity: 0.7 }
+          });
+        });
+      }
+
+      /* 1.5-hop: Medication类别 → sub_medication (具体药物) */
+      if (k === 'Medication' && e.sub_medication) {
+        var medSubColor = '#ff922b';
+        (e.sub_medication || []).forEach(function(sm) {
+          pushUniqueNode(nodes, {
+            name: sm.name, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
+            category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
+            symbolSize: 22, itemStyle: { color: medSubColor, opacity: 0.75 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: e.name, target: sm.name, value: 'has_specific_medication',
+            lineStyle: { color: medSubColor, width: 1, type: 'dotted', opacity: 0.5 }
+          });
+        });
+      }
     });
   });
 
@@ -1089,6 +1151,23 @@ function collapseGuide(e) {
   if (GRAPH_CHART) setTimeout(function() { GRAPH_CHART.resize(); }, 320);
 }
 
+function renderDataSourceBar(d) {
+  var el = document.getElementById('nw-datasource');
+  if (!el) return;
+  var ds = d.data_source || {};
+  var st = d.stats || {};
+  var parts = [];
+  parts.push('<span class="ds-label">数据源</span> ' + (ds.type || 'JSON快照'));
+  if (ds.export_time) parts.push('<span class="ds-sep">|</span> 导出: <span class="ds-val">' + ds.export_time + '</span>');
+  parts.push('<span class="ds-sep">|</span> 疾病: <span class="ds-val">' + (st.disease_count || 0) + '</span>');
+  parts.push('<span class="ds-sep">|</span> 节点: <span class="ds-val">' + (st.total_nodes || 0) + '</span>');
+  parts.push('<span class="ds-sep">|</span> 关系: <span class="ds-val">' + (st.total_relationships || 0) + '</span>');
+  if (st.shell_entity_count !== undefined) {
+    parts.push('<span class="ds-sep">|</span> 空壳实体: <span class="ds-val">' + st.shell_entity_count + '</span>');
+  }
+  el.innerHTML = parts.join(' ');
+}
+
 /* ================================================================
    Reset Graph
    ================================================================ */
@@ -1227,6 +1306,39 @@ function showEntityDetailPanel(name, nd) {
   h += detailRow('关联疾病', assocDiseases.length + ' 种');
   h += detailRow('所属维度', dimLabel);
   h += '</div>';
+
+  /* Show sub_medication / sub_procedure for TreatmentPlan and Medication nodes */
+  var subMeds = [], subProcs = [];
+  assocDiseases.forEach(function(dc) {
+    var d = KG_DATA.diseases[dc];
+    (d.dimensions.TreatmentPlan || []).forEach(function(tp) {
+      if (tp.name === name) {
+        (tp.sub_medication || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
+        (tp.sub_procedure || []).forEach(function(p) { if (!subProcs.some(function(x){return x.name===p.name})) subProcs.push(p); });
+      }
+    });
+    (d.dimensions.Medication || []).forEach(function(med) {
+      if (med.name === name) {
+        (med.sub_medication || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
+      }
+    });
+  });
+  if (subMeds.length > 0) {
+    h += '<div class="nw-detail-section"><h4>包含药物</h4>';
+    h += '<div class="nw-related-list">';
+    subMeds.forEach(function(m) {
+      h += '<div class="nw-related-item"><span class="ri-dot" style="background:#ff922b"></span><span>' + m.name + '</span></div>';
+    });
+    h += '</div></div>';
+  }
+  if (subProcs.length > 0) {
+    h += '<div class="nw-detail-section"><h4>包含操作</h4>';
+    h += '<div class="nw-related-list">';
+    subProcs.forEach(function(p) {
+      h += '<div class="nw-related-item"><span class="ri-dot" style="background:#f06595"></span><span>' + p.name + '</span></div>';
+    });
+    h += '</div></div>';
+  }
 
   /* Associated disease dimension breakdown */
   if (assocDiseases.length > 0) {

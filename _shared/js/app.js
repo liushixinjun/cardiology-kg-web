@@ -75,7 +75,7 @@ function renderFooter() {
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.1.4</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">v1.2.0</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
   
   // 检查弹窗是否已存在，不存在则创建
   if (!document.getElementById('changelog-modal')) {
@@ -101,7 +101,14 @@ function hideChangelog() {
 
 function renderChangelog() {
   var list = [
-    { v: 'v1.1.3', date: '2026-06-26', items: [
+    { v: 'v1.2.0', date: '2026-06-27', items: [
+      '重新从 Neo4j 导出最新数据快照，修复旧静态数据导致的空壳实体问题',
+      '图谱展示支持二跳展开：TreatmentPlan→includes_medication/includes_procedure，Medication→has_specific_medication',
+      '自动过滤空壳实体名（鉴别诊断/诊断标准/危险分层/预后良好/预后不良等）',
+      '页面底部新增数据源信息栏：导出时间、节点数、关系数、空壳实体数',
+      '节点去重改为按 code 去重'
+    ]},
+    { v: 'v1.1.4', date: '2026-06-27', items: [
       '修复网络探索图谱空白/空数据问题，节点与关系构建改为去重后再渲染',
       '优化力导向图布局参数，默认图谱进入页面即可散开显示',
       '右侧详情默认保持图谱概览，避免鼠标移出后回到空状态'
