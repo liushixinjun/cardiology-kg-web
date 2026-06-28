@@ -86,6 +86,19 @@
 
 ---
 
+## #008 — 页面滚动条异常：左侧树和主内容区一起滚动
+
+**日期**：2026-06-28  
+**现象**：疾病视角底部内容无法下拉展示全部；滚动时左侧疾病树和主内容区一起滚动  
+**根因**：`html, body` 从 shared CSS 继承了 `overflow: hidden`；`.ex-layout` 也设了 `overflow: hidden`，导致 `.ex-main` 的 `overflow: auto` 被上层覆盖  
+**修复**：  
+1. 显式设置 `html, body { height: 100%; overflow: hidden }` 覆盖 shared CSS  
+2. `.ex-main` 改为 `overflow-y: auto; overflow-x: hidden`  
+3. `.ex-left` 加 `overflow: hidden`，让 `.ex-tree` 的 `flex:1; overflow:auto` 独立滚动  
+**教训**：**三栏布局必须确保每栏独立滚动，不能让 overflow 从父级泄漏**
+
+---
+
 ## 通用教训总结
 
 1. **先分析再修复**：遇到 bug 先用控制台验证，找到确切根因再改代码
@@ -95,3 +108,4 @@
 5. **记录踩坑**：每次犯错必须记录，防止重复犯错
 6. **版本管理**：每次修复后及时 commit + push，不要积累大量修改
 7. **早期返回要谨慎**：`renderCurrent()` 中的 early return 导致实体视角忽略疾病切换，所有视角都要响应全局状态
+8. **三栏布局独立滚动**：overflow 会从父级泄漏，必须显式隔离每栏的滚动容器

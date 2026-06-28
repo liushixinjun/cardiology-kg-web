@@ -7,10 +7,11 @@
 <title>专科知识图谱 · 心血管内科 - 图谱探索</title>
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
+html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-layout{display:grid;grid-template-columns:300px 1fr 360px;height:calc(100vh - 48px);overflow:hidden}
-.ex-left{background:var(--bg2);border-right:1px solid var(--rule);display:flex;flex-direction:column;min-width:0}
-.ex-main{overflow:auto;padding:22px;background:var(--bg)}
-.ex-right{background:var(--bg2);border-left:1px solid var(--rule);overflow:auto;padding:18px}
+.ex-left{background:var(--bg2);border-right:1px solid var(--rule);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ex-main{overflow-y:auto;overflow-x:hidden;padding:22px;background:var(--bg)}
+.ex-right{background:var(--bg2);border-left:1px solid var(--rule);overflow-y:auto;overflow-x:hidden;padding:18px}
 .ex-search{padding:12px;border-bottom:1px solid var(--rule)}
 .ex-search input{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}
 .ex-search input:focus{border-color:var(--accent)}
