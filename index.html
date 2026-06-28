@@ -88,7 +88,21 @@
 <script src="./_shared/js/app.js"></script>
 <script>
 var GROUP_ORDER=['心力衰竭','心律失常','冠心病','心肌病','瓣膜性心脏病','心包疾病','高血压','先天性心脏病','感染性心内膜炎','心脏骤停/猝死','主动脉/外周血管','心脏神经症'];
-loadData(function(){renderNav('index');renderDashboard();});
+loadData(function(d){
+  renderNav('index');
+  // 批量获取所有疾病的完整维度数据
+  var codes = Object.keys(d.diseases);
+  var loaded = 0;
+  var total = codes.length;
+  codes.forEach(function(code) {
+    loadDiseaseData(code, function() {
+      loaded++;
+      if (loaded === total) {
+        renderDashboard();
+      }
+    });
+  });
+});
 function buildGroupStats(){var ds=KG_DATA.diseases,groups={};Object.keys(ds).forEach(function(code){var info=ds[code].info,p=parseParentCode(info.parent);if(!groups[p.group])groups[p.group]={count:0,cov:[],diseases:[]};groups[p.group].count++;groups[p.group].cov.push(getCoverage(code));groups[p.group].diseases.push(info.name);});return groups;}
 function avg(arr){return arr.length?Math.round(arr.reduce(function(a,b){return a+b},0)/arr.length):0;}
 function renderDashboard(){var s=KG_DATA.stats,groups=buildGroupStats(),groupNames=Object.keys(groups);document.getElementById('k-disease').textContent=s.disease_count;document.getElementById('k-group').textContent=groupNames.length;document.getElementById('k-node').textContent=s.total_nodes.toLocaleString();document.getElementById('k-rel').textContent=s.total_relationships.toLocaleString();document.getElementById('pathway').innerHTML='<span class="path-node">专科<br><strong>心血管内科</strong></span><span class="path-arrow">→</span><span class="path-node">疾病大类<br><strong>'+groupNames.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">专病<br><strong>'+s.disease_count+'</strong></span><span class="path-arrow">→</span><span class="path-node">知识维度<br><strong>'+DIM_KEYS.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">证据链<br><strong>'+((s.entity_types&&s.entity_types.Evidence)||0).toLocaleString()+'</strong></span>';renderCategoryList(groups);renderAssetChart(s);renderDimChart();renderGapList();}

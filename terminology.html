@@ -1017,11 +1017,23 @@ document.getElementById('term-search').addEventListener('input', function(e) {
 /* ============ Init ============ */
 loadData(function(d) {
   KG_DISEASES = d.diseases;
-  buildTermIndex(d);
   renderNav('terminology');
-  renderHeroStats();
-  renderDimList();
-  selectDim('Symptom');
+  // 批量获取所有疾病的完整维度数据
+  var codes = Object.keys(d.diseases);
+  var loaded = 0;
+  var total = codes.length;
+  document.getElementById('hs-total').textContent = '加载中...';
+  codes.forEach(function(code) {
+    loadDiseaseData(code, function() {
+      loaded++;
+      if (loaded === total) {
+        buildTermIndex(d);
+        renderHeroStats();
+        renderDimList();
+        selectDim('Symptom');
+      }
+    });
+  });
 });
 </script>
 </body>

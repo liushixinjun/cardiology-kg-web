@@ -214,6 +214,42 @@ function drawGraph(code){
     });
   });
   GRAPH.setOption({tooltip:{show:true},series:[{type:'graph',layout:'force',data:nodes,links:links,roam:true,label:{show:true,fontSize:9,color:'#e8eaf0'},force:{repulsion:200,gravity:.08,edgeLength:[50,160],friction:.6}}]});
+  // 点击节点展开关联内容
+  GRAPH.on('click',function(p){
+    if(p.dataType==='node'){
+      var name=p.data.name;
+      // 查找分组节点，展开该组下所有维度的全部实体
+      var grp=cGroups.find(function(g){return g.name===name;});
+      if(grp){
+        grp.dims.forEach(function(k){
+          var it=d.dimensions[k]||[];
+          it.forEach(function(e){
+            if(!seen[e.name]){
+              nodes.push({name:e.name,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              seen[e.name]=1;
+              links.push({source:name,target:e.name,lineStyle:{color:grp.color+'44',width:1,opacity:.3}});
+            }
+          });
+        });
+        GRAPH.setOption({series:[{data:nodes,links:links}]});
+      }
+      // 查找维度节点，展开该维度所有实体
+      else{
+        var dimKey=Object.keys(DIM_NAMES).find(function(k){return DIM_NAMES[k]===name;});
+        if(dimKey && d.dimensions[dimKey]){
+          var grpColor=cGroups.find(function(g){return g.dims.indexOf(dimKey)!==-1;})?.color||'#ff922b';
+          d.dimensions[dimKey].forEach(function(e){
+            if(!seen[e.name]){
+              nodes.push({name:e.name,symbolSize:13,itemStyle:{color:grpColor+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              seen[e.name]=1;
+              links.push({source:name,target:e.name,lineStyle:{color:grpColor+'44',width:1,opacity:.3}});
+            }
+          });
+          GRAPH.setOption({series:[{data:nodes,links:links}]});
+        }
+      }
+    }
+  });
 }
 function buildEntityIndexAsync(){
   fetch('/api/kg/diseases/summary').then(function(r){return r.json()}).then(function(data){
@@ -230,8 +266,8 @@ function buildEntityIndexAsync(){
     if(CURRENT_VIEW==='entity') filterEntities();
   }).catch(function(e){console.error('Entity index load failed:',e);});
 }
-function renderEntityView(){var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
-function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim);}).slice(0,500);var html=rows.map(function(e){return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
+function renderEntityView(){var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select><select id="entity-disease" onchange="filterEntities()"><option value="">全部疾病</option>'+Object.keys(KG_DATA.diseases).map(function(code){return '<option value="'+code+'">'+KG_DATA.diseases[code].info.name+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
+function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var diseaseCode=(document.getElementById('entity-disease')?document.getElementById('entity-disease').value:'');var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim)&&(!diseaseCode||e.diseaseCode===diseaseCode);}).slice(0,500);var html=rows.map(function(e){return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
 function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['完整率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}
 function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+e.name+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
 function showEntityDetail(dc,k,ec){var d=KG_DATA.diseases[dc],it=d.dimensions[k]||[],en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];if(!en)return;var h='<div class="ex-side-title">'+en.name+'</div><div class="ex-side-code">'+(en.code||'无编码')+'</div>';[['实体类型',DIM_NAMES[k]+' / '+k],['关联疾病',d.info.name],['疾病编码',d.info.code],['同维度实体数',it.length+' 个'],['疾病证据数',(d.evidence_count||0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});if(rs.length){h+='<div class="ex-side-section"><h4>关联关系</h4>';rs.forEach(function(r){h+='<div class="ex-small-item">'+r.rel+' → '+r.name+'</div>';});h+='</div>';}h+='<div class="ex-side-section"><h4>同维度其他实体</h4>';it.slice(0,20).forEach(function(e){if(e.name!==en.name)h+='<div class="ex-small-item">'+e.name+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
