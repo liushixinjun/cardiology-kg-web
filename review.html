@@ -492,6 +492,14 @@ function renderDiseasePanel(items) {
   var batches = {};
   items.forEach(function(r) { batches[r.batch_id] = 1; });
 
+  /* 按疾病分组场景卡 */
+  var scenarioByDisease = {};
+  (REVIEW_DATA ? REVIEW_DATA.scenario_cards : []).forEach(function(sc) {
+    var key = sc.disease_code + '|' + sc.batch_id;
+    if (!scenarioByDisease[key]) scenarioByDisease[key] = [];
+    scenarioByDisease[key].push(sc);
+  });
+
   /* 筛选栏 */
   var h = '<div class="rv-filters">';
   h += '<select id="disease-batch-filter" onchange="filterDiseases()"><option value="">全部批次</option>';
@@ -502,13 +510,12 @@ function renderDiseasePanel(items) {
   h += '</div>';
 
   /* 疾病卡片网格 */
-  h += '<div id="disease-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:14px">';
+  h += '<div id="disease-cards" style="display:grid;grid-template-columns:1fr;gap:14px">';
   items.forEach(function(r) {
     var rid = r.review_id;
     var pending = parseInt(r.pending_recommendation_count) || 0;
     var scenarios = parseInt(r.scenario_card_count) || 0;
     var totalItems = pending + scenarios;
-    /* 计算进度：基于已有决策 */
     var d = REVIEW_DECISIONS[rid] || {};
     var progress = 0;
     if (d.clinical_use_decision) progress += 40;
@@ -517,6 +524,10 @@ function renderDiseasePanel(items) {
     if (d.reviewer_role) progress += 10;
     if (d.expert_comment) progress += 15;
     var progressColor = progress === 0 ? 'var(--bg4)' : progress < 60 ? 'var(--yellow)' : progress < 100 ? 'var(--accent)' : 'var(--green)';
+
+    /* 该疾病对应的场景卡 */
+    var sceneKey = r.disease_code + '|' + r.batch_id;
+    var relatedScenarios = scenarioByDisease[sceneKey] || [];
 
     h += '<div class="rv-card rv-disease-card" data-batch="' + r.batch_id + '" data-name="' + r.disease_name + '" data-code="' + r.disease_code + '">';
 
@@ -591,6 +602,65 @@ function renderDiseasePanel(items) {
     /* 进度条 */
     h += '<div class="rv-progress-bar"><div class="rv-progress-track"><div class="rv-progress-fill" style="width:' + progress + '%;background:' + progressColor + '"></div></div></div>';
 
+    /* 展开场景详情按钮 */
+    if (relatedScenarios.length > 0) {
+      h += '<div style="margin-top:10px">';
+      h += '<button class="rv-expand-btn" onclick="toggleDiseaseScenarios(\'' + sceneKey + '\',this)">&#128203; 查看该疾病的所有场景详情 (' + relatedScenarios.length + ')</button>';
+      h += '<div class="rv-disease-scenarios" id="scenarios-' + sceneKey.replace('|','-') + '" style="display:none;margin-top:12px">';
+      relatedScenarios.forEach(function(sc) {
+        var srid = sc.review_id;
+        var samples = (sc.sample_targets || '').split(/[；;]/).filter(function(s) { return s.trim(); });
+        var missing = (sc.missing_field_summary || '').split(/[；;]/).filter(function(s) { return s.trim(); });
+        var color = badgeColor(sc.scenario_type);
+        var relLabel = RELATION_LABELS[sc.relation_type] || sc.relation_type;
+        var tgtLabel = TARGET_TYPE_LABELS[sc.target_type] || sc.target_type;
+        var sd = REVIEW_DECISIONS[srid] || {};
+
+        h += '<div style="background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:14px;margin-bottom:10px">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+        h += '<div><span class="rv-badge rv-badge-' + color + '">' + sc.scenario_type + '</span> <span style="font-size:13px;color:var(--muted);margin-left:6px">' + relLabel + ' → ' + tgtLabel + '</span></div>';
+        h += '<span class="rv-badge rv-badge-pending">' + sc.pending_item_count + ' 项待审</span>';
+        h += '</div>';
+
+        /* 视觉关系链 */
+        h += '<div class="rv-flow" style="margin-bottom:8px">';
+        h += '<div class="rv-flow-node rv-flow-disease">' + sc.disease_name + '</div>';
+        h += '<div class="rv-flow-arrow"><svg viewBox="0 0 28 14"><line x1="0" y1="7" x2="22" y2="7" stroke="currentColor" stroke-width="2"/><polygon points="22,3 28,7 22,11" fill="currentColor"/></svg></div>';
+        h += '<div class="rv-flow-node rv-flow-relation">' + relLabel + '</div>';
+        h += '<div class="rv-flow-arrow"><svg viewBox="0 0 28 14"><line x1="0" y1="7" x2="22" y2="7" stroke="currentColor" stroke-width="2"/><polygon points="22,3 28,7 22,11" fill="currentColor"/></svg></div>';
+        h += '<div class="rv-flow-node rv-flow-target">' + tgtLabel + '</div>';
+        h += '</div>';
+
+        if (samples.length) {
+          h += '<div style="margin-bottom:6px"><span style="font-size:12px;color:var(--muted);font-weight:700">样本目标:</span> ';
+          samples.forEach(function(s) { h += '<span class="rv-chip rv-chip-target">' + s.trim() + '</span>'; });
+          h += '</div>';
+        }
+        if (missing.length) {
+          h += '<div style="margin-bottom:6px"><span style="font-size:12px;color:var(--accent2);font-weight:700">&#9888; 缺失字段:</span> ';
+          missing.forEach(function(m) { h += '<span class="rv-chip rv-chip-missing">' + m.trim() + '</span>'; });
+          h += '</div>';
+        }
+        if (sc.review_focus) {
+          h += '<div class="rv-focus-box" style="font-size:12px;padding:6px 10px;margin-top:4px">&#127919; ' + sc.review_focus + '</div>';
+        }
+
+        /* 场景级决策 */
+        h += '<div class="rv-scene-decision" style="margin-top:8px">';
+        h += '<div class="rv-toggle-group">';
+        decisions.forEach(function(dec) {
+          var cls = sd.clinical_use_decision === dec ? dColors[dec] : '';
+          h += '<button class="rv-toggle-btn ' + cls + '" style="font-size:12px;padding:4px 10px" onclick="setScenarioDecision(\'' + srid + '\',\'clinical_use_decision\',\'' + dec + '\',this)">' + dec + '</button>';
+        });
+        h += '</div>';
+        h += '<textarea class="rv-comment" style="flex:1;min-width:180px;font-size:12px;min-height:32px" placeholder="专家意见" onchange="setDecision(\'' + srid + '\',\'expert_comment\',this.value)">' + (sd.expert_comment || '') + '</textarea>';
+        h += '</div>';
+
+        h += '</div>'; /* 场景卡结束 */
+      });
+      h += '</div></div>';
+    }
+
     h += '</div>'; /* card end */
   });
   h += '</div>';
@@ -645,6 +715,19 @@ function filterDiseases() {
 function updateDiseaseCount(n) {
   var el = document.getElementById('disease-count');
   if (el) el.textContent = '显示 ' + (n !== undefined ? n : document.querySelectorAll('#disease-cards .rv-disease-card').length) + ' / ' + (REVIEW_DATA ? REVIEW_DATA.disease_reviews.length : 0);
+}
+
+function toggleDiseaseScenarios(key, btn) {
+  var el = document.getElementById('scenarios-' + key.replace('|','-'));
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    btn.innerHTML = '&#128315; 收起场景详情';
+  } else {
+    el.style.display = 'none';
+    var count = el.querySelectorAll('[style*="background:var(--bg3)"]').length || el.children.length;
+    btn.innerHTML = '&#128203; 查看该疾病的所有场景详情 (' + count + ')';
+  }
 }
 
 /* ========== Tab 2: 场景级推荐审核 ========== */
