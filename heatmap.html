@@ -53,7 +53,21 @@
 <script src="./_shared/js/app.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script>
-loadData(function(d){renderNav('heatmap');renderHeatmap(d);});
+loadData(function(d){
+  renderNav('heatmap');
+  // 批量加载所有疾病的完整维度数据
+  var codes = Object.keys(d.diseases);
+  var loaded = 0;
+  var total = codes.length;
+  codes.forEach(function(code) {
+    loadDiseaseData(code, function() {
+      loaded++;
+      if (loaded === total) {
+        renderHeatmap(d);
+      }
+    });
+  });
+});
 function renderHeatmap(d){
   var container=document.getElementById('heatmap-chart');
   var chart=echarts.init(container,null,{renderer:'canvas'});
