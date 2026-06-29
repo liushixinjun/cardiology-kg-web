@@ -100,6 +100,7 @@ function renderNav(activePage) {
     {id:'network',label:'网络探索',icon:'🕸️'},
     {id:'heatmap',label:'数据覆盖分析',icon:'🗺️'},
     {id:'diagnosis',label:'临床诊断模拟',icon:'🔍'},
+    {id:'review',label:'临床审核',icon:'✅'},
     {id:'schema',label:'图谱数据字典',icon:'📐'},
     {id:'standard',label:'Schema标准',icon:'📘'},
     {id:'terminology',label:'医学术语库',icon:'🧬'}

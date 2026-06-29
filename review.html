@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>临床审核 - 专科知识图谱</title>
+<link rel="stylesheet" href="./_shared/css/style.css">
+<style>
+/* Page layout */
+html, body { height: 100%; overflow: hidden; margin: 0; }
+.rv-layout { display: flex; flex-direction: column; height: calc(100vh - 48px); overflow: hidden; }
+.rv-header { flex-shrink: 0; padding: 18px 24px 0; }
+.rv-kpi-bar { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+.rv-kpi { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 160px; }
+.rv-kpi .num { font-size: 28px; font-weight: 800; color: var(--accent); }
+.rv-kpi .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.rv-warning { background: rgba(255,210,59,.08); border: 1px solid rgba(255,210,59,.3); border-radius: 8px; padding: 10px 16px; font-size: 12px; color: var(--yellow); margin-bottom: 12px; }
+/* Tabs */
+.rv-tabs { display: flex; background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.rv-tab { flex: 1; padding: 12px 14px; text-align: center; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 700; border-bottom: 2px solid transparent; transition: all .15s; }
+.rv-tab:hover { background: var(--bg3); color: var(--ink); }
+.rv-tab.active { color: var(--accent); background: var(--bg3); border-bottom-color: var(--accent); }
+/* Content area */
+.rv-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px; }
+.rv-content::-webkit-scrollbar { width: 6px; }
+.rv-content::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+.rv-content::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.rv-panel { display: none; }
+.rv-panel.active { display: block; }
+/* Filter bar */
+.rv-filters { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.rv-filters select, .rv-filters input { padding: 8px 12px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; color: var(--ink); font-size: 12px; outline: none; }
+.rv-filters select:focus, .rv-filters input:focus { border-color: var(--accent); }
+/* Table */
+.rv-table-wrap { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; overflow: auto; max-height: calc(100vh - 320px); }
+.rv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rv-table th { position: sticky; top: 0; background: var(--bg3); padding: 10px 12px; text-align: left; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; z-index: 1; white-space: nowrap; }
+.rv-table td { padding: 9px 12px; border-top: 1px solid var(--rule); vertical-align: top; }
+.rv-table tr:hover td { background: rgba(79,140,255,.04); }
+/* Decision selects */
+.rv-decision { padding: 6px 10px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 6px; color: var(--ink); font-size: 12px; outline: none; cursor: pointer; }
+.rv-decision:focus { border-color: var(--accent); }
+/* Comment textarea */
+.rv-comment { width: 100%; min-height: 60px; padding: 8px 10px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 6px; color: var(--ink); font-size: 12px; resize: vertical; outline: none; font-family: inherit; }
+.rv-comment:focus { border-color: var(--accent); }
+.rv-comment.required { border-color: var(--accent2); }
+/* Badges */
+.rv-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+.rv-badge.pending { background: rgba(255,210,59,.15); color: var(--yellow); }
+.rv-badge.done { background: rgba(81,207,102,.15); color: var(--green); }
+.rv-badge.risk-high { background: rgba(255,107,107,.15); color: var(--accent2); }
+.rv-badge.risk-low { background: rgba(81,207,102,.15); color: var(--green); }
+/* Cards for scenario tab */
+.rv-card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.rv-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.rv-card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+.rv-card-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.rv-card-fields { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.rv-card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rv-card-actions select { max-width: 140px; }
+.rv-card-actions textarea { flex: 1; min-width: 200px; }
+/* Expand panel for detail items */
+.rv-expand { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule); }
+.rv-expand-title { font-size: 11px; font-weight: 700; color: var(--accent); cursor: pointer; margin-bottom: 6px; }
+.rv-expand-title:hover { text-decoration: underline; }
+/* Export button */
+.rv-export-btn { position: fixed; bottom: 24px; right: 24px; z-index: 100; padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(79,140,255,.4); transition: all .15s; }
+.rv-export-btn:hover { opacity: .9; transform: translateY(-1px); }
+/* Progress indicator */
+.rv-progress { display: flex; gap: 4px; align-items: center; }
+.rv-progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+.rv-progress-dot.done { background: var(--green); }
+/* Responsive */
+@media(max-width:900px) { .rv-kpi-bar { flex-direction: column; } .rv-filters { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="nav"></div>
+<div class="rv-layout">
+  <div class="rv-header">
+    <h1 style="font-size:22px;font-weight:800;margin:0">✅ 临床审核</h1>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">专家按疾病/场景/药师专项审核，Codex 回写验收的闭环流程</p>
+    <div class="rv-kpi-bar" id="rv-kpi"></div>
+    <div class="rv-warning">⚠ 当前允许状态：测试库工作版本，不得正式 CDSS 上线。所有审核决策仅用于图谱质量改进，不直接标记为 clinical_approved。</div>
+    <div class="rv-tabs" id="rv-tabs">
+      <div class="rv-tab active" data-tab="disease" onclick="switchTab('disease')">🏥 疾病级审核</div>
+      <div class="rv-tab" data-tab="scenario" onclick="switchTab('scenario')">📋 场景级推荐审核</div>
+      <div class="rv-tab" data-tab="pharmacist" onclick="switchTab('pharmacist')">💊 药师专项审核</div>
+      <div class="rv-tab" data-tab="detail" onclick="switchTab('detail')">🔍 边级证据追溯</div>
+    </div>
+  </div>
+  <div class="rv-content">
+    <div class="rv-panel active" id="panel-disease"></div>
+    <div class="rv-panel" id="panel-scenario"></div>
+    <div class="rv-panel" id="panel-pharmacist"></div>
+    <div class="rv-panel" id="panel-detail"></div>
+  </div>
+</div>
+<button class="rv-export-btn" onclick="exportDecisions()">📥 导出审核结果</button>
+<script src="./_shared/js/app.js"></script>
+<script src="./_shared/js/review.js"></script>
+</body>
+</html>
