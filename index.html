@@ -105,9 +105,48 @@ loadData(function(d){
 });
 function buildGroupStats(){var ds=KG_DATA.diseases,groups={};Object.keys(ds).forEach(function(code){var info=ds[code].info,p=parseParentCode(info.parent);if(!groups[p.group])groups[p.group]={count:0,cov:[],diseases:[]};groups[p.group].count++;groups[p.group].cov.push(getCoverage(code));groups[p.group].diseases.push(info.name);});return groups;}
 function avg(arr){return arr.length?Math.round(arr.reduce(function(a,b){return a+b},0)/arr.length):0;}
-function renderDashboard(){var s=KG_DATA.stats,groups=buildGroupStats(),groupNames=Object.keys(groups);document.getElementById('k-disease').textContent=s.disease_count;document.getElementById('k-group').textContent=groupNames.length;document.getElementById('k-node').textContent=s.total_nodes.toLocaleString();document.getElementById('k-rel').textContent=s.total_relationships.toLocaleString();document.getElementById('pathway').innerHTML='<span class="path-node">专科<br><strong>心血管内科</strong></span><span class="path-arrow">→</span><span class="path-node">疾病大类<br><strong>'+groupNames.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">专病<br><strong>'+s.disease_count+'</strong></span><span class="path-arrow">→</span><span class="path-node">知识维度<br><strong>'+DIM_KEYS.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">证据链<br><strong>'+((s.entity_types&&s.entity_types.Evidence)||0).toLocaleString()+'</strong></span>';renderCategoryList(groups);renderAssetChart(s);renderDimChart();renderGapList();}
+/* 从疾病维度数据动态统计各维度实体数量 */
+function buildDimEntityCounts(){
+  var ds=KG_DATA.diseases,cnt={};
+  DIM_KEYS.forEach(function(k){cnt[k]=0});
+  Object.keys(ds).forEach(function(code){
+    DIM_KEYS.forEach(function(k){var it=ds[code].dimensions[k]||[];cnt[k]+=it.length});
+  });
+  return cnt;
+}
+function renderDashboard(){
+  var s=KG_DATA.stats,groups=buildGroupStats(),groupNames=Object.keys(groups);
+  var dimCounts=buildDimEntityCounts();
+  var totalDimEntities=0;DIM_KEYS.forEach(function(k){totalDimEntities+=dimCounts[k]});
+  document.getElementById('k-disease').textContent=s.disease_count;
+  document.getElementById('k-group').textContent=groupNames.length;
+  document.getElementById('k-node').textContent=totalDimEntities.toLocaleString();
+  document.getElementById('k-rel').textContent=s.total_relationships.toLocaleString();
+  document.getElementById('pathway').innerHTML='<span class="path-node">专科<br><strong>心血管内科</strong></span><span class="path-arrow">→</span><span class="path-node">疾病大类<br><strong>'+groupNames.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">专病<br><strong>'+s.disease_count+'</strong></span><span class="path-arrow">→</span><span class="path-node">知识维度<br><strong>'+DIM_KEYS.length+'</strong></span><span class="path-arrow">→</span><span class="path-node">实体总量<br><strong>'+totalDimEntities.toLocaleString()+'</strong></span>';
+  renderCategoryList(groups);
+  renderAssetChart(dimCounts);
+  renderDimChart();
+  renderGapList();
+}
 function renderCategoryList(groups){var html='';GROUP_ORDER.forEach(function(g){if(!groups[g])return;var c=avg(groups[g].cov),color=c>=80?'#51cf66':c>=60?'#4f8cff':c>=40?'#ffd43b':'#ff6b6b';html+='<a class="cat-card" href="explore.html"><div class="cat-head"><span class="cat-name">'+(GROUP_ICONS[g]||'📁')+' '+g+'</span><span class="cat-count">'+groups[g].count+'种</span></div><div class="cat-bar"><div class="cat-fill" style="width:'+c+'%;background:'+color+'"></div></div><div class="cat-meta">17维度平均完整率 '+c+'%</div></a>';});document.getElementById('category-list').innerHTML=html;}
-function renderAssetChart(s){var ch=echarts.init(document.getElementById('chart-specialty'),null,{renderer:'svg'});var et=s.entity_types||{};var keys=['Disease','Symptom','Sign','Exam','LabTest','Medication','Procedure','TreatmentPlan','DiagnosisCriteria','RiskFactor','Complication','DifferentialDiagnosis','FollowUp','Prognosis'];var data=keys.map(function(k){return {name:k==='Disease'?'疾病':(DIM_NAMES[k]||k),value:et[k]||0};}).filter(function(x){return x.value>0});ch.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},grid:{top:10,bottom:70,left:60,right:18},xAxis:{type:'category',data:data.map(function(x){return x.name}),axisLabel:{rotate:45,fontSize:10,color:'#8b90a0'}},yAxis:{type:'value',axisLabel:{fontSize:10,color:'#8b90a0'}},series:[{name:'实体数量',type:'bar',data:data.map(function(x){return x.value}),itemStyle:{color:'#4f8cff'},barMaxWidth:24}]});window.addEventListener('resize',function(){ch.resize()});}
+function renderAssetChart(dimCnt){
+  var ch=echarts.init(document.getElementById('chart-specialty'),null,{renderer:'svg'});
+  /* 只取有数据的维度，排除 Etiology/Pathophysiology/Epidemiology（较稀疏） */
+  var exclude=['Etiology','Pathophysiology','Epidemiology'];
+  var data=DIM_KEYS.filter(function(k){return exclude.indexOf(k)===-1&&(dimCnt[k]||0)>0})
+    .map(function(k){return {name:DIM_NAMES[k]||k,value:dimCnt[k]||0}})
+    .sort(function(a,b){return b.value-a.value});
+  ch.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    grid:{top:10,bottom:70,left:60,right:18},
+    xAxis:{type:'category',data:data.map(function(x){return x.name}),axisLabel:{rotate:45,fontSize:10,color:'#8b90a0'}},
+    yAxis:{type:'value',axisLabel:{fontSize:10,color:'#8b90a0'}},
+    series:[{name:'实体数量',type:'bar',data:data.map(function(x){return x.value}),
+      itemStyle:{color:function(p){var v=p.value;return v>300?'#4f8cff':v>100?'#74c0fc':v>30?'#a5d8ff':'#dbe4ff'}},
+      barMaxWidth:28}]
+  });
+  window.addEventListener('resize',function(){ch.resize()});
+}
 function renderDimChart(){var ch=echarts.init(document.getElementById('chart-dim'),null,{renderer:'svg'});var ds=KG_DATA.diseases,totals={},filled={};DIM_KEYS.forEach(function(k){totals[k]=0;filled[k]=0});Object.keys(ds).forEach(function(code){DIM_KEYS.forEach(function(k){var it=ds[code].dimensions[k]||[];totals[k]+=it.length;if(it.length>0)filled[k]++;});});ch.setOption({tooltip:{trigger:'axis',formatter:function(ps){var p=ps[0],k=DIM_KEYS[p.dataIndex];return DIM_NAMES[k]+'<br/>有数据疾病：'+filled[k]+'/'+Object.keys(ds).length+'<br/>实体总量：'+totals[k];}},grid:{top:10,bottom:70,left:48,right:18},xAxis:{type:'category',data:DIM_KEYS.map(function(k){return DIM_NAMES[k]}),axisLabel:{rotate:45,fontSize:10,color:'#8b90a0'}},yAxis:{type:'value',max:Object.keys(ds).length,axisLabel:{fontSize:10,color:'#8b90a0'}},series:[{name:'有数据疾病数',type:'bar',data:DIM_KEYS.map(function(k){return filled[k]}),itemStyle:{color:function(p){var v=p.value/Object.keys(ds).length;return v>=.8?'#51cf66':v>=.6?'#4f8cff':v>=.4?'#ffd43b':'#ff6b6b'}},barMaxWidth:24}]});window.addEventListener('resize',function(){ch.resize()});}
 function renderGapList(){var ds=KG_DATA.diseases,total=Object.keys(ds).length,missing={};DIM_KEYS.forEach(function(k){missing[k]=0});Object.keys(ds).forEach(function(code){DIM_KEYS.forEach(function(k){if(!(ds[code].dimensions[k]||[]).length)missing[k]++;});});var focus=['Epidemiology','RiskStratification','FollowUp','Medication','TreatmentPlan','DifferentialDiagnosis'];var html='';focus.forEach(function(k){var m=missing[k]||0;html+='<div class="gap-item"><div class="gap-title">'+DIM_NAMES[k]+'</div><div class="gap-num">'+m+'</div><div class="gap-text">'+total+'种专病中仍有 '+m+' 种缺少该维度数据</div></div>';});document.getElementById('gap-list').innerHTML=html;}
 </script>
