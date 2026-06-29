@@ -8,13 +8,18 @@
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
 .hm-container{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:24px}
-.hm-title{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.hm-title-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.hm-title{font-size:18px;font-weight:700;color:var(--ink)}
+.hm-help-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--rule);background:var(--bg3);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.hm-help-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,140,255,.08)}
 .hm-subtitle{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7}
-.hm-how{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px;margin-bottom:20px}
-.hm-how h3{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px}
-.hm-how ul{list-style:none;padding:0;margin:0}
-.hm-how li{font-size:12px;color:var(--muted);line-height:1.7;padding:4px 0;display:flex;align-items:flex-start;gap:8px}
-.hm-how li::before{content:'●';color:var(--accent);font-size:8px;margin-top:6px;flex-shrink:0}
+.hm-help-panel{display:none;background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px;margin-bottom:18px;animation:hmFadeIn .2s ease}
+.hm-help-panel.show{display:block}
+@keyframes hmFadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.hm-help-panel h3{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px}
+.hm-help-panel ul{list-style:none;padding:0;margin:0}
+.hm-help-panel li{font-size:13px;color:var(--muted);line-height:1.7;padding:4px 0;display:flex;align-items:flex-start;gap:8px}
+.hm-help-panel li::before{content:'●';color:var(--accent);font-size:8px;margin-top:6px;flex-shrink:0}
 #heatmap-chart{width:100%;height:1100px}
 .hm-legend{display:flex;align-items:center;justify-content:center;margin-top:16px;gap:16px}
 .hm-legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
@@ -30,9 +35,12 @@
   </div>
 
   <div class="hm-container">
-    <div class="hm-title">疾病维度覆盖热力图</div>
+    <div class="hm-title-row">
+      <div class="hm-title">疾病维度覆盖热力图</div>
+      <button class="hm-help-btn" onclick="toggleHelp()" title="使用帮助">?</button>
+    </div>
     <div class="hm-subtitle">颜色表示每个专病在各知识维度上的实体数量：颜色越深表示该维度沉淀越多，空白表示暂无数据。用于快速定位哪些疾病的哪些维度需要优先补齐。</div>
-    <div class="hm-how">
+    <div class="hm-help-panel" id="hm-help">
       <h3>如何使用</h3>
       <ul>
         <li>横轴是17个知识维度（症状、体征、检查、检验、药物、治疗方案等），纵轴是77种专病</li>
@@ -55,7 +63,6 @@
 <script>
 loadData(function(d){
   renderNav('heatmap');
-  // 批量加载所有疾病的完整维度数据
   var codes = Object.keys(d.diseases);
   var loaded = 0;
   var total = codes.length;
@@ -68,6 +75,7 @@ loadData(function(d){
     });
   });
 });
+function toggleHelp(){var p=document.getElementById('hm-help');if(p){p.classList.toggle('show');}}
 function renderHeatmap(d){
   var container=document.getElementById('heatmap-chart');
   var chart=echarts.init(container,null,{renderer:'canvas'});
