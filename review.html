@@ -492,15 +492,6 @@ function renderDiseasePanel(items) {
   var batches = {};
   items.forEach(function(r) { batches[r.batch_id] = 1; });
 
-  /* 按疾病分组场景卡 */
-  var scenarioByDisease = {};
-  (REVIEW_DATA ? REVIEW_DATA.scenario_cards : []).forEach(function(sc) {
-    var key = sc.disease_code + '|' + sc.batch_id;
-    if (!scenarioByDisease[key]) scenarioByDisease[key] = [];
-    scenarioByDisease[key].push(sc);
-  });
-
-  /* 筛选栏 */
   var h = '<div class="rv-filters">';
   h += '<select id="disease-batch-filter" onchange="filterDiseases()"><option value="">全部批次</option>';
   Object.keys(batches).forEach(function(b) { h += '<option value="' + b + '">' + b + '</option>'; });
@@ -509,163 +500,36 @@ function renderDiseasePanel(items) {
   h += '<span class="rv-filter-count" id="disease-count"></span>';
   h += '</div>';
 
-  /* 疾病卡片网格 */
-  h += '<div id="disease-cards" style="display:grid;grid-template-columns:1fr;gap:14px">';
+  h += '<div id="disease-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">';
   items.forEach(function(r) {
-    var rid = r.review_id;
     var pending = parseInt(r.pending_recommendation_count) || 0;
     var scenarios = parseInt(r.scenario_card_count) || 0;
     var totalItems = pending + scenarios;
-    var d = REVIEW_DECISIONS[rid] || {};
-    var progress = 0;
-    if (d.clinical_use_decision) progress += 40;
-    if (d.overall_risk_level) progress += 20;
-    if (d.reviewer_name) progress += 15;
-    if (d.reviewer_role) progress += 10;
-    if (d.expert_comment) progress += 15;
-    var progressColor = progress === 0 ? 'var(--bg4)' : progress < 60 ? 'var(--yellow)' : progress < 100 ? 'var(--accent)' : 'var(--green)';
 
-    /* 该疾病对应的场景卡 */
-    var sceneKey = r.disease_code + '|' + r.batch_id;
-    var relatedScenarios = scenarioByDisease[sceneKey] || [];
+    h += '<div class="rv-card rv-disease-card" data-batch="' + r.batch_id + '" data-name="' + r.disease_name + '" data-code="' + r.disease_code + '" style="cursor:pointer;transition:all .15s" onclick="openDiseaseReview(\'' + encodeURIComponent(r.disease_code) + '\',\'' + encodeURIComponent(r.batch_id) + '\',\'' + encodeURIComponent(r.disease_name) + '\')" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\'">';
 
-    h += '<div class="rv-card rv-disease-card" data-batch="' + r.batch_id + '" data-name="' + r.disease_name + '" data-code="' + r.disease_code + '">';
-
-    /* 头部：疾病名 + 徽章 */
     h += '<div class="rv-disease-card-header">';
     h += '<div><div class="rv-disease-name">' + r.disease_name + '</div>';
     h += '<div class="rv-disease-code">' + r.disease_code + '</div></div>';
-    h += '<div style="display:flex;gap:6px;align-items:center">';
-    h += '<span class="rv-badge rv-badge-blue">' + r.batch_id.split('-').slice(2,4).join('-') + '</span>';
-    h += '<span class="rv-badge rv-badge-pending">待审 ' + totalItems + ' 项</span>';
-    h += '</div></div>';
+    h += '<span class="rv-badge rv-badge-blue" style="font-size:11px">' + r.batch_id.split('-').slice(2,4).join('-') + '</span>';
+    h += '</div>';
 
-    /* 统计数字 */
     h += '<div class="rv-disease-stats">';
     h += '<div class="rv-disease-stat"><div class="rv-disease-stat-num" style="color:var(--orange)">' + pending + '</div><div class="rv-disease-stat-label">待审核推荐</div></div>';
     h += '<div class="rv-disease-stat"><div class="rv-disease-stat-num" style="color:var(--cyan)">' + scenarios + '</div><div class="rv-disease-stat-label">场景卡片</div></div>';
-    h += '<div class="rv-disease-stat"><div class="rv-disease-stat-num" style="color:' + progressColor + '">' + progress + '%</div><div class="rv-disease-stat-label">审核进度</div></div>';
     h += '</div>';
 
-    /* 临床使用问题 */
-    h += '<div class="rv-disease-question">' + (r.clinical_use_question || '从临床使用效果看，该病种图谱是否可作为辅助诊疗参考？') + '</div>';
+    h += '<div style="text-align:center;color:var(--accent);font-size:12px;margin-top:8px">点击进入审核 →</div>';
 
-    /* 表单区 */
-    h += '<div class="rv-disease-form">';
-
-    /* 临床使用决策 */
-    h += '<div class="rv-form-group"><div class="rv-form-label">临床使用决策</div>';
-    h += '<div class="rv-toggle-group">';
-    var decisions = ['可试用','仅参考','需修改','禁用'];
-    var dColors = { '可试用': 'active-green', '仅参考': 'active-blue', '需修改': 'active-yellow', '禁用': 'active-red' };
-    decisions.forEach(function(dec) {
-      var cls = d.clinical_use_decision === dec ? dColors[dec] : '';
-      h += '<button class="rv-toggle-btn ' + cls + '" onclick="setDiseaseDecision(\'' + rid + '\',\'clinical_use_decision\',\'' + dec + '\',this)">' + dec + '</button>';
-    });
-    h += '</div></div>';
-
-    /* 风险等级 */
-    h += '<div class="rv-form-group"><div class="rv-form-label">风险等级</div>';
-    h += '<div class="rv-toggle-group">';
-    var risks = ['高','中','低'];
-    var rColors = { '高': 'active-red', '中': 'active-yellow', '低': 'active-green' };
-    risks.forEach(function(rk) {
-      var cls = d.overall_risk_level === rk ? rColors[rk] : '';
-      h += '<button class="rv-toggle-btn ' + cls + '" onclick="setDiseaseDecision(\'' + rid + '\',\'overall_risk_level\',\'' + rk + '\',this)">' + rk + '</button>';
-    });
-    h += '</div></div>';
-
-    /* 审核人 */
-    h += '<div class="rv-form-group"><div class="rv-form-label">审核人</div>';
-    h += '<input class="rv-input" placeholder="姓名" value="' + (d.reviewer_name || '') + '" onchange="setDiseaseDecision(\'' + rid + '\',\'reviewer_name\',this.value,this)"></div>';
-
-    /* 审核角色 */
-    h += '<div class="rv-form-group"><div class="rv-form-label">审核角色</div>';
-    h += '<select class="rv-select" onchange="setDiseaseDecision(\'' + rid + '\',\'reviewer_role\',this.value,this)">';
-    h += '<option value="">请选择</option>';
-    var roles = ['临床专家','药学专家','信息专家'];
-    roles.forEach(function(role) {
-      h += '<option value="' + role + '"' + (d.reviewer_role === role ? ' selected' : '') + '>' + role + '</option>';
-    });
-    h += '</select></div>';
-
-    /* 审核时间 */
-    h += '<div class="rv-form-group"><div class="rv-form-label">审核时间</div>';
-    h += '<input class="rv-input" type="datetime-local" value="' + (d.reviewed_at || '') + '" onchange="setDiseaseDecision(\'' + rid + '\',\'reviewed_at\',this.value,this)"></div>';
-
-    /* 审核人意见（跨两列） */
-    h += '<div class="rv-form-group rv-disease-form-full"><div class="rv-form-label">专家意见' + ((d.clinical_use_decision === '需修改' || d.clinical_use_decision === '禁用') ? ' <span style="color:var(--accent2)">*</span>' : '') + '</div>';
-    h += '<textarea class="rv-comment" placeholder="填写专家审核意见（需修改/禁用时必填）" onchange="setDiseaseDecision(\'' + rid + '\',\'expert_comment\',this.value,this)">' + (d.expert_comment || '') + '</textarea></div>';
-
-    h += '</div>'; /* form end */
-
-    /* 进度条 */
-    h += '<div class="rv-progress-bar"><div class="rv-progress-track"><div class="rv-progress-fill" style="width:' + progress + '%;background:' + progressColor + '"></div></div></div>';
-
-    /* 展开场景详情按钮 */
-    if (relatedScenarios.length > 0) {
-      h += '<div style="margin-top:10px">';
-      h += '<button class="rv-expand-btn" onclick="toggleDiseaseScenarios(\'' + sceneKey + '\',this)">&#128203; 查看该疾病的所有场景详情 (' + relatedScenarios.length + ')</button>';
-      h += '<div class="rv-disease-scenarios" id="scenarios-' + sceneKey.replace('|','-') + '" style="display:none;margin-top:12px">';
-      relatedScenarios.forEach(function(sc) {
-        var srid = sc.review_id;
-        var samples = (sc.sample_targets || '').split(/[；;]/).filter(function(s) { return s.trim(); });
-        var missing = (sc.missing_field_summary || '').split(/[；;]/).filter(function(s) { return s.trim(); });
-        var color = badgeColor(sc.scenario_type);
-        var relLabel = RELATION_LABELS[sc.relation_type] || sc.relation_type;
-        var tgtLabel = TARGET_TYPE_LABELS[sc.target_type] || sc.target_type;
-        var sd = REVIEW_DECISIONS[srid] || {};
-
-        h += '<div style="background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:14px;margin-bottom:10px">';
-        h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-        h += '<div><span class="rv-badge rv-badge-' + color + '">' + sc.scenario_type + '</span> <span style="font-size:13px;color:var(--muted);margin-left:6px">' + relLabel + ' → ' + tgtLabel + '</span></div>';
-        h += '<span class="rv-badge rv-badge-pending">' + sc.pending_item_count + ' 项待审</span>';
-        h += '</div>';
-
-        /* 视觉关系链 */
-        h += '<div class="rv-flow" style="margin-bottom:8px">';
-        h += '<div class="rv-flow-node rv-flow-disease">' + sc.disease_name + '</div>';
-        h += '<div class="rv-flow-arrow"><svg viewBox="0 0 28 14"><line x1="0" y1="7" x2="22" y2="7" stroke="currentColor" stroke-width="2"/><polygon points="22,3 28,7 22,11" fill="currentColor"/></svg></div>';
-        h += '<div class="rv-flow-node rv-flow-relation">' + relLabel + '</div>';
-        h += '<div class="rv-flow-arrow"><svg viewBox="0 0 28 14"><line x1="0" y1="7" x2="22" y2="7" stroke="currentColor" stroke-width="2"/><polygon points="22,3 28,7 22,11" fill="currentColor"/></svg></div>';
-        h += '<div class="rv-flow-node rv-flow-target">' + tgtLabel + '</div>';
-        h += '</div>';
-
-        if (samples.length) {
-          h += '<div style="margin-bottom:6px"><span style="font-size:12px;color:var(--muted);font-weight:700">样本目标:</span> ';
-          samples.forEach(function(s) { h += '<span class="rv-chip rv-chip-target">' + s.trim() + '</span>'; });
-          h += '</div>';
-        }
-        if (missing.length) {
-          h += '<div style="margin-bottom:6px"><span style="font-size:12px;color:var(--accent2);font-weight:700">&#9888; 缺失字段:</span> ';
-          missing.forEach(function(m) { h += '<span class="rv-chip rv-chip-missing">' + m.trim() + '</span>'; });
-          h += '</div>';
-        }
-        if (sc.review_focus) {
-          h += '<div class="rv-focus-box" style="font-size:12px;padding:6px 10px;margin-top:4px">&#127919; ' + sc.review_focus + '</div>';
-        }
-
-        /* 场景级决策 */
-        h += '<div class="rv-scene-decision" style="margin-top:8px">';
-        h += '<div class="rv-toggle-group">';
-        decisions.forEach(function(dec) {
-          var cls = sd.clinical_use_decision === dec ? dColors[dec] : '';
-          h += '<button class="rv-toggle-btn ' + cls + '" style="font-size:12px;padding:4px 10px" onclick="setScenarioDecision(\'' + srid + '\',\'clinical_use_decision\',\'' + dec + '\',this)">' + dec + '</button>';
-        });
-        h += '</div>';
-        h += '<textarea class="rv-comment" style="flex:1;min-width:180px;font-size:12px;min-height:32px" placeholder="专家意见" onchange="setDecision(\'' + srid + '\',\'expert_comment\',this.value)">' + (sd.expert_comment || '') + '</textarea>';
-        h += '</div>';
-
-        h += '</div>'; /* 场景卡结束 */
-      });
-      h += '</div></div>';
-    }
-
-    h += '</div>'; /* card end */
+    h += '</div>';
   });
   h += '</div>';
   panel.innerHTML = h;
   updateDiseaseCount();
+}
+
+function openDiseaseReview(code, batch, name) {
+  window.location.href = 'disease-review.html?code=' + code + '&batch=' + batch + '&name=' + name;
 }
 
 function setDiseaseDecision(rid, field, value, el) {

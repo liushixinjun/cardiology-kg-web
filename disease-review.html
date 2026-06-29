@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疾病审核详情 - 专科知识图谱</title>
+<link rel="stylesheet" href="./_shared/css/style.css">
+<style>
+html,body{height:100%;overflow:hidden;margin:0}
+
+/* ===== 顶部导航栏 ===== */
+.dr-topbar{
+  display:flex;align-items:center;gap:16px;
+  background:var(--bg2);border-bottom:1px solid var(--rule);
+  padding:0 24px;height:56px;flex-shrink:0;
+}
+.dr-back{
+  display:flex;align-items:center;gap:6px;
+  color:var(--muted);font-size:14px;cursor:pointer;
+  text-decoration:none;transition:color .15s;
+}
+.dr-back:hover{color:var(--accent)}
+.dr-back svg{width:18px;height:18px}
+.dr-disease-name{font-size:20px;font-weight:800;color:var(--ink);flex-shrink:0}
+.dr-disease-code{
+  font-family:monospace;font-size:12px;color:var(--muted);
+  background:var(--bg3);padding:2px 8px;border-radius:4px;flex-shrink:0;
+}
+.dr-stats{display:flex;gap:20px;margin-left:24px;flex-shrink:0}
+.dr-stat{display:flex;align-items:center;gap:6px;font-size:13px}
+.dr-stat-num{font-size:18px;font-weight:800}
+.dr-stat-label{color:var(--muted);font-size:12px}
+.dr-batch{font-size:12px;color:var(--muted);margin-left:auto;flex-shrink:0}
+
+/* ===== 主布局 ===== */
+.dr-layout{display:flex;height:calc(100vh - 48px - 56px);overflow:hidden}
+
+/* ===== 左侧：场景列表（280px） ===== */
+.dr-sidebar{
+  width:280px;min-width:280px;
+  border-right:1px solid var(--rule);background:var(--bg2);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.dr-sidebar-header{padding:16px 16px 12px;border-bottom:1px solid var(--rule)}
+.dr-sidebar-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.dr-sidebar-search{
+  width:100%;padding:8px 12px;
+  background:var(--bg3);border:1px solid var(--rule);border-radius:8px;
+  color:var(--ink);font-size:13px;outline:none;
+}
+.dr-sidebar-search:focus{border-color:var(--accent)}
+.dr-sidebar-list{flex:1;overflow-y:auto;padding:8px}
+.dr-sidebar-list::-webkit-scrollbar{width:4px}
+.dr-sidebar-list::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+
+.dr-scene-item{
+  padding:10px 12px;border-radius:8px;cursor:pointer;
+  margin-bottom:4px;transition:all .15s;border:1px solid transparent;
+}
+.dr-scene-item:hover{background:var(--bg3);border-color:var(--rule)}
+.dr-scene-item.active{
+  background:rgba(79,140,255,.08);border-color:var(--accent);color:var(--accent);
+}
+.dr-scene-item-title{
+  font-size:13px;font-weight:600;margin-bottom:2px;
+  display:flex;align-items:center;gap:6px;
+}
+.dr-scene-item-meta{font-size:11px;color:var(--muted)}
+.dr-scene-item-badge{
+  font-size:9px;padding:1px 6px;border-radius:999px;
+  background:rgba(255,210,59,.15);color:var(--yellow);font-weight:700;
+}
+.dr-scene-item-done{
+  font-size:9px;padding:1px 6px;border-radius:999px;
+  background:rgba(81,207,102,.15);color:var(--green);font-weight:700;
+}
+
+/* ===== 右侧：审核主区 ===== */
+.dr-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* 场景卡片区域 - 可滚动 */
+.dr-content{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.dr-content::-webkit-scrollbar{width:6px}
+.dr-content::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+
+/* 空状态 */
+.dr-empty{text-align:center;padding:80px 40px;color:var(--muted)}
+.dr-empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.dr-empty-text{font-size:15px;line-height:1.6}
+
+/* 单个场景审核卡 */
+.dr-scene-card{
+  background:var(--bg2);border:1px solid var(--rule);border-radius:14px;
+  padding:24px;margin-bottom:20px;transition:border-color .2s;
+}
+.dr-scene-card:hover{border-color:rgba(79,140,255,.3)}
+.dr-scene-card-header{
+  display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;
+}
+.dr-scene-card-title{font-size:17px;font-weight:700;color:var(--ink)}
+.dr-scene-card-batch{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* 关系链可视化 */
+.dr-flow{
+  display:flex;align-items:center;gap:0;margin-bottom:18px;
+  padding:14px 0;justify-content:center;
+}
+.dr-flow-node{
+  padding:10px 18px;border-radius:10px;font-size:14px;
+  font-weight:700;white-space:nowrap;
+}
+.dr-flow-disease{
+  background:rgba(79,140,255,.12);color:var(--accent);
+  border:1px solid rgba(79,140,255,.25);
+}
+.dr-flow-relation{
+  background:rgba(34,184,207,.12);color:var(--cyan);
+  border:1px solid rgba(34,184,207,.25);
+}
+.dr-flow-target{
+  background:rgba(204,93,232,.12);color:var(--purple);
+  border:1px solid rgba(204,93,232,.25);
+}
+.dr-flow-arrow{
+  width:40px;display:flex;align-items:center;justify-content:center;color:var(--muted);
+}
+.dr-flow-arrow svg{width:36px;height:14px}
+
+/* 信息区块 */
+.dr-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.dr-info-box{
+  background:var(--bg3);border:1px solid var(--rule);
+  border-radius:10px;padding:14px;
+}
+.dr-info-label{
+  font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.dr-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dr-chip{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
+.dr-chip-target{
+  background:rgba(79,140,255,.1);color:var(--accent);
+  border:1px solid rgba(79,140,255,.2);
+}
+.dr-chip-missing{
+  background:rgba(255,107,107,.1);color:var(--accent2);
+  border:1px solid rgba(255,107,107,.2);
+}
+.dr-focus-box{
+  background:rgba(255,210,59,.06);border:1px solid rgba(255,210,59,.2);
+  border-radius:8px;padding:10px 14px;font-size:13px;
+  color:var(--yellow);margin-top:14px;
+}
+
+/* 药师条目展开 */
+.dr-pharm-btn{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg3);border:1px solid var(--rule);border-radius:8px;
+  padding:8px 14px;color:var(--muted);font-size:12px;
+  cursor:pointer;margin-top:14px;transition:all .15s;width:100%;
+}
+.dr-pharm-btn:hover{border-color:var(--accent);color:var(--accent)}
+.dr-pharm-list{
+  display:none;margin-top:10px;border:1px solid var(--rule);
+  border-radius:8px;overflow:hidden;
+}
+.dr-pharm-list.show{display:block}
+.dr-pharm-item{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  border-bottom:1px solid var(--rule);font-size:13px;
+}
+.dr-pharm-item:last-child{border-bottom:none}
+.dr-pharm-item-name{font-weight:700;min-width:120px}
+.dr-pharm-item-code{font-family:monospace;font-size:11px;color:var(--muted);min-width:120px}
+.dr-pharm-item-missing{flex:1;font-size:11px;color:var(--accent2)}
+
+/* ===== 底部决策栏（固定） ===== */
+.dr-action-bar{
+  background:var(--bg2);border-top:1px solid var(--rule);
+  padding:16px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;
+}
+.dr-action-label{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.dr-toggle-group{
+  display:flex;gap:0;border:1px solid var(--rule);
+  border-radius:8px;overflow:hidden;
+}
+.dr-toggle-btn{
+  padding:10px 20px;font-size:14px;font-weight:700;border:none;
+  cursor:pointer;background:var(--bg3);color:var(--muted);
+  transition:all .15s;border-right:1px solid var(--rule);
+}
+.dr-toggle-btn:last-child{border-right:none}
+.dr-toggle-btn:hover{background:var(--bg4);color:var(--ink)}
+.dr-toggle-btn.active-green{
+  background:rgba(81,207,102,.15);color:var(--green);
+  border-color:rgba(81,207,102,.3);
+}
+.dr-toggle-btn.active-blue{
+  background:rgba(79,140,255,.15);color:var(--accent);
+  border-color:rgba(79,140,255,.3);
+}
+.dr-toggle-btn.active-yellow{
+  background:rgba(255,210,59,.15);color:var(--yellow);
+  border-color:rgba(255,210,59,.3);
+}
+.dr-toggle-btn.active-red{
+  background:rgba(255,107,107,.15);color:var(--accent2);
+  border-color:rgba(255,107,107,.3);
+}
+.dr-comment-input{
+  flex:1;padding:10px 14px;background:var(--bg3);
+  border:1px solid var(--rule);border-radius:8px;
+  color:var(--ink);font-size:14px;outline:none;
+}
+.dr-comment-input:focus{border-color:var(--accent)}
+.dr-export-btn{
+  padding:10px 24px;background:var(--accent);color:#fff;
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:all .15s;
+}
+.dr-export-btn:hover{opacity:.9}
+
+/* ===== 场景导航按钮 ===== */
+.dr-nav-row{display:flex;gap:12px;justify-content:center;margin-top:8px}
+
+/* ===== 响应式 ===== */
+@media(max-width:900px){
+  .dr-sidebar{width:200px;min-width:200px}
+  .dr-info-grid{grid-template-columns:1fr}
+  .dr-flow{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="nav"></div>
+<!-- 顶部导航栏 -->
+<div class="dr-topbar">
+  <a class="dr-back" href="review.html">
+    <svg viewBox="0 0 18 18"><path d="M12 3L6 9l6 6" stroke="currentColor" stroke-width="2" fill="none"/></svg> 返回
+  </a>
+  <div class="dr-disease-name" data-role="disease-name">加载中...</div>
+  <div class="dr-disease-code" data-role="disease-code">-</div>
+  <div class="dr-stats">
+    <div class="dr-stat">
+      <span class="dr-stat-num" data-role="stat-pending">-</span>
+      <span class="dr-stat-label">待审推荐</span>
+    </div>
+    <div class="dr-stat">
+      <span class="dr-stat-num" data-role="stat-scenarios" style="color:var(--cyan)">-</span>
+      <span class="dr-stat-label">场景卡</span>
+    </div>
+    <div class="dr-stat">
+      <span class="dr-stat-num" data-role="stat-pharmacist" style="color:var(--purple)">-</span>
+      <span class="dr-stat-label">药师项</span>
+    </div>
+  </div>
+  <div class="dr-batch" data-role="batch-id">-</div>
+</div>
+
+<div class="dr-layout">
+  <!-- 左侧：场景列表 -->
+  <div class="dr-sidebar">
+    <div class="dr-sidebar-header">
+      <div class="dr-sidebar-title">场景列表</div>
+      <input class="dr-sidebar-search" data-role="sidebar-search" placeholder="搜索场景..." oninput="DR.filterSidebar(this.value)">
+    </div>
+    <div class="dr-sidebar-list" data-role="sidebar-list"></div>
+  </div>
+
+  <!-- 右侧：审核主区 -->
+  <div class="dr-main">
+    <div class="dr-content" data-role="content">
+      <div class="dr-empty">
+        <div class="dr-empty-icon">加载中...</div>
+        <div class="dr-empty-text">正在加载数据，请稍候</div>
+      </div>
+    </div>
+    <!-- 底部决策栏 -->
+    <div class="dr-action-bar" data-role="action-bar" style="display:none">
+      <div class="dr-action-label">审核决策:</div>
+      <div class="dr-toggle-group" data-role="decision-group">
+        <button class="dr-toggle-btn" data-decision="可试用" onclick="DR.setSceneDecision('可试用')">可试用</button>
+        <button class="dr-toggle-btn" data-decision="仅参考" onclick="DR.setSceneDecision('仅参考')">仅参考</button>
+        <button class="dr-toggle-btn" data-decision="需修改" onclick="DR.setSceneDecision('需修改')">需修改</button>
+        <button class="dr-toggle-btn" data-decision="禁用" onclick="DR.setSceneDecision('禁用')">禁用</button>
+      </div>
+      <input class="dr-comment-input" data-role="comment-input" placeholder="填写专家意见（需修改/禁用时必填）" oninput="DR.onCommentInput(this.value)">
+      <button class="dr-export-btn" data-role="export-btn" onclick="DR.exportDecisions()">导出</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+ * disease-review.html — 疾病审核详情页（完全独立，不依赖 app.js）
+ * ================================================================= */
+var DR = (function () {
+  'use strict';
+
+  /* ---------- 中文映射表 ---------- */
+  var RELATION_LABELS = {
+    treated_by_medication: '药物治疗',
+    includes_medication: '包含药物',
+    includes_procedure: '包含手术',
+    treated_by_procedure: '手术治疗',
+    has_symptom: '症状表现',
+    has_sign: '体征表现',
+    has_exam: '检查项目',
+    has_lab_test: '检验项目',
+    has_risk_factor: '危险因素',
+    has_complication: '并发症',
+    has_differential: '鉴别诊断',
+    has_follow_up: '随访方案',
+    has_prognosis: '预后',
+    has_treatment_plan: '治疗方案',
+    has_diagnostic_criteria: '诊断标准',
+    has_risk_stratification: '风险分层',
+    has_pathophysiology: '病理生理',
+    has_epidemiology: '流行病学',
+    has_etiology: '病因'
+  };
+
+  var TARGET_TYPE_LABELS = {
+    Medication: '药物',
+    Procedure: '手术/操作',
+    Symptom: '症状',
+    Sign: '体征',
+    Exam: '检查',
+    LabTest: '检验',
+    RiskFactor: '危险因素',
+    Complication: '并发症',
+    DifferentialDiagnosis: '鉴别诊断',
+    FollowUp: '随访方案',
+    Prognosis: '预后',
+    TreatmentPlan: '治疗方案',
+    DiagnosisCriteria: '诊断标准',
+    RiskStratification: '风险分层',
+    Pathophysiology: '病理生理',
+    Epidemiology: '流行病学',
+    Etiology: '病因'
+  };
+
+  var SCENE_COLORS = {
+    '手术/操作治疗': 'cyan',
+    '手术治疗': 'cyan',
+    '包含手术': 'cyan',
+    '药物治疗': 'purple',
+    '包含药物': 'purple',
+    '症状表现': 'pink',
+    '体征表现': 'pink',
+    '检查项目': 'blue',
+    '检验项目': 'blue',
+    '危险因素': 'yellow',
+    '并发症': 'red',
+    '鉴别诊断': 'yellow',
+    '随访方案': 'green',
+    '预后': 'green',
+    '治疗方案': 'blue',
+    '诊断标准': 'blue',
+    '风险分层': 'yellow',
+    '流行病学': 'muted',
+    '病因': 'muted',
+    '病理生理': 'muted'
+  };
+
+  var COLOR_VAR_MAP = {
+    cyan: 'var(--cyan)',
+    purple: 'var(--purple)',
+    pink: 'var(--pink)',
+    blue: 'var(--accent)',
+    yellow: 'var(--yellow)',
+    red: 'var(--accent2)',
+    green: 'var(--green)',
+    muted: 'var(--muted)'
+  };
+
+  var MISSING_FIELD_LABELS = {
+    applicable_population: '适用人群',
+    clinical_review_status: '临床确认',
+    clinical_rule_or_clinical_pathway: '临床规则/路径',
+    exclusion_or_contraindication: '排除/禁忌',
+    recommendation_class_and_evidence_level: '推荐等级/证据等级',
+    medication_contraindication: '药物禁忌',
+    medication_dosage: '药物剂量',
+    medication_interaction: '药物相互作用',
+    medication_aliases: '药物别名',
+    evidence_source_chain: '证据链'
+  };
+
+  /* ---------- 内部状态 ---------- */
+  var _diseaseCode = '';
+  var _batchId = '';
+  var _diseaseName = '';
+  var _scenarios = [];
+  var _pharmacistItems = [];
+  var _currentIdx = -1;
+  var _decisions = {};   /* { reviewId: { decision, comment } } */
+
+  /* ---------- DOM 选择器快捷方式 ---------- */
+  function q(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function qAll(sel, ctx) { return (ctx || document).querySelectorAll(sel); }
+  function qAttr(sel) { return document.querySelector('[data-role="' + sel + '"]'); }
+
+  /* ---------- URL 参数 ---------- */
+  function getParams() {
+    var params = new URLSearchParams(window.location.search);
+    return {
+      code: params.get('code') || '',
+      batch: params.get('batch') || '',
+      name: params.get('name') || ''
+    };
+  }
+
+  /* ---------- 初始化入口 ---------- */
+  function init() {
+    var p = getParams();
+    _diseaseCode = p.code;
+    _batchId = p.batch;
+    _diseaseName = p.name || _diseaseCode;
+
+    /* 缺少关键参数时显示错误 */
+    if (!_diseaseCode || !_batchId) {
+      _showError('参数不足', 'URL 中缺少疾病编码(code)或批次编号(batch)，无法加载数据。<br><a href="review.html" style="color:var(--accent)">返回审核列表</a>');
+      return;
+    }
+
+    /* 设置顶部栏 */
+    var nameEl = qAttr('disease-name');
+    var codeEl = qAttr('disease-code');
+    var batchEl = qAttr('batch-id');
+    if (nameEl) nameEl.textContent = _diseaseName;
+    if (codeEl) codeEl.textContent = _diseaseCode;
+    if (batchEl) batchEl.textContent = _batchId;
+
+    /* 加载 JSON 数据 */
+    _fetchData();
+  }
+
+  /* ---------- 获取数据 ---------- */
+  function _fetchData() {
+    fetch('./assets/clinical_review_frontend_data.json')
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        _onDataLoaded(data);
+      })
+      .catch(function (err) {
+        _showError('数据加载失败', '无法读取前端审核数据：<br>' + err.message + '<br><a href="review.html" style="color:var(--accent)">返回审核列表</a>');
+      });
+  }
+
+  /* ---------- 数据加载完成 ---------- */
+  function _onDataLoaded(data) {
+    /* 筛选该疾病+批次的场景和药师数据 */
+    _scenarios = (data.scenario_cards || []).filter(function (s) {
+      return s.disease_code === _diseaseCode && s.batch_id === _batchId;
+    });
+    _pharmacistItems = (data.pharmacist_items || []).filter(function (p) {
+      return p.disease_code === _diseaseCode && p.batch_id === _batchId;
+    });
+
+    /* 无数据时 */
+    if (_scenarios.length === 0) {
+      _showError('暂无数据', '未找到匹配的场景卡数据（疾病: ' + _diseaseName + '，批次: ' + _batchId + '）。<br><a href="review.html" style="color:var(--accent)">返回审核列表</a>');
+      return;
+    }
+
+    /* 更新统计数据 */
+    _updateStats();
+
+    /* 渲染左侧导航 */
+    _renderSidebar();
+
+    /* 默认选中第一个场景 */
+    _selectScene(0);
+  }
+
+  /* ---------- 更新顶部统计 ---------- */
+  function _updateStats() {
+    var pendingTotal = 0;
+    for (var i = 0; i < _scenarios.length; i++) {
+      pendingTotal += parseInt(_scenarios[i].pending_item_count) || 0;
+    }
+    var statPending = qAttr('stat-pending');
+    var statScenarios = qAttr('stat-scenarios');
+    var statPharmacist = qAttr('stat-pharmacist');
+    if (statPending) statPending.textContent = pendingTotal;
+    if (statScenarios) statScenarios.textContent = _scenarios.length;
+    if (statPharmacist) statPharmacist.textContent = _pharmacistItems.length;
+  }
+
+  /* ---------- 显示错误信息 ---------- */
+  function _showError(title, msg) {
+    var content = qAttr('content');
+    if (content) {
+      content.innerHTML = '<div class="dr-empty">' +
+        '<div class="dr-empty-icon">!</div>' +
+        '<div class="dr-empty-text"><strong>' + title + '</strong><br>' + msg + '</div>' +
+        '</div>';
+    }
+  }
+
+  /* ============================================
+   *  左侧场景列表
+   * ============================================ */
+  function _renderSidebar() {
+    var listEl = qAttr('sidebar-list');
+    if (!listEl) return;
+
+    var html = '';
+    for (var i = 0; i < _scenarios.length; i++) {
+      var sc = _scenarios[i];
+      var colorKey = SCENE_COLORS[sc.scenario_type] || 'blue';
+      var colorVar = COLOR_VAR_MAP[colorKey] || 'var(--accent)';
+      var dec = _decisions[sc.review_id];
+      var badge = '';
+      if (dec && dec.decision) {
+        badge = '<span class="dr-scene-item-done">' + dec.decision + '</span>';
+      } else {
+        badge = '<span class="dr-scene-item-badge">' + sc.pending_item_count + '项</span>';
+      }
+      var tgtLabel = TARGET_TYPE_LABELS[sc.target_type] || sc.target_type;
+      var isActive = i === _currentIdx ? ' active' : '';
+      html += '<div class="dr-scene-item' + isActive + '" data-idx="' + i + '" onclick="DR.selectScene(' + i + ')">' +
+        '<div class="dr-scene-item-title">' +
+          '<span style="color:' + colorVar + '">●</span> ' +
+          sc.scenario_type + ' ' + badge +
+        '</div>' +
+        '<div class="dr-scene-item-meta">' + tgtLabel + ' · ' + sc.pending_item_count + '项待审</div>' +
+        '</div>';
+    }
+    listEl.innerHTML = html;
+  }
+
+  /* ---------- 搜索过滤 ---------- */
+  function filterSidebar(query) {
+    var q = (query || '').toLowerCase();
+    var items = qAll('.dr-scene-item');
+    for (var i = 0; i < items.length; i++) {
+      var text = items[i].textContent.toLowerCase();
+      items[i].style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+    }
+  }
+
+  /* ============================================
+   *  选中场景
+   * ============================================ */
+  function _selectScene(idx) {
+    if (idx < 0 || idx >= _scenarios.length) return;
+    _currentIdx = idx;
+    var sc = _scenarios[idx];
+
+    /* 更新左侧高亮 */
+    var items = qAll('.dr-scene-item');
+    for (var i = 0; i < items.length; i++) {
+      if (parseInt(items[i].getAttribute('data-idx')) === idx) {
+        items[i].classList.add('active');
+      } else {
+        items[i].classList.remove('active');
+      }
+    }
+
+    /* 渲染右侧详情 */
+    _renderSceneDetail(sc, idx);
+
+    /* 显示底部决策栏 */
+    var bar = qAttr('action-bar');
+    if (bar) bar.style.display = 'flex';
+    _syncDecisionUI(sc.review_id);
+  }
+
+  /* ============================================
+   *  渲染场景详情卡片
+   * ============================================ */
+  function _renderSceneDetail(sc, idx) {
+    var rid = sc.review_id;
+    var samples = _splitSafe(sc.sample_targets);
+    var missingRaw = _splitSafe(sc.missing_field_summary);
+    var missing = _labelMissingFields(missingRaw);
+    var relLabel = RELATION_LABELS[sc.relation_type] || sc.relation_type;
+    var tgtLabel = TARGET_TYPE_LABELS[sc.target_type] || sc.target_type;
+    var colorKey = SCENE_COLORS[sc.scenario_type] || 'blue';
+    var colorVar = COLOR_VAR_MAP[colorKey] || 'var(--accent)';
+
+    /* 查找该场景下的药师条目 */
+    var relatedPharm = _pharmacistItems.filter(function (p) {
+      return p.parent_review_id === rid;
+    });
+
+    var h = '';
+
+    /* --- 场景卡片 --- */
+    h += '<div class="dr-scene-card">';
+
+    /* 卡片头部 */
+    h += '<div class="dr-scene-card-header">';
+    h += '<div>';
+    h += '<div class="dr-scene-card-title">' + _esc(sc.scenario_type) + ' — ' + sc.pending_item_count + ' 项待审</div>';
+    h += '<div class="dr-scene-card-batch">' + _esc(sc.batch_id) + '</div>';
+    h += '</div>';
+    h += '</div>';
+
+    /* 关系链可视化 */
+    h += '<div class="dr-flow">';
+    h += _flowNode('dr-flow-disease', _esc(sc.disease_name));
+    h += _flowArrow();
+    h += _flowNode('dr-flow-relation', _esc(relLabel));
+    h += _flowArrow();
+    h += _flowNode('dr-flow-target', _esc(tgtLabel));
+    h += '</div>';
+
+    /* 信息网格 */
+    h += '<div class="dr-info-grid">';
+
+    /* 样本目标 */
+    h += '<div class="dr-info-box">';
+    h += '<div class="dr-info-label">样本目标 (' + samples.length + ')</div>';
+    h += '<div class="dr-chips">';
+    for (var i = 0; i < samples.length; i++) {
+      h += '<span class="dr-chip dr-chip-target">' + _esc(samples[i]) + '</span>';
+    }
+    h += '</div></div>';
+
+    /* 缺失字段 */
+    h += '<div class="dr-info-box">';
+    h += '<div class="dr-info-label">缺失字段 (' + missing.length + '类)</div>';
+    h += '<div class="dr-chips">';
+    for (var j = 0; j < missing.length; j++) {
+      h += '<span class="dr-chip dr-chip-missing">' + _esc(missing[j]) + '</span>';
+    }
+    h += '</div></div>';
+
+    h += '</div>'; /* info-grid */
+
+    /* 审核重点 */
+    if (sc.review_focus) {
+      h += '<div class="dr-focus-box">' + _esc(sc.review_focus) + '</div>';
+    }
+
+    /* 药师条目列表 */
+    if (relatedPharm.length > 0) {
+      h += '<button class="dr-pharm-btn" onclick="DR.togglePharmList(this)">';
+      h += '查看该场景下的药物/手术审核 (' + relatedPharm.length + '条)';
+      h += '</button>';
+      h += '<div class="dr-pharm-list">';
+      for (var k = 0; k < relatedPharm.length; k++) {
+        var ph = relatedPharm[k];
+        var phDec = _decisions[ph.review_id];
+        var phMissing = (ph.missing_fields || '').replace(/;/g, '；');
+        if (phMissing.length > 80) phMissing = phMissing.substring(0, 80) + '...';
+        h += '<div class="dr-pharm-item">';
+        h += '<div class="dr-pharm-item-name">' + _esc(ph.target_name) + '</div>';
+        h += '<div class="dr-pharm-item-code">' + _esc(ph.target_code || '-') + '</div>';
+        h += '<div class="dr-pharm-item-missing">' + _esc(phMissing || '-') + '</div>';
+        /* 药师决策按钮 */
+        h += '<div class="dr-toggle-group" style="flex-shrink:0">';
+        var pharmacistDecisions = ['通过', '需修改', '禁用'];
+        for (var d = 0; d < pharmacistDecisions.length; d++) {
+          var dLabel = pharmacistDecisions[d];
+          var cls = 'dr-toggle-btn';
+          if (phDec && phDec.decision === dLabel) {
+            if (dLabel === '通过') cls += ' active-green';
+            else if (dLabel === '需修改') cls += ' active-yellow';
+            else if (dLabel === '禁用') cls += ' active-red';
+          }
+          h += '<button class="' + cls + '" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();DR.setPharmDecision(\'' + ph.review_id + '\',\'' + dLabel + '\',this)">' + dLabel + '</button>';
+        }
+        h += '</div>';
+        h += '</div>';
+      }
+      h += '</div>';
+    }
+
+    h += '</div>'; /* scene-card */
+
+    /* 相邻场景快速导航 */
+    h += '<div class="dr-nav-row">';
+    if (idx > 0) {
+      h += '<button class="dr-toggle-btn" onclick="DR.selectScene(' + (idx - 1) + ')" style="font-size:13px">← 上一个场景</button>';
+    }
+    if (idx < _scenarios.length - 1) {
+      h += '<button class="dr-toggle-btn" onclick="DR.selectScene(' + (idx + 1) + ')" style="font-size:13px">下一个场景 →</button>';
+    }
+    h += '</div>';
+
+    /* 写入 DOM */
+    var content = qAttr('content');
+    if (content) {
+      content.innerHTML = h;
+      content.scrollTop = 0;
+    }
+  }
+
+  /* ============================================
+   *  药师条目展开/收起
+   * ============================================ */
+  function _togglePharmList(btn) {
+    var list = btn.nextElementSibling;
+    if (!list) return;
+    var count = qAll('.dr-pharm-item', list).length;
+    if (list.classList.contains('show')) {
+      list.classList.remove('show');
+      btn.textContent = '查看该场景下的药物/手术审核 (' + count + '条)';
+    } else {
+      list.classList.add('show');
+      btn.textContent = '收起药物/手术审核';
+    }
+  }
+
+  /* ============================================
+   *  场景级决策
+   * ============================================ */
+  function _setSceneDecision(decision) {
+    if (_currentIdx < 0) return;
+    var sc = _scenarios[_currentIdx];
+    var rid = sc.review_id;
+    if (!_decisions[rid]) _decisions[rid] = {};
+    _decisions[rid].decision = decision;
+    /* 同步评论 */
+    var commentEl = qAttr('comment-input');
+    if (commentEl) _decisions[rid].comment = commentEl.value;
+    _syncDecisionUI(rid);
+    _renderSidebar();
+    _updateExportBtn();
+  }
+
+  /* ---------- 药师级决策 ---------- */
+  function _setPharmDecision(reviewId, decision, btn) {
+    if (!_decisions[reviewId]) _decisions[reviewId] = {};
+    _decisions[reviewId].decision = decision;
+    /* 更新按钮组样式 */
+    var group = btn.parentElement;
+    if (group) {
+      var btns = qAll('.dr-toggle-btn', group);
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].className = 'dr-toggle-btn';
+      }
+      if (decision === '通过') btn.className = 'dr-toggle-btn active-green';
+      else if (decision === '需修改') btn.className = 'dr-toggle-btn active-yellow';
+      else if (decision === '禁用') btn.className = 'dr-toggle-btn active-red';
+    }
+    _updateExportBtn();
+  }
+
+  /* ---------- 同步决策 UI ---------- */
+  function _syncDecisionUI(rid) {
+    var dec = _decisions[rid] || {};
+    var group = qAttr('decision-group');
+    if (!group) return;
+    var btns = qAll('.dr-toggle-btn', group);
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var label = b.getAttribute('data-decision') || b.textContent.trim();
+      var isActive = (dec.decision === label);
+      var cls = 'dr-toggle-btn';
+      if (isActive) {
+        if (label === '可试用') cls += ' active-green';
+        else if (label === '仅参考') cls += ' active-blue';
+        else if (label === '需修改') cls += ' active-yellow';
+        else if (label === '禁用') cls += ' active-red';
+      }
+      b.className = cls;
+    }
+    var commentEl = qAttr('comment-input');
+    if (commentEl) commentEl.value = dec.comment || '';
+  }
+
+  /* ---------- 评论输入 ---------- */
+  function _onCommentInput(value) {
+    if (_currentIdx < 0) return;
+    var sc = _scenarios[_currentIdx];
+    var rid = sc.review_id;
+    if (!_decisions[rid]) _decisions[rid] = {};
+    _decisions[rid].comment = value;
+  }
+
+  /* ============================================
+   *  导出
+   * ============================================ */
+  function _updateExportBtn() {
+    var count = 0;
+    var keys = Object.keys(_decisions);
+    for (var i = 0; i < keys.length; i++) {
+      if (_decisions[keys[i]].decision) count++;
+    }
+    var btn = qAttr('export-btn');
+    if (btn) btn.textContent = '导出 (' + count + '条已决策)';
+  }
+
+  function _exportDecisions() {
+    var rows = [];
+    var now = new Date();
+    var ts = now.getFullYear() + '-' +
+      _pad2(now.getMonth() + 1) + '-' +
+      _pad2(now.getDate()) + ' ' +
+      _pad2(now.getHours()) + ':' +
+      _pad2(now.getMinutes()) + ':' +
+      _pad2(now.getSeconds());
+
+    var keys = Object.keys(_decisions);
+    for (var i = 0; i < keys.length; i++) {
+      var rid = keys[i];
+      var d = _decisions[rid];
+      if (!d.decision) continue;
+      /* 查找对应数据 */
+      var sc = _findScenario(rid);
+      var ph = _findPharmacist(rid);
+      var item = sc || ph || {};
+      rows.push({
+        review_level: sc ? 'scenario' : 'pharmacist',
+        review_id: rid,
+        batch_id: item.batch_id || _batchId,
+        disease_code: _diseaseCode,
+        disease_name: item.disease_name || '',
+        scenario_type: item.scenario_type || '',
+        relation_type: item.relation_type || '',
+        target_type: item.target_type || '',
+        target_code: item.target_code || '',
+        target_name: item.target_name || '',
+        review_decision: d.decision,
+        expert_comment: d.comment || ''
+      });
+    }
+
+    if (!rows.length) {
+      alert('暂无已填写的审核决策');
+      return;
+    }
+
+    /* JSON 导出 */
+    var jsonExport = {
+      schema_version: 'clinical-review-decision-export-v1',
+      exported_at: ts,
+      exported_by: 'Trae前端审核',
+      items: rows
+    };
+    _downloadFile(
+      JSON.stringify(jsonExport, null, 2),
+      'disease_review_' + _diseaseCode + '_' + ts.replace(/[: ]/g, '-') + '.json',
+      'application/json'
+    );
+
+    /* CSV 导出 */
+    var csvHeaders = [
+      'review_level', 'review_id', 'batch_id', 'disease_code', 'disease_name',
+      'scenario_type', 'relation_type', 'target_type', 'target_code', 'target_name',
+      'review_decision', 'expert_comment'
+    ];
+    var csvLines = [csvHeaders.join(',')];
+    for (var j = 0; j < rows.length; j++) {
+      csvLines.push(csvHeaders.map(function (h) {
+        return '"' + (rows[j][h] || '').replace(/"/g, '""') + '"';
+      }).join(','));
+    }
+    _downloadFile(
+      '\uFEFF' + csvLines.join('\n'),
+      'disease_review_' + _diseaseCode + '_' + ts.replace(/[: ]/g, '-') + '.csv',
+      'text/csv;charset=utf-8'
+    );
+
+    alert('已导出 ' + rows.length + ' 条审核决策');
+  }
+
+  /* ============================================
+   *  工具函数
+   * ============================================ */
+  function _splitSafe(str) {
+    if (!str) return [];
+    return str.split(/[；;]/).filter(function (s) { return s.trim() !== ''; }).map(function (s) { return s.trim(); });
+  }
+
+  function _labelMissingFields(arr) {
+    var result = [];
+    for (var i = 0; i < arr.length; i++) {
+      var raw = arr[i];
+      /* 尝试提取 key 部分（去掉 ×N） */
+      var key = raw.replace(/\s*×\d+\s*$/, '').trim();
+      var label = MISSING_FIELD_LABELS[key] || key;
+      var countMatch = raw.match(/×(\d+)/);
+      if (countMatch) {
+        result.push(label + '×' + countMatch[1]);
+      } else {
+        result.push(label);
+      }
+    }
+    return result;
+  }
+
+  function _flowNode(cls, text) {
+    return '<div class="dr-flow-node ' + cls + '">' + text + '</div>';
+  }
+
+  function _flowArrow() {
+    return '<div class="dr-flow-arrow"><svg viewBox="0 0 36 14"><line x1="0" y1="7" x2="28" y2="7" stroke="currentColor" stroke-width="2"/><polygon points="28,3 36,7 28,11" fill="currentColor"/></svg></div>';
+  }
+
+  function _esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function _pad2(n) {
+    return n < 10 ? '0' + n : '' + n;
+  }
+
+  function _findScenario(rid) {
+    for (var i = 0; i < _scenarios.length; i++) {
+      if (_scenarios[i].review_id === rid) return _scenarios[i];
+    }
+    return null;
+  }
+
+  function _findPharmacist(rid) {
+    for (var i = 0; i < _pharmacistItems.length; i++) {
+      if (_pharmacistItems[i].review_id === rid) return _pharmacistItems[i];
+    }
+    return null;
+  }
+
+  function _downloadFile(content, filename, type) {
+    var blob = new Blob([content], { type: type });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /* ============================================
+   *  导航栏渲染（独立，不依赖 app.js）
+   * ============================================ */
+  function _renderNav() {
+    var nav = q('.nav');
+    if (!nav) return;
+    var pages = [
+      { id: 'index', label: '数据总览', icon: '' },
+      { id: 'explore', label: '图谱探索', icon: '' },
+      { id: 'network', label: '网络探索', icon: '' },
+      { id: 'heatmap', label: '数据覆盖', icon: '' },
+      { id: 'diagnosis', label: '临床诊断', icon: '' },
+      { id: 'review', label: '临床审核', icon: '' },
+      { id: 'schema', label: '数据字典', icon: '' },
+      { id: 'terminology', label: '术语库', icon: '' }
+    ];
+    var h = '<a class="nav-brand" href="index.html">专科知识图谱 · 心血管内科</a>';
+    h += '<div class="nav-links">';
+    for (var i = 0; i < pages.length; i++) {
+      var p = pages[i];
+      var cls = (p.id === 'review') ? ' active' : '';
+      h += '<a class="nav-link' + cls + '" href="' + p.id + '.html">' + (p.icon ? p.icon + ' ' : '') + p.label + '</a>';
+    }
+    h += '</div>';
+    nav.innerHTML = h;
+  }
+
+  /* ============================================
+   *  公开 API
+   * ============================================ */
+  return {
+    init: init,
+    selectScene: _selectScene,
+    filterSidebar: filterSidebar,
+    togglePharmList: _togglePharmList,
+    setSceneDecision: _setSceneDecision,
+    setPharmDecision: _setPharmDecision,
+    onCommentInput: _onCommentInput,
+    exportDecisions: _exportDecisions,
+    renderNav: _renderNav
+  };
+
+})();
+
+/* ===== 启动 ===== */
+document.addEventListener('DOMContentLoaded', function () {
+  DR.renderNav();
+  DR.init();
+});
+</script>
+</body>
+</html>
