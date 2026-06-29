@@ -146,12 +146,17 @@ loadData(function(d){
 });
 
 function renderStats(d){
-  var et=d.stats.entity_types,rt=d.stats.rel_types;
-  var eTypes=Object.keys(et).length,rTypes=Object.keys(rt).length;
-  var html='<div class="stat-card"><div class="stat-num">'+d.stats.disease_count+'</div><div class="stat-label">疾病种类</div></div>';
-  html+='<div class="stat-card"><div class="stat-num">'+d.stats.total_nodes.toLocaleString()+'</div><div class="stat-label">实体节点</div></div>';
+  var st=d.stats||{};
+  var et=st.entity_types||{};
+  var eTypes=Object.keys(et).length;
+  var rTypes=Object.keys(REL_DEFS).length;
+  var totalNodes=st.total_nodes||0;
+  var totalRels=st.total_relationships||0;
+  var diseaseCount=st.disease_count||Object.keys(d.diseases||{}).length;
+  var html='<div class="stat-card"><div class="stat-num">'+diseaseCount+'</div><div class="stat-label">疾病种类</div></div>';
+  html+='<div class="stat-card"><div class="stat-num">'+totalNodes.toLocaleString()+'</div><div class="stat-label">实体节点</div></div>';
   html+='<div class="stat-card"><div class="stat-num">'+eTypes+'</div><div class="stat-label">实体类型</div></div>';
-  html+='<div class="stat-card"><div class="stat-num">'+rTypes+'</div><div class="stat-label">关系类型</div></div>';
+  html+='<div class="stat-card"><div class="stat-num">'+rTypes+'</div><div class="stat-label">关系类型 ('+totalRels.toLocaleString()+')</div></div>';
   document.getElementById('stats-row').innerHTML=html;
 }
 
@@ -203,16 +208,17 @@ function filterEntity(q){
 
 function renderRelationPanel(d){
   var container=document.getElementById('panel-relation');
-  var rt=d.stats.rel_types;
-  var sorted=Object.keys(rt).sort(function(a,b){return rt[b]-rt[a]});
+  var rt=(d.stats||{}).rel_types||null;
+  var relKeys=Object.keys(REL_DEFS);
+  /* 优先用API的实际关系计数，否则用0 */
   var html='<div style="overflow-x:auto"><table class="s-rel-table"><thead><tr><th style="width:40px">#</th><th>关系名称</th><th style="text-align:right">数量</th><th>方向映射</th><th>说明</th></tr></thead><tbody>';
-  sorted.forEach(function(rel,i){
-    var cnt=rt[rel];
-    var def=REL_DEFS[rel]||{mapping:'-',desc:'-'};
+  relKeys.forEach(function(rel,i){
+    var cnt=rt?(rt[rel]||0):'-';
+    var def=REL_DEFS[rel];
     html+='<tr data-search="'+(rel+def.mapping+def.desc).toLowerCase()+'">';
     html+='<td style="color:var(--muted);font-weight:700">'+(i+1)+'</td>';
     html+='<td class="s-rel-name">'+rel+'</td>';
-    html+='<td class="s-rel-cnt">'+cnt.toLocaleString()+'</td>';
+    html+='<td class="s-rel-cnt">'+(typeof cnt==='number'?cnt.toLocaleString():cnt)+'</td>';
     html+='<td class="s-rel-mapping">'+def.mapping+'</td>';
     html+='<td class="s-rel-desc">'+def.desc+'</td>';
     html+='</tr>';
