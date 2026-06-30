@@ -289,8 +289,27 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response({"error": "Disease not found"}, 404)
             return
 
-        # 静态文件
-        super().do_GET()
+        # 静态文件（HTML 禁止缓存，确保每次刷新拿到最新版本）
+        if path.endswith('.html') or path == '/':
+            self.send_response(200)
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+            # 读取文件并发送
+            filepath = self.translate_path(path)
+            if os.path.isdir(filepath):
+                filepath = os.path.join(filepath, 'index.html')
+            if os.path.isfile(filepath):
+                with open(filepath, 'rb') as f:
+                    content = f.read()
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+            else:
+                self.send_error(404, 'File not found')
+        else:
+            super().do_GET()
 
     def _json_response(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')
