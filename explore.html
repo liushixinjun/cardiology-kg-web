@@ -65,9 +65,10 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 var CURRENT_DISEASE=null,CURRENT_VIEW='disease',GRAPH=null,ALL_ENTITIES=[];
 var COLORS=['#51cf66','#ff6b6b','#ffd43b','#ff922b','#cc5de8','#22b8cf','#748ffc','#f06595','#94d82d','#fab005','#15aabf','#e599f7','#66d9e8','#fcc419','#a9e34b','#da77f2','#63e6be'];
 loadData(function(){renderNav('explore');buildDiseaseTree();renderCurrent();
-  // 自动选择第一个疾病
-  var firstCode = Object.keys(KG_DATA.diseases)[0];
-  if (firstCode) selectDisease(firstCode);
+  // 读取 URL code 参数，有则选中对应疾病，无则选第一个
+  var urlCode = new URLSearchParams(window.location.search).get('code');
+  var targetCode = (urlCode && KG_DATA.diseases[urlCode]) ? urlCode : Object.keys(KG_DATA.diseases)[0];
+  if (targetCode) selectDisease(targetCode);
   // 异步加载实体索引
   buildEntityIndexAsync();
 });

@@ -504,7 +504,7 @@ body { display: flex; flex-direction: column; }
     <div class="term-hero-left">
       <div class="hero-kicker">医学术语知识库</div>
       <h1>🧬 医学术语知识库</h1>
-      <div class="hero-sub">当前加载：心血管内科 · 覆盖77种专病 × 17个知识维度 · 支持按维度分类浏览、全局搜索、术语详情与关联关系查看</div>
+      <div class="hero-sub">当前加载：心血管内科 · 覆盖<span id="term-disease-count">-</span>种专病 × 17个知识维度 · 支持按维度分类浏览、全局搜索、术语详情与关联关系查看</div>
     </div>
     <div class="term-hero-stats">
       <div class="term-hero-stat"><div class="stat-val" id="hs-total">-</div><div class="stat-lbl">独立术语</div></div>
@@ -1018,6 +1018,8 @@ document.getElementById('term-search').addEventListener('input', function(e) {
 loadData(function(d) {
   KG_DISEASES = d.diseases;
   renderNav('terminology');
+  var countEl = document.getElementById('term-disease-count');
+  if (countEl) countEl.textContent = Object.keys(d.diseases).length;
   // 批量获取所有疾病的完整维度数据
   var codes = Object.keys(d.diseases);
   var loaded = 0;

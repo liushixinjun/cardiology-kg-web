@@ -31,7 +31,7 @@
 <div class="page">
   <div class="page-header">
     <h1>📊 数据覆盖分析</h1>
-    <div class="subtitle">77种专病 × 17个知识维度的数据覆盖热力图</div>
+    <div class="subtitle"><span id="heatmap-sub-count">-</span>种专病 × 17个知识维度的数据覆盖热力图</div>
   </div>
 
   <div class="hm-container">
@@ -43,7 +43,7 @@
     <div class="hm-help-panel" id="hm-help">
       <h3>如何使用</h3>
       <ul>
-        <li>横轴是17个知识维度（症状、体征、检查、检验、药物、治疗方案等），纵轴是77种专病</li>
+        <li>横轴是17个知识维度（症状、体征、检查、检验、药物、治疗方案等），纵轴是<span id="heatmap-help-count">-</span>种专病</li>
         <li>颜色越深说明该疾病在该维度已有较多实体数据，空白或深色说明数据缺失或为零</li>
         <li>鼠标悬浮到任意格子上，会弹出该疾病在该维度的具体实体数量</li>
         <li>点击任意格子可跳转到该疾病的详情页，查看具体实体内容</li>
@@ -61,19 +61,14 @@
 <script src="./_shared/js/app.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script>
-loadData(function(d){
-  renderNav('heatmap');
-  var codes = Object.keys(d.diseases);
-  var loaded = 0;
-  var total = codes.length;
-  codes.forEach(function(code) {
-    loadDiseaseData(code, function() {
-      loaded++;
-      if (loaded === total) {
-        renderHeatmap(d);
-      }
-    });
-  });
+renderNav('heatmap');
+loadAllDiseaseData(function(d) {
+  var diseaseCount = Object.keys(d.diseases).length;
+  var subEl = document.getElementById('heatmap-sub-count');
+  if (subEl) subEl.textContent = diseaseCount;
+  var helpEl = document.getElementById('heatmap-help-count');
+  if (helpEl) helpEl.textContent = diseaseCount;
+  renderHeatmap(d);
 });
 function toggleHelp(){var p=document.getElementById('hm-help');if(p){p.classList.toggle('show');}}
 function renderHeatmap(d){
@@ -98,7 +93,7 @@ function renderHeatmap(d){
       position:'top',
       formatter:function(p){
         var di=p.data[0],ci=p.data[1],cnt=p.data[2];
-        var names=['症状','体征','检查','检验','药物','手术','危险因素','并发症','鉴别诊断','风险分层','预后','随访','治疗方案','诊断标准','病因','流行病学','病理生理'];
+        var names=DIM_KEYS.map(function(k){return DIM_NAMES[k]});
         var dimName=names[di]||xLabels[di];
         var diseaseName=yLabels[ci];
         return '<div style="font-weight:700;margin-bottom:4px">'+diseaseName+'</div><div>'+dimName+': <span style="color:#4f8cff;font-weight:700">'+cnt+'</span> 个实体</div>';

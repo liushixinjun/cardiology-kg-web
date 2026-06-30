@@ -258,6 +258,19 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(query_disease_list())
             return
 
+        if path == '/api/kg/diseases/all':
+            # 获取所有疾病列表
+            diseases_list = query_disease_list()
+            # 对每个疾病获取完整数据
+            all_diseases = {}
+            for d in diseases_list:
+                full = query_disease_full(d['code'])
+                if full:
+                    all_diseases[d['code']] = full
+            stats = query_global_stats()
+            self._json_response({"diseases": all_diseases, "stats": stats})
+            return
+
         if path == '/api/kg/diseases/summary':
             self._json_response(query_diseases_summary())
             return
@@ -266,7 +279,7 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(query_global_stats())
             return
 
-        m = re.match(r'^/api/kg/disease/([A-Z0-9\-]+)$', path)
+        m = re.match(r'^/api/kg/disease/([A-Za-z0-9\-]+)$', path)
         if m:
             code = m.group(1)
             data = query_disease_full(code)

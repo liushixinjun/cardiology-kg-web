@@ -73,6 +73,62 @@ function loadDiseaseData(code, callback) {
   });
 }
 
+/* 批量加载所有疾病完整数据（1次请求替代76次） */
+function loadAllDiseaseData(callback) {
+  /* 1. 检查内存缓存 */
+  if (KG_DATA && KG_DATA._allLoaded) { callback(KG_DATA); return; }
+  
+  /* 2. 检查 sessionStorage 缓存 */
+  try {
+    var cached = sessionStorage.getItem('kg_all_diseases');
+    if (cached) {
+      var parsed = JSON.parse(cached);
+      /* 恢复到 KG_DATA */
+      if (!KG_DATA) KG_DATA = {diseases: {}, stats: null, _loaded: false};
+      Object.keys(parsed.diseases).forEach(function(code) {
+        parsed.diseases[code]._loaded = true;
+        KG_DATA.diseases[code] = parsed.diseases[code];
+      });
+      KG_DATA.stats = parsed.stats;
+      KG_DATA._loaded = true;
+      KG_DATA._allLoaded = true;
+      callback(KG_DATA);
+      return;
+    }
+  } catch(e) {}
+  
+  /* 3. 发起批量请求 */
+  fetch('/api/kg/diseases/all')
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if (!KG_DATA) KG_DATA = {diseases: {}, stats: null, _loaded: false};
+      Object.keys(data.diseases).forEach(function(code) {
+        data.diseases[code]._loaded = true;
+        KG_DATA.diseases[code] = data.diseases[code];
+      });
+      KG_DATA.stats = data.stats;
+      KG_DATA._loaded = true;
+      KG_DATA._allLoaded = true;
+      /* 缓存到 sessionStorage */
+      try { sessionStorage.setItem('kg_all_diseases', JSON.stringify(data)); } catch(e) {}
+      callback(KG_DATA);
+    })
+    .catch(function(e){
+      console.error('loadAllDiseaseData failed:', e);
+      /* 降级到逐个加载 */
+      loadData(function(d){
+        var codes = Object.keys(d.diseases);
+        var loaded = 0;
+        codes.forEach(function(code) {
+          loadDiseaseData(code, function() {
+            loaded++;
+            if (loaded === codes.length) callback(KG_DATA);
+          });
+        });
+      });
+    });
+}
+
 function getCoverage(code) {
   if(!KG_DATA||!KG_DATA.diseases[code])return 0;
   var d=KG_DATA.diseases[code];

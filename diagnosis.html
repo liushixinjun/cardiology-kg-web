@@ -165,7 +165,7 @@
   </div>
 
   <div class="diagnosis-footer">
-    本功能基于关键词匹配和加权评分算法，从77种心血管专病的17个知识维度中检索匹配。仅供辅助参考，不构成临床诊断依据。
+    本功能基于关键词匹配和加权评分算法，从<span id="diag-disease-count">-</span>种心血管专病的17个知识维度中检索匹配。仅供辅助参考，不构成临床诊断依据。
   </div>
 </div>
 
@@ -457,6 +457,11 @@ var DIM_TERM_LIST = {};   // dimKey -> [term, ...]
 /* ---- 3. 初始化 ---- */
 loadData(function(d) {
   renderNav('diagnosis');
+  var countEl = document.getElementById('diag-disease-count');
+  if (countEl) countEl.textContent = Object.keys(d.diseases).length;
+  loadAllDiseaseData(function(d2) {
+    console.log('All disease data loaded for diagnosis:', Object.keys(d2.diseases).length, 'diseases');
+  });
 });
 
 /* ---- 4. 主匹配函数 ---- */
