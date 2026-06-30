@@ -75,7 +75,23 @@ loadData(function(){renderNav('explore');buildDiseaseTree();renderCurrent();
 function buildDiseaseTree(){
   var ds=KG_DATA.diseases,groups={};
   Object.keys(ds).forEach(function(code){var info=ds[code].info,g=parseParentCode(info.parent).group;if(!groups[g])groups[g]=[];groups[g].push({code:code,name:info.name,cov:getCoverage(code)});});
-  var html='';Object.keys(groups).sort().forEach(function(g){var list=groups[g],ic=GROUP_ICONS[g]||'📁';html+='<div class="ex-group open"><div class="ex-group-head" onclick="toggleGroup(this)"><span class="arr">▶</span><span>'+ic+'</span><span>'+g+'</span><span class="count">'+list.length+'</span></div><div class="ex-group-items">';list.sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(d){html+='<div class="ex-disease" data-code="'+d.code+'" onclick="selectDisease(\''+d.code+'\')"><span class="name">'+d.name+'</span><span class="cov '+covClass(d.cov)+'">'+Math.round(d.cov)+'%</span></div>';});html+='</div></div>';});
+  /* 已解析PDF的大类优先展示 */
+  var parsedFirst=['冠心病','心肌病','心力衰竭'];
+  var allGroups=Object.keys(groups);
+  var sorted=parsedFirst.filter(function(g){return groups[g]}).concat(allGroups.filter(function(g){return parsedFirst.indexOf(g)===-1}).sort());
+  var html='';
+  sorted.forEach(function(g){
+    var list=groups[g],ic=GROUP_ICONS[g]||'📁';
+    /* 每大类下疾病按百分比高到低排序 */
+    list.sort(function(a,b){return b.cov-a.cov});
+    var avgCov=list.length?Math.round(list.reduce(function(s,d){return s+d.cov},0)/list.length):0;
+    var avgCls=avgCov>=80?'cov-full':avgCov>=60?'cov-good':avgCov>=40?'cov-mid':'cov-low';
+    html+='<div class="ex-group open"><div class="ex-group-head" onclick="toggleGroup(this)"><span class="arr">▶</span><span>'+ic+'</span><span>'+g+'</span><span class="count">'+list.length+'</span><span class="cov '+avgCls+'">'+avgCov+'%</span></div><div class="ex-group-items">';
+    list.forEach(function(d){
+      html+='<div class="ex-disease" data-code="'+d.code+'" onclick="selectDisease(\''+d.code+'\')"><span class="name">'+d.name+'</span><span class="cov '+covClass(d.cov)+'">'+Math.round(d.cov)+'%</span></div>';
+    });
+    html+='</div></div>';
+  });
   document.getElementById('disease-tree').innerHTML=html;
 }
 function toggleGroup(el){el.parentElement.classList.toggle('open')}

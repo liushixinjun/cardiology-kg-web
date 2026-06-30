@@ -10,8 +10,8 @@ function togglePanelNote(el) {
   el.classList.toggle('active', show);
 }
 
-/* GROUP_ORDER: 优先展示顺序，缺失的大类自动追加到末尾 */
-var GROUP_ORDER_BASE = ['心力衰竭','心律失常','冠心病','心肌病','瓣膜性心脏病','心包疾病','高血压','先天性心脏病','感染性心内膜炎','心脏骤停/猝死','主动脉/外周血管','心脏神经症'];
+/* GROUP_ORDER: 已解析PDF的大类优先展示，其余按默认顺序 */
+var GROUP_ORDER_BASE = ['冠心病','心肌病','心力衰竭','心律失常','瓣膜性心脏病','心包疾病','高血压','先天性心脏病','感染性心内膜炎','心脏骤停/猝死','主动脉/外周血管','心脏神经症'];
 function getGroupOrder(groups) {
   var seen = {};
   var order = GROUP_ORDER_BASE.filter(function(g) { if (groups[g]) { seen[g] = true; return true; } return false; });
@@ -131,23 +131,41 @@ function renderFlowBar(stats, groups) {
 function renderDiseaseTable(groups) {
   var el = document.getElementById('disease-table');
   if (!el) return;
-  var html = '<table><thead><tr><th>大类</th><th>专病数</th><th>平均完整率</th><th>维度覆盖</th><th>操作</th></tr></thead><tbody>';
   var groupOrder = getGroupOrder(groups);
-  groupOrder.forEach(function(g, idx) {
-    if (!groups[g]) return;
-    var gr = groups[g], cov = gr.coverage;
-    var covCls = cov >= 80 ? 'cov-full' : cov >= 60 ? 'cov-good' : cov >= 40 ? 'cov-mid' : 'cov-low';
-    var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>'; }).join('');
-    html += '<tr class="dt-row" onclick="openModal(' + idx + ')">';
-    html += '<td><span class="dt-icon">' + gr.icon + '</span> ' + g + '</td>';
-    html += '<td>' + gr.count + '</td>';
-    html += '<td><span class="tag ' + covCls + '">' + cov + '%</span></td>';
-    html += '<td class="dt-dims">' + dimVec + '</td>';
-    html += '<td><span class="dt-btn">查看专病 \u2192</span></td>';
-    html += '</tr>';
-  });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  /* 按完整率百分比排序（高→低） */
+  var sorted = groupOrder.filter(function(g){return groups[g]}).sort(function(a,b){return groups[b].coverage - groups[a].coverage});
+  var DEFAULT_SHOW = 5;
+  var showAll = false;
+
+  function renderRows(order) {
+    var html = '<table><thead><tr><th>大类</th><th>专病数</th><th>平均完整率</th><th>维度覆盖</th><th>操作</th></tr></thead><tbody>';
+    order.forEach(function(g, idx) {
+      var gr = groups[g], cov = gr.coverage;
+      var covCls = cov >= 80 ? 'cov-full' : cov >= 60 ? 'cov-good' : cov >= 40 ? 'cov-mid' : 'cov-low';
+      var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>'; }).join('');
+      var realIdx = groupOrder.indexOf(g);
+      html += '<tr class="dt-row" onclick="openModal(' + realIdx + ')">';
+      html += '<td><span class="dt-icon">' + gr.icon + '</span> ' + g + '</td>';
+      html += '<td>' + gr.count + '</td>';
+      html += '<td><span class="tag ' + covCls + '">' + cov + '%</span></td>';
+      html += '<td class="dt-dims">' + dimVec + '</td>';
+      html += '<td><span class="dt-btn">查看专病 \u2192</span></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    if (sorted.length > DEFAULT_SHOW) {
+      html += '<div class="dt-toggle" onclick="window._dtToggle()">' +
+        (showAll ? '收起 ↑' : '展开全部 ' + sorted.length + ' 个大类 ↓') + '</div>';
+    }
+    return html;
+  }
+
+  window._dtToggle = function() {
+    showAll = !showAll;
+    el.innerHTML = renderRows(showAll ? sorted : sorted.slice(0, DEFAULT_SHOW));
+  };
+
+  el.innerHTML = renderRows(sorted.slice(0, DEFAULT_SHOW));
 }
 
 /* ====== 弹窗 Modal ====== */
