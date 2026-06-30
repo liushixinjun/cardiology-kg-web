@@ -107,8 +107,12 @@
 
 /* ====== Panel ====== */
 .panel{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px;position:relative;overflow:hidden}
-.panel-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px}
-.panel-note{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.panel-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.panel-help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(79,140,255,.12);color:var(--accent);font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none}
+.panel-help:hover{background:rgba(79,140,255,.25);transform:scale(1.1)}
+.panel-help.active{background:var(--accent);color:#fff}
+.panel-note{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;display:none}
+.panel-note.show{display:block}
 
 /* ====== Main Grid (Graph + Radar) ====== */
 .main-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:24px}
@@ -229,12 +233,12 @@
   <!-- Main Grid: Graph + Radar -->
   <section class="main-grid">
     <div class="panel">
-      <div class="panel-title">知识网络图谱</div>
+      <div class="panel-title"><span>知识网络图谱</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">中心节点为心血管内科专科，向外辐射疾病大类与专病节点。点击专病节点可跳转查看详情。</div>
       <div id="chart-graph"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">17维度全局覆盖率</div>
+      <div class="panel-title"><span>17维度全局覆盖率</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">雷达图展示每个知识维度在全部专病中的覆盖比例，100%表示所有疾病均有该维度数据。</div>
       <div id="chart-radar"></div>
     </div>
@@ -254,12 +258,12 @@
   <!-- Bottom Grid: Dim Chart + Gaps -->
   <section class="bottom-grid">
     <div class="panel">
-      <div class="panel-title">各维度实体数量分布</div>
+      <div class="panel-title"><span>各维度实体数量分布</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">柱状图展示17个知识维度中有数据的疾病数量，颜色反映覆盖率等级。</div>
       <div id="chart-dim"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">重点质量缺口</div>
+      <div class="panel-title"><span>重点质量缺口</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">按缺失疾病数排序，优先关注影响临床可用性的维度缺口。</div>
       <div class="gap-list" id="gap-list"></div>
     </div>

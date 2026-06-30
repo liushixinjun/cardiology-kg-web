@@ -1,6 +1,15 @@
 /* === 专科知识图谱 · 数据总览 Dashboard === */
 /* 所有数据从 KG_DATA 动态读取，无硬编码 */
 
+/* 帮助说明切换 */
+function togglePanelNote(el) {
+  var note = el.closest('.panel').querySelector('.panel-note');
+  if (!note) return;
+  var show = !note.classList.contains('show');
+  note.classList.toggle('show', show);
+  el.classList.toggle('active', show);
+}
+
 /* GROUP_ORDER: 优先展示顺序，缺失的大类自动追加到末尾 */
 var GROUP_ORDER_BASE = ['心力衰竭','心律失常','冠心病','心肌病','瓣膜性心脏病','心包疾病','高血压','先天性心脏病','感染性心内膜炎','心脏骤停/猝死','主动脉/外周血管','心脏神经症'];
 function getGroupOrder(groups) {

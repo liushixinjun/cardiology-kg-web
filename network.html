@@ -532,10 +532,15 @@ var DEFAULT_DISEASE_NAMES = [];
 function buildDefaultDiseases(diseases) {
   var scored = Object.keys(diseases).map(function(code) {
     var d = diseases[code];
-    var dimCount = DIM_KEYS.filter(function(k) {
-      var items = d.dimensions ? (d.dimensions[k] || []) : [];
-      return items.length > 0;
-    }).length;
+    var dimCount = 0;
+    // 优先用完整 dimensions 数据
+    if (d.dimensions && Object.keys(d.dimensions).length > 0) {
+      dimCount = DIM_KEYS.filter(function(k) { return (d.dimensions[k] || []).length > 0; }).length;
+    }
+    // 回退到 dim_counts（loadData 骨架数据）
+    if (dimCount === 0 && d.dim_counts) {
+      dimCount = DIM_KEYS.filter(function(k) { return (d.dim_counts[k] || 0) > 0; }).length;
+    }
     return { name: d.info.name, code: code, dimCount: dimCount };
   });
   scored.sort(function(a, b) { return b.dimCount - a.dimCount; });
