@@ -110,6 +110,7 @@
 .panel-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .panel-help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(79,140,255,.12);color:var(--accent);font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none}
 .panel-help:hover{background:rgba(79,140,255,.25);transform:scale(1.1)}
+.panel-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:700;background:rgba(81,207,102,.12);color:#51cf66;letter-spacing:.02em}
 .panel-help.active{background:var(--accent);color:#fff}
 .panel-note{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;display:none}
 .panel-note.show{display:block}
@@ -235,7 +236,7 @@
   <!-- Main Grid: Graph + Radar -->
   <section class="main-grid">
     <div class="panel">
-      <div class="panel-title"><span>知识网络图谱</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
+      <div class="panel-title"><span>知识网络图谱</span><span class="panel-badge">可交互</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">中心节点为心血管内科专科，向外辐射疾病大类与专病节点。点击专病节点可跳转查看详情。</div>
       <div id="chart-graph"></div>
     </div>

@@ -219,7 +219,7 @@ function renderGraph(groups) {
     var gr = groups[g];
     nodes.push({ name: g, symbolSize: 36, category: 0, value: gr.count, itemStyle: { color: catColors[gi % catColors.length] } });
     links.push({ source: '心血管内科', target: g });
-    gr.diseases.slice(0, 6).forEach(function(d) {
+    gr.diseases.slice().sort(function(a,b){return b.pct - a.pct}).slice(0, 5).forEach(function(d) {
       if (!nodes.find(function(n) { return n.name === d.name; })) {
         nodes.push({ name: d.name, symbolSize: Math.max(12, Math.round(d.pct / 5)), category: 1, value: d.pct, diseaseCode: d.code });
       }
@@ -235,7 +235,9 @@ function renderGraph(groups) {
       formatter: function(p) {
         if (p.dataType === 'edge') return '';
         var cat = p.data.category;
-        return p.data.name + (cat === 0 ? ' (大类 ' + p.data.value + '种)' : cat === 2 ? ' (专科)' : ' (完整率 ' + p.data.value + '%)');
+        if (cat === 2) return p.data.name + ' (专科)';
+        if (cat === 0) return p.data.name + ' (大类 ' + p.data.value + '种)';
+        return p.data.name + '<br/>完整率: <b>' + p.data.value + '%</b>';
       }
     },
     series: [{
@@ -243,8 +245,15 @@ function renderGraph(groups) {
       force: { repulsion: 350, edgeLength: [50, 120], gravity: 0.12, friction: 0.6 },
       label: {
         show: true, fontSize: 10, color: '#f0f4f8', fontWeight: 600,
-        formatter: function(p) { return (p.data.category === 0 || p.data.category === 2) ? '{bold|' + p.data.name + '}' : p.data.name; },
-        rich: { bold: { fontSize: 12, fontWeight: 800, color: '#f0f4f8' } }
+        formatter: function(p) {
+          if (p.data.category === 2) return '{bold|' + p.data.name + '}';
+          if (p.data.category === 0) return '{bold|' + p.data.name + '}';
+          return p.data.name + '\n{pct|' + p.data.value + '%}';
+        },
+        rich: {
+          bold: { fontSize: 12, fontWeight: 800, color: '#f0f4f8' },
+          pct: { fontSize: 9, color: '#74c0fc', padding: [2, 0, 0, 0] }
+        }
       },
       lineStyle: { color: 'source', curveness: 0.15, width: 1.2, opacity: 0.4 },
       emphasis: { focus: 'adjacency', lineStyle: { width: 3 }, itemStyle: { borderWidth: 3, borderColor: '#fff' } },
