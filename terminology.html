@@ -660,7 +660,7 @@ function renderDimList() {
     var count = DIM_STATS[k] || 0;
     var cov = TOTAL_DISEASES > 0 ? Math.round(DIM_DISEASE_COV[k] / TOTAL_DISEASES * 100) : 0;
     var barPct = maxCount > 0 ? Math.round(count / maxCount * 100) : 0;
-    var color = DIM_COLORS[i % DIM_COLORS.length];
+    var color = DIM_COLORS_ARR[i % DIM_COLORS_ARR.length];
     var activeCls = k === CURRENT_DIM ? ' active' : '';
     var icon = (typeof DIM_ICONS !== 'undefined' && DIM_ICONS[k]) ? DIM_ICONS[k] : '';
 

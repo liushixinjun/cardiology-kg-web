@@ -510,22 +510,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
    ================================================================ */
 
 /* ---------- Constants ---------- */
-var DIM_COLORS = {
-  Symptom: '#51cf66', Sign: '#cc5de8', Exam: '#22b8cf', LabTest: '#748ffc',
-  Medication: '#ff922b', Procedure: '#f06595', RiskFactor: '#ff6b6b',
-  Complication: '#ffd43b', DiagnosisCriteria: '#94d82d', TreatmentPlan: '#66d9e8',
-  Etiology: '#fcc419', DifferentialDiagnosis: '#ea7ccc',
-  RiskStratification: '#a9e34b', Prognosis: '#63e6be', FollowUp: '#fcc419',
-  Epidemiology: '#da77f2', Pathophysiology: '#748ffc'
-};
-var DIM_LABELS = {
-  Symptom: '症状', Sign: '体征', Exam: '检查', LabTest: '检验',
-  Medication: '药物', Procedure: '手术', RiskFactor: '危险因素',
-  Complication: '并发症', DiagnosisCriteria: '诊断标准', TreatmentPlan: '治疗方案',
-  Etiology: '病因', DifferentialDiagnosis: '鉴别诊断',
-  RiskStratification: '风险分层', Prognosis: '预后', FollowUp: '随访',
-  Epidemiology: '流行病学', Pathophysiology: '病理生理'
-};
+/* DIM_COLORS and DIM_NAMES are now global from app.js */
 var DISEASE_COLOR = '#4f8cff';
 
 /* ---------- State ---------- */
@@ -542,7 +527,20 @@ var ALL_GRAPH_EDGES = [];       // all edges for BFS
 var LAST_GRAPH_DATA = { nodes: [], links: [] };
 var NODE_EXPANDED = {};         // entityName -> bool (level 1 expanded)
 var SEARCH_RESULTS = null;      // search filtered node names
-var DEFAULT_DISEASE_NAMES = ['急性心肌梗死', '心房颤动', '主动脉夹层', '高血压', '心力衰竭'];
+/* 从数据中动态选取覆盖维度最多的前5个疾病 */
+var DEFAULT_DISEASE_NAMES = [];
+function buildDefaultDiseases(diseases) {
+  var scored = Object.keys(diseases).map(function(code) {
+    var d = diseases[code];
+    var dimCount = DIM_KEYS.filter(function(k) {
+      var items = d.dimensions ? (d.dimensions[k] || []) : [];
+      return items.length > 0;
+    }).length;
+    return { name: d.info.name, code: code, dimCount: dimCount };
+  });
+  scored.sort(function(a, b) { return b.dimCount - a.dimCount; });
+  DEFAULT_DISEASE_NAMES = scored.slice(0, 5).map(function(s) { return s.name; });
+}
 var DEFAULT_VISIBLE_DIMS = ['Symptom', 'Exam', 'LabTest', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan'];
 var MAX_OTHER_DISEASES = 24;
 
@@ -566,6 +564,7 @@ loadData(function(d) {
    Disease Select
    ================================================================ */
 function chooseDefaultDisease(d) {
+  buildDefaultDiseases(d.diseases);
   for (var i = 0; i < DEFAULT_DISEASE_NAMES.length; i++) {
     var target = DEFAULT_DISEASE_NAMES[i];
     var found = null;
@@ -664,7 +663,7 @@ function renderDimFilters() {
     html += '<input type="checkbox" ' + (DIM_FILTERS[k] ? 'checked' : '') +
             ' onchange="onDimToggle(\'' + k + '\', this.checked)">';
     html += '<span class="dim-dot" style="background:' + color + '"></span>';
-    html += '<span class="dim-label">' + DIM_LABELS[k] + '</span>';
+    html += '<span class="dim-label">' + DIM_NAMES[k] + '</span>';
     html += '<span class="dim-count">' + count + '</span>';
     html += '</label>';
   });
@@ -974,7 +973,7 @@ function renderGraph() {
         var info = ALL_GRAPH_NODES[p.name];
         var t = '';
         if (info) {
-          t = info.type === 'Disease' ? '疾病' : (DIM_LABELS[info.type] || info.type || '');
+          t = info.type === 'Disease' ? '疾病' : (DIM_NAMES[info.type] || info.type || '');
         }
         return '<b>' + p.name + '</b>' + (t ? '<br><span style="color:#8b90a0">' + t + '</span>' : '');
       }
@@ -1157,7 +1156,7 @@ function getStarterEntities(d, limit) {
     var items = d.dimensions[k] || [];
     items.slice(0, 2).forEach(function(e) {
       if (result.length < limit) {
-        result.push({ name: e.name, dim: DIM_LABELS[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
+        result.push({ name: e.name, dim: DIM_NAMES[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
       }
     });
   });
@@ -1166,7 +1165,7 @@ function getStarterEntities(d, limit) {
       if (result.length >= limit) return;
       (d.dimensions[k] || []).forEach(function(e) {
         if (result.length < limit && !result.some(function(x) { return x.name === e.name; })) {
-          result.push({ name: e.name, dim: DIM_LABELS[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
+          result.push({ name: e.name, dim: DIM_NAMES[k] || k, type: k, color: DIM_COLORS[k] || '#888' });
         }
       });
     });
@@ -1300,7 +1299,7 @@ function showDiseaseDetail(name, nd) {
     var items = d.dimensions[k] || [];
     if (items.length === 0) return;
     h += '<div class="nw-dim-bar">';
-    h += '<span class="bar-label">' + DIM_LABELS[k] + '</span>';
+    h += '<span class="bar-label">' + DIM_NAMES[k] + '</span>';
     h += '<span class="bar-dots">';
     var showCount = Math.min(items.length, 12);
     for (var i = 0; i < showCount; i++) {
@@ -1351,7 +1350,7 @@ function showEntityDetailPanel(name, nd) {
   h += '<div class="nw-detail-code">' + (nd.code || '-') + '</div>';
 
   var color = DIM_COLORS[nd.type] || '#888';
-  var dimLabel = DIM_LABELS[nd.type] || nd.type;
+  var dimLabel = DIM_NAMES[nd.type] || nd.type;
   h += '<span class="nw-dim-tag" style="background:' + color + '">' + dimLabel + '</span>';
 
   /* Count associated diseases */
@@ -1412,7 +1411,7 @@ function showEntityDetailPanel(name, nd) {
       });
       if (dimCount > 0) {
         h += '<div class="nw-dim-bar">';
-        h += '<span class="bar-label">' + DIM_LABELS[k] + '</span>';
+        h += '<span class="bar-label">' + DIM_NAMES[k] + '</span>';
         h += '<span class="bar-dots">';
         var sc = Math.min(dimCount, 12);
         for (var i = 0; i < sc; i++) {
@@ -1455,7 +1454,7 @@ function showEntityDetailPanel(name, nd) {
         });
       });
       if (related.length > 0) {
-        h += '<div class="nw-cross-row"><b>' + DIM_LABELS[k] + ':</b> ' +
+        h += '<div class="nw-cross-row"><b>' + DIM_NAMES[k] + ':</b> ' +
              related.slice(0, 4).join('、') +
              (related.length > 4 ? '等' + related.length + '种' : '') + '</div>';
       }
@@ -1638,7 +1637,7 @@ function onPathNodeClick(name, nd) {
       var parts = [];
       parts.push('<span class="po-name">' + path.nodes[0] + '</span>');
       for (var i = 0; i < path.edges.length; i++) {
-        var edgeLabel = DIM_LABELS[path.edges[i].label] || path.edges[i].label || '';
+        var edgeLabel = DIM_NAMES[path.edges[i].label] || path.edges[i].label || '';
         parts.push('<span class="po-arrow">—[' + edgeLabel + ']→</span>');
         parts.push('<span class="po-name">' + path.nodes[i + 1] + '</span>');
       }

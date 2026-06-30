@@ -2,6 +2,9 @@
 var KG_DATA = null;
 var DIM_NAMES = {Symptom:'症状',Sign:'体征',Exam:'检查',LabTest:'检验',Medication:'药物',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理'};
 var DIM_KEYS = Object.keys(DIM_NAMES);
+/* 全局维度颜色（对象+数组两种形式，供各页面统一引用） */
+var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',Exam:'#22b8cf',LabTest:'#748ffc',Medication:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc'};
+var DIM_COLORS_ARR = DIM_KEYS.map(function(k){return DIM_COLORS[k]});
 
 /* 二级层级映射：从 parentCode 提取大类前缀 → 大类名 + 子类名 */
 function parseParentCode(pc) {

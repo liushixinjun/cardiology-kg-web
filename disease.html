@@ -190,7 +190,7 @@ function renderGraph(code){
   _gc=echarts.init(c,null,{renderer:'svg'});
   var d=KG_DATA.diseases[code],info=d.info,ns=[],ls=[];
   ns.push({name:info.name,symbolSize:60,category:0,itemStyle:{color:'#4f8cff',shadowBlur:25,shadowColor:'rgba(79,140,255,0.7)'},label:{fontSize:14,fontWeight:'bold',color:'#fff'}});
-  var cs=['#51cf66','#ff6b6b','#ffd43b','#ff922b','#cc5de8','#22b8cf','#748ffc','#f06595','#94d82d','#fab005','#15aabf','#e599f7','#66d9e8','#fcc419','#a9e34b','#da77f2','#63e6be'];
+  var cs = DIM_COLORS_ARR;
   DIM_KEYS.forEach(function(k,idx){
     var it=d.dimensions[k]||[];
     if(it.length>0){
