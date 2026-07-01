@@ -31,7 +31,7 @@
 <div class="page">
   <div class="page-header">
     <h1>📊 数据覆盖分析</h1>
-    <div class="subtitle"><span id="heatmap-sub-count">-</span>种专病 × 17个知识维度的数据覆盖热力图</div>
+    <div class="subtitle"><span id="heatmap-sub-count">-</span>种专病 × <span class="dcp">17</span>个知识维度的数据覆盖热力图</div>
   </div>
 
   <div class="hm-container">
@@ -43,7 +43,7 @@
     <div class="hm-help-panel" id="hm-help">
       <h3>如何使用</h3>
       <ul>
-        <li>横轴是17个知识维度（症状、体征、检查、检验、药物、治疗方案等），纵轴是<span id="heatmap-help-count">-</span>种专病</li>
+        <li>横轴是<span class="dcp">17</span>个知识维度（症状、体征、检查、检验、药物、治疗方案等），纵轴是<span id="heatmap-help-count">-</span>种专病</li>
         <li>颜色越深说明该疾病在该维度已有较多实体数据，空白或深色说明数据缺失或为零</li>
         <li>鼠标悬浮到任意格子上，会弹出该疾病在该维度的具体实体数量</li>
         <li>点击任意格子可跳转到该疾病的详情页，查看具体实体内容</li>
@@ -58,10 +58,10 @@
     </div>
   </div>
 </div>
-<script src="./_shared/js/app.js?v=20260630"></script>
+<script src="./_shared/js/app.js?v=20260701"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script>
-renderNav('heatmap');
+injectDimCount();renderNav('heatmap');
 loadAllDiseaseData(function(d) {
   var diseaseCount = Object.keys(d.diseases).length;
   var subEl = document.getElementById('heatmap-sub-count');

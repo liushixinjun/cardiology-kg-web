@@ -165,14 +165,14 @@
   </div>
 
   <div class="diagnosis-footer">
-    本功能基于关键词匹配和加权评分算法，从<span id="diag-disease-count">-</span>种心血管专病的17个知识维度中检索匹配。仅供辅助参考，不构成临床诊断依据。
+    本功能基于关键词匹配和加权评分算法，从<span id="diag-disease-count">-</span>种心血管专病的<span class="dcp">17</span>个知识维度中检索匹配。仅供辅助参考，不构成临床诊断依据。
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260630"></script>
+<script src="./_shared/js/app.js?v=20260701"></script>
 <script>
 /* ============================================================
-   临床诊断模拟 — 17维度加权匹配引擎
+   临床诊断模拟 — <span class="dcp">17</span>维度加权匹配引擎
    ============================================================ */
 
 /* ---- 1. 维度权重配置 ---- */
@@ -456,7 +456,7 @@ var DIM_TERM_LIST = {};   // dimKey -> [term, ...]
 
 /* ---- 3. 初始化 ---- */
 loadData(function(d) {
-  renderNav('diagnosis');
+  injectDimCount();renderNav('diagnosis');
   var countEl = document.getElementById('diag-disease-count');
   if (countEl) countEl.textContent = Object.keys(d.diseases).length;
   loadAllDiseaseData(function(d2) {
@@ -713,28 +713,7 @@ function displayResults(matches, maxScore) {
 }
 
 /* ---- 8. 维度颜色映射 ---- */
-function getDimColor(dimKey) {
-  var colors = {
-    Symptom: '#4f8cff',
-    Sign: '#cc5de8',
-    Exam: '#22b8cf',
-    LabTest: '#51cf66',
-    Medication: '#ff922b',
-    Procedure: '#f06595',
-    RiskFactor: '#ff6b6b',
-    Complication: '#ffd43b',
-    DifferentialDiagnosis: '#8b90a0',
-    RiskStratification: '#8b90a0',
-    Prognosis: '#8b90a0',
-    FollowUp: '#8b90a0',
-    TreatmentPlan: '#6edfa0',
-    DiagnosisCriteria: '#ffe066',
-    Etiology: '#d78fe8',
-    Epidemiology: '#8b90a0',
-    Pathophysiology: '#5ecdd8'
-  };
-  return colors[dimKey] || '#8b90a0';
-}
+function getDimColor(dimKey) { return DIM_COLORS[dimKey] || '#8b90a0'; }
 
 /* ---- 9. Canvas 雷达图绘制 ---- */
 function drawRadar(canvasId, match) {
@@ -749,7 +728,7 @@ function drawRadar(canvasId, match) {
 
   // 绘制17个轴（排除DifferentialDiagnosis的特殊显示，但保留结构）
   // 为避免过于拥挤，只显示有数据的维度 + 4个核心维度作为骨架
-  var displayDims = DIM_KEYS.slice(0, 17);
+  var displayDims = DIM_KEYS;
   var n = displayDims.length;
   var angleStep = (2 * Math.PI) / n;
   var startAngle = -Math.PI / 2; // 从顶部开始

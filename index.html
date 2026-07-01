@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 数据总览</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260630">
+<link rel="stylesheet" href="./_shared/css/style.css?v=20260701">
 <style>
 /* ====== Page ====== */
 .page{width:100%;padding:24px 32px;box-sizing:border-box}
@@ -217,10 +217,10 @@
       <div class="hero-left">
         <div class="hero-badge"><span class="hero-badge-dot"></span> NEO4J 实时图谱</div>
         <h1>心血管内科 · 专科知识图谱</h1>
-        <div class="hero-sub">以心血管内科为主线，按疾病大类组织专病知识，汇总症状、体征、检查、检验、药物、治疗方案等17个知识维度，帮助快速了解图谱覆盖范围和建设质量。</div>
+        <div class="hero-sub">以心血管内科为主线，按疾病大类组织专病知识，汇总症状、体征、检查、检验、药物、治疗方案等<span class="dcp">17</span>个知识维度，帮助快速了解图谱覆盖范围和建设质量。</div>
         <div class="hero-tags">
           <span class="hero-tag">🏥 心血管内科</span>
-          <span class="hero-tag">📊 17知识维度</span>
+          <span class="hero-tag">📊 <span class="dcp">17</span>知识维度</span>
           <span class="hero-tag">🔍 检索 · 可视化 · 质量审计</span>
         </div>
       </div>
@@ -241,7 +241,7 @@
       <div id="chart-graph"></div>
     </div>
     <div class="panel">
-      <div class="panel-title"><span>17维度全局覆盖率</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
+      <div class="panel-title"><span><span class="dcp">17</span>维度全局覆盖率</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
       <div class="panel-note">雷达图展示每个知识维度在全部专病中的覆盖比例，100%表示所有疾病均有该维度数据。</div>
       <div id="chart-radar"></div>
     </div>
@@ -262,7 +262,7 @@
   <section class="bottom-grid">
     <div class="panel">
       <div class="panel-title"><span>各维度实体数量分布</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
-      <div class="panel-note">柱状图展示17个知识维度中有数据的疾病数量，颜色反映覆盖率等级。</div>
+      <div class="panel-note">柱状图展示<span class="dcp">17</span>个知识维度中有数据的疾病数量，颜色反映覆盖率等级。</div>
       <div id="chart-dim"></div>
     </div>
     <div class="panel">
@@ -282,7 +282,7 @@
       <a class="nav-card" href="explore.html">
         <div class="nc-icon">&#x1f9ed;</div>
         <h3>图谱探索</h3>
-        <p>查看专病17维度详情、关系网络和实体清单</p>
+        <p>查看专病<span class="dcp">17</span>维度详情、关系网络和实体清单</p>
       </a>
       <a class="nav-card" href="network.html">
         <div class="nc-icon">&#x1f578;&#xfe0f;</div>
@@ -329,10 +329,10 @@
 <div class="modal" id="modal"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260630"></script>
+<script src="./_shared/js/app.js?v=20260701"></script>
 <script src="dashboard.js"></script>
 <script>
-renderNav('index');
+injectDimCount();renderNav('index');
 /* 优先用 loadAllDiseaseData（批量），不存在则降级 loadData + 逐个加载 */
 if (typeof loadAllDiseaseData === 'function') {
   loadAllDiseaseData(function(d) { renderDashboard(); });

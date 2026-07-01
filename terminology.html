@@ -504,7 +504,7 @@ body { display: flex; flex-direction: column; }
     <div class="term-hero-left">
       <div class="hero-kicker">医学术语知识库</div>
       <h1>🧬 医学术语知识库</h1>
-      <div class="hero-sub">当前加载：心血管内科 · 覆盖<span id="term-disease-count">-</span>种专病 × 17个知识维度 · 支持按维度分类浏览、全局搜索、术语详情与关联关系查看</div>
+      <div class="hero-sub">当前加载：心血管内科 · 覆盖<span id="term-disease-count">-</span>种专病 × <span class="dcp">17</span>个知识维度 · 支持按维度分类浏览、全局搜索、术语详情与关联关系查看</div>
     </div>
     <div class="term-hero-stats">
       <div class="term-hero-stat"><div class="stat-val" id="hs-total">-</div><div class="stat-lbl">独立术语</div></div>
@@ -557,7 +557,7 @@ body { display: flex; flex-direction: column; }
 
 </div>
 
-<script src="./_shared/js/app.js?v=20260630"></script>
+<script src="./_shared/js/app.js?v=20260701"></script>
 <script>
 /* ================================================================
    Medical Terminology Knowledge Base — Three-Column Layout
@@ -594,12 +594,7 @@ var DIM_DESC = {
 };
 
 /* Dimension colors for progress bars */
-var DIM_COLORS = [
-  '#4f8cff','#22b8cf','#51cf66','#ffd43b','#ff922b',
-  '#cc5de8','#f06595','#ff6b6b','#4f8cff','#22b8cf',
-  '#51cf66','#ffd43b','#ff922b','#cc5de8','#f06595',
-  '#ff6b6b','#4f8cff'
-];
+/* DIM_COLORS_ARR is global from app.js */
 
 /* ============ Build terminology index ============ */
 function buildTermIndex(d) {
@@ -1017,7 +1012,7 @@ document.getElementById('term-search').addEventListener('input', function(e) {
 /* ============ Init ============ */
 loadData(function(d) {
   KG_DISEASES = d.diseases;
-  renderNav('terminology');
+  injectDimCount();renderNav('terminology');
   var countEl = document.getElementById('term-disease-count');
   if (countEl) countEl.textContent = Object.keys(d.diseases).length;
   // 批量获取所有疾病的完整维度数据

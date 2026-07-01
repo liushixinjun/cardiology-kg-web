@@ -52,7 +52,7 @@
       <a class="std-anchor active" href="#scope">标准定位</a>
       <a class="std-anchor" href="#hierarchy">图谱层级</a>
       <a class="std-anchor" href="#entities">实体类型标准</a>
-      <a class="std-anchor" href="#dimensions">17维度标准</a>
+      <a class="std-anchor" href="#dimensions"><span class="dcp">17</span>维度标准</a>
       <a class="std-anchor" href="#relations">关系建模标准</a>
       <a class="std-anchor" href="#properties">字段约束</a>
       <a class="std-anchor" href="#quality">质量规则</a>
@@ -77,7 +77,7 @@
           <span class="std-flow-node">疾病大类 DiseaseCategory</span><span class="std-flow-arrow">→</span>
           <span class="std-flow-node">疾病亚类 DiseaseSubcategory</span><span class="std-flow-arrow">→</span>
           <span class="std-flow-node">疾病 Disease</span><span class="std-flow-arrow">→</span>
-          <span class="std-flow-node">17维度知识实体</span>
+          <span class="std-flow-node"><span class="dcp">17</span>维度知识实体</span>
         </div>
       </section>
 
@@ -88,8 +88,8 @@
       </section>
 
       <section class="std-section" id="dimensions">
-        <h2>17维度标准</h2>
-        <div class="std-section-desc">每个疾病应围绕以下17个知识维度组织数据。维度是否有数据用于计算首页“17维度数据完整率”。</div>
+        <h2><span class="dcp">17</span>维度标准</h2>
+        <div class="std-section-desc">每个疾病应围绕以下<span class="dcp">17</span>个知识维度组织数据。维度是否有数据用于计算首页“17维度数据完整率”。</div>
         <div class="std-badge-row" id="dimension-badges"></div>
       </section>
 
@@ -116,7 +116,7 @@
         <div class="std-rule-list">
           <div class="std-rule"><div class="std-rule-title">命名规范</div><div class="std-rule-text">实体名称应使用规范中文医学名称，避免英文缩写、泛化占位符和重复别名污染主实体。</div></div>
           <div class="std-rule"><div class="std-rule-title">证据链要求</div><div class="std-rule-text">关键医学知识必须可追溯到教材、指南、共识或文献证据，关系应能关联 Evidence 或 Guideline。</div></div>
-          <div class="std-rule"><div class="std-rule-title">维度完整性</div><div class="std-rule-text">疾病完整性按17维度检查，不能只看实体总量；有数据还要检查是否为有效医学内容。</div></div>
+          <div class="std-rule"><div class="std-rule-title">维度完整性</div><div class="std-rule-text">疾病完整性按<span class="dcp">17</span>维度检查，不能只看实体总量；有数据还要检查是否为有效医学内容。</div></div>
           <div class="std-rule"><div class="std-rule-title">细粒度要求</div><div class="std-rule-text">药物、治疗方案、鉴别诊断等高价值维度应避免“大类化”“占位化”，需要尽量细化到临床可用粒度。</div></div>
         </div>
       </section>
@@ -124,7 +124,7 @@
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260630"></script>
+<script src="./_shared/js/app.js?v=20260701"></script>
 <script>
 var ENTITY_STANDARD=[
   ['专科','Specialty','医学专科领域，如心血管内科'],['疾病大类','DiseaseCategory','专科下的一级疾病分类'],['疾病亚类','DiseaseSubcategory','疾病大类下的二级细分'],['疾病','Disease','图谱核心疾病节点'],['病因','Etiology','疾病发生原因'],['流行病学','Epidemiology','人群分布和发生规律'],['病理生理','Pathophysiology','疾病发生发展机制'],['症状','Symptom','患者主观表现'],['体征','Sign','医生客观检查发现'],['检查','Exam','辅助检查项目'],['检查指标','ExamIndicator','检查/检验中的具体指标'],['检验','LabTest','实验室检验项目'],['药物','Medication','治疗疾病的药品或药物类别'],['手术/操作','Procedure','手术、介入和操作治疗'],['治疗方案','TreatmentPlan','综合治疗策略'],['诊断标准','DiagnosisCriteria','诊断依据和标准'],['鉴别诊断','DifferentialDiagnosis','需要区分的相似疾病'],['风险分层','RiskStratification','严重程度或风险等级'],['并发症','Complication','疾病相关并发问题'],['预后','Prognosis','疾病结局和发展趋势'],['随访','FollowUp','治疗后监测和复诊计划'],['证据','Evidence','支持知识的来源证据'],['指南','Guideline','临床指南或专家共识'],['阈值规则','ThresholdRule','指标阈值和判定规则']
@@ -132,7 +132,7 @@ var ENTITY_STANDARD=[
 var REL_STANDARD=[
   ['has_category','Specialty → DiseaseCategory','专科具有疾病大类'],['has_subcategory','DiseaseCategory → DiseaseSubcategory','疾病大类具有疾病亚类'],['has_disease','DiseaseCategory → Disease','疾病大类包含疾病'],['belongs_to_category','Disease → DiseaseCategory','疾病属于疾病大类'],['belongs_to_subcategory','Disease → DiseaseSubcategory','疾病属于疾病亚类'],['has_symptom','Disease → Symptom','疾病具有症状'],['has_sign','Disease → Sign','疾病具有体征'],['requires_exam','Disease → Exam','疾病需要检查'],['requires_lab_test','Disease → LabTest','疾病需要检验'],['treated_by_medication','Disease → Medication','疾病通过药物治疗'],['treated_by_procedure','Disease → Procedure','疾病通过手术/操作治疗'],['has_treatment_plan','Disease → TreatmentPlan','疾病具有治疗方案'],['has_diagnostic_criteria','Disease → DiagnosisCriteria','疾病具有诊断标准'],['differentiates_from','Disease → Disease','疾病之间需要鉴别诊断'],['supported_by_evidence','Evidence → Entity','证据支持实体知识']
 ];
-loadData(function(){renderNav('standard');renderTables();});
+loadData(function(){injectDimCount();renderNav('standard');renderTables();});
 function renderTables(){
   var eb=document.getElementById('entity-standard-body'),rb=document.getElementById('relation-standard-body'),db=document.getElementById('dimension-badges');
   eb.innerHTML=ENTITY_STANDARD.map(function(r){return '<tr><td class="name">'+r[0]+'</td><td class="code">'+r[1]+'</td><td>'+r[2]+'</td></tr>'}).join('');

@@ -5,6 +5,15 @@ var DIM_KEYS = Object.keys(DIM_NAMES);
 /* 全局维度颜色（对象+数组两种形式，供各页面统一引用） */
 var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',Exam:'#22b8cf',LabTest:'#748ffc',Medication:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc'};
 var DIM_COLORS_ARR = DIM_KEYS.map(function(k){return DIM_COLORS[k]});
+/* 动态注入维度数量：替换页面中所有 .dcp 占位符 */
+function injectDimCount() {
+  var els = document.querySelectorAll('.dcp');
+  for (var i = 0; i < els.length; i++) {
+    els[i].textContent = DIM_KEYS.length;
+    els[i].className = '';
+  }
+}
+
 
 /* 二级层级映射：从 parentCode 提取大类前缀 → 大类名 + 子类名 */
 function parseParentCode(pc) {
