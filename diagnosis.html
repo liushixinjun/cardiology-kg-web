@@ -9,6 +9,37 @@
 <style>
 /* ===== Diagnosis Page Styles ===== */
 .diagnosis-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; min-height: 600px; }
+
+/* ===== Architecture Overview ===== */
+.arch-section { background: linear-gradient(135deg, #0c1426 0%, #111b33 40%, #0f2027 100%); border: 1px solid rgba(79,140,255,.18); border-radius: 14px; padding: 28px 32px; margin-bottom: 28px; box-shadow: 0 0 60px rgba(79,140,255,.06); }
+.arch-desc { font-size: 13px; color: #8b90a0; line-height: 1.9; margin-bottom: 20px; max-width: 900px; }
+.arch-desc strong { color: #74c0fc; font-weight: 600; }
+.arch-title { font-size: 16px; font-weight: 800; color: #e8eaf0; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.arch-flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.arch-layer { width: 100%; max-width: 860px; border-radius: 10px; padding: 14px 20px; text-align: center; }
+.arch-layer-label { font-size: 13px; font-weight: 700; color: #e8eaf0; margin-bottom: 8px; }
+.arch-layer-content { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.arch-pill { font-size: 11px; padding: 5px 14px; border-radius: 20px; font-weight: 600; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: #8b90a0; white-space: nowrap; transition: all .2s; }
+.arch-pill:hover { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: #c8d6e5; }
+.arch-pill-blue { background: rgba(79,140,255,.08); border-color: rgba(79,140,255,.2); color: #74c0fc; }
+.arch-pill-blue:hover { background: rgba(79,140,255,.18); }
+.arch-pill-green { background: rgba(81,207,102,.08); border-color: rgba(81,207,102,.2); color: #51cf66; }
+.arch-pill-green:hover { background: rgba(81,207,102,.18); }
+.arch-layer-knowledge { background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.06); }
+.arch-layer-capability { background: rgba(79,140,255,.04); border: 1px solid rgba(79,140,255,.12); }
+.arch-layer-trigger { background: rgba(255,146,43,.04); border: 1px solid rgba(255,146,43,.12); }
+.arch-layer-trigger .arch-layer-label { color: #ff922b; }
+.arch-layer-event { background: rgba(204,93,232,.04); border: 1px solid rgba(204,93,232,.12); }
+.arch-layer-event .arch-layer-label { color: #cc5de8; }
+.arch-layer-workflow { background: rgba(79,140,255,.06); border: 1px solid rgba(79,140,255,.15); }
+.arch-layer-pathway { background: rgba(34,184,207,.04); border: 1px solid rgba(34,184,207,.12); }
+.arch-layer-pathway .arch-layer-label { color: #22b8cf; }
+.arch-layer-output { background: rgba(81,207,102,.04); border: 1px solid rgba(81,207,102,.12); }
+.arch-flow-steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.arch-step { font-size: 12px; padding: 6px 16px; border-radius: 6px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: #8b90a0; font-weight: 600; }
+.arch-step-highlight { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: #74c0fc; font-weight: 700; }
+.arch-step-arrow { font-size: 16px; color: rgba(79,140,255,.5); font-weight: 700; }
+.arch-arrow { font-size: 18px; color: rgba(79,140,255,.35); line-height: 1; padding: 4px 0; user-select: none; }
 .input-section { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 24px; position: sticky; top: 72px; align-self: start; }
 .result-section { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 24px; }
 .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
@@ -130,6 +161,91 @@
     <h1>临床诊断模拟</h1>
     <div class="subtitle">基于心血管专科知识图谱的疾病智能匹配</div>
   </div>
+
+  <!-- ===== Architecture Overview ===== -->
+  <section class="arch-section">
+    <div class="arch-desc">
+      以专科诊疗辅助建设为目标，以专科CDSS为能力承载，围绕<strong>疾病推荐</strong>、<strong>鉴别方法推荐</strong>、<strong>检查推荐</strong>、<strong>治疗方案推荐</strong>、<strong>智能评估</strong>、<strong>风险预测</strong>、<strong>诊疗路径串联</strong>和<strong>质控闭环</strong>的完整能力体系。专病诊疗路径是其中的状态管理和过程承接环节，用于把医从预测、入院、分型、治疗、风险监控、出院回访本或可管理、可观察、可评价的链条。
+    </div>
+
+    <h3 class="arch-title">整体逻辑</h3>
+
+    <div class="arch-flow">
+      <!-- Layer 1: Knowledge System -->
+      <div class="arch-layer arch-layer-knowledge">
+        <div class="arch-layer-label">专科诊疗知识体系</div>
+        <div class="arch-layer-content">
+          <div class="arch-pill">专科知识包</div>
+          <div class="arch-pill">规则</div>
+          <div class="arch-pill">标签</div>
+          <div class="arch-pill">知识图谱</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 2: Capability -->
+      <div class="arch-layer arch-layer-capability">
+        <div class="arch-layer-label">专科辅助诊疗能力</div>
+        <div class="arch-layer-content">
+          <div class="arch-pill arch-pill-blue">疾病推荐</div>
+          <div class="arch-pill arch-pill-blue">鉴别方法推荐</div>
+          <div class="arch-pill arch-pill-blue">检查推荐</div>
+          <div class="arch-pill arch-pill-blue">治疗方案推荐</div>
+          <div class="arch-pill arch-pill-blue">智能评估</div>
+          <div class="arch-pill arch-pill-blue">风险预测</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 3: Trigger -->
+      <div class="arch-layer arch-layer-trigger">
+        <div class="arch-layer-label">门诊/急诊/住院/随访等临床场景触发</div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 4: Event -->
+      <div class="arch-layer arch-layer-event">
+        <div class="arch-layer-label">诊疗事件触发</div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 5: Workflow -->
+      <div class="arch-layer arch-layer-workflow">
+        <div class="arch-flow-steps">
+          <div class="arch-step">入院前筛查</div>
+          <div class="arch-step-arrow">&rarr;</div>
+          <div class="arch-step arch-step-highlight">候选专病推荐</div>
+          <div class="arch-step-arrow">&rarr;</div>
+          <div class="arch-step">证据补齐/入院确认</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 6: Pathway -->
+      <div class="arch-layer arch-layer-pathway">
+        <div class="arch-layer-label">专病诊疗路径串联患者状态并由状态机推进</div>
+      </div>
+
+      <div class="arch-arrow">&#8595;</div>
+
+      <!-- Layer 7: Output -->
+      <div class="arch-layer arch-layer-output">
+        <div class="arch-layer-content">
+          <div class="arch-pill arch-pill-green">输出推荐</div>
+          <div class="arch-pill arch-pill-green">校验</div>
+          <div class="arch-pill arch-pill-green">预警</div>
+          <div class="arch-pill arch-pill-green">质控</div>
+          <div class="arch-pill arch-pill-green">随访</div>
+          <div class="arch-pill arch-pill-green">效果评价</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <div class="diagnosis-layout">
     <!-- Left: Input -->
