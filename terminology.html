@@ -619,11 +619,21 @@ function buildTermIndex(d) {
       entities.forEach(function(e) {
         var key = k + '::' + e.name;
         if (!ALL_TERMS[key]) {
-          ALL_TERMS[key] = { name: e.name, code: e.code || '', dim: k, diseases: [] };
+          ALL_TERMS[key] = { name: e.name, code: e.code || '', dim: k, diseases: [], name_en: e.name_en || '', aliases: e.aliases || [] };
           DIM_STATS[k]++;
         }
         if (ALL_TERMS[key].diseases.indexOf(disName) === -1) {
           ALL_TERMS[key].diseases.push(disName);
+        }
+        /* 合并别名（去重） */
+        if (e.aliases && e.aliases.length > 0) {
+          var existing = ALL_TERMS[key].aliases;
+          e.aliases.forEach(function(a) {
+            if (existing.indexOf(a) === -1) existing.push(a);
+          });
+        }
+        if (e.name_en && !ALL_TERMS[key].name_en) {
+          ALL_TERMS[key].name_en = e.name_en;
         }
       });
     });
@@ -749,7 +759,10 @@ function renderCenterCards() {
     var selectedCls = key === CURRENT_TERM_KEY ? ' selected' : '';
     html += '<div class="term-card' + selectedCls + '" onclick="selectTerm(\'' + escAttr(key) + '\')" data-key="' + escAttr(key) + '">';
     html += '  <div class="term-card-left">';
-    html += '    <div class="term-card-name">' + hl(t.name) + '</div>';
+    html += '    <div class="term-card-name">' + hl(t.name);
+    if (t.name_en) html += ' <span style="font-size:9px;color:var(--muted);font-style:italic">' + escHtml(t.name_en) + '</span>';
+    if (t.aliases && t.aliases.length > 0) html += ' <span style="font-size:9px;color:var(--accent);opacity:.7">(' + t.aliases.length + '别名)</span>';
+    html += '</div>';
     html += '    <div class="term-card-code">' + (t.code ? hl(t.code) : '') + '</div>';
     html += '  </div>';
     html += '  <div class="term-card-right">';
@@ -875,6 +888,21 @@ function renderDetail() {
   html += '    <span class="dr-value">' + t.diseases.length + ' 种</span>';
   html += '  </div>';
   html += '</div>';
+
+  /* 别名 + 英文名 */
+  if (t.aliases && t.aliases.length > 0 || t.name_en) {
+    html += '<div class="term-detail-section">';
+    html += '  <div class="term-detail-section-title">🏷️ 别名 / 英文名</div>';
+    html += '  <div style="display:flex;flex-wrap:wrap;gap:6px">';
+    if (t.name_en) {
+      html += '<span style="font-size:11px;padding:3px 10px;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);border-radius:6px;color:var(--accent);font-style:italic">🌐 ' + escHtml(t.name_en) + '</span>';
+    }
+    (t.aliases || []).forEach(function(a) {
+      html += '<span style="font-size:11px;padding:3px 10px;background:var(--bg3);border:1px solid var(--rule);border-radius:6px;color:var(--muted)">📌 ' + escHtml(a) + '</span>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  }
 
   /* Disease list */
   html += '<div class="term-detail-section">';
@@ -1015,21 +1043,12 @@ loadData(function(d) {
   injectDimCount();renderNav('terminology');
   var countEl = document.getElementById('term-disease-count');
   if (countEl) countEl.textContent = Object.keys(d.diseases).length;
-  // 批量获取所有疾病的完整维度数据
-  var codes = Object.keys(d.diseases);
-  var loaded = 0;
-  var total = codes.length;
-  document.getElementById('hs-total').textContent = '加载中...';
-  codes.forEach(function(code) {
-    loadDiseaseData(code, function() {
-      loaded++;
-      if (loaded === total) {
-        buildTermIndex(d);
-        renderHeroStats();
-        renderDimList();
-        selectDim('Symptom');
-      }
-    });
+  // 批量加载所有疾病完整数据（1次请求替代N次）
+  loadAllDiseaseData(function() {
+    buildTermIndex(d);
+    renderHeroStats();
+    renderDimList();
+    selectDim('Symptom');
   });
 });
 </script>

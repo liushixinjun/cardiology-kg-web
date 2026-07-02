@@ -106,17 +106,19 @@ def query_diseases_summary():
             for dim, rel in REL_MAP.items():
                 rows = sess.run(f"""
                     MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
-                    RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref
-                    ORDER BY n.name LIMIT 30
-                """, code=code)
-                items = []
-                seen = set()
-                for r in rows:
-                    name = r["pref"] or r["name"] or r["ncode"] or "N/A"
-                    if name in SHELL_NAMES or name in seen:
-                        continue
-                    seen.add(name)
-                    items.append({"name": name, "code": r["ncode"]})
+                    RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
+                       n.name_en as name_en, n.aliases as aliases
+                ORDER BY n.name LIMIT 30
+            """, code=code)
+            items = []
+            seen = set()
+            for r in rows:
+                name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                if name in SHELL_NAMES or name in seen:
+                    continue
+                seen.add(name)
+                aliases = [a for a in (r["aliases"] or []) if a != name]
+                items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases})
                 dims[dim] = items
             result[code] = {"info": d_info, "dimensions": dims}
 
@@ -149,7 +151,8 @@ def query_disease_full(code):
         for dim, rel in REL_MAP.items():
             results = sess.run(f"""
                 MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
-                RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref
+                RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
+                       n.name_en as name_en, n.aliases as aliases
                 ORDER BY n.name LIMIT 30
             """, code=code)
             items = []
@@ -159,7 +162,8 @@ def query_disease_full(code):
                 if name in SHELL_NAMES or name in seen:
                     continue
                 seen.add(name)
-                item = {"name": name, "code": r["ncode"]}
+                aliases = [a for a in (r["aliases"] or []) if a != name]
+                item = {"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases}
 
                 # TreatmentPlan 二跳
                 if dim == "TreatmentPlan" and r["ncode"]:
@@ -246,6 +250,52 @@ def query_global_stats():
         }
 
 
+def query_entity_detail(code):
+    """查询单个实体的详细信息（别名、英文名、关联疾病）"""
+    d = get_driver()
+    with d.session() as sess:
+        r = sess.run("""
+            MATCH (n:KGNode {code: $code})
+            RETURN n.name as name, n.code as code, n.name_en as name_en,
+                   n.aliases as aliases, n.preferred_name as pref,
+                   labels(n) as labels
+        """, code=code).single()
+        if not r:
+            return {"error": "Entity not found", "code": code}
+        
+        # 查找关联疾病
+        diseases = sess.run("""
+            MATCH (d:Disease)-[rel]->(n:KGNode {code: $code})
+            RETURN DISTINCT d.name as disease_name, d.code as disease_code,
+                   type(rel) as rel_type
+            ORDER BY d.name LIMIT 20
+        """, code=code)
+        disease_list = [dict(rd) for rd in diseases]
+        
+        # 查找同名实体在其他疾病中的出现
+        name = r["name"]
+        cross_diseases = sess.run("""
+            MATCH (d:Disease)-[rel]->(n:KGNode {name: $name})
+            WHERE n.code <> $code
+            RETURN DISTINCT d.name as disease_name, d.code as disease_code,
+                   type(rel) as rel_type
+            ORDER BY d.name LIMIT 10
+        """, name=name, code=code)
+        cross_list = [dict(rd) for rd in cross_diseases]
+        
+        aliases = [a for a in (r["aliases"] or []) if a != name]
+        
+        return {
+            "name": r["pref"] or name,
+            "code": code,
+            "name_en": r["name_en"] or "",
+            "aliases": aliases,
+            "labels": r["labels"] or [],
+            "diseases": disease_list,
+            "cross_diseases": cross_list
+        }
+
+
 class KGHandler(http.server.SimpleHTTPRequestHandler):
     """自定义HTTP处理器：API路由 + 静态文件"""
 
@@ -287,6 +337,13 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(data)
             else:
                 self._json_response({"error": "Disease not found"}, 404)
+            return
+
+        # 单个实体查询（别名+关系）
+        m2 = re.match(r'^/api/kg/entity/([A-Za-z0-9\-]+)$', path)
+        if m2:
+            ecode = m2.group(1)
+            self._json_response(query_entity_detail(ecode))
             return
 
         # 静态文件（HTML 禁止缓存，确保每次刷新拿到最新版本）

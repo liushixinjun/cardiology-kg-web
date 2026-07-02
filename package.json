@@ -1,0 +1,12 @@
+{
+  "name": "cardiology-kg-web",
+  "version": "1.0.0",
+  "description": "心血管专科知识图谱Web系统",
+  "main": "server.py",
+  "scripts": {
+    "generate-doc": "node generate-doc.js"
+  },
+  "dependencies": {
+    "docx": "^8.2.3"
+  }
+}
