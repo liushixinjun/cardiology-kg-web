@@ -4,22 +4,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>心血管知识图谱 - 专病诊疗路径编辑器</title>
+<title>心血管知识图谱 - 诊疗路径流程引擎</title>
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
-/* ===== Engine Editor Styles ===== */
+/* ===== Reset & Layout ===== */
 html, body { height: 100%; overflow: hidden; }
-body { display: flex; flex-direction: column; }
+body { display: flex; flex-direction: column; background: var(--bg); color: var(--ink); }
 
-/* Toolbar */
+/* ===== Toolbar ===== */
 .toolbar {
   display: flex; align-items: center; gap: 6px;
   background: var(--bg2); border-bottom: 1px solid var(--rule);
   padding: 6px 16px; height: 44px; flex-shrink: 0; z-index: 50;
 }
+.toolbar-title {
+  font-size: 13px; font-weight: 700; color: var(--accent); margin-right: 8px; white-space: nowrap;
+}
 .toolbar-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border: 1px solid var(--rule); border-radius: 5px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border: 1px solid var(--rule); border-radius: 5px;
   background: var(--bg3); color: var(--ink); font-size: 12px; font-weight: 600;
   cursor: pointer; transition: all .15s; white-space: nowrap;
 }
@@ -29,204 +32,192 @@ body { display: flex; flex-direction: column; }
 .toolbar-btn.primary:hover { opacity: .9; }
 .toolbar-btn.danger { border-color: var(--accent2); color: var(--accent2); }
 .toolbar-btn.danger:hover { background: rgba(255,107,107,.1); }
-.toolbar-sep { width: 1px; height: 22px; background: var(--rule); margin: 0 4px; }
-.toolbar-zoom { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
+.toolbar-sep { width: 1px; height: 22px; background: var(--rule); margin: 0 4px; flex-shrink: 0; }
+.toolbar-zoom {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted);
+}
 .toolbar-zoom .zoom-val { min-width: 40px; text-align: center; font-weight: 700; color: var(--ink); }
-.toolbar-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-right: 12px; white-space: nowrap; }
 
-/* Main layout */
-.editor-main { display: flex; flex: 1; overflow: hidden; }
+/* ===== Editor Layout ===== */
+.editor-layout { display: flex; flex: 1; overflow: hidden; }
 
-/* Left Panel */
+/* ===== Left Panel ===== */
 .left-panel {
-  width: 240px; flex-shrink: 0; background: var(--bg2);
+  width: 220px; flex-shrink: 0; background: var(--bg2);
   border-right: 1px solid var(--rule); display: flex; flex-direction: column;
   overflow: hidden;
 }
-.panel-section { padding: 14px 14px 10px; }
+.panel-section { padding: 12px 12px 8px; }
 .panel-section-title {
   font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
 }
+.panel-divider { height: 1px; background: var(--rule); }
 
-/* Node palette items */
-.node-palette { display: flex; flex-direction: column; gap: 6px; }
+/* Node palette */
+.node-palette { display: flex; flex-direction: column; gap: 5px; }
 .node-palette-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; border-radius: 6px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 6px;
   background: var(--bg3); border: 1px solid var(--rule);
   cursor: grab; transition: all .15s; user-select: none;
 }
 .node-palette-item:hover { border-color: var(--accent); transform: translateX(2px); }
 .node-palette-item:active { cursor: grabbing; }
 .node-palette-icon {
-  width: 30px; height: 30px; border-radius: 6px;
+  width: 28px; height: 28px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
+  font-size: 14px; flex-shrink: 0;
 }
 .node-palette-label { font-size: 12px; font-weight: 600; color: var(--ink); }
 .node-palette-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
-/* Saved paths list */
-.saved-paths { flex: 1; overflow-y: auto; padding: 0 14px 14px; }
-.saved-paths::-webkit-scrollbar { width: 4px; }
-.saved-paths::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
-.saved-path-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px; border-radius: 6px;
+/* Saved paths */
+.saved-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
+.saved-list::-webkit-scrollbar { width: 4px; }
+.saved-list::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+.saved-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 8px; border-radius: 6px;
   background: var(--bg3); border: 1px solid var(--rule);
-  cursor: pointer; transition: all .15s; margin-bottom: 6px;
+  cursor: pointer; transition: all .15s; margin-bottom: 5px;
 }
-.saved-path-item:hover { border-color: var(--accent); }
-.saved-path-name { font-size: 12px; font-weight: 600; color: var(--ink); flex: 1; }
-.saved-path-count { font-size: 10px; color: var(--muted); }
+.saved-item:hover { border-color: var(--accent); }
+.saved-item-name { font-size: 11px; font-weight: 600; color: var(--ink); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-item-count { font-size: 10px; color: var(--muted); white-space: nowrap; }
 
-/* Canvas area */
-.canvas-wrapper {
+/* ===== Canvas ===== */
+.canvas-container {
   flex: 1; position: relative; overflow: hidden;
-  background: #0d1117;
+  background-color: #f5f5f5;
+  background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px);
+  background-size: 20px 20px;
   cursor: default;
 }
-.canvas-wrapper.panning { cursor: grab; }
-.canvas-wrapper.panning:active { cursor: grabbing; }
-
-/* Grid background */
-.canvas-grid {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none; z-index: 0;
-}
-
-/* Canvas container (pannable/zoomable) */
+.canvas-container.panning { cursor: grab; }
+.canvas-container.panning:active { cursor: grabbing; }
 .canvas {
-  position: absolute; top: 0; left: 0; width: 8000px; height: 8000px;
-  transform-origin: 0 0;
-  z-index: 1;
+  position: absolute; top: 0; left: 0;
+  width: 10000px; height: 10000px;
+  transform-origin: 0 0; z-index: 1;
 }
 
-/* SVG connections layer */
-.connections-layer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 2;
+/* SVG connections */
+.connections-svg {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: visible; pointer-events: none; z-index: 2;
 }
-.connections-layer path { pointer-events: stroke; cursor: pointer; }
-
-/* Nodes layer */
-.nodes-layer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 3;
+.connections-svg path.conn-path {
+  pointer-events: stroke; cursor: pointer;
+}
+.connections-svg path.temp-path {
+  pointer-events: none;
 }
 
-/* Flow node */
+/* ===== Flow Node ===== */
 .flow-node {
   position: absolute; width: 180px;
-  background: var(--bg2); border: 2px solid var(--rule);
-  border-radius: 10px; cursor: move; user-select: none;
-  transition: box-shadow .15s;
+  background: #fff; border: 2px solid #e0e0e0;
+  border-radius: 8px; cursor: move; user-select: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  transition: box-shadow .15s, border-color .15s;
   z-index: 10;
 }
-.flow-node:hover { box-shadow: 0 2px 12px rgba(0,0,0,.3); }
-.flow-node.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,140,255,.25), 0 4px 16px rgba(0,0,0,.4); z-index: 20; }
-.flow-node-type-bar {
-  height: 4px; border-radius: 8px 8px 0 0;
+.flow-node:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+.flow-node.selected {
+  border-color: #4f8cff;
+  box-shadow: 0 0 0 2px rgba(79,140,255,.25), 0 4px 16px rgba(0,0,0,.15);
+  z-index: 20;
 }
-.flow-node-body {
-  padding: 10px 14px 12px; display: flex; align-items: center; gap: 8px;
+.node-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 6px 6px 0 0;
+  font-size: 11px; font-weight: 700; color: #fff;
 }
-.flow-node-icon {
-  font-size: 18px; flex-shrink: 0; width: 24px; text-align: center;
-}
-.flow-node-label {
-  font-size: 12px; font-weight: 600; color: var(--ink);
-  line-height: 1.4; word-break: break-all;
-}
+.node-icon { font-size: 13px; }
+.node-type-name { font-size: 11px; }
+.node-body { padding: 8px 10px 10px; }
+.node-label { font-size: 12px; font-weight: 600; color: #333; line-height: 1.4; }
+.node-desc { font-size: 10px; color: #999; margin-top: 2px; line-height: 1.3; }
 
-/* Node ports */
-.node-port {
-  position: absolute; width: 10px; height: 10px;
-  border-radius: 50%; border: 2px solid var(--bg2);
+/* ===== Ports ===== */
+.port {
+  position: absolute; width: 8px; height: 8px;
+  border-radius: 50%; background: #bbb; border: 2px solid #fff;
   cursor: crosshair; z-index: 15;
-  transition: transform .15s, box-shadow .15s;
+  transition: transform .15s, box-shadow .15s, background .15s;
 }
-.node-port:hover { transform: scale(1.4); box-shadow: 0 0 8px rgba(255,255,255,.2); }
-.node-port.port-in {
-  top: -5px; left: 50%; transform: translateX(-50%);
-}
-.node-port.port-in:hover { transform: translateX(-50%) scale(1.4); }
-.node-port.port-out {
-  bottom: -5px; left: 50%; transform: translateX(-50%);
-}
-.node-port.port-out:hover { transform: translateX(-50%) scale(1.4); }
+.port:hover { background: #4f8cff; transform: scale(1.5); box-shadow: 0 0 6px rgba(79,140,255,.4); }
+.port-top { top: -4px; left: 50%; margin-left: -4px; }
+.port-bottom { bottom: -4px; left: 50%; margin-left: -4px; }
+.port-left { left: -4px; top: 50%; margin-top: -4px; }
+.port-right { right: -4px; top: 50%; margin-top: -4px; }
 
-/* Connection label */
+/* ===== Connection Label ===== */
 .conn-label {
-  position: absolute;
-  font-size: 11px; font-weight: 700;
-  color: var(--ink); background: var(--bg);
-  padding: 2px 8px; border-radius: 4px;
-  border: 1px solid var(--rule);
-  pointer-events: none; z-index: 5;
+  position: absolute; z-index: 5;
+  font-size: 10px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #f06595, #cc5de8);
+  padding: 2px 8px; border-radius: 10px;
+  pointer-events: auto; cursor: pointer;
   white-space: nowrap; transform: translate(-50%, -50%);
+  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  transition: box-shadow .15s;
 }
+.conn-label:hover { box-shadow: 0 2px 8px rgba(240,101,149,.4); }
+.conn-label.selected { box-shadow: 0 0 0 2px #4f8cff, 0 2px 8px rgba(79,140,255,.3); }
 
-/* Right Panel */
+/* ===== Right Panel ===== */
 .right-panel {
-  width: 320px; flex-shrink: 0; background: var(--bg2);
+  width: 300px; flex-shrink: 0; background: var(--bg2);
   border-left: 1px solid var(--rule); display: flex; flex-direction: column;
   overflow: hidden;
 }
 .right-panel-header {
-  padding: 14px 16px 10px; border-bottom: 1px solid var(--rule);
+  padding: 12px 14px 10px; border-bottom: 1px solid var(--rule);
 }
-.right-panel-title {
-  font-size: 13px; font-weight: 700; color: var(--accent);
-}
+.right-panel-title { font-size: 13px; font-weight: 700; color: var(--accent); }
 .right-panel-body {
-  flex: 1; overflow-y: auto; padding: 14px 16px;
+  flex: 1; overflow-y: auto; padding: 12px 14px;
 }
 .right-panel-body::-webkit-scrollbar { width: 4px; }
 .right-panel-body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
 
-.prop-group { margin-bottom: 16px; }
+.prop-group { margin-bottom: 14px; }
 .prop-label {
   font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;
 }
 .prop-input {
   width: 100%; padding: 7px 10px; border: 1px solid var(--rule);
   border-radius: 5px; background: var(--bg3); color: var(--ink);
-  font-size: 13px; outline: none; font-family: inherit;
+  font-size: 12px; outline: none; font-family: inherit;
 }
 .prop-input:focus { border-color: var(--accent); }
-textarea.prop-input { min-height: 70px; resize: vertical; }
+textarea.prop-input { min-height: 60px; resize: vertical; }
 select.prop-input { cursor: pointer; }
-
-.prop-empty {
-  text-align: center; padding: 40px 20px; color: var(--muted);
-  font-size: 13px;
+.prop-btn {
+  width: 100%; padding: 8px; border: none; border-radius: 5px;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
 }
+.prop-btn:hover { opacity: .9; }
+.prop-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 13px; }
 .prop-empty-icon { font-size: 32px; margin-bottom: 10px; opacity: .5; }
+.prop-info { font-size: 11px; color: var(--muted); line-height: 1.8; }
 
-/* Drag preview */
-.drag-preview {
-  position: fixed; pointer-events: none; z-index: 9999;
-  opacity: .75; transform: translate(-50%, -50%);
-}
-
-/* Context menu */
+/* ===== Context Menu ===== */
 .context-menu {
   display: none; position: fixed; z-index: 9999;
   background: var(--bg2); border: 1px solid var(--rule);
   border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,.5);
-  padding: 4px; min-width: 160px;
+  padding: 4px; min-width: 150px;
 }
 .context-menu.show { display: block; }
 .context-menu-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; border-radius: 5px;
+  padding: 7px 12px; border-radius: 5px;
   font-size: 12px; font-weight: 600; color: var(--ink);
   cursor: pointer; transition: background .1s;
 }
@@ -234,7 +225,7 @@ select.prop-input { cursor: pointer; }
 .context-menu-item.danger { color: var(--accent2); }
 .context-menu-sep { height: 1px; background: var(--rule); margin: 4px 8px; }
 
-/* Toast notification */
+/* ===== Toast ===== */
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   padding: 10px 24px; border-radius: 8px;
@@ -244,41 +235,46 @@ select.prop-input { cursor: pointer; }
   pointer-events: none;
 }
 .toast.show { opacity: 1; }
+
+/* ===== Drag Preview ===== */
+.drag-preview {
+  position: fixed; pointer-events: none; z-index: 9999;
+  opacity: .7; transform: translate(-50%, -50%);
+}
 </style>
 </head>
 <body>
 
 <!-- Navigation -->
-<nav class="nav">
-  <a class="nav-brand" href="index.html">🏥 专科知识图谱 · 心血管内科</a>
-  <div class="nav-links" id="nav-links"></div>
-  <div class="nav-right">
-    <a class="nav-config-btn" href="config.html" title="系统配置">⚙</a>
-  </div>
-</nav>
+<nav class="nav" id="mainNav"></nav>
 
 <!-- Toolbar -->
 <div class="toolbar">
-  <span class="toolbar-title">🔗 诊疗路径编辑器</span>
-  <button class="toolbar-btn" onclick="newFlow()" title="新建">📄 新建</button>
-  <button class="toolbar-btn" onclick="saveFlow()" title="保存到本地存储">💾 保存</button>
-  <button class="toolbar-btn" onclick="loadFlow()" title="从本地存储加载">📂 加载</button>
-  <button class="toolbar-btn" onclick="exportJSON()" title="导出JSON文件">📋 导出JSON</button>
+  <span class="toolbar-title">诊疗路径流程引擎</span>
+  <button class="toolbar-btn" onclick="newFlow()">📄 新建</button>
+  <button class="toolbar-btn" onclick="saveFlow()">💾 保存</button>
+  <button class="toolbar-btn" onclick="loadFlow()">📂 加载</button>
+  <button class="toolbar-btn" onclick="exportJSON()">📋 导出JSON</button>
   <div class="toolbar-sep"></div>
-  <button class="toolbar-btn primary" onclick="loadAMIExample()" title="加载AMI示例路径">🔄 加载AMI示例</button>
+  <button class="toolbar-btn primary" onclick="loadAMIExample()">🔄 加载AMI示例</button>
   <div class="toolbar-sep"></div>
-  <div class="toolbar-zoom">
-    <button class="toolbar-btn" onclick="zoomIn()" title="放大">🔍+</button>
-    <span class="zoom-val" id="zoomDisplay">100%</span>
-    <button class="toolbar-btn" onclick="zoomOut()" title="缩小">🔍-</button>
-    <button class="toolbar-btn" onclick="resetZoom()" title="重置缩放">100%</button>
-  </div>
+  <button class="toolbar-btn" onclick="doAutoLayout()">🔄 自动排版</button>
+  <button class="toolbar-btn danger" onclick="deleteSelected()">🗑️ 删除</button>
+  <button class="toolbar-btn" onclick="doUndo()">↩️ 撤销</button>
+  <div class="toolbar-sep"></div>
+  <button class="toolbar-btn" onclick="doPublish()">📋 发布</button>
+  <button class="toolbar-btn" onclick="showTest()">🧪 测试</button>
   <div style="flex:1"></div>
-  <button class="toolbar-btn danger" onclick="deleteSelected()" title="删除选中">🗑️ 删除选中</button>
+  <div class="toolbar-zoom">
+    <button class="toolbar-btn" onclick="zoomOut()" style="padding:4px 8px">-</button>
+    <span class="zoom-val" id="zoomDisplay">100%</span>
+    <button class="toolbar-btn" onclick="zoomIn()" style="padding:4px 8px">+</button>
+    <button class="toolbar-btn" onclick="resetZoom()" style="padding:4px 8px">适配</button>
+  </div>
 </div>
 
-<!-- Main Editor -->
-<div class="editor-main">
+<!-- Editor Layout -->
+<div class="editor-layout">
 
   <!-- Left Panel -->
   <div class="left-panel">
@@ -286,30 +282,38 @@ select.prop-input { cursor: pointer; }
       <div class="panel-section-title">节点类型</div>
       <div class="node-palette" id="nodePalette"></div>
     </div>
-    <div style="border-top:1px solid var(--rule);flex:1;display:flex;flex-direction:column;overflow:hidden">
-      <div class="panel-section" style="padding-bottom:4px">
-        <div class="panel-section-title">已保存路径</div>
-      </div>
-      <div class="saved-paths" id="savedPaths"></div>
+    <div class="panel-divider"></div>
+    <div class="panel-section" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0">
+      <div class="panel-section-title" style="margin-bottom:6px">已保存路径</div>
+      <div class="saved-list" id="savedPaths"></div>
     </div>
   </div>
 
   <!-- Canvas -->
-  <div class="canvas-wrapper" id="canvasWrapper">
-    <div class="canvas-grid"></div>
-    <svg class="connections-layer" id="svgLayer"></svg>
-    <div class="canvas" id="canvas"></div>
+  <div class="canvas-container" id="canvasContainer">
+    <div class="canvas" id="canvas">
+      <svg class="connections-svg" id="connectionsSvg">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="rgba(0,0,0,0.25)"/>
+          </marker>
+          <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="#4f8cff"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
   </div>
 
   <!-- Right Panel -->
-  <div class="right-panel">
+  <div class="right-panel" id="rightPanel">
     <div class="right-panel-header">
-      <div class="right-panel-title" id="rightPanelTitle">属性编辑</div>
+      <div class="right-panel-title" id="rightPanelTitle">属性配置</div>
     </div>
     <div class="right-panel-body" id="rightPanelBody">
       <div class="prop-empty">
-        <div class="prop-empty-icon">🖱️</div>
-        <div>点击节点查看属性</div>
+        <div class="prop-empty-icon">🖱</div>
+        <div>选择节点或连线查看配置</div>
       </div>
     </div>
   </div>
@@ -318,7 +322,7 @@ select.prop-input { cursor: pointer; }
 
 <!-- Context Menu -->
 <div class="context-menu" id="contextMenu">
-  <div class="context-menu-item" onclick="duplicateNode()">📋 复制节点</div>
+  <div class="context-menu-item" onclick="duplicateSelected()">📋 复制节点</div>
   <div class="context-menu-sep"></div>
   <div class="context-menu-item danger" onclick="deleteSelected()">🗑️ 删除</div>
 </div>
@@ -326,156 +330,237 @@ select.prop-input { cursor: pointer; }
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Test Modal -->
+<div class="modal-overlay" id="testModal">
+  <div style="position:absolute;inset:0" onclick="hideTest()"></div>
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="hideTest()">&times;</button>
+    <h3>流程测试面板</h3>
+    <div class="modal-code" id="testContent"></div>
+  </div>
+</div>
+
 <script src="./_shared/js/app.js?v=20260701"></script>
 <script>
 /* ===================================================================
-   专病诊疗路径可视化流程引擎编辑器
+   专病诊疗路径流程引擎编辑器 — 真正可交互版
    Pure HTML/CSS/JS - No external dependencies
    =================================================================== */
 
-/* ---- Render navigation ---- */
+/* ---- Navigation ---- */
 (function() {
-  var navPages = [
-    {id:'index', label:'数据总览', icon:'📊'},
-    {id:'explore', label:'图谱探索', icon:'🧭'},
-    {id:'engine', label:'路径编辑', icon:'🔗'},
-    {id:'diagnosis', label:'临床诊断模拟', icon:'🔍'}
+  var navHtml = '<a class="nav-brand" href="index.html">专科知识图谱 · 心血管内科</a><div class="nav-links">';
+  var pages = [
+    {id:'index',label:'数据总览',icon:'📊'},{id:'explore',label:'图谱探索',icon:'🧭'},
+    {id:'engine',label:'路径编辑',icon:'🔗'},{id:'diagnosis',label:'临床诊断模拟',icon:'🔍'}
   ];
-  var html = '';
-  navPages.forEach(function(p) {
-    html += '<a class="nav-link' + (p.id === 'engine' ? ' active' : '') + '" href="' + p.id + '.html">' + p.icon + ' ' + p.label + '</a>';
+  pages.forEach(function(p) {
+    navHtml += '<a class="nav-link' + (p.id === 'engine' ? ' active' : '') + '" href="' + p.id + '.html">' + p.icon + ' ' + p.label + '</a>';
   });
-  document.getElementById('nav-links').innerHTML = html;
+  navHtml += '</div><div class="nav-right"><a class="nav-config-btn" href="config.html" title="系统配置">⚙</a></div>';
+  document.getElementById('mainNav').innerHTML = navHtml;
 })();
 
-/* ---- Node type definitions ---- */
+/* ============================
+   NODE TYPE DEFINITIONS
+   ============================ */
 var NODE_TYPES = [
-  { type: 'trigger',  name: '事件触发', icon: '⚡', color: '#ff922b', desc: '临床事件入口' },
-  { type: 'state',    name: '状态节点', icon: '📌', color: '#4f8cff', desc: '路径状态' },
-  { type: 'decision', name: '决策节点', icon: '◆',  color: '#cc5de8', desc: '分支判断' },
-  { type: 'action',   name: '动作节点', icon: '⚙',  color: '#51cf66', desc: '系统动作' },
-  { type: 'gateway',  name: '并行网关', icon: '◇',  color: '#8b90a0', desc: '并行/汇聚' },
-  { type: 'end',      name: '结束节点', icon: '⏹', color: '#ff6b6b', desc: '流程终止' }
+  { type: 'start',      name: '开始',     icon: '🟢', color: '#52c41a', desc: '流程起点' },
+  { type: 'task',       name: '业务任务', icon: '📋', color: '#4f8cff', desc: 'CDSS业务处理' },
+  { type: 'decision',   name: '决策节点', icon: '◆',  color: '#cc5de8', desc: '条件分支判断' },
+  { type: 'gateway',    name: '并行网关', icon: '◇',  color: '#ff922b', desc: '并行/汇聚' },
+  { type: 'subprocess', name: '子流程',   icon: '🔄', color: '#22b8cf', desc: '嵌套子流程' },
+  { type: 'end',        name: '结束',     icon: '🔴', color: '#ff4d4f', desc: '流程终点' }
 ];
 var NODE_TYPE_MAP = {};
 NODE_TYPES.forEach(function(t) { NODE_TYPE_MAP[t.type] = t; });
 
-/* ---- State ---- */
-var nodes = [];        // [{id, type, label, x, y, config:{}, description:''}]
-var connections = [];  // [{id, source, target, label:''}]
+var TASK_TYPES = ['入组筛查','疾病推荐','鉴别推荐','医嘱推荐','方案推荐','评估','预警','质控','随访'];
+var EVENT_TYPES = ['无条件','EVT_PATIENT_CONTEXT_READY','EVT_EMR_SAVE','EVT_DIAGNOSIS_SAVE','EVT_ORDER_SAVE_PRE','EVT_REPORT_BACK','EVT_DISCHARGE_SAVE','EVT_TIMER_SCAN'];
+
+/* ============================
+   STATE
+   ============================ */
+var nodes = [];
+var connections = [];
 var selectedNodeId = null;
 var selectedConnId = null;
+var undoStack = [];
 var nextNodeId = 1;
 var nextConnId = 1;
 var flowName = '未命名路径';
-var flowVersion = '1.0';
 
-/* ---- Canvas state ---- */
-var canvasOffsetX = 0;
-var canvasOffsetY = 0;
-var canvasScale = 1;
-var isPanning = false;
-var panStartX = 0, panStartY = 0;
+/* Canvas transform */
+var canvasOffsetX = 0, canvasOffsetY = 0, canvasScale = 1;
+var isPanning = false, panStartX = 0, panStartY = 0;
 var spaceHeld = false;
 
-/* ---- Drag from palette ---- */
-var dragNodeType = null;
-var dragPreview = null;
+/* Drag from palette */
+var dragState = null; // {type:'new-node', nodeType:xxx}
+var dragPreviewEl = null;
 
-/* ---- Drag node on canvas ---- */
-var dragNode = null;
-var dragNodeStartX = 0, dragNodeStartY = 0;
-var dragMouseStartX = 0, dragMouseStartY = 0;
+/* Move node on canvas */
+// dragState reused: {type:'move-node', nodeId, startMouseX, startMouseY, origX, origY}
 
-/* ---- Connection drawing ---- */
-var drawingConn = false;
-var drawConnSourceId = null;
-var drawConnStartX = 0, drawConnStartY = 0;
-var drawConnEndX = 0, drawConnEndY = 0;
-var tempConnPath = null;
+/* Draw connection */
+var drawState = null; // {sourceNodeId, sourcePort, startX, startY, tempPath}
+var didDrag = false;
 
-/* ---- DOM refs ---- */
-var canvasEl = document.getElementById('canvas');
-var svgLayer = document.getElementById('svgLayer');
-var canvasWrapper = document.getElementById('canvasWrapper');
+/* ============================
+   DOM REFERENCES
+   ============================ */
+var canvasEl, canvasContainer, connectionsSvg;
 
 /* ============================
    INIT
    ============================ */
 function init() {
+  canvasEl = document.getElementById('canvas');
+  canvasContainer = document.getElementById('canvasContainer');
+  connectionsSvg = document.getElementById('connectionsSvg');
+
   renderPalette();
   refreshSavedPaths();
   setupCanvasEvents();
   setupKeyboardEvents();
-  setupContextMenu();
-  updateCanvasTransform();
+  setupGlobalMouse();
 }
 
-/* ---- Render palette ---- */
+/* ============================
+   PALETTE
+   ============================ */
 function renderPalette() {
-  var palette = document.getElementById('nodePalette');
+  var pal = document.getElementById('nodePalette');
   var html = '';
   NODE_TYPES.forEach(function(t) {
-    html += '<div class="node-palette-item" draggable="true" data-type="' + t.type + '">'
+    html += '<div class="node-palette-item" data-type="' + t.type + '">'
       + '<div class="node-palette-icon" style="background:' + t.color + '22;color:' + t.color + '">' + t.icon + '</div>'
       + '<div><div class="node-palette-label">' + t.name + '</div>'
       + '<div class="node-palette-desc">' + t.desc + '</div></div></div>';
   });
-  palette.innerHTML = html;
+  pal.innerHTML = html;
 
-  // Attach drag events
-  var items = palette.querySelectorAll('.node-palette-item');
-  items.forEach(function(item) {
-    item.addEventListener('mousedown', onPaletteDragStart);
-  });
+  /* Attach mousedown for drag-to-canvas */
+  var items = pal.querySelectorAll('.node-palette-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].addEventListener('mousedown', onPaletteMouseDown);
+  }
+}
+
+function onPaletteMouseDown(e) {
+  e.preventDefault();
+  var type = this.getAttribute('data-type');
+  var info = NODE_TYPE_MAP[type];
+
+  dragState = { type: 'new-node', nodeType: type };
+  didDrag = false;
+
+  /* Create preview element */
+  dragPreviewEl = document.createElement('div');
+  dragPreviewEl.className = 'drag-preview';
+  dragPreviewEl.innerHTML = '<div style="width:180px;padding:8px 12px;background:#fff;border:2px solid ' + info.color + ';border-radius:8px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.15)">'
+    + '<span style="font-size:14px">' + info.icon + '</span>'
+    + '<span style="font-size:12px;font-weight:600;color:#333">' + info.name + '</span></div>';
+  dragPreviewEl.style.left = e.clientX + 'px';
+  dragPreviewEl.style.top = e.clientY + 'px';
+  document.body.appendChild(dragPreviewEl);
 }
 
 /* ============================
-   PALETTE DRAG
+   GLOBAL MOUSE (handles all drag operations)
    ============================ */
-function onPaletteDragStart(e) {
-  e.preventDefault();
-  var type = this.getAttribute('data-type');
-  dragNodeType = type;
-  var info = NODE_TYPE_MAP[type];
+function setupGlobalMouse() {
+  document.addEventListener('mousemove', function(e) {
+    /* --- Palette drag: new node --- */
+    if (dragState && dragState.type === 'new-node' && dragPreviewEl) {
+      didDrag = true;
+      dragPreviewEl.style.left = e.clientX + 'px';
+      dragPreviewEl.style.top = e.clientY + 'px';
+      return;
+    }
 
-  // Create preview
-  dragPreview = document.createElement('div');
-  dragPreview.className = 'drag-preview';
-  dragPreview.innerHTML = '<div style="width:180px;padding:10px 14px;background:var(--bg2);border:2px solid ' + info.color + ';border-radius:10px;display:flex;align-items:center;gap:8px">'
-    + '<span style="font-size:18px">' + info.icon + '</span>'
-    + '<span style="font-size:12px;font-weight:600;color:var(--ink)">' + info.name + '</span></div>';
-  dragPreview.style.left = e.clientX + 'px';
-  dragPreview.style.top = e.clientY + 'px';
-  document.body.appendChild(dragPreview);
+    /* --- Move node on canvas --- */
+    if (dragState && dragState.type === 'move-node') {
+      didDrag = true;
+      var node = findNode(dragState.nodeId);
+      if (!node) return;
+      var dx = (e.clientX - dragState.startMouseX) / canvasScale;
+      var dy = (e.clientY - dragState.startMouseY) / canvasScale;
+      node.x = dragState.origX + dx;
+      node.y = dragState.origY + dy;
+      updateNodeDOM(node);
+      updateAllConnections();
+      return;
+    }
 
-  document.addEventListener('mousemove', onPaletteDragMove);
-  document.addEventListener('mouseup', onPaletteDragEnd);
-}
+    /* --- Draw connection --- */
+    if (drawState && drawState.tempPath) {
+      var rect = canvasContainer.getBoundingClientRect();
+      var mx = (e.clientX - rect.left - canvasOffsetX) / canvasScale;
+      var my = (e.clientY - rect.top - canvasOffsetY) / canvasScale;
+      var pathD = makeConnPath(drawState.startX, drawState.startY, drawState.sourcePort, mx, my, 'left');
+      drawState.tempPath.setAttribute('d', pathD);
+    }
 
-function onPaletteDragMove(e) {
-  if (!dragPreview) return;
-  dragPreview.style.left = e.clientX + 'px';
-  dragPreview.style.top = e.clientY + 'px';
-}
+    /* --- Canvas panning --- */
+    if (isPanning) {
+      canvasOffsetX = e.clientX - panStartX;
+      canvasOffsetY = e.clientY - panStartY;
+      updateCanvasTransform();
+    }
+  });
 
-function onPaletteDragEnd(e) {
-  document.removeEventListener('mousemove', onPaletteDragMove);
-  document.removeEventListener('mouseup', onPaletteDragEnd);
-  if (dragPreview) {
-    document.body.removeChild(dragPreview);
-    dragPreview = null;
-  }
-  if (!dragNodeType) return;
+  document.addEventListener('mouseup', function(e) {
+    /* --- Palette drag end: create node --- */
+    if (dragState && dragState.type === 'new-node') {
+      if (dragPreviewEl) {
+        dragPreviewEl.remove();
+        dragPreviewEl = null;
+      }
+      var rect = canvasContainer.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        var cx = (e.clientX - rect.left - canvasOffsetX) / canvasScale;
+        var cy = (e.clientY - rect.top - canvasOffsetY) / canvasScale;
+        saveUndoState();
+        var node = addNode(dragState.nodeType, cx - 90, cy - 30);
+        selectNode(node.id);
+      }
+      dragState = null;
+      return;
+    }
 
-  // Check if dropped on canvas
-  var rect = canvasWrapper.getBoundingClientRect();
-  if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
-    var cx = (e.clientX - rect.left - canvasOffsetX) / canvasScale;
-    var cy = (e.clientY - rect.top - canvasOffsetY) / canvasScale;
-    addNode(dragNodeType, cx, cy);
-  }
-  dragNodeType = null;
+    /* --- Move node end --- */
+    if (dragState && dragState.type === 'move-node') {
+      dragState = null;
+      return;
+    }
+
+    /* --- Draw connection end --- */
+    if (drawState) {
+      /* Check if mouse is over a port */
+      var target = document.elementFromPoint(e.clientX, e.clientY);
+      if (target && target.classList.contains('port')) {
+        var targetNodeId = target.getAttribute('data-node');
+        var targetPort = target.getAttribute('data-port');
+        if (targetNodeId && targetNodeId !== drawState.sourceNodeId) {
+          saveUndoState();
+          addConnection(drawState.sourceNodeId, targetNodeId, drawState.sourcePort, targetPort, '', '无条件');
+        }
+      }
+      /* Clean up temp path */
+      if (drawState.tempPath) {
+        drawState.tempPath.remove();
+      }
+      drawState = null;
+      return;
+    }
+
+    /* --- Panning end --- */
+    if (isPanning) {
+      isPanning = false;
+      canvasContainer.classList.remove('panning');
+    }
+  });
 }
 
 /* ============================
@@ -488,14 +573,13 @@ function addNode(type, x, y, cfg) {
     id: 'n' + (nextNodeId++),
     type: type,
     label: defaults.label || info.name,
-    x: x - 90, // center
-    y: y - 30,
-    config: defaults.config || {},
-    description: defaults.description || ''
+    x: Math.round(x),
+    y: Math.round(y),
+    description: defaults.description || '',
+    config: defaults.config || {}
   };
   nodes.push(node);
   renderNode(node);
-  selectNode(node.id);
   return node;
 }
 
@@ -508,25 +592,50 @@ function renderNode(node) {
   el.style.left = node.x + 'px';
   el.style.top = node.y + 'px';
 
-  el.innerHTML = '<div class="flow-node-type-bar" style="background:' + info.color + '"></div>'
-    + '<div class="flow-node-body">'
-    + '<span class="flow-node-icon" style="color:' + info.color + '">' + info.icon + '</span>'
-    + '<span class="flow-node-label" id="label-' + node.id + '">' + escapeHtml(node.label) + '</span>'
+  var descHtml = node.description ? '<div class="node-desc">' + escapeHtml(node.description) + '</div>' : '';
+
+  el.innerHTML = '<div class="node-header" style="background:' + info.color + '">'
+    + '<span class="node-icon">' + info.icon + '</span>'
+    + '<span class="node-type-name">' + info.name + '</span>'
     + '</div>'
-    + '<div class="node-port port-in" data-port="in" data-node="' + node.id + '" style="background:' + info.color + ';border-color:' + info.color + '"></div>'
-    + '<div class="node-port port-out" data-port="out" data-node="' + node.id + '" style="background:' + info.color + ';border-color:' + info.color + '"></div>';
+    + '<div class="node-body">'
+    + '<div class="node-label" id="label-' + node.id + '">' + escapeHtml(node.label) + '</div>'
+    + descHtml
+    + '</div>'
+    + '<div class="port port-top" data-node="' + node.id + '" data-port="top"></div>'
+    + '<div class="port port-bottom" data-node="' + node.id + '" data-port="bottom"></div>'
+    + '<div class="port port-left" data-node="' + node.id + '" data-port="left"></div>'
+    + '<div class="port port-right" data-node="' + node.id + '" data-port="right"></div>';
 
   canvasEl.appendChild(el);
 
-  // Events
+  /* Node mousedown: start move drag + select */
   el.addEventListener('mousedown', function(e) {
-    if (e.target.classList.contains('node-port')) return;
+    if (e.target.classList.contains('port')) return;
     if (e.button !== 0) return;
     e.stopPropagation();
+    didDrag = false;
+    saveUndoState();
     selectNode(node.id);
-    startNodeDrag(e, node);
+    dragState = {
+      type: 'move-node',
+      nodeId: node.id,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      origX: node.x,
+      origY: node.y
+    };
   });
 
+  /* Node click: select (suppress if dragged) */
+  el.addEventListener('click', function(e) {
+    if (didDrag) return;
+    if (e.target.classList.contains('port')) return;
+    e.stopPropagation();
+    selectNode(node.id);
+  });
+
+  /* Right-click context menu */
   el.addEventListener('contextmenu', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -534,24 +643,18 @@ function renderNode(node) {
     showContextMenu(e.clientX, e.clientY);
   });
 
-  // Port events
-  var ports = el.querySelectorAll('.node-port');
-  ports.forEach(function(port) {
-    port.addEventListener('mousedown', function(e) {
-      e.stopPropagation();
-      var portType = port.getAttribute('data-port');
-      if (portType === 'out') {
-        startConnectionDraw(e, node.id);
-      }
-    });
-    port.addEventListener('mouseup', function(e) {
-      e.stopPropagation();
-      var portType = port.getAttribute('data-port');
-      if (portType === 'in' && drawingConn && drawConnSourceId !== node.id) {
-        finishConnectionDraw(node.id);
-      }
-    });
-  });
+  /* Port events */
+  var ports = el.querySelectorAll('.port');
+  for (var i = 0; i < ports.length; i++) {
+    (function(port) {
+      port.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var portName = port.getAttribute('data-port');
+        startConnectionDraw(e, node.id, portName);
+      });
+    })(ports[i]);
+  }
 }
 
 function updateNodeDOM(node) {
@@ -563,94 +666,56 @@ function updateNodeDOM(node) {
   if (labelEl) labelEl.textContent = node.label;
 }
 
-function selectNode(id) {
-  // Deselect previous
-  if (selectedNodeId) {
-    var prev = document.getElementById('node-' + selectedNodeId);
-    if (prev) prev.classList.remove('selected');
-  }
-  selectedConnId = null;
-  selectedNodeId = id;
-  if (id) {
-    var el = document.getElementById('node-' + id);
-    if (el) el.classList.add('selected');
-    renderProperties(id);
-  } else {
-    renderPropertiesEmpty();
-  }
-}
-
-function deleteNode(id) {
-  // Remove connections involving this node
-  connections = connections.filter(function(c) {
-    if (c.source === id || c.target === id) {
-      removeConnectionDOM(c.id);
-      return false;
-    }
-    return true;
-  });
-  // Remove node
-  nodes = nodes.filter(function(n) { return n.id !== id; });
-  var el = document.getElementById('node-' + id);
+function removeNodeFromDOM(nodeId) {
+  var el = document.getElementById('node-' + nodeId);
   if (el) el.remove();
-  if (selectedNodeId === id) {
-    selectedNodeId = null;
-    renderPropertiesEmpty();
-  }
-}
-
-function duplicateNode() {
-  hideContextMenu();
-  if (!selectedNodeId) return;
-  var orig = findNode(selectedNodeId);
-  if (!orig) return;
-  addNode(orig.type, orig.x + 120, orig.y + 60, {
-    label: orig.label + ' (副本)',
-    config: JSON.parse(JSON.stringify(orig.config)),
-    description: orig.description
-  });
-}
-
-/* ---- Node Drag ---- */
-function startNodeDrag(e, node) {
-  dragNode = node;
-  dragMouseStartX = e.clientX;
-  dragMouseStartY = e.clientY;
-  dragNodeStartX = node.x;
-  dragNodeStartY = node.y;
-  document.addEventListener('mousemove', onNodeDragMove);
-  document.addEventListener('mouseup', onNodeDragEnd);
-}
-
-function onNodeDragMove(e) {
-  if (!dragNode) return;
-  var dx = (e.clientX - dragMouseStartX) / canvasScale;
-  var dy = (e.clientY - dragMouseStartY) / canvasScale;
-  dragNode.x = dragNodeStartX + dx;
-  dragNode.y = dragNodeStartY + dy;
-  updateNodeDOM(dragNode);
-  updateAllConnections();
-}
-
-function onNodeDragEnd(e) {
-  dragNode = null;
-  document.removeEventListener('mousemove', onNodeDragMove);
-  document.removeEventListener('mouseup', onNodeDragEnd);
 }
 
 /* ============================
-   CONNECTIONS
+   CONNECTION DRAWING
    ============================ */
-function addConnection(sourceId, targetId, label) {
-  // Check for duplicates
+function startConnectionDraw(e, sourceNodeId, sourcePort) {
+  e.preventDefault();
+  var pos = getPortPosition(sourceNodeId, sourcePort);
+  drawState = {
+    sourceNodeId: sourceNodeId,
+    sourcePort: sourcePort,
+    startX: pos.x,
+    startY: pos.y,
+    tempPath: null
+  };
+
+  /* Create temp SVG path */
+  var pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathEl.classList.add('temp-path');
+  pathEl.setAttribute('fill', 'none');
+  pathEl.setAttribute('stroke', 'rgba(79,140,255,0.5)');
+  pathEl.setAttribute('stroke-width', '2');
+  pathEl.setAttribute('stroke-dasharray', '6,4');
+  connectionsSvg.appendChild(pathEl);
+  drawState.tempPath = pathEl;
+}
+
+/* ============================
+   CONNECTION MANAGEMENT
+   ============================ */
+function addConnection(sourceId, targetId, sourcePort, targetPort, label, eventType) {
+  /* Prevent duplicates */
   for (var i = 0; i < connections.length; i++) {
-    if (connections[i].source === sourceId && connections[i].target === targetId) return null;
+    if (connections[i].sourceId === sourceId && connections[i].targetId === targetId) return null;
   }
+  /* Prevent self-connection */
+  if (sourceId === targetId) return null;
+
   var conn = {
     id: 'c' + (nextConnId++),
-    source: sourceId,
-    target: targetId,
-    label: label || ''
+    sourceId: sourceId,
+    targetId: targetId,
+    sourcePort: sourcePort,
+    targetPort: targetPort,
+    label: label || '',
+    eventType: eventType || '无条件',
+    condition: ''
   };
   connections.push(conn);
   renderConnection(conn);
@@ -658,45 +723,42 @@ function addConnection(sourceId, targetId, label) {
 }
 
 function renderConnection(conn) {
-  var srcNode = findNode(conn.source);
-  var tgtNode = findNode(conn.target);
-  if (!srcNode || !tgtNode) return;
+  var srcPos = getPortPosition(conn.sourceId, conn.sourcePort);
+  var tgtPos = getPortPosition(conn.targetId, conn.targetPort);
+  if (!srcPos || !tgtPos) return;
 
-  var srcInfo = NODE_TYPE_MAP[srcNode.type];
-  var path = createBezierPath(srcNode, tgtNode);
-
-  // Create SVG path
+  /* SVG path */
+  var pathD = makeConnPath(srcPos.x, srcPos.y, conn.sourcePort, tgtPos.x, tgtPos.y, conn.targetPort);
   var pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathEl.classList.add('conn-path');
   pathEl.setAttribute('id', 'conn-' + conn.id);
-  pathEl.setAttribute('d', path);
+  pathEl.setAttribute('d', pathD);
   pathEl.setAttribute('fill', 'none');
-  pathEl.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+  pathEl.setAttribute('stroke', 'rgba(0,0,0,0.2)');
   pathEl.setAttribute('stroke-width', '1.5');
   pathEl.setAttribute('marker-end', 'url(#arrowhead)');
-  pathEl.style.pointerEvents = 'stroke';
-  pathEl.style.cursor = 'pointer';
   pathEl.setAttribute('data-conn', conn.id);
-  svgLayer.appendChild(pathEl);
+  connectionsSvg.appendChild(pathEl);
 
-  // Click to select connection
+  /* Click to select connection */
   pathEl.addEventListener('mousedown', function(e) {
     e.stopPropagation();
     selectConnection(conn.id);
   });
 
-  // Label
+  /* Label */
   if (conn.label) {
     renderConnectionLabel(conn);
   }
 }
 
 function renderConnectionLabel(conn) {
-  var srcNode = findNode(conn.source);
-  var tgtNode = findNode(conn.target);
-  if (!srcNode || !tgtNode) return;
+  var srcPos = getPortPosition(conn.sourceId, conn.sourcePort);
+  var tgtPos = getPortPosition(conn.targetId, conn.targetPort);
+  if (!srcPos || !tgtPos) return;
 
-  var mx = (srcNode.x + 90 + tgtNode.x + 90) / 2;
-  var my = (srcNode.y + 35 + tgtNode.y + 35) / 2;
+  var mx = (srcPos.x + tgtPos.x) / 2;
+  var my = (srcPos.y + tgtPos.y) / 2;
 
   var lbl = document.createElement('div');
   lbl.className = 'conn-label';
@@ -704,7 +766,35 @@ function renderConnectionLabel(conn) {
   lbl.textContent = conn.label;
   lbl.style.left = mx + 'px';
   lbl.style.top = my + 'px';
+  lbl.setAttribute('data-conn', conn.id);
+
+  lbl.addEventListener('mousedown', function(e) {
+    e.stopPropagation();
+    selectConnection(conn.id);
+  });
+  lbl.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
   canvasEl.appendChild(lbl);
+}
+
+function updateConnectionDOM(conn) {
+  var srcPos = getPortPosition(conn.sourceId, conn.sourcePort);
+  var tgtPos = getPortPosition(conn.targetId, conn.targetPort);
+  if (!srcPos || !tgtPos) return;
+
+  var pathEl = document.getElementById('conn-' + conn.id);
+  if (pathEl) {
+    pathEl.setAttribute('d', makeConnPath(srcPos.x, srcPos.y, conn.sourcePort, tgtPos.x, tgtPos.y, conn.targetPort));
+  }
+
+  /* Update label position */
+  var lblEl = document.getElementById('conn-label-' + conn.id);
+  if (lblEl) {
+    lblEl.style.left = ((srcPos.x + tgtPos.x) / 2) + 'px';
+    lblEl.style.top = ((srcPos.y + tgtPos.y) / 2) + 'px';
+  }
 }
 
 function removeConnectionDOM(connId) {
@@ -714,240 +804,181 @@ function removeConnectionDOM(connId) {
   if (lblEl) lblEl.remove();
 }
 
+function updateAllConnections() {
+  for (var i = 0; i < connections.length; i++) {
+    updateConnectionDOM(connections[i]);
+  }
+}
+
+/* ============================
+   SELECTION
+   ============================ */
+function selectNode(id) {
+  /* Deselect previous node */
+  if (selectedNodeId) {
+    var prev = document.getElementById('node-' + selectedNodeId);
+    if (prev) prev.classList.remove('selected');
+  }
+  /* Deselect previous connection */
+  deselectConnHighlight();
+
+  selectedConnId = null;
+  selectedNodeId = id;
+
+  if (id) {
+    var el = document.getElementById('node-' + id);
+    if (el) el.classList.add('selected');
+    renderNodeProperties(id);
+  } else {
+    renderPropertiesEmpty();
+  }
+}
+
 function selectConnection(connId) {
-  // Deselect node
+  /* Deselect previous node */
   if (selectedNodeId) {
     var prev = document.getElementById('node-' + selectedNodeId);
     if (prev) prev.classList.remove('selected');
     selectedNodeId = null;
   }
-  // Deselect prev conn
-  if (selectedConnId) {
-    var prevPath = document.getElementById('conn-' + selectedConnId);
-    if (prevPath) prevPath.setAttribute('stroke', 'rgba(255,255,255,0.2)');
-  }
-  selectedConnId = connId;
-  var pathEl = document.getElementById('conn-' + connId);
-  if (pathEl) pathEl.setAttribute('stroke', '#4f8cff');
+  deselectConnHighlight();
 
-  // Show connection properties
+  selectedConnId = connId;
+  highlightConn(connId);
+
   var conn = findConnection(connId);
   if (conn) renderConnectionProperties(conn);
 }
 
-function deleteConnection(connId) {
-  connections = connections.filter(function(c) { return c.id !== connId; });
-  removeConnectionDOM(connId);
-  if (selectedConnId === connId) {
-    selectedConnId = null;
-    renderPropertiesEmpty();
+function deselectAll() {
+  if (selectedNodeId) {
+    var prev = document.getElementById('node-' + selectedNodeId);
+    if (prev) prev.classList.remove('selected');
+    selectedNodeId = null;
   }
+  deselectConnHighlight();
+  selectedConnId = null;
+  renderPropertiesEmpty();
+  hideContextMenu();
 }
 
-function createBezierPath(srcNode, tgtNode) {
-  var x1 = srcNode.x + 90;
-  var y1 = srcNode.y + 65; // bottom of node
-  var x2 = tgtNode.x + 90;
-  var y2 = tgtNode.y;      // top of node
-
-  var dy = Math.abs(y2 - y1);
-  var cp = Math.max(50, dy * 0.4);
-
-  return 'M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + (y1 + cp) + ', ' + x2 + ' ' + (y2 - cp) + ', ' + x2 + ' ' + y2;
+function highlightConn(connId) {
+  var pathEl = document.getElementById('conn-' + connId);
+  if (pathEl) {
+    pathEl.setAttribute('stroke', '#4f8cff');
+    pathEl.setAttribute('stroke-width', '2');
+    pathEl.setAttribute('marker-end', 'url(#arrowhead-active)');
+  }
+  var lblEl = document.getElementById('conn-label-' + connId);
+  if (lblEl) lblEl.classList.add('selected');
 }
 
-function updateAllConnections() {
-  connections.forEach(function(conn) {
-    var pathEl = document.getElementById('conn-' + conn.id);
-    if (!pathEl) return;
-    var srcNode = findNode(conn.source);
-    var tgtNode = findNode(conn.target);
-    if (!srcNode || !tgtNode) return;
-    pathEl.setAttribute('d', createBezierPath(srcNode, tgtNode));
-
-    // Update label position
-    if (conn.label) {
-      var lblEl = document.getElementById('conn-label-' + conn.id);
-      if (lblEl) {
-        lblEl.style.left = ((srcNode.x + 90 + tgtNode.x + 90) / 2) + 'px';
-        lblEl.style.top = ((srcNode.y + 35 + tgtNode.y + 35) / 2) + 'px';
-      }
+function deselectConnHighlight() {
+  if (selectedConnId) {
+    var prevPath = document.getElementById('conn-' + selectedConnId);
+    if (prevPath) {
+      prevPath.setAttribute('stroke', 'rgba(0,0,0,0.2)');
+      prevPath.setAttribute('stroke-width', '1.5');
+      prevPath.setAttribute('marker-end', 'url(#arrowhead)');
     }
-  });
-}
-
-/* ---- Connection drawing ---- */
-function startConnectionDraw(e, sourceId) {
-  e.preventDefault();
-  drawingConn = true;
-  drawConnSourceId = sourceId;
-  var srcNode = findNode(sourceId);
-  drawConnStartX = srcNode.x + 90;
-  drawConnStartY = srcNode.y + 65;
-
-  // Create temp SVG path
-  tempConnPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  tempConnPath.setAttribute('fill', 'none');
-  tempConnPath.setAttribute('stroke', 'rgba(79,140,255,0.5)');
-  tempConnPath.setAttribute('stroke-width', '2');
-  tempConnPath.setAttribute('stroke-dasharray', '6,4');
-  svgLayer.appendChild(tempConnPath);
-
-  document.addEventListener('mousemove', onConnectionDrawMove);
-  document.addEventListener('mouseup', onConnectionDrawEnd);
-}
-
-function onConnectionDrawMove(e) {
-  if (!drawingConn || !tempConnPath) return;
-  var rect = canvasWrapper.getBoundingClientRect();
-  drawConnEndX = (e.clientX - rect.left - canvasOffsetX) / canvasScale;
-  drawConnEndY = (e.clientY - rect.top - canvasOffsetY) / canvasScale;
-
-  var dy = Math.abs(drawConnEndY - drawConnStartY);
-  var cp = Math.max(50, dy * 0.4);
-  var d = 'M ' + drawConnStartX + ' ' + drawConnStartY
-    + ' C ' + drawConnStartX + ' ' + (drawConnStartY + cp) + ', '
-    + drawConnEndX + ' ' + (drawConnEndY - cp) + ', '
-    + drawConnEndX + ' ' + drawConnEndY;
-  tempConnPath.setAttribute('d', d);
-}
-
-function onConnectionDrawEnd(e) {
-  document.removeEventListener('mousemove', onConnectionDrawMove);
-  document.removeEventListener('mouseup', onConnectionDrawEnd);
-  if (tempConnPath) {
-    tempConnPath.remove();
-    tempConnPath = null;
+    var prevLbl = document.getElementById('conn-label-' + selectedConnId);
+    if (prevLbl) prevLbl.classList.remove('selected');
   }
-  drawingConn = false;
-  drawConnSourceId = null;
-}
-
-function finishConnectionDraw(targetId) {
-  if (!drawConnSourceId || drawConnSourceId === targetId) return;
-  addConnection(drawConnSourceId, targetId);
 }
 
 /* ============================
    PROPERTIES PANEL
    ============================ */
 function renderPropertiesEmpty() {
-  document.getElementById('rightPanelTitle').textContent = '属性编辑';
-  document.getElementById('rightPanelBody').innerHTML = '<div class="prop-empty"><div class="prop-empty-icon">🖱️</div><div>点击节点查看属性</div></div>';
+  document.getElementById('rightPanelTitle').textContent = '属性配置';
+  document.getElementById('rightPanelBody').innerHTML =
+    '<div class="prop-empty"><div class="prop-empty-icon">🖱</div><div>选择节点或连线查看配置</div></div>';
 }
 
-function renderProperties(nodeId) {
+function renderNodeProperties(nodeId) {
   var node = findNode(nodeId);
   if (!node) { renderPropertiesEmpty(); return; }
   var info = NODE_TYPE_MAP[node.type];
 
   document.getElementById('rightPanelTitle').textContent = info.icon + ' ' + info.name + ' 属性';
 
-  var html = '';
+  var h = '';
+  h += '<div class="prop-group"><div class="prop-label">节点名称</div>'
+    + '<input class="prop-input" id="prop-label" value="' + escapeAttr(node.label) + '" oninput="onNodePropChange(\'label\',this.value)"></div>';
 
-  // Common properties
-  html += '<div class="prop-group"><div class="prop-label">节点名称</div>'
-    + '<input class="prop-input" id="prop-label" value="' + escapeAttr(node.label) + '" oninput="onPropChange(\'label\', this.value)"></div>';
+  h += '<div class="prop-group"><div class="prop-label">节点描述</div>'
+    + '<textarea class="prop-input" id="prop-desc" oninput="onNodePropChange(\'description\',this.value)">' + escapeHtml(node.description) + '</textarea></div>';
 
-  html += '<div class="prop-group"><div class="prop-label">节点描述</div>'
-    + '<textarea class="prop-input" id="prop-desc" oninput="onPropChange(\'description\', this.value)">' + escapeHtml(node.description) + '</textarea></div>';
+  h += '<div class="prop-group"><div class="prop-label">节点类型</div>'
+    + '<input class="prop-input" value="' + info.name + '" readonly style="opacity:.6;cursor:not-allowed"></div>';
 
-  // Type-specific properties
-  switch (node.type) {
-    case 'trigger':
-      html += renderTriggerProps(node);
-      break;
-    case 'state':
-      html += renderStateProps(node);
-      break;
-    case 'decision':
-      html += renderDecisionProps(node);
-      break;
-    case 'action':
-      html += renderActionProps(node);
-      break;
+  /* Task-specific fields */
+  if (node.type === 'task') {
+    var taskTypes = TASK_TYPES;
+    h += '<div class="prop-group"><div class="prop-label">任务类型</div>'
+      + '<select class="prop-input" id="prop-taskType" onchange="onNodeConfigChange(\'taskType\',this.value)">';
+    h += '<option value="">-- 请选择 --</option>';
+    taskTypes.forEach(function(tt) {
+      h += '<option value="' + tt + '"' + (node.config.taskType === tt ? ' selected' : '') + '>' + tt + '</option>';
+    });
+    h += '</select></div>';
   }
 
-  // Node info
-  html += '<div class="prop-group" style="margin-top:20px;padding-top:14px;border-top:1px solid var(--rule)">'
+  /* Decision-specific */
+  if (node.type === 'decision') {
+    h += '<div class="prop-group"><div class="prop-label">判断条件</div>'
+      + '<textarea class="prop-input" oninput="onNodeConfigChange(\'condition\',this.value)">' + escapeHtml(node.config.condition || '') + '</textarea></div>';
+  }
+
+  /* Node info */
+  h += '<div class="prop-group" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)">'
     + '<div class="prop-label">节点信息</div>'
-    + '<div style="font-size:11px;color:var(--muted);line-height:1.8">'
+    + '<div class="prop-info">'
     + 'ID: ' + node.id + '<br>'
     + '类型: ' + info.type + '<br>'
     + '位置: (' + Math.round(node.x) + ', ' + Math.round(node.y) + ')'
     + '</div></div>';
 
-  document.getElementById('rightPanelBody').innerHTML = html;
+  document.getElementById('rightPanelBody').innerHTML = h;
 }
 
-function renderTriggerProps(node) {
-  var cfg = node.config;
-  var eventTypes = [
-    'EVT_PATIENT_CONTEXT_READY', 'EVT_EMR_SAVE', 'EVT_DIAGNOSIS_SAVE',
-    'EVT_ORDER_SAVE_PRE', 'EVT_ORDER_SAVE_POST', 'EVT_REPORT_BACK',
-    'EVT_DISCHARGE_SAVE', 'EVT_TIMER_SCAN'
-  ];
-  var html = '<div class="prop-group"><div class="prop-label">事件类型</div>'
-    + '<select class="prop-input" id="prop-eventType" onchange="onConfigChange(\'eventType\', this.value)">';
-  eventTypes.forEach(function(et) {
-    html += '<option value="' + et + '"' + (cfg.eventType === et ? ' selected' : '') + '>' + et + '</option>';
+function renderConnectionProperties(conn) {
+  document.getElementById('rightPanelTitle').textContent = '连线 / 事件配置';
+
+  var srcNode = findNode(conn.sourceId);
+  var tgtNode = findNode(conn.targetId);
+
+  var h = '';
+  h += '<div class="prop-group"><div class="prop-label">显示名称</div>'
+    + '<input class="prop-input" id="prop-connLabel" value="' + escapeAttr(conn.label) + '" oninput="onConnPropChange(\'label\',this.value)"></div>';
+
+  h += '<div class="prop-group"><div class="prop-label">触发事件</div>'
+    + '<select class="prop-input" id="prop-connEvent" onchange="onConnPropChange(\'eventType\',this.value)">';
+  EVENT_TYPES.forEach(function(et) {
+    h += '<option value="' + et + '"' + (conn.eventType === et ? ' selected' : '') + '>' + et + '</option>';
   });
-  html += '</select></div>';
+  h += '</select></div>';
 
-  html += '<div class="prop-group"><div class="prop-label">触发来源</div>'
-    + '<input class="prop-input" id="prop-source" value="' + escapeAttr(cfg.source || '') + '" oninput="onConfigChange(\'source\', this.value)"></div>';
+  h += '<div class="prop-group"><div class="prop-label">条件表达式</div>'
+    + '<input class="prop-input" id="prop-connCond" value="' + escapeAttr(conn.condition || '') + '" oninput="onConnPropChange(\'condition\',this.value)" placeholder="如: 肌钙蛋白>0.1"></div>';
 
-  return html;
+  h += '<div class="prop-group" style="margin-top:12px"><button class="prop-btn" onclick="saveConnConfig()">保存连线配置</button></div>';
+
+  h += '<div class="prop-group" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)">'
+    + '<div class="prop-label">连线信息</div>'
+    + '<div class="prop-info">'
+    + 'ID: ' + conn.id + '<br>'
+    + '起点: ' + (srcNode ? srcNode.label : conn.sourceId) + '<br>'
+    + '终点: ' + (tgtNode ? tgtNode.label : conn.targetId) + '<br>'
+    + '端口: ' + conn.sourcePort + ' → ' + conn.targetPort
+    + '</div></div>';
+
+  h += '<div class="prop-group" style="margin-top:12px"><button class="prop-btn" style="background:var(--accent2)" onclick="deleteSelected()">删除此连线</button></div>';
+
+  document.getElementById('rightPanelBody').innerHTML = h;
 }
 
-function renderStateProps(node) {
-  var cfg = node.config;
-  var html = '<div class="prop-group"><div class="prop-label">状态编码</div>'
-    + '<input class="prop-input" id="prop-stateCode" value="' + escapeAttr(cfg.stateCode || '') + '" oninput="onConfigChange(\'stateCode\', this.value)" placeholder="如 S10"></div>';
-
-  html += '<div class="prop-group"><div class="prop-label">状态名称</div>'
-    + '<input class="prop-input" id="prop-stateName" value="' + escapeAttr(cfg.stateName || '') + '" oninput="onConfigChange(\'stateName\', this.value)"></div>';
-
-  return html;
-}
-
-function renderDecisionProps(node) {
-  var cfg = node.config;
-  var html = '<div class="prop-group"><div class="prop-label">判断条件</div>'
-    + '<textarea class="prop-input" id="prop-condition" oninput="onConfigChange(\'condition\', this.value)">' + escapeHtml(cfg.condition || '') + '</textarea></div>';
-
-  html += '<div class="prop-group"><div class="prop-label">是分支标签</div>'
-    + '<input class="prop-input" id="prop-yesLabel" value="' + escapeAttr(cfg.yesLabel || '是') + '" oninput="onConfigChange(\'yesLabel\', this.value)"></div>';
-
-  html += '<div class="prop-group"><div class="prop-label">否分支标签</div>'
-    + '<input class="prop-input" id="prop-noLabel" value="' + escapeAttr(cfg.noLabel || '否') + '" oninput="onConfigChange(\'noLabel\', this.value)"></div>';
-
-  return html;
-}
-
-function renderActionProps(node) {
-  var cfg = node.config;
-  var actionTypes = [
-    '疾病推荐', '鉴别方法推荐', '医嘱推荐', '治疗方案推荐',
-    '智能评估', '风险预警', '质控反馈', '随访管理'
-  ];
-  var html = '<div class="prop-group"><div class="prop-label">动作类型</div>'
-    + '<select class="prop-input" id="prop-actionType" onchange="onConfigChange(\'actionType\', this.value)">';
-  actionTypes.forEach(function(at) {
-    html += '<option value="' + at + '"' + (cfg.actionType === at ? ' selected' : '') + '>' + at + '</option>';
-  });
-  html += '</select></div>';
-
-  html += '<div class="prop-group"><div class="prop-label">输出内容</div>'
-    + '<textarea class="prop-input" id="prop-output" oninput="onConfigChange(\'output\', this.value)">' + escapeHtml(cfg.output || '') + '</textarea></div>';
-
-  html += '<div class="prop-group"><div class="prop-label">依据来源</div>'
-    + '<input class="prop-input" id="prop-source_ref" value="' + escapeAttr(cfg.source_ref || '') + '" oninput="onConfigChange(\'source_ref\', this.value)"></div>';
-
-  return html;
-}
-
-function onPropChange(field, value) {
+function onNodePropChange(field, value) {
   if (!selectedNodeId) return;
   var node = findNode(selectedNodeId);
   if (!node) return;
@@ -957,35 +988,31 @@ function onPropChange(field, value) {
     if (lblEl) lblEl.textContent = value;
   } else if (field === 'description') {
     node.description = value;
+    /* Update desc in DOM */
+    var el = document.getElementById('node-' + node.id);
+    if (el) {
+      var bodyEl = el.querySelector('.node-body');
+      var descEl = el.querySelector('.node-desc');
+      if (value) {
+        if (descEl) { descEl.textContent = value; }
+        else {
+          var d = document.createElement('div');
+          d.className = 'node-desc';
+          d.textContent = value;
+          bodyEl.appendChild(d);
+        }
+      } else {
+        if (descEl) descEl.remove();
+      }
+    }
   }
 }
 
-function onConfigChange(field, value) {
+function onNodeConfigChange(field, value) {
   if (!selectedNodeId) return;
   var node = findNode(selectedNodeId);
   if (!node) return;
   node.config[field] = value;
-}
-
-/* ---- Connection properties ---- */
-function renderConnectionProperties(conn) {
-  document.getElementById('rightPanelTitle').textContent = '🔗 连线属性';
-
-  var html = '<div class="prop-group"><div class="prop-label">连线标签</div>'
-    + '<input class="prop-input" id="prop-connLabel" value="' + escapeAttr(conn.label) + '" oninput="onConnPropChange(\'label\', this.value)"></div>';
-
-  var srcNode = findNode(conn.source);
-  var tgtNode = findNode(conn.target);
-  html += '<div class="prop-group" style="margin-top:12px"><div class="prop-label">连线信息</div>'
-    + '<div style="font-size:11px;color:var(--muted);line-height:1.8">'
-    + 'ID: ' + conn.id + '<br>'
-    + '起点: ' + (srcNode ? srcNode.label : conn.source) + '<br>'
-    + '终点: ' + (tgtNode ? tgtNode.label : conn.target)
-    + '</div></div>';
-
-  html += '<div style="margin-top:16px"><button class="toolbar-btn danger" onclick="deleteConnection(\'' + conn.id + '\')" style="width:100%">🗑️ 删除此连线</button></div>';
-
-  document.getElementById('rightPanelBody').innerHTML = html;
 }
 
 function onConnPropChange(field, value) {
@@ -994,79 +1021,62 @@ function onConnPropChange(field, value) {
   if (!conn) return;
   conn[field] = value;
 
-  // Re-render label
-  var oldLbl = document.getElementById('conn-label-' + conn.id);
-  if (oldLbl) oldLbl.remove();
-  if (conn.label) renderConnectionLabel(conn);
+  if (field === 'label') {
+    /* Update label DOM */
+    var oldLbl = document.getElementById('conn-label-' + conn.id);
+    if (oldLbl) oldLbl.remove();
+    if (conn.label) renderConnectionLabel(conn);
+  }
+}
+
+function saveConnConfig() {
+  showToast('连线配置已保存');
 }
 
 /* ============================
    CANVAS EVENTS
    ============================ */
 function setupCanvasEvents() {
-  // Click on canvas to deselect
-  canvasWrapper.addEventListener('mousedown', function(e) {
-    if (e.target === canvasWrapper || e.target.classList.contains('canvas-grid')) {
-      // Pan with middle button or space held
+  /* Click on canvas background to deselect */
+  canvasContainer.addEventListener('mousedown', function(e) {
+    if (e.target === canvasContainer || e.target === canvasEl || e.target.classList.contains('connections-svg')) {
+      /* Pan with middle button or space+left */
       if (e.button === 1 || (e.button === 0 && spaceHeld)) {
         e.preventDefault();
         isPanning = true;
         panStartX = e.clientX - canvasOffsetX;
         panStartY = e.clientY - canvasOffsetY;
-        canvasWrapper.classList.add('panning');
+        canvasContainer.classList.add('panning');
         return;
       }
-      // Deselect
+      /* Deselect on left click */
       if (e.button === 0) {
-        selectNode(null);
-        selectedConnId = null;
-        renderPropertiesEmpty();
-        hideContextMenu();
+        deselectAll();
       }
     }
   });
 
-  document.addEventListener('mousemove', function(e) {
-    if (isPanning) {
-      canvasOffsetX = e.clientX - panStartX;
-      canvasOffsetY = e.clientY - panStartY;
-      updateCanvasTransform();
-    }
-  });
-
-  document.addEventListener('mouseup', function(e) {
-    if (isPanning) {
-      isPanning = false;
-      canvasWrapper.classList.remove('panning');
-    }
-  });
-
-  // Zoom with Ctrl+scroll
-  canvasWrapper.addEventListener('wheel', function(e) {
+  /* Ctrl+Scroll zoom */
+  canvasContainer.addEventListener('wheel', function(e) {
     if (!e.ctrlKey) return;
     e.preventDefault();
-    var rect = canvasWrapper.getBoundingClientRect();
+    var rect = canvasContainer.getBoundingClientRect();
     var mx = e.clientX - rect.left;
     var my = e.clientY - rect.top;
-
     var oldScale = canvasScale;
     var delta = e.deltaY > 0 ? 0.9 : 1.1;
-    canvasScale = Math.max(0.2, Math.min(3, canvasScale * delta));
-
-    // Zoom towards mouse
+    canvasScale = Math.max(0.15, Math.min(3, canvasScale * delta));
     canvasOffsetX = mx - (mx - canvasOffsetX) * (canvasScale / oldScale);
     canvasOffsetY = my - (my - canvasOffsetY) * (canvasScale / oldScale);
-
     updateCanvasTransform();
   }, { passive: false });
 
-  // Click to hide context menu
-  canvasWrapper.addEventListener('click', hideContextMenu);
+  /* Hide context menu on canvas click */
+  canvasContainer.addEventListener('click', hideContextMenu);
 }
 
 function updateCanvasTransform() {
   canvasEl.style.transform = 'translate(' + canvasOffsetX + 'px, ' + canvasOffsetY + 'px) scale(' + canvasScale + ')';
-  svgLayer.style.transform = 'translate(' + canvasOffsetX + 'px, ' + canvasOffsetY + 'px) scale(' + canvasScale + ')';
   document.getElementById('zoomDisplay').textContent = Math.round(canvasScale * 100) + '%';
 }
 
@@ -1078,65 +1088,115 @@ function setupKeyboardEvents() {
     if (e.key === ' ') {
       e.preventDefault();
       spaceHeld = true;
-      canvasWrapper.classList.add('panning');
+      canvasContainer.classList.add('panning');
     }
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      // Don't delete if editing text
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       deleteSelected();
     }
     if (e.key === 'Escape') {
-      selectNode(null);
-      selectedConnId = null;
-      renderPropertiesEmpty();
-      hideContextMenu();
+      deselectAll();
+      if (drawState && drawState.tempPath) {
+        drawState.tempPath.remove();
+        drawState = null;
+      }
+    }
+    if (e.ctrlKey && e.key === 'z') {
+      e.preventDefault();
+      doUndo();
     }
   });
-
   document.addEventListener('keyup', function(e) {
     if (e.key === ' ') {
       spaceHeld = false;
-      if (!isPanning) canvasWrapper.classList.remove('panning');
+      if (!isPanning) canvasContainer.classList.remove('panning');
     }
   });
 }
 
+/* ============================
+   DELETE
+   ============================ */
 function deleteSelected() {
   hideContextMenu();
   if (selectedNodeId) {
-    deleteNode(selectedNodeId);
+    saveUndoState();
+    /* Remove connected connections */
+    var toRemove = [];
+    for (var i = 0; i < connections.length; i++) {
+      if (connections[i].sourceId === selectedNodeId || connections[i].targetId === selectedNodeId) {
+        toRemove.push(connections[i].id);
+      }
+    }
+    for (var j = 0; j < toRemove.length; j++) {
+      removeConnectionById(toRemove[j]);
+    }
+    /* Remove node */
+    removeNodeById(selectedNodeId);
   } else if (selectedConnId) {
-    deleteConnection(selectedConnId);
+    saveUndoState();
+    removeConnectionById(selectedConnId);
+    selectedConnId = null;
+    renderPropertiesEmpty();
   }
+}
+
+function removeNodeById(id) {
+  nodes = nodes.filter(function(n) { return n.id !== id; });
+  removeNodeFromDOM(id);
+  if (selectedNodeId === id) {
+    selectedNodeId = null;
+    renderPropertiesEmpty();
+  }
+}
+
+function removeConnectionById(id) {
+  connections = connections.filter(function(c) { return c.id !== id; });
+  removeConnectionDOM(id);
+  if (selectedConnId === id) {
+    selectedConnId = null;
+    deselectConnHighlight();
+    renderPropertiesEmpty();
+  }
+}
+
+/* ============================
+   DUPLICATE
+   ============================ */
+function duplicateSelected() {
+  hideContextMenu();
+  if (!selectedNodeId) return;
+  var orig = findNode(selectedNodeId);
+  if (!orig) return;
+  saveUndoState();
+  var node = addNode(orig.type, orig.x + 40, orig.y + 40, {
+    label: orig.label + ' (副本)',
+    description: orig.description,
+    config: JSON.parse(JSON.stringify(orig.config))
+  });
+  selectNode(node.id);
 }
 
 /* ============================
    CONTEXT MENU
    ============================ */
-function setupContextMenu() {
-  canvasWrapper.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-}
-
 function showContextMenu(x, y) {
   var menu = document.getElementById('contextMenu');
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   menu.classList.add('show');
 }
-
 function hideContextMenu() {
   document.getElementById('contextMenu').classList.remove('show');
 }
-
-document.addEventListener('click', function() { hideContextMenu(); });
+document.addEventListener('click', hideContextMenu);
 
 /* ============================
    TOOLBAR ACTIONS
    ============================ */
 function newFlow() {
   if (nodes.length > 0 && !confirm('确定新建？当前内容将被清空。')) return;
+  saveUndoState();
   nodes = [];
   connections = [];
   selectedNodeId = null;
@@ -1145,25 +1205,23 @@ function newFlow() {
   nextConnId = 1;
   flowName = '未命名路径';
   canvasEl.innerHTML = '';
-  svgLayer.innerHTML = '';
+  /* Re-add SVG defs */
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'connections-svg');
+  svg.setAttribute('id', 'connectionsSvg');
+  svg.innerHTML = '<defs>'
+    + '<marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="rgba(0,0,0,0.25)"/></marker>'
+    + '<marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="#4f8cff"/></marker>'
+    + '</defs>';
+  canvasEl.appendChild(svg);
+  connectionsSvg = svg;
   renderPropertiesEmpty();
   showToast('已新建空白路径');
 }
 
 function saveFlow() {
-  var data = {
-    name: flowName,
-    version: flowVersion,
-    nodes: nodes.map(function(n) {
-      return { id: n.id, type: n.type, label: n.label, x: Math.round(n.x), y: Math.round(n.y), config: n.config, description: n.description };
-    }),
-    connections: connections.map(function(c) {
-      return { id: c.id, source: c.source, target: c.target, label: c.label };
-    })
-  };
-
+  var data = buildFlowData();
   try {
-    // Get existing saved flows
     var saved = JSON.parse(localStorage.getItem('kg_engine_flows') || '{}');
     saved[flowName] = data;
     localStorage.setItem('kg_engine_flows', JSON.stringify(saved));
@@ -1177,79 +1235,15 @@ function saveFlow() {
 function loadFlow() {
   var saved = JSON.parse(localStorage.getItem('kg_engine_flows') || '{}');
   var names = Object.keys(saved);
-  if (names.length === 0) {
-    showToast('没有已保存的路径');
-    return;
-  }
-  // Show first saved or prompt
+  if (names.length === 0) { showToast('没有已保存的路径'); return; }
   var name = prompt('请输入要加载的路径名称:\n\n已保存: ' + names.join(', '));
   if (!name || !saved[name]) return;
   loadFlowData(saved[name]);
   showToast('已加载: ' + name);
 }
 
-function loadFlowData(data) {
-  nodes = [];
-  connections = [];
-  selectedNodeId = null;
-  selectedConnId = null;
-  canvasEl.innerHTML = '';
-  svgLayer.innerHTML = '';
-
-  flowName = data.name || '未命名路径';
-  flowVersion = data.version || '1.0';
-
-  // Find max IDs
-  var maxN = 0, maxC = 0;
-
-  // Render nodes
-  (data.nodes || []).forEach(function(nd) {
-    var numId = parseInt(nd.id.replace('n', ''));
-    if (numId > maxN) maxN = numId;
-    var node = {
-      id: nd.id,
-      type: nd.type,
-      label: nd.label,
-      x: nd.x,
-      y: nd.y,
-      config: nd.config || {},
-      description: nd.description || ''
-    };
-    nodes.push(node);
-    renderNode(node);
-  });
-  nextNodeId = maxN + 1;
-
-  // Render connections (after nodes)
-  setTimeout(function() {
-    (data.connections || []).forEach(function(cd) {
-      var numId = parseInt(cd.id.replace('c', ''));
-      if (numId > maxC) maxC = numId;
-      var conn = {
-        id: cd.id,
-        source: cd.source,
-        target: cd.target,
-        label: cd.label || ''
-      };
-      connections.push(conn);
-      renderConnection(conn);
-    });
-    nextConnId = maxC + 1;
-  }, 50);
-}
-
 function exportJSON() {
-  var data = {
-    name: flowName,
-    version: flowVersion,
-    nodes: nodes.map(function(n) {
-      return { id: n.id, type: n.type, label: n.label, x: Math.round(n.x), y: Math.round(n.y), config: n.config, description: n.description };
-    }),
-    connections: connections.map(function(c) {
-      return { id: c.id, source: c.source, target: c.target, label: c.label };
-    })
-  };
-
+  var data = buildFlowData();
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
@@ -1261,13 +1255,120 @@ function exportJSON() {
   showToast('已导出JSON文件');
 }
 
-/* ---- Zoom controls ---- */
+function doAutoLayout() {
+  if (nodes.length === 0) return;
+  saveUndoState();
+
+  /* Build adjacency */
+  var outgoing = {};
+  var incoming = {};
+  nodes.forEach(function(n) { outgoing[n.id] = []; incoming[n.id] = []; });
+  connections.forEach(function(c) {
+    if (outgoing[c.sourceId]) outgoing[c.sourceId].push(c.targetId);
+    if (incoming[c.targetId]) incoming[c.targetId].push(c.sourceId);
+  });
+
+  /* Find roots (no incoming) */
+  var roots = nodes.filter(function(n) { return incoming[n.id].length === 0; });
+  if (roots.length === 0) roots = [nodes[0]];
+
+  /* BFS to assign levels */
+  var levels = {};
+  var visited = {};
+  var queue = [];
+  roots.forEach(function(n) {
+    levels[n.id] = 0;
+    visited[n.id] = true;
+    queue.push(n);
+  });
+  while (queue.length > 0) {
+    var cur = queue.shift();
+    var lv = levels[cur.id];
+    var outs = outgoing[cur.id] || [];
+    for (var i = 0; i < outs.length; i++) {
+      if (!visited[outs[i]]) {
+        visited[outs[i]] = true;
+        levels[outs[i]] = lv + 1;
+        var tn = findNode(outs[i]);
+        if (tn) queue.push(tn);
+      }
+    }
+  }
+
+  /* Assign levels for unvisited nodes */
+  var maxLv = 0;
+  nodes.forEach(function(n) {
+    if (levels[n.id] === undefined) { maxLv++; levels[n.id] = maxLv; }
+    if (levels[n.id] > maxLv) maxLv = levels[n.id];
+  });
+
+  /* Group by level */
+  var groups = {};
+  nodes.forEach(function(n) {
+    var lv = levels[n.id] || 0;
+    if (!groups[lv]) groups[lv] = [];
+    groups[lv].push(n);
+  });
+
+  /* Position */
+  var startX = 100, startY = 100, gapX = 250, gapY = 100;
+  for (var lv = 0; lv <= maxLv; lv++) {
+    var grp = groups[lv] || [];
+    for (var j = 0; j < grp.length; j++) {
+      grp[j].x = startX + lv * gapX;
+      grp[j].y = startY + j * gapY;
+      updateNodeDOM(grp[j]);
+    }
+  }
+  updateAllConnections();
+  showToast('自动排版完成');
+}
+
+function doPublish() {
+  showToast('已发布到测试环境');
+}
+
+function showTest() {
+  var h = '<div style="margin-bottom:12px"><strong>流程名称:</strong> ' + escapeHtml(flowName) + '</div>';
+  h += '<div style="margin-bottom:12px"><strong>节点数:</strong> ' + nodes.length + ' | <strong>连线数:</strong> ' + connections.length + '</div>';
+  h += '<div style="margin-bottom:8px"><strong>节点列表:</strong></div>';
+  h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
+  h += '<tr style="background:#242836"><th style="padding:4px 8px;text-align:left">ID</th><th style="padding:4px 8px;text-align:left">类型</th><th style="padding:4px 8px;text-align:left">名称</th></tr>';
+  nodes.forEach(function(n) {
+    var info = NODE_TYPE_MAP[n.type];
+    h += '<tr><td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + n.id + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + (info ? info.name : n.type) + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + escapeHtml(n.label) + '</td></tr>';
+  });
+  h += '</table>';
+  h += '<div style="margin:12px 0 8px"><strong>连线列表:</strong></div>';
+  h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
+  h += '<tr style="background:#242836"><th style="padding:4px 8px;text-align:left">ID</th><th style="padding:4px 8px;text-align:left">起点</th><th style="padding:4px 8px;text-align:left">终点</th><th style="padding:4px 8px;text-align:left">标签</th><th style="padding:4px 8px;text-align:left">事件</th></tr>';
+  connections.forEach(function(c) {
+    var src = findNode(c.sourceId);
+    var tgt = findNode(c.targetId);
+    h += '<tr><td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + c.id + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + (src ? src.label : c.sourceId) + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + (tgt ? tgt.label : c.targetId) + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + escapeHtml(c.label) + '</td>'
+      + '<td style="padding:3px 8px;border-bottom:1px solid #2e3348">' + c.eventType + '</td></tr>';
+  });
+  h += '</table>';
+  document.getElementById('testContent').innerHTML = h;
+  document.getElementById('testModal').classList.add('show');
+}
+
+function hideTest() {
+  document.getElementById('testModal').classList.remove('show');
+}
+
+/* ---- Zoom ---- */
 function zoomIn() {
   canvasScale = Math.min(3, canvasScale * 1.2);
   updateCanvasTransform();
 }
 function zoomOut() {
-  canvasScale = Math.max(0.2, canvasScale / 1.2);
+  canvasScale = Math.max(0.15, canvasScale / 1.2);
   updateCanvasTransform();
 }
 function resetZoom() {
@@ -1278,27 +1379,50 @@ function resetZoom() {
 }
 
 /* ============================
+   UNDO
+   ============================ */
+function saveUndoState() {
+  undoStack.push(JSON.stringify({
+    nodes: nodes.map(function(n) {
+      return { id: n.id, type: n.type, label: n.label, x: n.x, y: n.y, description: n.description, config: JSON.parse(JSON.stringify(n.config || {})) };
+    }),
+    connections: connections.map(function(c) {
+      return { id: c.id, sourceId: c.sourceId, targetId: c.targetId, sourcePort: c.sourcePort, targetPort: c.targetPort, label: c.label, eventType: c.eventType, condition: c.condition };
+    }),
+    nextNodeId: nextNodeId,
+    nextConnId: nextConnId,
+    flowName: flowName
+  }));
+  if (undoStack.length > 50) undoStack.shift();
+}
+
+function doUndo() {
+  if (undoStack.length === 0) { showToast('没有可撤销的操作'); return; }
+  var state = JSON.parse(undoStack.pop());
+  loadFlowData(state);
+  showToast('已撤销');
+}
+
+/* ============================
    SAVED PATHS LIST
    ============================ */
 function refreshSavedPaths() {
   var container = document.getElementById('savedPaths');
   var saved = JSON.parse(localStorage.getItem('kg_engine_flows') || '{}');
   var names = Object.keys(saved);
-
   if (names.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:20px;font-size:12px;color:var(--muted)">暂无保存的路径</div>';
+    container.innerHTML = '<div style="text-align:center;padding:16px;font-size:11px;color:var(--muted)">暂无保存的路径</div>';
     return;
   }
-
   var html = '';
   names.forEach(function(name) {
     var flow = saved[name];
-    var nodeCount = (flow.nodes || []).length;
-    var connCount = (flow.connections || []).length;
-    html += '<div class="saved-path-item" onclick="loadSavedPath(\'' + escapeAttr(name) + '\')">'
-      + '<span style="font-size:14px">📄</span>'
-      + '<span class="saved-path-name">' + escapeHtml(name) + '</span>'
-      + '<span class="saved-path-count">' + nodeCount + '节点/' + connCount + '连线</span>'
+    var nc = (flow.nodes || []).length;
+    var cc = (flow.connections || []).length;
+    html += '<div class="saved-item" onclick="loadSavedPath(\'' + escapeAttr(name) + '\')">'
+      + '<span style="font-size:12px">📄</span>'
+      + '<span class="saved-item-name">' + escapeHtml(name) + '</span>'
+      + '<span class="saved-item-count">' + nc + '节点/' + cc + '连线</span>'
       + '</div>';
   });
   container.innerHTML = html;
@@ -1312,129 +1436,130 @@ function loadSavedPath(name) {
 }
 
 /* ============================
+   FLOW DATA I/O
+   ============================ */
+function buildFlowData() {
+  return {
+    name: flowName,
+    nodes: nodes.map(function(n) {
+      return { id: n.id, type: n.type, label: n.label, x: Math.round(n.x), y: Math.round(n.y), description: n.description, config: JSON.parse(JSON.stringify(n.config || {})) };
+    }),
+    connections: connections.map(function(c) {
+      return { id: c.id, sourceId: c.sourceId, targetId: c.targetId, sourcePort: c.sourcePort, targetPort: c.targetPort, label: c.label, eventType: c.eventType, condition: c.condition || '' };
+    })
+  };
+}
+
+function loadFlowData(data) {
+  nodes = [];
+  connections = [];
+  selectedNodeId = null;
+  selectedConnId = null;
+  canvasEl.innerHTML = '';
+
+  /* Re-create SVG */
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'connections-svg');
+  svg.setAttribute('id', 'connectionsSvg');
+  svg.innerHTML = '<defs>'
+    + '<marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="rgba(0,0,0,0.25)"/></marker>'
+    + '<marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 8 3 L 0 6 L 2 3 Z" fill="#4f8cff"/></marker>'
+    + '</defs>';
+  canvasEl.appendChild(svg);
+  connectionsSvg = svg;
+
+  flowName = data.name || '未命名路径';
+
+  var maxN = 0, maxC = 0;
+
+  /* Render nodes */
+  (data.nodes || []).forEach(function(nd) {
+    var numId = parseInt(nd.id.replace('n', ''));
+    if (numId > maxN) maxN = numId;
+    var node = {
+      id: nd.id, type: nd.type, label: nd.label,
+      x: nd.x, y: nd.y,
+      description: nd.description || '',
+      config: nd.config || {}
+    };
+    nodes.push(node);
+    renderNode(node);
+  });
+  nextNodeId = maxN + 1;
+
+  /* Render connections after nodes are in DOM */
+  setTimeout(function() {
+    (data.connections || []).forEach(function(cd) {
+      var numId = parseInt(cd.id.replace('c', ''));
+      if (numId > maxC) maxC = numId;
+
+      /* Auto-detect ports if not specified */
+      var sp = cd.sourcePort, tp = cd.targetPort;
+      if (!sp || !tp) {
+        var best = getBestPorts(cd.sourceId, cd.targetId);
+        sp = best.sourcePort;
+        tp = best.targetPort;
+      }
+
+      var conn = {
+        id: cd.id, sourceId: cd.sourceId, targetId: cd.targetId,
+        sourcePort: sp, targetPort: tp,
+        label: cd.label || '',
+        eventType: cd.eventType || '无条件',
+        condition: cd.condition || ''
+      };
+      connections.push(conn);
+      renderConnection(conn);
+    });
+    nextConnId = maxC + 1;
+  }, 30);
+}
+
+/* ============================
    AMI EXAMPLE
    ============================ */
 function loadAMIExample() {
   var amiData = {
     name: 'AMI急性心肌梗死诊疗路径',
-    version: '1.0',
     nodes: [
-      // Row 1: Trigger
-      { id: 'n1', type: 'trigger', label: '急诊接诊', x: 310, y: 30,
-        config: { eventType: 'EVT_PATIENT_CONTEXT_READY', source: '急诊接诊' },
-        description: '患者到达急诊，系统接诊' },
-
-      // Row 2: Action - 高危筛查
-      { id: 'n2', type: 'action', label: '高危大类筛查', x: 310, y: 170,
-        config: { actionType: '疾病推荐', output: '筛查ACS/心衰/心律失常等高危疾病', source_ref: 'CDSS推荐引擎' },
-        description: '对患者进行高危疾病大类筛查' },
-
-      // Row 3: Decision - 是否命中
-      { id: 'n3', type: 'decision', label: '是否命中高危？', x: 310, y: 310,
-        config: { condition: '命中ACS/心衰/心律失常等高危大类', yesLabel: '是', noLabel: '否' },
-        description: '判断是否命中高危疾病大类' },
-
-      // Row 4 Left: State - 记录判断结果
-      { id: 'n4', type: 'state', label: '记录判断结果', x: 110, y: 450,
-        config: { stateCode: 'S10', stateName: '维持通用提醒' },
-        description: '记录未命中高危的判断结果，维持通用提醒' },
-
-      // Row 4 Right: Action - 候选专病推荐
-      { id: 'n5', type: 'action', label: '候选专病推荐', x: 510, y: 450,
-        config: { actionType: '疾病推荐', output: '推荐候选专病列表', source_ref: 'CDSS推荐引擎' },
-        description: '基于高危筛查结果，推荐候选专病' },
-
-      // Row 5 Right: Decision - 证据是否充分
-      { id: 'n6', type: 'decision', label: '证据是否充分？', x: 510, y: 590,
-        config: { condition: '诊断证据是否满足入径标准', yesLabel: '是', noLabel: '否' },
-        description: '判断当前诊断证据是否充分' },
-
-      // Row 5 Left: Action - 证据补齐
-      { id: 'n7', type: 'action', label: '证据补齐', x: 160, y: 590,
-        config: { actionType: '鉴别方法推荐', output: '推荐补充检查项目', source_ref: '指南推荐' },
-        description: '推荐补充检查以补齐诊断证据' },
-
-      // Row 6 Right: State - 入径确认
-      { id: 'n8', type: 'state', label: '入径确认', x: 510, y: 730,
-        config: { stateCode: 'S20', stateName: '创建AMI路径实例' },
-        description: '确认进入AMI诊疗路径，创建路径实例' },
-
-      // Row 7: Decision - STEMI/NSTEMI
-      { id: 'n9', type: 'decision', label: 'STEMI/NSTEMI？', x: 510, y: 870,
-        config: { condition: '根据心电图ST段改变进行分型', yesLabel: 'ST段抬高', noLabel: '无ST段抬高' },
-        description: 'STEMI与NSTEMI分型分层' },
-
-      // Row 8 Left: State - STEMI分型
-      { id: 'n10', type: 'state', label: 'STEMI分型', x: 260, y: 1010,
-        config: { stateCode: 'S30', stateName: '再灌注窗口评估' },
-        description: 'STEMI患者进行再灌注治疗窗口评估' },
-
-      // Row 8 Right: State - NSTEMI分型
-      { id: 'n11', type: 'state', label: 'NSTEMI分型', x: 760, y: 1010,
-        config: { stateCode: 'S31', stateName: '风险评估' },
-        description: 'NSTEMI患者进行风险分层评估' },
-
-      // Row 9 Left: Action - 推荐急诊PCI
-      { id: 'n12', type: 'action', label: '推荐急诊PCI', x: 260, y: 1150,
-        config: { actionType: '治疗方案推荐', output: '推荐急诊PCI再灌注治疗', source_ref: 'STEMI诊疗指南' },
-        description: 'STEMI患者推荐急诊PCI治疗' },
-
-      // Row 9 Right: Action - 推荐抗栓+住院
-      { id: 'n13', type: 'action', label: '推荐抗栓+住院', x: 760, y: 1150,
-        config: { actionType: '医嘱推荐', output: '推荐抗栓治疗+住院观察', source_ref: 'NSTEMI诊疗指南' },
-        description: 'NSTEMI患者推荐抗栓治疗和住院' },
-
-      // Row 10: State - 治疗执行
-      { id: 'n14', type: 'state', label: '治疗执行', x: 510, y: 1290,
-        config: { stateCode: 'S40', stateName: '医嘱执行+风险监测' },
-        description: '执行治疗方案，持续风险监测' },
-
-      // Row 11: Decision - 是否有并发症
-      { id: 'n15', type: 'decision', label: '是否有并发症？', x: 510, y: 1430,
-        config: { condition: '治疗过程中是否出现并发症', yesLabel: '是', noLabel: '否' },
-        description: '评估治疗过程中是否出现并发症' },
-
-      // Row 12 Left: Action - 并发症处置
-      { id: 'n16', type: 'action', label: '并发症处置', x: 260, y: 1570,
-        config: { actionType: '风险预警', output: '并发症预警及处置方案', source_ref: '并发症处理规范' },
-        description: '对并发症进行紧急处置' },
-
-      // Row 12 Right: State - 出院准备
-      { id: 'n17', type: 'state', label: '出院准备', x: 760, y: 1570,
-        config: { stateCode: 'S50', stateName: '出院质控' },
-        description: '出院前质控评估和准备' },
-
-      // Row 13: State - 随访管理
-      { id: 'n18', type: 'state', label: '随访管理', x: 510, y: 1710,
-        config: { stateCode: 'S60', stateName: '复查+二级预防' },
-        description: '出院后随访、复查和二级预防' },
-
-      // Row 14: End - 效果评价
-      { id: 'n19', type: 'end', label: '效果评价', x: 510, y: 1850,
-        config: { },
-        description: '疗效评价+路径质量评估' }
+      { id:'n1',  type:'start',      label:'开始',               x:80,  y:300, description:'急性心肌梗死诊疗流程起点', config:{} },
+      { id:'n2',  type:'task',       label:'入组前筛查',          x:280, y:300, description:'高危大类筛查', config:{taskType:'入组筛查'} },
+      { id:'n3',  type:'task',       label:'候选专病推荐',        x:480, y:300, description:'推荐候选专病列表', config:{taskType:'疾病推荐'} },
+      { id:'n4',  type:'decision',   label:'证据充分？',          x:680, y:300, description:'判断诊断证据是否充分', config:{condition:'诊断证据是否满足入径标准'} },
+      { id:'n5',  type:'task',       label:'证据补齐',            x:680, y:140, description:'推荐补充检查项目', config:{taskType:'鉴别推荐'} },
+      { id:'n6',  type:'task',       label:'入径确认',            x:880, y:300, description:'确认进入AMI诊疗路径', config:{taskType:'评估'} },
+      { id:'n7',  type:'decision',   label:'STEMI/NSTEMI？',     x:1080,y:300, description:'根据心电图ST段改变进行分型', config:{condition:'根据心电图ST段改变进行分型'} },
+      { id:'n8',  type:'task',       label:'STEMI分型+再灌注评估',x:1080,y:140, description:'再灌注治疗窗口评估', config:{taskType:'评估'} },
+      { id:'n9',  type:'task',       label:'NSTEMI风险评估',      x:1080,y:480, description:'NSTEMI患者风险分层', config:{taskType:'评估'} },
+      { id:'n10', type:'task',       label:'推荐急诊PCI',        x:1300,y:140, description:'STEMI患者推荐急诊PCI治疗', config:{taskType:'方案推荐'} },
+      { id:'n11', type:'task',       label:'推荐抗栓+住院',       x:1300,y:480, description:'NSTEMI患者推荐抗栓治疗', config:{taskType:'医嘱推荐'} },
+      { id:'n12', type:'task',       label:'治疗执行+风险监测',   x:1520,y:300, description:'执行治疗方案，持续风险监测', config:{taskType:'质控'} },
+      { id:'n13', type:'decision',   label:'有并发症？',          x:1740,y:300, description:'评估治疗过程中是否出现并发症', config:{condition:'治疗过程中是否出现并发症'} },
+      { id:'n14', type:'task',       label:'并发症处置',          x:1740,y:140, description:'并发症预警及处置方案', config:{taskType:'预警'} },
+      { id:'n15', type:'task',       label:'出院准备',            x:1960,y:300, description:'出院前质控评估和准备', config:{taskType:'质控'} },
+      { id:'n16', type:'task',       label:'随访管理',            x:2160,y:300, description:'出院后随访、复查和二级预防', config:{taskType:'随访'} },
+      { id:'n17', type:'end',        label:'结束',                x:2360,y:300, description:'诊疗流程结束', config:{} }
     ],
     connections: [
-      { id: 'c1',  source: 'n1',  target: 'n2',  label: '' },
-      { id: 'c2',  source: 'n2',  target: 'n3',  label: '' },
-      { id: 'c3',  source: 'n3',  target: 'n4',  label: '否' },
-      { id: 'c4',  source: 'n3',  target: 'n5',  label: '是' },
-      { id: 'c5',  source: 'n5',  target: 'n6',  label: '' },
-      { id: 'c6',  source: 'n6',  target: 'n7',  label: '否' },
-      { id: 'c7',  source: 'n6',  target: 'n8',  label: '是' },
-      { id: 'c8',  source: 'n8',  target: 'n9',  label: '' },
-      { id: 'c9',  source: 'n9',  target: 'n10', label: 'ST段抬高' },
-      { id: 'c10', source: 'n9',  target: 'n11', label: '无ST段抬高' },
-      { id: 'c11', source: 'n10', target: 'n12', label: '' },
-      { id: 'c12', source: 'n11', target: 'n13', label: '' },
-      { id: 'c13', source: 'n12', target: 'n14', label: '' },
-      { id: 'c14', source: 'n13', target: 'n14', label: '' },
-      { id: 'c15', source: 'n14', target: 'n15', label: '' },
-      { id: 'c16', source: 'n15', target: 'n16', label: '是' },
-      { id: 'c17', source: 'n15', target: 'n17', label: '否' },
-      { id: 'c18', source: 'n16', target: 'n14', label: '' },
-      { id: 'c19', source: 'n17', target: 'n18', label: '' },
-      { id: 'c20', source: 'n18', target: 'n19', label: '' }
+      { id:'c1',  sourceId:'n1',  targetId:'n2',  sourcePort:'right', targetPort:'left',   label:'开始',               eventType:'无条件' },
+      { id:'c2',  sourceId:'n2',  targetId:'n3',  sourcePort:'right', targetPort:'left',   label:'节点1:入组前筛查',   eventType:'EVT_EMR_SAVE' },
+      { id:'c3',  sourceId:'n3',  targetId:'n4',  sourcePort:'right', targetPort:'left',   label:'高风险推荐',         eventType:'EVT_REPORT_BACK' },
+      { id:'c4',  sourceId:'n4',  targetId:'n5',  sourcePort:'top',   targetPort:'bottom', label:'否-证据不足',         eventType:'无条件' },
+      { id:'c5',  sourceId:'n4',  targetId:'n6',  sourcePort:'right', targetPort:'left',   label:'是-证据充分',         eventType:'EVT_DIAGNOSIS_SAVE' },
+      { id:'c6',  sourceId:'n5',  targetId:'n3',  sourcePort:'left',  targetPort:'right',  label:'补齐后重新推荐',     eventType:'无条件' },
+      { id:'c7',  sourceId:'n6',  targetId:'n7',  sourcePort:'right', targetPort:'left',   label:'入径确认',           eventType:'EVT_DIAGNOSIS_SAVE' },
+      { id:'c8',  sourceId:'n7',  targetId:'n8',  sourcePort:'top',   targetPort:'bottom', label:'ST段抬高',            eventType:'EVT_REPORT_BACK' },
+      { id:'c9',  sourceId:'n7',  targetId:'n9',  sourcePort:'bottom',targetPort:'top',    label:'无ST段抬高',          eventType:'EVT_REPORT_BACK' },
+      { id:'c10', sourceId:'n8',  targetId:'n10', sourcePort:'right', targetPort:'left',   label:'再灌注窗口内',       eventType:'EVT_REPORT_BACK' },
+      { id:'c11', sourceId:'n9',  targetId:'n11', sourcePort:'right', targetPort:'left',   label:'高危NSTEMI',          eventType:'EVT_REPORT_BACK' },
+      { id:'c12', sourceId:'n10', targetId:'n12', sourcePort:'right', targetPort:'left',   label:'PCI方案',             eventType:'EVT_ORDER_SAVE_PRE' },
+      { id:'c13', sourceId:'n11', targetId:'n12', sourcePort:'right', targetPort:'left',   label:'抗栓方案',            eventType:'EVT_ORDER_SAVE_PRE' },
+      { id:'c14', sourceId:'n12', targetId:'n13', sourcePort:'right', targetPort:'left',   label:'治疗中监测',         eventType:'EVT_TIMER_SCAN' },
+      { id:'c15', sourceId:'n13', targetId:'n14', sourcePort:'top',   targetPort:'bottom', label:'是-有并发症',         eventType:'EVT_REPORT_BACK' },
+      { id:'c16', sourceId:'n13', targetId:'n15', sourcePort:'right', targetPort:'left',   label:'否-无并发症',         eventType:'EVT_DISCHARGE_SAVE' },
+      { id:'c17', sourceId:'n14', targetId:'n12', sourcePort:'left',  targetPort:'top',    label:'处置后继续',          eventType:'无条件' },
+      { id:'c18', sourceId:'n15', targetId:'n16', sourcePort:'right', targetPort:'left',   label:'出院',                eventType:'EVT_DISCHARGE_SAVE' },
+      { id:'c19', sourceId:'n16', targetId:'n17', sourcePort:'right', targetPort:'left',   label:'随访完成',            eventType:'EVT_TIMER_SCAN' }
     ]
   };
 
@@ -1477,17 +1602,64 @@ function showToast(msg) {
   toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
 
-/* ============================
-   SVG DEFS (arrowhead marker)
-   ============================ */
-(function() {
-  var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  defs.innerHTML = '<marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">'
-    + '<path d="M 0 0 L 10 4 L 0 8 L 2 4 Z" fill="rgba(255,255,255,0.3)"/></marker>'
-    + '<marker id="arrowhead-active" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">'
-    + '<path d="M 0 0 L 10 4 L 0 8 L 2 4 Z" fill="#4f8cff"/></marker>';
-  svgLayer.appendChild(defs);
-})();
+function getPortPosition(nodeId, portName) {
+  var el = document.getElementById('node-' + nodeId);
+  if (!el) return null;
+  var x = parseInt(el.style.left);
+  var y = parseInt(el.style.top);
+  var w = el.offsetWidth;
+  var h = el.offsetHeight;
+  switch (portName) {
+    case 'top':    return { x: x + w / 2, y: y };
+    case 'bottom': return { x: x + w / 2, y: y + h };
+    case 'left':   return { x: x, y: y + h / 2 };
+    case 'right':  return { x: x + w, y: y + h / 2 };
+  }
+  return { x: x + w / 2, y: y + h / 2 };
+}
+
+function makeConnPath(x1, y1, port1, x2, y2, port2) {
+  var dirs = {
+    top:    { dx: 0, dy: -1 },
+    bottom: { dx: 0, dy: 1 },
+    left:   { dx: -1, dy: 0 },
+    right:  { dx: 1, dy: 0 }
+  };
+  var d1 = dirs[port1] || { dx: 0, dy: 1 };
+  var d2 = dirs[port2] || { dx: 0, dy: -1 };
+  var dist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  var offset = Math.max(50, dist * 0.3);
+  var cx1 = x1 + d1.dx * offset;
+  var cy1 = y1 + d1.dy * offset;
+  var cx2 = x2 + d2.dx * offset;
+  var cy2 = y2 + d2.dy * offset;
+  return 'M ' + x1 + ' ' + y1 + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + x2 + ' ' + y2;
+}
+
+function getBestPorts(sourceId, targetId) {
+  var sEl = document.getElementById('node-' + sourceId);
+  var tEl = document.getElementById('node-' + targetId);
+  if (!sEl || !tEl) return { sourcePort: 'right', targetPort: 'left' };
+
+  var sx = parseInt(sEl.style.left), sy = parseInt(sEl.style.top);
+  var sw = sEl.offsetWidth, sh = sEl.offsetHeight;
+  var tx = parseInt(tEl.style.left), ty = parseInt(tEl.style.top);
+  var tw = tEl.offsetWidth, th = tEl.offsetHeight;
+
+  var scx = sx + sw / 2, scy = sy + sh / 2;
+  var tcx = tx + tw / 2, tcy = ty + th / 2;
+  var dx = tcx - scx, dy = tcy - scy;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0 ?
+      { sourcePort: 'right', targetPort: 'left' } :
+      { sourcePort: 'left', targetPort: 'right' };
+  } else {
+    return dy > 0 ?
+      { sourcePort: 'bottom', targetPort: 'top' } :
+      { sourcePort: 'top', targetPort: 'bottom' };
+  }
+}
 
 /* ============================
    BOOT
