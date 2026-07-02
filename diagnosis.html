@@ -10,8 +10,16 @@
 /* ===== Diagnosis Page Styles ===== */
 .diagnosis-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; min-height: 600px; }
 
-/* ===== Architecture Overview ===== */
-.arch-section { background: linear-gradient(135deg, #0c1426 0%, #111b33 40%, #0f2027 100%); border: 1px solid rgba(79,140,255,.18); border-radius: 14px; padding: 28px 32px; margin-bottom: 28px; box-shadow: 0 0 60px rgba(79,140,255,.06); }
+/* ===== Architecture Toggle ===== */
+.arch-section { background: linear-gradient(135deg, #0c1426 0%, #111b33 40%, #0f2027 100%); border: 1px solid rgba(79,140,255,.18); border-radius: 14px; margin-bottom: 28px; box-shadow: 0 0 60px rgba(79,140,255,.06); overflow: hidden; }
+.arch-toggle { display: flex; align-items: center; gap: 10px; padding: 16px 24px; cursor: pointer; user-select: none; transition: background .2s; }
+.arch-toggle:hover { background: rgba(255,255,255,.03); }
+.arch-toggle-icon { font-size: 11px; color: #4f8cff; transition: transform .25s; display: inline-block; }
+.arch-toggle-icon.open { transform: rotate(90deg); }
+.arch-toggle-text { font-size: 15px; font-weight: 700; color: #e8eaf0; }
+.arch-toggle-hint { font-size: 11px; color: #8b90a0; margin-left: auto; }
+.arch-body { padding: 0 28px 24px; animation: archIn .3s ease; }
+@keyframes archIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 .arch-desc { font-size: 13px; color: #8b90a0; line-height: 1.9; margin-bottom: 20px; max-width: 900px; }
 .arch-desc strong { color: #74c0fc; font-weight: 600; }
 .arch-title { font-size: 16px; font-weight: 800; color: #e8eaf0; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
@@ -40,6 +48,18 @@
 .arch-step-highlight { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: #74c0fc; font-weight: 700; }
 .arch-step-arrow { font-size: 16px; color: rgba(79,140,255,.5); font-weight: 700; }
 .arch-arrow { font-size: 18px; color: rgba(79,140,255,.35); line-height: 1; padding: 4px 0; user-select: none; }
+
+/* ===== Sample Cases ===== */
+.sample-cases { margin-bottom: 14px; }
+.sample-cases-title { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em; }
+.sample-list { display: flex; flex-direction: column; gap: 6px; }
+.sample-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 8px; cursor: pointer; transition: all .2s; }
+.sample-item:hover { border-color: rgba(79,140,255,.4); background: rgba(79,140,255,.04); }
+.sample-icon { font-size: 18px; flex-shrink: 0; }
+.sample-info { flex: 1; min-width: 0; }
+.sample-name { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.sample-desc { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sample-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: rgba(79,140,255,.1); color: var(--accent); font-weight: 600; flex-shrink: 0; }
 .input-section { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 24px; position: sticky; top: 72px; align-self: start; }
 .result-section { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 24px; }
 .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
@@ -162,9 +182,15 @@
     <div class="subtitle">基于心血管专科知识图谱的疾病智能匹配</div>
   </div>
 
-  <!-- ===== Architecture Overview ===== -->
+  <!-- ===== Architecture Overview (collapsed by default) ===== -->
   <section class="arch-section">
-    <div class="arch-desc">
+    <div class="arch-toggle" onclick="toggleArch()">
+      <span class="arch-toggle-icon" id="arch-toggle-icon">&#9654;</span>
+      <span class="arch-toggle-text">整体逻辑架构</span>
+      <span class="arch-toggle-hint">点击展开</span>
+    </div>
+    <div class="arch-body" id="arch-body" style="display:none;">
+      <div class="arch-desc">
       以专科诊疗辅助建设为目标，以专科CDSS为能力承载，围绕<strong>疾病推荐</strong>、<strong>鉴别方法推荐</strong>、<strong>检查推荐</strong>、<strong>治疗方案推荐</strong>、<strong>智能评估</strong>、<strong>风险预测</strong>、<strong>诊疗路径串联</strong>和<strong>质控闭环</strong>的完整能力体系。专病诊疗路径是其中的状态管理和过程承接环节，用于把医从预测、入院、分型、治疗、风险监控、出院回访本或可管理、可观察、可评价的链条。
     </div>
 
@@ -251,7 +277,40 @@
     <!-- Left: Input -->
     <div class="input-section">
       <div class="section-title">患者临床信息</div>
-      <textarea class="patient-textarea" id="patient-input" placeholder="请输入患者的主诉、现病史、既往史、个人史、家族史等临床信息...&#10;&#10;示例：&#10;患者男性，65岁，因"胸痛2小时"入院。2小时前无明显诱因出现胸骨后压榨性疼痛，向左肩放射，伴大汗、恶心、呕吐。既往有高血压病史10年，糖尿病史5年，吸烟30年。查体：BP 160/95mmHg，心率102次/分，心电图示ST段抬高。肌钙蛋白升高。"></textarea>
+
+      <!-- Sample patient cases -->
+      <div class="sample-cases">
+        <div class="sample-cases-title">快速加载示例病例</div>
+        <div class="sample-list">
+          <div class="sample-item" onclick="loadSample(0)">
+            <span class="sample-icon">&#128680;</span>
+            <div class="sample-info"><div class="sample-name">急性心肌梗死</div><div class="sample-desc">65岁男性，胸痛2小时，ST段抬高</div></div>
+            <span class="sample-badge">STEMI</span>
+          </div>
+          <div class="sample-item" onclick="loadSample(1)">
+            <span class="sample-icon">&#9889;</span>
+            <div class="sample-info"><div class="sample-name">心房颤动</div><div class="sample-desc">72岁女性，心悸、心律不齐</div></div>
+            <span class="sample-badge">AF</span>
+          </div>
+          <div class="sample-item" onclick="loadSample(2)">
+            <span class="sample-icon">&#128146;</span>
+            <div class="sample-info"><div class="sample-name">急性心力衰竭</div><div class="sample-desc">68岁男性，呼吸困难、端坐呼吸、水肿</div></div>
+            <span class="sample-badge">AHF</span>
+          </div>
+          <div class="sample-item" onclick="loadSample(3)">
+            <span class="sample-icon">&#128163;</span>
+            <div class="sample-info"><div class="sample-name">不稳定型心绞痛</div><div class="sample-desc">58岁男性，胸骨后压榨性疼痛，休息时发作</div></div>
+            <span class="sample-badge">UA</span>
+          </div>
+          <div class="sample-item" onclick="loadSample(4)">
+            <span class="sample-icon">&#128269;</span>
+            <div class="sample-info"><div class="sample-name">扩张型心肌病</div><div class="sample-desc">45岁男性，活动后气促、心脏扩大、EF降低</div></div>
+            <span class="sample-badge">DCM</span>
+          </div>
+        </div>
+      </div>
+
+      <textarea class="patient-textarea" id="patient-input" placeholder="请输入患者的主诉、现病史、既往史、个人史、家族史等临床信息..."></textarea>
       <div class="btn-group">
         <button class="btn btn-primary" onclick="runDiagnosis()">匹配诊断</button>
         <button class="btn btn-outline" onclick="clearInput()">清空输入</button>
@@ -933,6 +992,36 @@ function clearInput() {
   document.getElementById('stats-bar').style.display = 'none';
   document.getElementById('diagnosis-results').innerHTML =
     '<div class="no-results"><div class="no-results-icon">&#128269;</div><div>请输入患者临床信息后点击"匹配诊断"</div></div>';
+}
+
+/* ---- 11. 架构图折叠/展开 ---- */
+function toggleArch() {
+  var body = document.getElementById('arch-body');
+  var icon = document.getElementById('arch-toggle-icon');
+  var hint = document.querySelector('.arch-toggle-hint');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    icon.classList.add('open');
+    hint.textContent = '点击收起';
+  } else {
+    body.style.display = 'none';
+    icon.classList.remove('open');
+    hint.textContent = '点击展开';
+  }
+}
+
+/* ---- 12. 示例病例数据 ---- */
+var SAMPLE_CASES = [
+  '患者男性，65岁，因"胸痛2小时"入院。2小时前无明显诱因出现胸骨后压榨性疼痛，向左肩放射，伴大汗、恶心、呕吐。既往有高血压病史10年，糖尿病史5年，吸烟30年。查体：BP 160/95mmHg，心率102次/分，心电图示ST段抬高。肌钙蛋白升高。诊断为急性ST段抬高型心肌梗死。',
+  '患者女性，72岁，反复心悸、胸闷1周加重2天就诊。既往有高血压病史15年，2型糖尿病史8年。查体：心率130次/分，心律绝对不齐，心音强弱不等。心电图示心房颤动，心室率130次/分。心脏超声示左房扩大(48mm)，左室射血分数55%。D-二聚体升高。',
+  '患者男性，68岁，因"呼吸困难3天，加重伴端坐呼吸1天"急诊入院。既往有冠心病、陈旧性心肌梗死病史5年，高血压病史12年。查体：端坐位，呼吸急促，双肺可闻及湿啰音，心率110次/分，双下肢凹陷性水肿。BNP 1800pg/ml，肌钙蛋白轻度升高。胸片示肺淤血、心影增大。',
+  '患者男性，58岁，反复胸骨后压榨性疼痛3个月，近1周加重，休息时也发作，含服硝酸甘油可缓解。既往有高血压病史8年，吸烟20年。查体：BP 150/90mmHg，心率88次/分。心电图示V4-V6 ST段压低0.2mV。肌钙蛋白正常。诊断为不稳定型心绞痛。',
+  '患者男性，45岁，因"活动后气促6个月，加重2周"就诊。既往体健，无高血压糖尿病史。查体：心率90次/分，心界向左下扩大，心尖区可闻及3/6级收缩期吹风样杂音，双下肢轻度水肿。心脏超声示左室明显扩大(LVEDD 68mm)，左室射血分数30%，室壁运动弥漫性减弱。BNP 850pg/ml。'
+];
+
+function loadSample(idx) {
+  document.getElementById('patient-input').value = SAMPLE_CASES[idx];
+  document.getElementById('patient-input').focus();
 }
 </script>
 </body>
