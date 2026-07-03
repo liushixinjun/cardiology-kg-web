@@ -109,3 +109,42 @@
 6. **版本管理**：每次修复后及时 commit + push，不要积累大量修改
 7. **早期返回要谨慎**：`renderCurrent()` 中的 early return 导致实体视角忽略疾病切换，所有视角都要响应全局状态
 8. **三栏布局独立滚动**：overflow 会从父级泄漏，必须显式隔离每栏的滚动容器
+9. **禁止在 RunCommand 中做批量文件替换**：PowerShell 管道 + Set-Content 会因编码/路径/特殊字符导致文件损坏（#010）
+
+---
+
+## #010 — 批量版本号替换导致14个HTML文件全部损坏（灾难级）
+
+**日期**：2026-07-03 11:13  
+**严重度**：🔴 灾难级（14个核心页面全部丢失）  
+**现象**：执行 `Get-ChildItem *.html | ForEach-Object { (Get-Content) -replace 'v=20260703','v=20260704' | Set-Content }` 后，所有14个HTML文件变成12字节的 `</html>`  
+**根因**：PowerShell `Set-Content` 在管道模式下，默认使用系统ANSI编码（非UTF-8），且对多字节字符（中文）处理异常。管道流式处理时文件先被清空再写入，中途出错导致只写入了末尾几个字节  
+**影响范围**：`index.html`、`explore.html`、`network.html`、`heatmap.html`、`diagnosis.html`、`engine.html`、`review.html`、`schema.html`、`standard.html`、`terminology.html`、`config.html`、`disease.html`、`disease-review.html`、`instances.html`（共14个文件）  
+**恢复方式**：`git checkout -- <files>` 从Git历史恢复（仓库在 `kg-test-page/.git`）  
+**修复耗时**：约15分钟（含排查原因+恢复+重新应用修改）  
+
+**根因分析**：
+1. 批量文件操作用 PowerShell 管道 + `Set-Content` 不安全，编码问题导致文件损坏
+2. 没有先用单个文件测试替换命令
+3. 没有在执行前检查文件编码
+4. 幸亏有Git仓库，否则14个页面全部丢失
+
+**正确做法**：
+```python
+# 用Python脚本安全替换
+import re, glob
+for f in glob.glob('*.html'):
+    with open(f, 'r', encoding='utf-8-sig') as fh:
+        content = fh.read()
+    new_content = re.sub(r'app\.js\?v=\d+', 'app.js?v=20260704', content)
+    with open(f, 'w', encoding='utf-8') as fh:
+        fh.write(new_content)
+```
+
+**教训**：
+- **批量文件修改必须用脚本（Python/Node），不能用PowerShell管道**
+- **任何批量操作前必须先备份或确认有Git历史可恢复**
+- **单个文件验证通过后再批量执行**
+- **Git仓库是生命线，项目必须有版本管理**
+
+**关联规则**：见 `_全局复利与踩坑日志.md` 踩坑编号 #004
