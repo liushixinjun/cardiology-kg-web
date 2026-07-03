@@ -90,8 +90,8 @@ def query_disease_list():
         # 获取每个疾病的维度数量（一次查询）
         dim_counts = {}
         for dim, rel in REL_MAP.items():
-            rows = sess.run(f"""
-                MATCH (d:Disease)-[:{rel}]->(n)
+            rows = sess.run("""
+                MATCH (d:Disease)-[:" + rel + "]->(n)
                 RETURN d.code as code, count(DISTINCT n) as cnt
             """)
             for r in rows:
@@ -122,8 +122,8 @@ def query_diseases_summary():
             code = d_info["code"]
             dims = {}
             for dim, rel in REL_MAP.items():
-                rows = sess.run(f"""
-                    MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
+                rows = sess.run("""
+                    MATCH (d:Disease {{code: $code}})-[:" + rel + "]->(n)
                     RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
                        n.name_en as name_en, n.aliases as aliases
                     ORDER BY n.name LIMIT 30
@@ -131,7 +131,7 @@ def query_diseases_summary():
                 items = []
                 seen = set()
                 for r in rows:
-                    name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                    name = r["pre"] or r["name"] or r["ncode"] or "N/A"
                     if name in SHELL_NAMES or name in seen:
                         continue
                     seen.add(name)
@@ -167,8 +167,8 @@ def query_disease_full(code):
         # 17维度 + 二跳
         dimensions = {}
         for dim, rel in REL_MAP.items():
-            results = sess.run(f"""
-                MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
+            results = sess.run("""
+                MATCH (d:Disease {{code: $code}})-[:" + rel + "]->(n)
                 RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
                        n.name_en as name_en, n.aliases as aliases
                 ORDER BY n.name LIMIT 30
@@ -176,7 +176,7 @@ def query_disease_full(code):
             items = []
             seen = set()
             for r in results:
-                name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                name = r["pre"] or r["name"] or r["ncode"] or "N/A"
                 if name in SHELL_NAMES or name in seen:
                     continue
                 seen.add(name)
@@ -194,7 +194,7 @@ def query_disease_full(code):
                             ORDER BY m.name LIMIT 15
                         """, tp_code=r["ncode"])
                         for sm in sub_meds:
-                            n = sm["pref"] or sm["name"] or sm["code"]
+                            n = sm["pre"] or sm["name"] or sm["code"]
                             item["sub_medication"].append({"name": n, "code": sm["code"]})
 
                         sub_procs = sess.run("""
@@ -203,7 +203,7 @@ def query_disease_full(code):
                             ORDER BY p.name LIMIT 15
                         """, tp_code=r["ncode"])
                         for sp in sub_procs:
-                            n = sp["pref"] or sp["name"] or sp["code"]
+                            n = sp["pre"] or sp["name"] or sp["code"]
                             item["sub_procedure"].append({"name": n, "code": sp["code"]})
                     except Exception:
                         pass
@@ -218,7 +218,7 @@ def query_disease_full(code):
                             ORDER BY s.name LIMIT 15
                         """, med_code=r["ncode"])
                         for sm in sub_meds:
-                            n = sm["pref"] or sm["name"] or sm["code"]
+                            n = sm["pre"] or sm["name"] or sm["code"]
                             item["sub_medication"].append({"name": n, "code": sm["code"]})
                     except Exception:
                         pass
@@ -232,13 +232,13 @@ def query_disease_full(code):
             seen = set()
             for chain in cfg["rel_chain"]:
                 try:
-                    results = sess.run(f"""
+                    results = sess.run("""
                         MATCH (d:Disease {{code: $code}})-[:{chain['rel_to']}]->(x:KGNode)-[:{chain['hop2_rel']}]->(n)
                         RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref
                         ORDER BY n.name LIMIT 30
                     """, code=code)
                     for r in results:
-                        name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                        name = r["pre"] or r["name"] or r["ncode"] or "N/A"
                         if name in seen:
                             continue
                         seen.add(name)
@@ -350,7 +350,7 @@ def query_entity_detail(code):
         aliases = [a for a in (r["aliases"] or []) if a != name]
         
         return {
-            "name": r["pref"] or name,
+            "name": r["pre"] or name,
             "code": code,
             "name_en": r["name_en"] or "",
             "aliases": aliases,
@@ -460,9 +460,9 @@ def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     http.server.HTTPServer.allow_reuse_address = True
     server = http.server.HTTPServer(('0.0.0.0', port), KGHandler)
-    print(f"知识图谱动态服务启动: http://0.0.0.0:{port}")
-    print(f"Neo4j: {NEO4J_URI}")
-    print(f"API: /api/kg/diseases | /api/kg/stats | /api/kg/disease/<code> | /api/kg/guidelines")
+    print("知识图谱动态服务启动: http://0.0.0.0:" + str(port) + "")
+    print("Neo4j: " + NEO4J_URI + "")
+    print("API: /api/kg/diseases | /api/kg/stats | /api/kg/disease/<code> | /api/kg/guidelines")
     server.serve_forever()
 
 
