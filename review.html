@@ -354,7 +354,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 </button>
 
 <!-- 加载共享导航 -->
-<script src="./_shared/js/app.js?v=20260701"></script>
+<script src="./_shared/js/app.js?v=20260703a"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -423,7 +423,11 @@ var TARGET_TYPE_LABELS = {
   RiskStratification: '风险分层',
   Pathophysiology: '病理生理',
   Epidemiology: '流行病学',
-  Etiology: '病因'
+  Etiology: '病因',
+  Evidence: '证据',
+  Guideline: '指南',
+  ThresholdRule: '阈值规则',
+  ExamIndicator: '检查指标'
 };
 
 /* 颜色映射 */
@@ -433,7 +437,8 @@ var SCENE_TYPE_COLORS = {
   '危险因素': 'yellow', '并发症': 'red', '鉴别诊断': 'yellow',
   '随访方案': 'green', '预后': 'green', '治疗方案': 'blue',
   '诊断标准': 'blue', '风险分层': 'yellow', '流行病学': 'muted',
-  '病因': 'muted', '病理生理': 'muted'
+  '病因': 'muted', '病理生理': 'muted',
+  '证据': 'green', '指南': 'yellow', '阈值规则': 'cyan', '检查指标': 'purple'
 };
 
 function badgeColor(type) { return SCENE_TYPE_COLORS[type] || 'blue'; }

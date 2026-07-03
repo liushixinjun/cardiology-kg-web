@@ -557,7 +557,7 @@ body { display: flex; flex-direction: column; }
 
 </div>
 
-<script src="./_shared/js/app.js?v=20260701"></script>
+<script src="./_shared/js/app.js?v=20260703a"></script>
 <script>
 /* ================================================================
    Medical Terminology Knowledge Base — Three-Column Layout
@@ -590,7 +590,11 @@ var DIM_DESC = {
   Prognosis: '疾病的发展趋势和最终结局，包括生存率、复发率等。',
   FollowUp: '对出院患者进行定期复查和追踪管理，监测疾病进展。',
   Epidemiology: '疾病在人群中的分布规律和影响因素，包括发病率、患病率等。',
-  Pathophysiology: '疾病发生发展的内在机制和过程，如心肌重构、血流动力学改变等。'
+  Pathophysiology: '疾病发生发展的内在机制和过程，如心肌重构、血流动力学改变等。',
+  Evidence: '支持疾病知识的循证医学证据来源，包括教材、指南、文献等。',
+  Guideline: '临床实践指南或专家共识，如ACC/AHA、ESC等权威发布的诊疗建议。',
+  ThresholdRule: '检验检查指标的临界值判定规则，用于辅助诊断和风险评估。',
+  ExamIndicator: '检查项目中的具体量化指标，如射血分数、心室壁厚度等。'
 };
 
 /* Dimension colors for progress bars */
@@ -646,7 +650,7 @@ function buildTermIndex(d) {
 function renderHeroStats() {
   document.getElementById('hs-total').textContent = TOTAL_TERMS.toLocaleString();
   var activeDims = DIM_KEYS.filter(function(k) { return DIM_STATS[k] > 0; }).length;
-  document.getElementById('hs-dims').textContent = activeDims + '/17';
+  document.getElementById('hs-dims').textContent = activeDims + '/' + DIM_KEYS.length;
   document.getElementById('hs-diseases').textContent = TOTAL_DISEASES;
   document.getElementById('lf-total').textContent = TOTAL_TERMS.toLocaleString();
   document.getElementById('lf-dims').textContent = activeDims;

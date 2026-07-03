@@ -142,6 +142,10 @@
 .dim-Etiology { background: rgba(204,93,232,0.12); color: #d78fe8; }
 .dim-Epidemiology { background: rgba(139,144,160,0.15); color: var(--muted); }
 .dim-Pathophysiology { background: rgba(34,184,207,0.12); color: #5ecdd8; }
+.dim-Evidence { background: rgba(64,192,87,0.15); color: #40c057; }
+.dim-Guideline { background: rgba(250,176,5,0.15); color: #fab005; }
+.dim-ThresholdRule { background: rgba(32,201,151,0.15); color: #20c997; }
+.dim-ExamIndicator { background: rgba(132,94,247,0.15); color: #845ef7; }
 
 /* Radar chart */
 .radar-wrap { display: flex; align-items: center; gap: 12px; }
@@ -344,7 +348,7 @@
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260701"></script>
+<script src="./_shared/js/app.js?v=20260703a"></script>
 <script>
 /* ============================================================
    临床诊断模拟 — <span class="dcp">17</span>维度加权匹配引擎
@@ -368,7 +372,11 @@ var DIM_WEIGHTS = {
   RiskStratification: 1,
   Prognosis: 1,
   FollowUp: 1,
-  DifferentialDiagnosis: 0
+  DifferentialDiagnosis: 0,
+  Evidence: 1,
+  Guideline: 2,
+  ThresholdRule: 3,
+  ExamIndicator: 4
 };
 
 /* ---- 2. 扩展医学术语词表 (300+ terms) ---- */
@@ -610,6 +618,25 @@ var MED_TERMS = {
     '舒张功能障碍','收缩功能障碍','射血分数降低','射血分数保留',
     '心室壁运动异常','室壁运动减弱','室壁运动消失',
     '微循环障碍','内皮功能障碍','血管内皮损伤'
+  ],
+  Evidence: [
+    '教材','指南','文献','共识','循证','证据','研究','试验','RCT','Meta分析',
+    '系统评价','队列研究','病例对照','随机对照','多中心','回顾性','前瞻性',
+    'ACC','AHA','ESC','指南推荐','专家共识','证据等级','推荐级别'
+  ],
+  Guideline: [
+    'ACC/AHA','ESC','中国指南','专家共识','临床实践指南','诊疗规范',
+    '指南推荐','推荐级别','I类推荐','IIa类推荐','IIb类推荐','III类推荐',
+    '证据等级A','证据等级B','证据等级C','指南更新','指南解读'
+  ],
+  ThresholdRule: [
+    '阈值','临界值','正常范围','异常值','参考值','cut-off','截断值',
+    '上限','下限','危急值','预警值','报警值','界值','诊断阈值'
+  ],
+  ExamIndicator: [
+    '射血分数','EF值','LVEF','心室壁厚度','室间隔厚度','左室后壁',
+    'E/A比值','E/e比值','肺动脉压力','主动脉瓣面积','二尖瓣反流',
+    '主动脉瓣跨瓣压差','心胸比','心脏大小','左室舒张末径','左室收缩末径'
   ]
 };
 

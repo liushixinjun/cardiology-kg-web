@@ -22,7 +22,7 @@ SHELL_NAMES = {
     "一般治疗", "药物治疗", "定期随访",
 }
 
-# ============ 维度关系映射 ============
+# ============ 维度关系映射（17核心 + 2直接扩展） ============
 REL_MAP = {
     "Symptom": "has_symptom",
     "Sign": "has_sign",
@@ -41,10 +41,27 @@ REL_MAP = {
     "Etiology": "has_etiology",
     "Epidemiology": "has_epidemiology",
     "Pathophysiology": "has_pathophysiology",
+    "Evidence": "supported_by_evidence",
+    "Guideline": "based_on_guideline",
+}
+
+# 二跳维度映射：通过 Exam/LabTest 间接关联
+TWO_HOP_DIMS = {
+    "ThresholdRule": {
+        "rel_chain": [
+            {"via": "Exam", "rel_to": "requires_exam", "hop2_rel": "has_threshold_rule"},
+            {"via": "LabTest", "rel_to": "requires_lab_test", "hop2_rel": "has_threshold_rule"},
+        ]
+    },
+    "ExamIndicator": {
+        "rel_chain": [
+            {"via": "Exam", "rel_to": "requires_exam", "hop2_rel": "exam_has_indicator"},
+            {"via": "LabTest", "rel_to": "requires_lab_test", "hop2_rel": "lab_test_has_indicator"},
+        ]
+    },
 }
 
 EXCLUDE_REL = [
-    'supported_by_evidence', 'based_on_guideline',
     'belongs_to_category', 'belongs_to_subcategory',
     'has_category', 'has_subcategory',
 ]
@@ -208,6 +225,27 @@ def query_disease_full(code):
                 items.append(item)
             dimensions[dim] = items
 
+        # 二跳维度：ThresholdRule、ExamIndicator
+        for dim, cfg in TWO_HOP_DIMS.items():
+            items = []
+            seen = set()
+            for chain in cfg["rel_chain"]:
+                try:
+                    results = sess.run(f"""
+                        MATCH (d:Disease {{code: $code}})-[:{chain['rel_to']}]->(x:KGNode)-[:{chain['hop2_rel']}]->(n)
+                        RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref
+                        ORDER BY n.name LIMIT 30
+                    """, code=code)
+                    for r in results:
+                        name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                        if name in seen:
+                            continue
+                        seen.add(name)
+                        items.append({"name": name, "code": r["ncode"], "name_en": "", "aliases": []})
+                except Exception:
+                    pass
+            dimensions[dim] = items
+
         # 关系统计
         rel_stats = sess.run("""
             MATCH (d:Disease {code: $code})-[r]->(n)
@@ -217,7 +255,7 @@ def query_disease_full(code):
         """, code=code, excl=EXCLUDE_REL)
         relations_summary = [dict(r) for r in rel_stats]
 
-        # 证据数
+        # 证据总数（不受 LIMIT 30 限制）
         ev_cnt = sess.run("""
             MATCH (d:Disease {code: $code})-[:supported_by_evidence]->(e:Evidence)
             RETURN count(e) as cnt
@@ -228,6 +266,7 @@ def query_disease_full(code):
             "dimensions": dimensions,
             "relations_summary": relations_summary,
             "evidence_count": ev_cnt,
+            "guidelines": [e["name"] for e in dimensions.get("Guideline", [])],
         }
 
 
@@ -248,6 +287,30 @@ def query_global_stats():
             "disease_count": disease_count,
             "shell_entity_count": shell_count,
         }
+
+
+def query_guidelines():
+    """获取所有指南及其关联疾病"""
+    d = get_driver()
+    with d.session() as sess:
+        results = sess.run("""
+            MATCH (g:Guideline)<-[:based_on_guideline]-(d:Disease)
+            RETURN g.name as name, g.organization as org, g.year as year,
+                   g.version as version, g.recommendation_level as level,
+                   collect(DISTINCT {code: d.code, name: d.name}) as diseases
+            ORDER BY g.year DESC, g.name
+        """)
+        guidelines = []
+        for r in results:
+            guidelines.append({
+                "name": r["name"] or "",
+                "organization": r["org"] or "",
+                "year": r["year"] or "",
+                "version": r["version"] or "",
+                "level": r["level"] or "",
+                "diseases": r["diseases"] or []
+            })
+        return {"guidelines": guidelines, "total": len(guidelines)}
 
 
 def query_entity_detail(code):
@@ -329,6 +392,10 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(query_global_stats())
             return
 
+        if path == '/api/kg/guidelines':
+            self._json_response(query_guidelines())
+            return
+
         m = re.match(r'^/api/kg/disease/([A-Za-z0-9\-]+)$', path)
         if m:
             code = m.group(1)
@@ -387,10 +454,11 @@ def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 4001
     # 切换到脚本所在目录（即 kg-test-page）
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    http.server.HTTPServer.allow_reuse_address = True
     server = http.server.HTTPServer(('0.0.0.0', port), KGHandler)
     print(f"知识图谱动态服务启动: http://0.0.0.0:{port}")
     print(f"Neo4j: {NEO4J_URI}")
-    print(f"API: /api/kg/diseases | /api/kg/stats | /api/kg/disease/<code>")
+    print(f"API: /api/kg/diseases | /api/kg/stats | /api/kg/disease/<code> | /api/kg/guidelines")
     server.serve_forever()
 
 

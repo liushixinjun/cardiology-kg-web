@@ -60,7 +60,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260701"></script>
+<script src="./_shared/js/app.js?v=20260703a"></script>
 <script>
 var CURRENT_DISEASE=null,CURRENT_VIEW='disease',GRAPH=null,ALL_ENTITIES=[];
 var COLORS = DIM_COLORS_ARR;
@@ -156,6 +156,11 @@ function renderDiseaseView(code){
       name: '风险与诊断', icon: '⚠️',
       dims: ['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis'],
       desc: '危险因素、风险分层和鉴别诊断'
+    },
+    {
+      name: '证据链与指南', icon: '📚',
+      dims: ['Evidence','Guideline','ThresholdRule','ExamIndicator'],
+      desc: '循证来源、临床指南、阈值规则和检查指标'
     }
   ];
 
@@ -217,7 +222,8 @@ function drawGraph(code){
     {name:'治疗方案',dims:['TreatmentPlan','Medication','Procedure'],color:'#ff922b'},
     {name:'预后随访',dims:['Prognosis','FollowUp','Complication'],color:'#cc5de8'},
     {name:'病因机制',dims:['Etiology','Pathophysiology','Epidemiology'],color:'#748ffc'},
-    {name:'风险诊断',dims:['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis'],color:'#ffd43b'}
+    {name:'风险诊断',dims:['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis'],color:'#ffd43b'},
+    {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule','ExamIndicator'],color:'#40c057'}
   ];
   cGroups.forEach(function(grp){
     var total=grp.dims.reduce(function(s,k){return s+(d.dimensions[k]||[]).length;},0);

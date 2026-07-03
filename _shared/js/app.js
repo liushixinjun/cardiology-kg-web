@@ -1,9 +1,11 @@
 /* === 专科知识图谱 · 共享应用逻辑 === */
 var KG_DATA = null;
-var DIM_NAMES = {Symptom:'症状',Sign:'体征',Exam:'检查',LabTest:'检验',Medication:'药物',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理'};
+var DIM_NAMES = {Symptom:'症状',Sign:'体征',Exam:'检查',LabTest:'检验',Medication:'药物',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理',Evidence:'证据',Guideline:'指南',ThresholdRule:'阈值规则',ExamIndicator:'检查指标'};
 var DIM_KEYS = Object.keys(DIM_NAMES);
+/* 17核心临床维度（用于覆盖度计算，保持向后兼容） */
+var CORE_DIM_KEYS = ['Symptom','Sign','Exam','LabTest','Medication','Procedure','RiskFactor','Complication','DifferentialDiagnosis','RiskStratification','Prognosis','FollowUp','TreatmentPlan','DiagnosisCriteria','Etiology','Epidemiology','Pathophysiology'];
 /* 全局维度颜色（对象+数组两种形式，供各页面统一引用） */
-var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',Exam:'#22b8cf',LabTest:'#748ffc',Medication:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc'};
+var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',Exam:'#22b8cf',LabTest:'#748ffc',Medication:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc',Evidence:'#40c057',Guideline:'#fab005',ThresholdRule:'#20c997',ExamIndicator:'#845ef7'};
 var DIM_COLORS_ARR = DIM_KEYS.map(function(k){return DIM_COLORS[k]});
 /* 动态注入维度数量：替换页面中所有 .dcp 占位符 */
 function injectDimCount() {
@@ -144,17 +146,17 @@ function loadAllDiseaseData(callback) {
 function getCoverage(code) {
   if(!KG_DATA||!KG_DATA.diseases[code])return 0;
   var d=KG_DATA.diseases[code];
-  // 优先用已加载的 dimensions
+  // 使用17核心维度计算覆盖度
+  var keys = CORE_DIM_KEYS || DIM_KEYS;
   if(d._loaded && d.dimensions) {
     var f=0;
-    DIM_KEYS.forEach(function(k){if(d.dimensions[k]&&d.dimensions[k].length>0)f++});
-    return(f/DIM_KEYS.length)*100;
+    keys.forEach(function(k){if(d.dimensions[k]&&d.dimensions[k].length>0)f++});
+    return(f/keys.length)*100;
   }
-  // 降级用 dim_counts（骨架对象）
   if(d.dim_counts) {
     var f=0;
-    DIM_KEYS.forEach(function(k){if(d.dim_counts[k]&&d.dim_counts[k]>0)f++});
-    return(f/DIM_KEYS.length)*100;
+    keys.forEach(function(k){if(d.dim_counts[k]&&d.dim_counts[k]>0)f++});
+    return(f/keys.length)*100;
   }
   return 0;
 }
@@ -168,9 +170,11 @@ function renderNav(activePage) {
     {id:'network',label:'网络探索',icon:'🕸️'},
     {id:'heatmap',label:'数据覆盖分析',icon:'🗺️'},
     {id:'diagnosis',label:'临床诊断模拟',icon:'🔍'},
+    {id:'engine',label:'路径编辑',icon:'🔗'},
     {id:'review',label:'临床审核',icon:'✅'},
     {id:'schema',label:'图谱数据字典',icon:'📐'},
     {id:'standard',label:'Schema标准',icon:'📘'},
+    {id:'guideline',label:'指南库',icon:'📋'},
     {id:'terminology',label:'医学术语库',icon:'🧬'}
   ];
   var cfg = getServerConfig();
