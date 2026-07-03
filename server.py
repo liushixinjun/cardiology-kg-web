@@ -125,17 +125,17 @@ def query_diseases_summary():
                     MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
                     RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
                        n.name_en as name_en, n.aliases as aliases
-                ORDER BY n.name LIMIT 30
-            """, code=code)
-            items = []
-            seen = set()
-            for r in rows:
-                name = r["pref"] or r["name"] or r["ncode"] or "N/A"
-                if name in SHELL_NAMES or name in seen:
-                    continue
-                seen.add(name)
-                aliases = [a for a in (r["aliases"] or []) if a != name]
-                items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases})
+                    ORDER BY n.name LIMIT 30
+                """, code=code)
+                items = []
+                seen = set()
+                for r in rows:
+                    name = r["pref"] or r["name"] or r["ncode"] or "N/A"
+                    if name in SHELL_NAMES or name in seen:
+                        continue
+                    seen.add(name)
+                    aliases = [a for a in (r["aliases"] or []) if a != name]
+                    items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases})
                 dims[dim] = items
             result[code] = {"info": d_info, "dimensions": dims}
 
