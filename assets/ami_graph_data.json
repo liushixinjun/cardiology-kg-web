@@ -1,0 +1,1951 @@
+{
+  "Symptom": [
+    {
+      "code": "SYM-CARD-1130B3D9AB8F",
+      "name": "上腹痛",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-0ACC45EF4E60",
+      "name": "乏力",
+      "name_en": "Fatigue"
+    },
+    {
+      "code": "SYM-CARD-BC91622FC62F",
+      "name": "出汗",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-3C54A8AA7CDB",
+      "name": "劳力性呼吸困难",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-TEXT-CBB30EA0F1",
+      "name": "发热",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-19E67F3BE240",
+      "name": "呼吸困难",
+      "name_en": "Dyspnea"
+    },
+    {
+      "code": "SYM-CARD-TEXT-DB87B8B091",
+      "name": "咯血",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-TEXT-24EDE9C876",
+      "name": "咳嗽",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-9BD3C4F11F7E",
+      "name": "夜间阵发性呼吸困难",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-6DA3580C8B73",
+      "name": "头晕",
+      "name_en": "Dizziness"
+    },
+    {
+      "code": "SYM-CARD-E3290D298A53",
+      "name": "心悸",
+      "name_en": "Palpitation"
+    },
+    {
+      "code": "SYM-CARD-1053F19CEBAD",
+      "name": "恶心呕吐",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-AECE358B7FF2",
+      "name": "放射痛",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-F3352646F3F1",
+      "name": "晕厥",
+      "name_en": "Syncope"
+    },
+    {
+      "code": "SYM-CARD-80A8947D5A71",
+      "name": "濒死感",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-F076662BF021",
+      "name": "端坐呼吸",
+      "name_en": null
+    },
+    {
+      "code": "SYM-CARD-B479F36AE54A",
+      "name": "胸痛",
+      "name_en": "Chest pain"
+    },
+    {
+      "code": "SYM-CARD-0039E284D715",
+      "name": "胸闷",
+      "name_en": "Chest distress"
+    },
+    {
+      "code": "SYM-CARD-F655A47C2B62",
+      "name": "黑矇",
+      "name_en": null
+    }
+  ],
+  "Sign": [
+    {
+      "code": "SIGN-CARD-FULLBOOK-FCCBB5937E",
+      "name": "休克",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-1FA3A83EF714",
+      "name": "低血压",
+      "name_en": "Hypotension"
+    },
+    {
+      "code": "SIGN-CARD-TEXT-E67B99C5BD",
+      "name": "发绀",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-75EFE91EFEED",
+      "name": "奔马律",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-TEXT-C0F47862DF",
+      "name": "心动过缓",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-4E5DA62E1DA3",
+      "name": "心动过速",
+      "name_en": "Tachycardia"
+    },
+    {
+      "code": "SIGN-CARD-EB9D2F421114",
+      "name": "心脏扩大",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-92548DA98265",
+      "name": "心脏杂音",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-7D7BE7B5FE4D",
+      "name": "心音低钝",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-52CC24CD4C33",
+      "name": "水肿",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-FFE03BB62300",
+      "name": "皮肤湿冷",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-B0814CB800B1",
+      "name": "第三心音",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-658603F4081B",
+      "name": "第四心音",
+      "name_en": null
+    },
+    {
+      "code": "SIGN-CARD-67CD9C4673B0",
+      "name": "肺部啰音",
+      "name_en": "Pulmonary rales"
+    },
+    {
+      "code": "SIGN-CARD-37D71F7E64B1",
+      "name": "颈静脉怒张",
+      "name_en": "Jugular venous distension"
+    },
+    {
+      "code": "SIGN-CARD-TEXT-3A48213336",
+      "name": "高血压",
+      "name_en": null
+    }
+  ],
+  "Exam": [
+    {
+      "code": "EXAM-CARD-TEXT-9A031190AE",
+      "name": "CT检查",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-FULLBOOK-80909CCD5C",
+      "name": "CT肺动脉造影",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-TEXT-2BB358B9BF",
+      "name": "冠状动脉CTA",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-F60922D428D5",
+      "name": "冠状动脉CT血管成像",
+      "name_en": "Coronary CT angiography"
+    },
+    {
+      "code": "EXAM-CAG",
+      "name": "冠状动脉造影",
+      "name_en": "Coronary angiography"
+    },
+    {
+      "code": "EXAM-HOLTER",
+      "name": "动态心电图",
+      "name_en": "Holter monitoring"
+    },
+    {
+      "code": "EXAM-ECG",
+      "name": "心电图",
+      "name_en": "Electrocardiogram"
+    },
+    {
+      "code": "EXAM-CARD-TEXT-8AF3973EB6",
+      "name": "心脏导管检查",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-TEXT-C33E64A777",
+      "name": "电生理检查",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-TEXT-8633D5B324",
+      "name": "磁共振成像",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-TEXT-BE9C2270C9",
+      "name": "胸部X线检查",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-CARD-FULLBOOK-27900FDADC",
+      "name": "血管超声",
+      "name_en": null
+    },
+    {
+      "code": "EXAM-TTE",
+      "name": "超声心动图",
+      "name_en": "Echocardiography"
+    },
+    {
+      "code": "EXAM-CARD-241B4B0218DF",
+      "name": "运动负荷试验",
+      "name_en": "Exercise stress testing"
+    }
+  ],
+  "LabTest": [
+    {
+      "code": "LAB-CARD-TEXT-BF2619C772",
+      "name": "C反应蛋白",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-D3BEA3E2BC55",
+      "name": "低密度脂蛋白胆固醇",
+      "name_en": "Low-density lipoprotein cholesterol"
+    },
+    {
+      "code": "LAB-CARD-A9EC1D4DA037",
+      "name": "心肌肌钙蛋白",
+      "name_en": "Cardiac troponin"
+    },
+    {
+      "code": "LAB-CARD-TEXT-1BE2B3C08B",
+      "name": "红细胞沉降率",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-960C7CE8E22B",
+      "name": "肌酸激酶同工酶",
+      "name_en": "Creatine kinase-MB"
+    },
+    {
+      "code": "LAB-CARD-TEXT-07B39C98F1",
+      "name": "肾功能",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-TEXT-768E5070F6",
+      "name": "脑钠肽",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-TEXT-48E9A64933",
+      "name": "血培养",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-TEXT-3F8D27CB7E",
+      "name": "血常规",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-TEXT-43D8A5AEE4",
+      "name": "血糖",
+      "name_en": null
+    },
+    {
+      "code": "LAB-CARD-TEXT-D983BB0EFF",
+      "name": "血脂检查",
+      "name_en": null
+    }
+  ],
+  "Medication": [
+    {
+      "code": "MED-CARD-86E5A960E1BF",
+      "name": "P2Y12受体抑制剂",
+      "name_en": "P2Y12 inhibitor"
+    },
+    {
+      "code": "MED-BETA-BLOCKER",
+      "name": "β受体阻滞剂",
+      "name_en": "Beta blocker"
+    },
+    {
+      "code": "MED-CARD-DAE0F0B68F1D",
+      "name": "他汀类药物",
+      "name_en": "Statin"
+    },
+    {
+      "code": "MED-DIURETIC",
+      "name": "利尿剂",
+      "name_en": "Diuretic"
+    },
+    {
+      "code": "MED-CARD-TEXT-EE219280A7",
+      "name": "抗凝药物",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-TEXT-4E798D0AB2",
+      "name": "抗血小板药物",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-00A158EBF21E",
+      "name": "替格瑞洛",
+      "name_en": "Ticagrelor"
+    },
+    {
+      "code": "MED-CARD-EAA01CFD434E",
+      "name": "氯吡格雷",
+      "name_en": "Clopidogrel"
+    },
+    {
+      "code": "MED-CARD-TEXT-93710567D3",
+      "name": "洋地黄类药物",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-TEXT-D07193A49C",
+      "name": "溶栓药物",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-CC1DDBE4EFA8",
+      "name": "硝酸甘油",
+      "name_en": "Nitroglycerin"
+    },
+    {
+      "code": "MED-CARD-55157DA54154",
+      "name": "硝酸酯类药物",
+      "name_en": "Nitrates"
+    },
+    {
+      "code": "MED-CARD-C9175F150C3D",
+      "name": "美托洛尔",
+      "name_en": "Metoprolol"
+    },
+    {
+      "code": "MED-AMIODARONE",
+      "name": "胺碘酮",
+      "name_en": "Amiodarone"
+    },
+    {
+      "code": "MED-CARD-TEXT-B905AF3E59",
+      "name": "血管紧张素Ⅱ受体拮抗剂",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-E40082221530",
+      "name": "血管紧张素转换酶抑制剂",
+      "name_en": "Angiotensin-converting enzyme inhibitor"
+    },
+    {
+      "code": "MED-CARD-TEXT-28E925C6DE",
+      "name": "钙通道阻滞剂",
+      "name_en": null
+    },
+    {
+      "code": "MED-CARD-9F606AC80BFD",
+      "name": "阿司匹林",
+      "name_en": "Aspirin"
+    },
+    {
+      "code": "MED-CARD-498184546A72",
+      "name": "阿托伐他汀",
+      "name_en": "Atorvastatin"
+    }
+  ],
+  "Procedure": [
+    {
+      "code": "PROC-CARD-BDB19D2C7A36",
+      "name": "冠状动脉旁路移植术",
+      "name_en": "Coronary artery bypass grafting"
+    },
+    {
+      "code": "PROC-CARD-TEXT-84551F84B4",
+      "name": "射频消融术",
+      "name_en": null
+    },
+    {
+      "code": "PROC-CARD-TEXT-D2C1F9E289",
+      "name": "心脏再同步治疗",
+      "name_en": null
+    },
+    {
+      "code": "PROC-HEART-TRANSPLANT",
+      "name": "心脏移植",
+      "name_en": "Heart transplantation"
+    },
+    {
+      "code": "PROC-CARD-TEXT-D9A9D30763",
+      "name": "植入式心律转复除颤器",
+      "name_en": null
+    },
+    {
+      "code": "PROC-CARD-DA0F467D4A30",
+      "name": "溶栓治疗",
+      "name_en": "Fibrinolytic therapy"
+    },
+    {
+      "code": "PROC-CARD-TEXT-6248D2A735",
+      "name": "瓣膜置换术",
+      "name_en": null
+    },
+    {
+      "code": "PROC-CARD-E9ADC25A25E3",
+      "name": "经皮冠状动脉介入治疗",
+      "name_en": "Percutaneous coronary intervention"
+    },
+    {
+      "code": "PROC-CARD-TEXT-23F5CDA89B",
+      "name": "起搏器植入",
+      "name_en": null
+    }
+  ],
+  "RiskFactor": [
+    {
+      "code": "RF-CARD-AE8D5957D18A",
+      "name": "冠心病家族史",
+      "name_en": "Family history of coronary heart disease"
+    },
+    {
+      "code": "RF-CARD-FULLBOOK-CCD18035D8",
+      "name": "创伤",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-C5097AF85131",
+      "name": "吸烟",
+      "name_en": "Smoking"
+    },
+    {
+      "code": "RF-CARD-TEXT-C77DFF9EAC",
+      "name": "感染",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-FULLBOOK-E79089C924",
+      "name": "手术",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-26FAEB71ABE2",
+      "name": "糖尿病",
+      "name_en": "Diabetes mellitus"
+    },
+    {
+      "code": "RF-CARD-DEF5786467E6",
+      "name": "肥胖",
+      "name_en": "Obesity"
+    },
+    {
+      "code": "RF-CARD-FULLBOOK-C643050E31",
+      "name": "肿瘤",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-2A67CB32C182",
+      "name": "血脂异常",
+      "name_en": "Dyslipidemia"
+    },
+    {
+      "code": "RF-CARD-FULLBOOK-66DF0ABEC6",
+      "name": "长期卧床",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-TEXT-3935A55C86",
+      "name": "高脂血症",
+      "name_en": null
+    },
+    {
+      "code": "RF-CARD-DE0A9F1FE2C8",
+      "name": "高血压",
+      "name_en": "Hypertension"
+    }
+  ],
+  "Complication": [
+    {
+      "code": "COMP-CARD-FULLBOOK-F7077FB368",
+      "name": "出血",
+      "name_en": null
+    },
+    {
+      "code": "COMP-CARD-7CF202961681",
+      "name": "心力衰竭",
+      "name_en": "Heart failure"
+    },
+    {
+      "code": "COMP-CARD-439BBF78D81C",
+      "name": "心律失常",
+      "name_en": "Arrhythmia"
+    },
+    {
+      "code": "COMP-CARD-2D4A7476D746",
+      "name": "心源性休克",
+      "name_en": "Cardiogenic shock"
+    },
+    {
+      "code": "COMP-CARD-A72F9F86BA4A",
+      "name": "心脏性猝死",
+      "name_en": "Sudden cardiac death"
+    },
+    {
+      "code": "COMP-CARD-TEXT-4FC74E832A",
+      "name": "感染性心内膜炎",
+      "name_en": null
+    },
+    {
+      "code": "COMP-CARD-TEXT-578BE2D590",
+      "name": "猝死",
+      "name_en": null
+    },
+    {
+      "code": "COMP-CARD-FULLBOOK-0B4E779BE0",
+      "name": "肺动脉高压",
+      "name_en": null
+    },
+    {
+      "code": "COMP-CARD-FULLBOOK-3164DCDE50",
+      "name": "肺栓塞",
+      "name_en": null
+    },
+    {
+      "code": "COMP-CARD-TEXT-2EDA47E727",
+      "name": "脑卒中",
+      "name_en": null
+    }
+  ],
+  "DifferentialDiagnosis": [
+    {
+      "code": "DDX-CARD-8F53C29C0798",
+      "name": "主动脉夹层",
+      "name_en": "Aortic dissection"
+    },
+    {
+      "code": "DDX-CARD-A4091D292E4B",
+      "name": "冠状动脉痉挛",
+      "name_en": "Coronary artery spasm"
+    },
+    {
+      "code": "DDX-CARD-93E362D80029",
+      "name": "急性心包炎",
+      "name_en": "Acute pericarditis"
+    },
+    {
+      "code": "DDX-CARD-881C77E90E42",
+      "name": "肺栓塞",
+      "name_en": "Pulmonary embolism"
+    }
+  ],
+  "RiskStratification": [
+    {
+      "code": "RISK-CARD-9566F1411AE9",
+      "name": "GRACE评分",
+      "name_en": "GRACE risk score"
+    },
+    {
+      "code": "RISK-CARD-7C838C246189",
+      "name": "急性心肌梗死风险分层",
+      "name_en": null
+    }
+  ],
+  "Prognosis": [
+    {
+      "code": "PROG-CARD-4C9E94F08116",
+      "name": "急性心肌梗死预后",
+      "name_en": null
+    }
+  ],
+  "FollowUp": [
+    {
+      "code": "FU-CARD-ED1B0E900769",
+      "name": "急性心肌梗死随访方案",
+      "name_en": null
+    }
+  ],
+  "TreatmentPlan": [
+    {
+      "code": "PLAN-CARD-3972CBC8228B",
+      "name": "再灌注治疗",
+      "name_en": "Reperfusion therapy"
+    },
+    {
+      "code": "PLAN-CARD-TEXT-7CC38FBA6F",
+      "name": "复律治疗",
+      "name_en": null
+    },
+    {
+      "code": "PLAN-CARD-83DC54FD93C2",
+      "name": "急性心肌梗死治疗方案",
+      "name_en": null
+    },
+    {
+      "code": "PLAN-CARD-A1C4E6332D38",
+      "name": "抗凝治疗",
+      "name_en": "Anticoagulation therapy"
+    },
+    {
+      "code": "PLAN-CARD-42FD049DCDB5",
+      "name": "抗血小板治疗",
+      "name_en": "Antiplatelet therapy"
+    },
+    {
+      "code": "PLAN-CARD-FULLBOOK-BBA9C43055",
+      "name": "氧疗",
+      "name_en": null
+    },
+    {
+      "code": "PLAN-CARD-FULLBOOK-B87D3F557B",
+      "name": "溶栓治疗",
+      "name_en": null
+    },
+    {
+      "code": "PLAN-CARD-TEXT-EEF9C97B59",
+      "name": "血运重建",
+      "name_en": null
+    },
+    {
+      "code": "PLAN-CARD-TEXT-BDE62A3BE0",
+      "name": "降压治疗",
+      "name_en": null
+    }
+  ],
+  "DiagnosisCriteria": [
+    {
+      "code": "DXC-CARD-547346EE2FED",
+      "name": "急性心肌梗死诊断标准",
+      "name_en": null
+    }
+  ],
+  "Etiology": [
+    {
+      "code": "ETI-CARD-TEXT-D6A8249236",
+      "name": "动脉粥样硬化",
+      "name_en": null
+    },
+    {
+      "code": "ETI-CARD-D9D0FDB893C3",
+      "name": "急性心肌梗死病因",
+      "name_en": null
+    },
+    {
+      "code": "ETI-CARD-FULLBOOK-1E29D1B0D5",
+      "name": "深静脉血栓形成",
+      "name_en": null
+    },
+    {
+      "code": "ETI-CARD-TEXT-0EC5F56F7B",
+      "name": "炎症",
+      "name_en": null
+    },
+    {
+      "code": "ETI-CARD-TEXT-AD881398D8",
+      "name": "遗传因素",
+      "name_en": null
+    }
+  ],
+  "Epidemiology": [
+    {
+      "code": "EPI-CARD-FULLBOOK-4EB46E87F7",
+      "name": "发病率升高",
+      "name_en": null
+    },
+    {
+      "code": "EPI-CARD-FD62186806C6",
+      "name": "急性心肌梗死流行病学",
+      "name_en": null
+    }
+  ],
+  "Pathophysiology": [
+    {
+      "code": "PATH-CARD-FULLBOOK-9C398A672B",
+      "name": "右心负荷增加",
+      "name_en": null
+    },
+    {
+      "code": "PATH-CARD-FULLBOOK-A2FC4267EF",
+      "name": "心室重构",
+      "name_en": null
+    },
+    {
+      "code": "PATH-CARD-FULLBOOK-49867E5C1F",
+      "name": "心肌缺血",
+      "name_en": null
+    },
+    {
+      "code": "PATH-CARD-7056DCDB0871",
+      "name": "急性心肌梗死病理生理机制",
+      "name_en": null
+    }
+  ],
+  "Evidence": [
+    {
+      "code": "EVD-D762DC7BE1A20EEFCE39-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第11页证据（SEG-DOC-E0F939A44074F320-11-GL-00020-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0380DD2313975958DC8B-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第27页证据（SEG-DOC-E0F939A44074F320-27-GL-00036-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-72AEBC01E567EB96FB63-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第28页证据（SEG-DOC-E0F939A44074F320-28-GL-00038-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0C9B9F80B1B3D1342678-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第31页证据（SEG-DOC-E0F939A44074F320-31-GL-00044-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-DADFEEC07FAA26EDAB04-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第31页证据（SEG-DOC-E0F939A44074F320-31-GL-00046-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-93D815356FD0BA7D3066-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第32页证据（SEG-DOC-E0F939A44074F320-32-GL-00047-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3D582A9B00204086B199-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第42页证据（SEG-DOC-E0F939A44074F320-42-GL-00060-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0490DC9206CF040CBD27-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第48页证据（SEG-DOC-E0F939A44074F320-48-GL-00063-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-449B0649E9C243804027-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第58页证据（SEG-DOC-E0F939A44074F320-58-GL-00087-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-20B1D05A6885E3077328-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第65页证据（SEG-DOC-E0F939A44074F320-65-GL-00108-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B4F233510AA93BCA244F-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第65页证据（SEG-DOC-E0F939A44074F320-65-GL-00109-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-32E3663ED9D50D74D667-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第6页证据（SEG-DOC-E0F939A44074F320-6-GL-00003-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3CD90174BDE095AC16D9-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第70页证据（SEG-DOC-E0F939A44074F320-70-GL-00126-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-BB91487521FD1CBBE099-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第70页证据（SEG-DOC-E0F939A44074F320-70-GL-00128-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A3EA64923931552F6B76-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第76页证据（SEG-DOC-E0F939A44074F320-76-GL-00135-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-779632C86B84E8A5B109-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第77页证据（SEG-DOC-E0F939A44074F320-77-GL-00138-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-721EE5EBB0FE68499C95-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第78页证据（SEG-DOC-E0F939A44074F320-78-GL-00143-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D9C69291D6759AC8E344-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第79页证据（SEG-DOC-E0F939A44074F320-79-GL-00145-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-155BBBD1C146148F3373-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第80页证据（SEG-DOC-E0F939A44074F320-80-GL-00149-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-FC4B59A19DEB43747639-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第82页证据（SEG-DOC-E0F939A44074F320-82-GL-00151-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B4A6FA6275E0C083168F-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第84页证据（SEG-DOC-E0F939A44074F320-84-GL-00152-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-82AE5DA3153E8536DD67-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第95页证据（SEG-DOC-E0F939A44074F320-95-GL-00160-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-035CA4014CE4A14AB79B-AMI",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf 第96页证据（SEG-DOC-E0F939A44074F320-96-GL-00161-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4EA01F5357962BF598E1-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第1页证据（SEG-DOC-866065446A7A5F65-1-GL-00001-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-AD5F12AC604A1A75F417-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第1页证据（SEG-DOC-866065446A7A5F65-1-GL-00002-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1EA09154F30A75ABFF97-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第1页证据（SEG-DOC-866065446A7A5F65-1-GL-00005-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-871DA3C82B3BEC1432B6-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第1页证据（SEG-DOC-866065446A7A5F65-1-GL-00007-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-810351D1FED1FE390EE6-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第1页证据（SEG-DOC-866065446A7A5F65-1-GL-00009-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9A1C41BB38E3029E07C5-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00011-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-84FAAFA3F72122F21C77-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00013-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-ED6B61F9AB279C7BCBB4-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00015-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1F8BDB5671A6FBDA20E8-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00017-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-F8255E72ABA0D7A8B420-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00019-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-467E133C5310A3619326-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第2页证据（SEG-DOC-866065446A7A5F65-2-GL-00020-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B00898E4B67C8146B841-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第3页证据（SEG-DOC-866065446A7A5F65-3-GL-00023-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-56AF2340E37314FCA705-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第4页证据（SEG-DOC-866065446A7A5F65-4-GL-00026-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-026C74E25627DCF16488-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第5页证据（SEG-DOC-866065446A7A5F65-5-GL-00028-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B9B303B0E1B921BC095F-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第5页证据（SEG-DOC-866065446A7A5F65-5-GL-00030-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-E91FE87DC5AE247A6530-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第5页证据（SEG-DOC-866065446A7A5F65-5-GL-00032-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-723FD143C34E0842458F-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第6页证据（SEG-DOC-866065446A7A5F65-6-GL-00033-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D1001B9BB83EA268E86C-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第7页证据（SEG-DOC-866065446A7A5F65-7-GL-00035-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-80F12281D10F97748924-AMI",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf 第9页证据（SEG-DOC-866065446A7A5F65-9-GL-00043-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-5C8AE27C34EB5FAA3124-AMI",
+      "name": "4TH universal definition of MI.pdf 第19页证据（SEG-DOC-174B3BDD2451501A-19-GL-00017-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6D6FB560841290968122-AMI",
+      "name": "4TH universal definition of MI.pdf 第28页证据（SEG-DOC-174B3BDD2451501A-28-GL-00025-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9CFCFE5EAC8E2EA1FBB5-AMI",
+      "name": "4TH universal definition of MI.pdf 第29页证据（SEG-DOC-174B3BDD2451501A-29-GL-00028-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-ECEE2DA67D521B1A469D-AMI",
+      "name": "4TH universal definition of MI.pdf 第31页证据（SEG-DOC-174B3BDD2451501A-31-GL-00031-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0AAFE16ADDBC86048914-AMI",
+      "name": "4TH universal definition of MI.pdf 第32页证据（SEG-DOC-174B3BDD2451501A-32-GL-00033-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1012BD5772A84595B7FE-AMI",
+      "name": "4TH universal definition of MI.pdf 第33页证据（SEG-DOC-174B3BDD2451501A-33-GL-00037-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-BFD8DF56E0886EF186D8-AMI",
+      "name": "4TH universal definition of MI.pdf 第5页证据（SEG-DOC-174B3BDD2451501A-5-GL-00003-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-54AC837A1B4B48C5B396-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第12页证据（SEG-DOC-08953CE23214DC37-12-GL-00029-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-99B661F1DB33AF15C3E6-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第16页证据（SEG-DOC-08953CE23214DC37-16-GL-00047-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4AB4EB07281B1E7828F4-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第17页证据（SEG-DOC-08953CE23214DC37-17-GL-00050-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-FA5049FE7968E24544F4-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第18页证据（SEG-DOC-08953CE23214DC37-18-GL-00057-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-8B2B63C59191B5D7D463-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第26页证据（SEG-DOC-08953CE23214DC37-26-GL-00107-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-62B08CDBCC0210D8F6F0-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第28页证据（SEG-DOC-08953CE23214DC37-28-GL-00114-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0D49CD3B4D042305F4C5-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第30页证据（SEG-DOC-08953CE23214DC37-30-GL-00124-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-F13E040E4CB8D39100E2-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第31页证据（SEG-DOC-08953CE23214DC37-31-GL-00128-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-40214F33A083B602B426-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第31页证据（SEG-DOC-08953CE23214DC37-31-GL-00130-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B3F9F29D0F0C49A9AC6A-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第33页证据（SEG-DOC-08953CE23214DC37-33-GL-00136-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-EBFE65B59646DD29CCE7-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第35页证据（SEG-DOC-08953CE23214DC37-35-GL-00141-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-E678C850ECF85EAEF3AA-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第43页证据（SEG-DOC-08953CE23214DC37-43-GL-00164-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-DB515497A00D9CA5E2D6-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第46页证据（SEG-DOC-08953CE23214DC37-46-GL-00168-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-2D2C14DBD95704C7391D-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第47页证据（SEG-DOC-08953CE23214DC37-47-GL-00171-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-99FAF8118FD4C551F761-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第48页证据（SEG-DOC-08953CE23214DC37-48-GL-00174-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-46AAC91D8FCC71DEB91B-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第49页证据（SEG-DOC-08953CE23214DC37-49-GL-00176-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B2539B7583FAD8A6F7B9-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第4页证据（SEG-DOC-08953CE23214DC37-4-GL-00005-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-298B2369870EC1253CE0-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第50页证据（SEG-DOC-08953CE23214DC37-50-GL-00178-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-307DDB003ADFAB97F5CC-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第52页证据（SEG-DOC-08953CE23214DC37-52-GL-00186-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-64C66E7B14F63818BCAF-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第55页证据（SEG-DOC-08953CE23214DC37-55-GL-00195-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-7659DF00A2431DBD2656-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第6页证据（SEG-DOC-08953CE23214DC37-6-GL-00009-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-954A9B7824489B77FAC6-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第7页证据（SEG-DOC-08953CE23214DC37-7-GL-00011-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-69B9560D3D651835F950-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第7页证据（SEG-DOC-08953CE23214DC37-7-GL-00012-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-C88CD124B6A0D6AD9BA6-AMI",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf 第8页证据（SEG-DOC-08953CE23214DC37-8-GL-00014-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-C19628B936546014524C-AMI",
+      "name": "ACS  ESC  2023.pdf 第11页证据（SEG-DOC-FAF812AF598A7058-11-GL-00037-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4251DCF73997783BDE61-AMI",
+      "name": "ACS  ESC  2023.pdf 第12页证据（SEG-DOC-FAF812AF598A7058-12-GL-00047-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9F4B4DA40DBB5F11C911-AMI",
+      "name": "ACS  ESC  2023.pdf 第23页证据（SEG-DOC-FAF812AF598A7058-23-GL-00120-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A9718A55D98AEED5015B-AMI",
+      "name": "ACS  ESC  2023.pdf 第35页证据（SEG-DOC-FAF812AF598A7058-35-GL-00165-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-314791F1BC1A6DDA89B6-AMI",
+      "name": "ACS  ESC  2023.pdf 第43页证据（SEG-DOC-FAF812AF598A7058-43-GL-00194-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-73F43F1FED6F3F36E82B-AMI",
+      "name": "ACS  ESC  2023.pdf 第44页证据（SEG-DOC-FAF812AF598A7058-44-GL-00197-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3EAC290E820122061ADD-AMI",
+      "name": "ACS  ESC  2023.pdf 第45页证据（SEG-DOC-FAF812AF598A7058-45-GL-00199-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0834D30A7B91649AD2B2-AMI",
+      "name": "ACS  ESC  2023.pdf 第57页证据（SEG-DOC-FAF812AF598A7058-57-GL-00226-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-965D14EDABC8534A788A-AMI",
+      "name": "ACS  ESC  2023.pdf 第5页证据（SEG-DOC-FAF812AF598A7058-5-GL-00006-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-87B691B46CA351DEFF65-AMI",
+      "name": "ACS  ESC  2023.pdf 第6页证据（SEG-DOC-FAF812AF598A7058-6-GL-00011-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-CAE65309520B549DE308-AMI",
+      "name": "ACS  ESC  2023.pdf 第7页证据（SEG-DOC-FAF812AF598A7058-7-GL-00015-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B25EE0C9F278E9FBEE30-AMI",
+      "name": "ACS  ESC  2023.pdf 第82页证据（SEG-DOC-FAF812AF598A7058-82-GL-00304-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-03B4C8868CBC1258E2A5-AMI",
+      "name": "ACS  ESC  2023.pdf 第8页证据（SEG-DOC-FAF812AF598A7058-8-GL-00020-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0557F7773247CA1A79EC-AMI",
+      "name": "CCS CN 2024.pdf 第11页证据（SEG-DOC-0CFCD79F003BFB93-11-GL-00076-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A0601187D1F3A0DEA3A5-AMI",
+      "name": "CCS CN 2024.pdf 第12页证据（SEG-DOC-0CFCD79F003BFB93-12-GL-00079-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3DFFBBC7018C600C87B9-AMI",
+      "name": "CCS CN 2024.pdf 第12页证据（SEG-DOC-0CFCD79F003BFB93-12-GL-00082-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3F9A9CEAE20ED79F1757-AMI",
+      "name": "CCS CN 2024.pdf 第13页证据（SEG-DOC-0CFCD79F003BFB93-13-GL-00089-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4A1266C3DC0FB769419C-AMI",
+      "name": "CCS CN 2024.pdf 第14页证据（SEG-DOC-0CFCD79F003BFB93-14-GL-00091-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B844D69BED30964FC616-AMI",
+      "name": "CCS CN 2024.pdf 第14页证据（SEG-DOC-0CFCD79F003BFB93-14-GL-00093-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-43B4DDF1A82A9D5EFE8E-AMI",
+      "name": "CCS CN 2024.pdf 第15页证据（SEG-DOC-0CFCD79F003BFB93-15-GL-00095-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-7C0980ECB70DF5D6C100-AMI",
+      "name": "CCS CN 2024.pdf 第16页证据（SEG-DOC-0CFCD79F003BFB93-16-GL-00100-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4FD048612A9CD101D162-AMI",
+      "name": "CCS CN 2024.pdf 第16页证据（SEG-DOC-0CFCD79F003BFB93-16-GL-00104-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-B68F0BD122744D1F00C1-AMI",
+      "name": "CCS CN 2024.pdf 第2页证据（SEG-DOC-0CFCD79F003BFB93-2-GL-00012-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3D6A41777A5987FC4F39-AMI",
+      "name": "CCS CN 2024.pdf 第3页证据（SEG-DOC-0CFCD79F003BFB93-3-GL-00024-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6BC2067ADC236D786925-AMI",
+      "name": "CCS CN 2024.pdf 第4页证据（SEG-DOC-0CFCD79F003BFB93-4-GL-00037-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-BD9F8271BA214338522C-AMI",
+      "name": "CCS CN 2024.pdf 第6页证据（SEG-DOC-0CFCD79F003BFB93-6-GL-00047-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-07F290936F5E45D4C300-AMI",
+      "name": "CCS CN 2024.pdf 第7页证据（SEG-DOC-0CFCD79F003BFB93-7-GL-00050-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6D2B0D6C4E75744C4E17-AMI",
+      "name": "CCS CN 2024.pdf 第7页证据（SEG-DOC-0CFCD79F003BFB93-7-GL-00052-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-7554DE0B208EE58F8DC0-AMI",
+      "name": "CCS CN 2024.pdf 第8页证据（SEG-DOC-0CFCD79F003BFB93-8-GL-00058-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-07D5FD9503007C280EC1-AMI",
+      "name": "CCS CN 2024.pdf 第8页证据（SEG-DOC-0CFCD79F003BFB93-8-GL-00061-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D6AE56AE0AA55A49BCEF-AMI",
+      "name": "CCS CN 2024.pdf 第8页证据（SEG-DOC-0CFCD79F003BFB93-8-GL-00063-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-F18E1E3660A7AA972EC2-AMI",
+      "name": "CCS ESC 2019.pdf 第55页证据（SEG-DOC-78579EFFB060EF72-55-GL-00111-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-51F490AE20FF0A289B33-AMI",
+      "name": "CCS ESC 2019.pdf 第56页证据（SEG-DOC-78579EFFB060EF72-56-GL-00114-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0190B2CCE404ADEB4B67-AMI",
+      "name": "CCS ESC 2019.pdf 第59页证据（SEG-DOC-78579EFFB060EF72-59-GL-00118-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-DCADF67FE3620CAACAF4-AMI",
+      "name": "CCS ESC 2019.pdf 第61页证据（SEG-DOC-78579EFFB060EF72-61-GL-00119-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6F5B364A4F84EC1E4CDA-AMI",
+      "name": "CCS ESC 2019.pdf 第62页证据（SEG-DOC-78579EFFB060EF72-62-GL-00122-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D2F6644175AA91190747-AMI",
+      "name": "CCS ESC 2019.pdf 第66页证据（SEG-DOC-78579EFFB060EF72-66-GL-00126-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-EAFA586297D75C9A9E84-AMI",
+      "name": "CCS ESC 2019.pdf 第70页证据（SEG-DOC-78579EFFB060EF72-70-GL-00130-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9F30A3C90DA3EEA86A4B-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第11页证据（SEG-DOC-74E4AFDAB17B75CB-11-GL-00038-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-7E712EFFFF03648AEAA9-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第12页证据（SEG-DOC-74E4AFDAB17B75CB-12-GL-00049-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-BCEF6AC8CB59290D2B88-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第23页证据（SEG-DOC-74E4AFDAB17B75CB-23-GL-00118-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-F4CB203FB655F47ED94D-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第35页证据（SEG-DOC-74E4AFDAB17B75CB-35-GL-00158-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-35458BDB256C3C488C99-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第43页证据（SEG-DOC-74E4AFDAB17B75CB-43-GL-00189-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A0B56307F8BAB63AE98F-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第44页证据（SEG-DOC-74E4AFDAB17B75CB-44-GL-00192-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D544642DA075CB357F30-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第45页证据（SEG-DOC-74E4AFDAB17B75CB-45-GL-00194-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D27B371D186F772B673A-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第57页证据（SEG-DOC-74E4AFDAB17B75CB-57-GL-00222-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9AF4590B8142A7C4F66D-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第5页证据（SEG-DOC-74E4AFDAB17B75CB-5-GL-00007-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-20A67C3A1E2525460DB1-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第6页证据（SEG-DOC-74E4AFDAB17B75CB-6-GL-00012-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-274828ED06B85F750A37-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第7页证据（SEG-DOC-74E4AFDAB17B75CB-7-GL-00016-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-EEF4EE6B1CEB0D439014-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第82页证据（SEG-DOC-74E4AFDAB17B75CB-82-GL-00292-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-EEB29BEA9F5E6C2CF303-AMI",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf 第8页证据（SEG-DOC-74E4AFDAB17B75CB-8-GL-00021-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-FB3B59EC414C7D7CD2A3-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第15页证据（SEG-DOC-43E2E1C7083A9CD6-15-GL-00129-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-ABA524226CD6A2A663A2-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第15页证据（SEG-DOC-43E2E1C7083A9CD6-15-GL-00132-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-37B04792A70E461308A1-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第17页证据（SEG-DOC-43E2E1C7083A9CD6-17-GL-00148-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-E1E3DC7F74AF5F474F38-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第17页证据（SEG-DOC-43E2E1C7083A9CD6-17-GL-00149-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-CF9DD04272CD78A09C4A-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第22页证据（SEG-DOC-43E2E1C7083A9CD6-22-GL-00199-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-17383A37A665CADF6B1F-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第23页证据（SEG-DOC-43E2E1C7083A9CD6-23-GL-00216-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9EEAA5AE6A5BA39E8B38-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第23页证据（SEG-DOC-43E2E1C7083A9CD6-23-GL-00217-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9327CA5C6E7137C0526C-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第23页证据（SEG-DOC-43E2E1C7083A9CD6-23-GL-00225-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-087451F1F96C315AA04C-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第38页证据（SEG-DOC-43E2E1C7083A9CD6-38-GL-00396-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D76EBBF6E9B07813623F-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第39页证据（SEG-DOC-43E2E1C7083A9CD6-39-GL-00400-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0FD27060FACF080B3B5D-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第39页证据（SEG-DOC-43E2E1C7083A9CD6-39-GL-00403-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D88E7CFC2CCB0ED97433-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第43页证据（SEG-DOC-43E2E1C7083A9CD6-43-GL-00436-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-86E01A34C3015537DD0A-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第43页证据（SEG-DOC-43E2E1C7083A9CD6-43-GL-00440-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-48959995F224E6AADFEA-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第44页证据（SEG-DOC-43E2E1C7083A9CD6-44-GL-00452-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-E16399640F90E6B500D8-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第45页证据（SEG-DOC-43E2E1C7083A9CD6-45-GL-00469-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-16BFCCD561291A02DF12-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第48页证据（SEG-DOC-43E2E1C7083A9CD6-48-GL-00508-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0C56D894AFDEFDA23927-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第48页证据（SEG-DOC-43E2E1C7083A9CD6-48-GL-00510-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-8B3364B90723DDF93688-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第50页证据（SEG-DOC-43E2E1C7083A9CD6-50-GL-00563-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1B09D91D1A45FAA2A955-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第53页证据（SEG-DOC-43E2E1C7083A9CD6-53-GL-00594-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-31E9C26603D9752DC77A-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第7页证据（SEG-DOC-43E2E1C7083A9CD6-7-GL-00021-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A4E77FCBFABED70B4277-AMI",
+      "name": "NSTE-ACS ACC 2014.pdf 第86页证据（SEG-DOC-43E2E1C7083A9CD6-86-GL-00697-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-279A2A1CA1D22C6CCCE3-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第10页证据（SEG-DOC-223D946BFCBBE084-10-GL-00044-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-2CCED33E50166267D42E-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第11页证据（SEG-DOC-223D946BFCBBE084-11-GL-00048-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-8D91E281B0419B978A87-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第11页证据（SEG-DOC-223D946BFCBBE084-11-GL-00051-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-530C81D6E7DCDF33F11E-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第12页证据（SEG-DOC-223D946BFCBBE084-12-GL-00054-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-62D3DA36B4D0A13C7EC5-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第12页证据（SEG-DOC-223D946BFCBBE084-12-GL-00056-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-37E0CF7DE9DBA48CF0EE-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第15页证据（SEG-DOC-223D946BFCBBE084-15-GL-00060-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3B6BD8B0D873C604A00F-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第15页证据（SEG-DOC-223D946BFCBBE084-15-GL-00063-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-90A85513BC6EC90F1A0B-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第15页证据（SEG-DOC-223D946BFCBBE084-15-GL-00068-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-8ECD64A518D11527A0F9-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第16页证据（SEG-DOC-223D946BFCBBE084-16-GL-00070-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6376E96B8D6A0C8CE1EF-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第16页证据（SEG-DOC-223D946BFCBBE084-16-GL-00072-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0FE5ED8858C007D6D68A-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第17页证据（SEG-DOC-223D946BFCBBE084-17-GL-00077-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-82D3FDFEDE71FE5472CC-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第17页证据（SEG-DOC-223D946BFCBBE084-17-GL-00079-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-7BB9F747B5DA072CF105-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第17页证据（SEG-DOC-223D946BFCBBE084-17-GL-00081-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-2D9A39DF7584BC763EDD-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第18页证据（SEG-DOC-223D946BFCBBE084-18-GL-00083-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-CB01195F0CA258B9F753-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第19页证据（SEG-DOC-223D946BFCBBE084-19-GL-00088-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1B4902DB7C2C718C9298-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第20页证据（SEG-DOC-223D946BFCBBE084-20-GL-00091-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-14BB9A56841B2F29BAFF-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第21页证据（SEG-DOC-223D946BFCBBE084-21-GL-00094-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6F68B07772D614EFCC69-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第21页证据（SEG-DOC-223D946BFCBBE084-21-GL-00096-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-E8BD03B7C7198199D19A-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第22页证据（SEG-DOC-223D946BFCBBE084-22-GL-00099-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-85B7796BD3F2147E3EA4-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第2页证据（SEG-DOC-223D946BFCBBE084-2-GL-00008-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-4BF33EE8DA056C14DB96-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第2页证据（SEG-DOC-223D946BFCBBE084-2-GL-00013-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1982054177229C086FC7-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第3页证据（SEG-DOC-223D946BFCBBE084-3-GL-00017-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-284C4E9C02BA9B546BC7-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第3页证据（SEG-DOC-223D946BFCBBE084-3-GL-00020-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1EBE1F965F69378B6891-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第4页证据（SEG-DOC-223D946BFCBBE084-4-GL-00022-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-88F7483D4416A73371C0-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第4页证据（SEG-DOC-223D946BFCBBE084-4-GL-00024-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-F3B5554DBDAC71DF0D97-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第5页证据（SEG-DOC-223D946BFCBBE084-5-GL-00025-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A461939A6CD470240837-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第8页证据（SEG-DOC-223D946BFCBBE084-8-GL-00034-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-AE93D748260E75B08015-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第8页证据（SEG-DOC-223D946BFCBBE084-8-GL-00036-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-D7599877FE1126374E91-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第9页证据（SEG-DOC-223D946BFCBBE084-9-GL-00038-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-9FB4F5994AB6A7C9FA16-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第9页证据（SEG-DOC-223D946BFCBBE084-9-GL-00039-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-11DE98ACA59762107E9E-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第9页证据（SEG-DOC-223D946BFCBBE084-9-GL-00041-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1D1BD2F8C6944488AFED-AMI",
+      "name": "NSTE-ACS CN 2024.pdf 第9页证据（SEG-DOC-223D946BFCBBE084-9-GL-00042-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-439B1E568C94156AC69E-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第12页证据（SEG-DOC-DFD3AED1BB841FF3-12-GL-00027-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-68C92B9A888F9D47D67F-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第13页证据（SEG-DOC-DFD3AED1BB841FF3-13-GL-00030-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6D3DBC6DFF5DCE5023E7-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第13页证据（SEG-DOC-DFD3AED1BB841FF3-13-GL-00032-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-C87E05052BDFC3DD521C-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第42页证据（SEG-DOC-DFD3AED1BB841FF3-42-GL-00127-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3C38DC733E00D4523C1F-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第42页证据（SEG-DOC-DFD3AED1BB841FF3-42-GL-00128-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-32E99CF8E44686A4A26D-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第42页证据（SEG-DOC-DFD3AED1BB841FF3-42-GL-00129-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-C14D13EB0FB8734D2660-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第42页证据（SEG-DOC-DFD3AED1BB841FF3-42-GL-00131-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-275DDDE0D2D2BF323214-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第49页证据（SEG-DOC-DFD3AED1BB841FF3-49-GL-00153-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-71059FA524F894C2A104-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第60页证据（SEG-DOC-DFD3AED1BB841FF3-60-GL-00308-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-6B424F36D58D27E51AD0-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第62页证据（SEG-DOC-DFD3AED1BB841FF3-62-GL-00310-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-222381E6C473DAE8DE69-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第63页证据（SEG-DOC-DFD3AED1BB841FF3-63-GL-00312-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-81E53FB9867A00A87329-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第64页证据（SEG-DOC-DFD3AED1BB841FF3-64-GL-00314-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-8B86ACA930654F04D985-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第65页证据（SEG-DOC-DFD3AED1BB841FF3-65-GL-00317-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-EF9143BAA532BBFEB0A4-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第73页证据（SEG-DOC-DFD3AED1BB841FF3-73-GL-00339-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-48789299DDA4D9ED1A03-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第75页证据（SEG-DOC-DFD3AED1BB841FF3-75-GL-00343-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1F2330E948E57784FF12-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第76页证据（SEG-DOC-DFD3AED1BB841FF3-76-GL-00346-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-65E7CA53992E69A04579-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第77页证据（SEG-DOC-DFD3AED1BB841FF3-77-GL-00351-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-1269E9300C261B0BBB4A-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第79页证据（SEG-DOC-DFD3AED1BB841FF3-79-GL-00355-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-3478A5ED4869B74B91F1-AMI",
+      "name": "NSTE-ACS ESC 2020.pdf 第8页证据（SEG-DOC-DFD3AED1BB841FF3-8-GL-00006-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-A95667E9C404F5595AC2-AMI",
+      "name": "STEMI ACC 2013.pdf 第14页证据（SEG-DOC-73C01373FC69F764-14-GL-00014-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-784DAB9097BCCC94C66B-AMI",
+      "name": "STEMI ACC 2013.pdf 第17页证据（SEG-DOC-73C01373FC69F764-17-GL-00022-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-CE2E999642A41B80A157-AMI",
+      "name": "STEMI ACC 2013.pdf 第22页证据（SEG-DOC-73C01373FC69F764-22-GL-00029-AMI）",
+      "name_en": null
+    },
+    {
+      "code": "EVD-0B86C35D5E20D1F49A7F-AMI",
+      "name": "STEMI ACC 2013.pdf 第22页证据（SEG-DOC-73C01373FC69F764-22-GL-00030-AMI）",
+      "name_en": null
+    }
+  ],
+  "Guideline": [
+    {
+      "code": "SRC-DOC-E0F939A44074F320",
+      "name": "2018 ESC EACTS Guidelines on myocardial revascularization.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-866065446A7A5F65",
+      "name": "2018 STEMI院前溶栓治疗中国专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-174B3BDD2451501A",
+      "name": "4TH universal definition of MI.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-08953CE23214DC37",
+      "name": "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-FAF812AF598A7058",
+      "name": "ACS  ESC  2023.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-0CFCD79F003BFB93",
+      "name": "CCS CN 2024.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-78579EFFB060EF72",
+      "name": "CCS ESC 2019.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-74E4AFDAB17B75CB",
+      "name": "ESC 急性冠脉综合征指南（2023）.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-43E2E1C7083A9CD6",
+      "name": "NSTE-ACS ACC 2014.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-223D946BFCBBE084",
+      "name": "NSTE-ACS CN 2024.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-DFD3AED1BB841FF3",
+      "name": "NSTE-ACS ESC 2020.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-73C01373FC69F764",
+      "name": "STEMI ACC 2013.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-955DCDB8BC81606E",
+      "name": "STEMI CN 2019.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-608DDED17DA46BC7",
+      "name": "STEMI ESC 2017.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-C0BB559FA2C8448A",
+      "name": "《内科学（第10版）》.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-F0DDA79BAB227E88",
+      "name": "【医脉通】2020心肌梗死后心力衰竭防治专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-70D3EB187476D123",
+      "name": "中国 ST段抬高型心肌梗死患者急诊PCI微循环保护策略.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-F1C8C5C1085BEDAF",
+      "name": "中国 冠状动脉粥样硬化性心脏病猝死2024.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-AFBC49A750345874",
+      "name": "冠心病双联抗血小板治疗中国专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-EC5A88A34A19CF0B",
+      "name": "冠状动脉粥样硬化性心脏病患者药物治疗管理路径专家共识_周洋.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-73CBCF74B9DAABAC",
+      "name": "存活心肌无创影像学评价专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-37B4754AACAB4D5F",
+      "name": "心肌梗死心电图诊断标准和报告规范中国专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-63C1CE632EA42314",
+      "name": "稳定性冠心病诊断与治疗指南 2018.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-99DE8941F1F5EDF3",
+      "name": "经皮冠状动脉介入治疗指南（2025）.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-16A94BC5A06F338E",
+      "name": "缺血性心肌病血运重建专家共识.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-F0E1ED198C99B706",
+      "name": "老年冠心病慢病管理指南_王杨淦.pdf",
+      "name_en": null
+    },
+    {
+      "code": "SRC-DOC-AFB35BB7F5EF5657",
+      "name": "青年急性心肌梗死诊断和治疗专家建议.pdf",
+      "name_en": null
+    }
+  ],
+  "guideline_list": [
+    "2018 ESC EACTS Guidelines on myocardial revascularization.pdf",
+    "2018 STEMI院前溶栓治疗中国专家共识.pdf",
+    "4TH universal definition of MI.pdf",
+    "ACC／AHA／ACEP／NAEMSP ／SCAI指 南：急性冠脉 综合征患者的管理 2025.pdf",
+    "ACS  ESC  2023.pdf",
+    "CCS CN 2024.pdf",
+    "CCS ESC 2019.pdf",
+    "ESC 急性冠脉综合征指南（2023）.pdf",
+    "NSTE-ACS ACC 2014.pdf",
+    "NSTE-ACS CN 2024.pdf",
+    "NSTE-ACS ESC 2020.pdf",
+    "STEMI ACC 2013.pdf",
+    "STEMI CN 2019.pdf",
+    "STEMI ESC 2017.pdf",
+    "《内科学（第10版）》.pdf",
+    "【医脉通】2020心肌梗死后心力衰竭防治专家共识.pdf",
+    "中国 ST段抬高型心肌梗死患者急诊PCI微循环保护策略.pdf",
+    "中国 冠状动脉粥样硬化性心脏病猝死2024.pdf",
+    "冠心病双联抗血小板治疗中国专家共识.pdf",
+    "冠状动脉粥样硬化性心脏病患者药物治疗管理路径专家共识_周洋.pdf",
+    "存活心肌无创影像学评价专家共识.pdf",
+    "心肌梗死心电图诊断标准和报告规范中国专家共识.pdf",
+    "稳定性冠心病诊断与治疗指南 2018.pdf",
+    "经皮冠状动脉介入治疗指南（2025）.pdf",
+    "缺血性心肌病血运重建专家共识.pdf",
+    "老年冠心病慢病管理指南_王杨淦.pdf",
+    "青年急性心肌梗死诊断和治疗专家建议.pdf"
+  ],
+  "related_diseases": [
+    {
+      "code": "DIS-CARD-HF",
+      "name": "心力衰竭",
+      "shared": 17
+    },
+    {
+      "code": "DIS-CARD-VTE",
+      "name": "静脉血栓症",
+      "shared": 16
+    },
+    {
+      "code": "DIS-CARD-ARR-AF",
+      "name": "心房颤动",
+      "shared": 16
+    },
+    {
+      "code": "DIS-CARD-CAD-ATHEROSCLEROSIS",
+      "name": "动脉粥样硬化",
+      "shared": 15
+    },
+    {
+      "code": "DIS-CARD-CAD-CHD",
+      "name": "冠状动脉粥样硬化性心脏病",
+      "shared": 15
+    },
+    {
+      "code": "DIS-CARD-VHD-AS",
+      "name": "主动脉瓣狭窄",
+      "shared": 14
+    },
+    {
+      "code": "DIS-CARD-CAD-ACS",
+      "name": "急性冠脉综合征",
+      "shared": 14
+    },
+    {
+      "code": "DIS-CARD-ARR-PVC",
+      "name": "室性期前收缩",
+      "shared": 13
+    },
+    {
+      "code": "DIS-CARD-CM-MYOCARDITIS",
+      "name": "心肌炎",
+      "shared": 13
+    },
+    {
+      "code": "DIS-CARD-ARR-VF",
+      "name": "心室扑动与心室颤动",
+      "shared": 13
+    }
+  ]
+}

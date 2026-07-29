@@ -1,6 +1,6 @@
 {
   "name": "cardiology-kg-web",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "心血管专科知识图谱Web系统",
   "main": "server.py",
   "scripts": {

@@ -1,0 +1,223 @@
+# PROJECT_CONTEXT.md — 心血管专科知识图谱 Web 平台
+
+> **最后更新**: 2026-07-19 | **当前版本**: v1.3.0 (VERSION) / v1.5.0 (app.js默认)
+> **用途**: 新 AI 模型接手时，先读此文件了解项目全貌，避免用户重复说明。
+
+---
+
+## 一、项目概述
+
+这是一个**心血管内科专科知识图谱 Web 可视化与交互平台**，基于 Neo4j 图数据库，支持 132 种心血管疾病的交互式浏览、诊断模拟和循证分析。
+
+- **核心数据规模**: 13 个疾病大类（CAT- 前缀 V2.0）、132 种疾病（86 independent + 9 broad_diagnosis + 37 clinical_subtype）、13,777 可视化实体、59,830 总节点、46,053 证据、205,902 关系
+- **Schema V2.0 新增**: 37 种实体类型、56 种关系类型、StandardDiagnosis（82条有效 ICD-10）、diagnostic_role / diagnosis_level / has_clinical_subtype / has_standard_diagnosis
+- **知识图谱结构**: Disease → 25个临床维度（含 Prevention/Definition）+ 二跳维度 + Evidence/Guideline
+
+---
+
+## 二、技术架构
+
+| 层次 | 技术 | 说明 |
+|------|------|------|
+| 前端 | **原生 HTML + CSS + JS** | 无框架、无构建工具，单文件 SPA |
+| 图表 | **ECharts 5.x** | 力导向图/雷达图/热力图 (`_shared/js/echarts.min.js`) |
+| 样式 | **暗色主题 CSS 变量** | 主背景 `#0f1117`，主色调 `#4f8cff`，详见 `style.css` |
+| 后端 | **Python `http.server`** | 标准库，自定义 `KGHandler`，端口 4001 |
+| 图数据库 | **Neo4j** | Bolt 协议，Cypher 查询 |
+| 缓存 | **Redis** | TTL 300秒，FLUSHALL 清除 |
+| 部署 | **paramiko SSH** | 自动化文件上传 + 服务重启 |
+
+---
+
+## 三、服务器信息
+
+| 项目 | 值 |
+|------|------|
+| 服务器地址 | `192.168.3.27` |
+| Web 访问地址 | `http://192.168.3.27:4001` |
+| SSH 用户/密码 | `root` / `zysoft@27` |
+| 远程部署目录 | `/zoesoft/zoekgweb` |
+| Neo4j Bolt | `bolt://192.168.3.27:7687` (neo4j/zysoft@2024) |
+| Redis | `192.168.3.27:6379` |
+
+---
+
+## 四、文件结构与职责
+
+```
+kg-test-page/
+├── server.py                 # 后端主程序（API + 静态文件服务）
+├── deploy.py                 # 一键部署脚本（SSH上传 + 清缓存 + 重启）
+├── refresh_cache.py          # 仅刷新缓存+重启（不上传文件）
+├── VERSION                   # 版本号单一真相源
+├── .server-config.json       # 服务器/数据库连接配置
+│
+├── index.html                # 数据总览（首页驾驶舱）
+├── explore.html              # 图谱探索（疾病层级树 + 23维度 + 诊疗流程）
+├── network.html              # 网络探索（ECharts力导向图）
+├── heatmap.html              # 专病诊疗框架覆盖分析（热力图）
+├── disease.html              # 疾病详情浏览
+├── diagnosis.html            # [已作废] 临床诊断模拟
+├── engine.html               # [已作废] 诊疗路径编辑器
+├── review.html               # 临床审核
+├── schema.html               # 图谱数据字典 / 实例检索
+├── standard.html             # 图谱架构规范
+├── guideline.html            # 指南库
+├── terminology.html          # 医学术语库
+├── config.html               # 系统设置（数据同步/数据库/菜单配置）
+├── specialty-cdss-prototype.html  # CDSS 辅助诊疗原型（独立系统）
+│
+├── _shared/
+│   ├── css/style.css         # 全局暗色主题样式
+│   └── js/
+│       ├── app.js            # 共享逻辑（版本/导航/数据加载/维度定义）
+│       ├── echarts.min.js    # ECharts 图表库
+│       └── review.js         # 临床审核逻辑
+│
+└── assets/                   # 静态资源、文档、JSON 数据
+```
+
+---
+
+## 五、核心后端 API
+
+| 接口 | 说明 |
+|------|------|
+| `GET /api/kg/version` | 版本号 |
+| `GET /api/kg/stats` | 全局统计（Redis缓存） |
+| `GET /api/kg/diseases` | 疾病列表 |
+| `GET /api/kg/diseases/all` | 全量疾病数据 |
+| `GET /api/kg/disease/<code>` | 单个疾病完整数据（23维度） |
+| `GET /api/kg/disease-tree` | V2.0 疾病层级树（疾病大类→宽口径/独立→子分型） |
+| `GET /api/kg/entity/<code>` | 单个实体详情 |
+| `GET /api/kg/schema-info` | V2.0 实体/关系类型清单与统计 |
+| `GET /api/kg/guidelines` | 指南列表 |
+| `GET /api/kg/flush-cache` | 清除 Redis 缓存 |
+
+---
+
+## 六、前端核心概念
+
+### 导航栏 (app.js → renderNav)
+9个功能模块 + 1个外部链接（专科辅助诊疗），通过 `config.html` 控制显隐，存储在 `localStorage`。
+已作废页面：`diagnosis.html`（临床诊断模拟）、`engine.html`（诊疗路径编辑器）已从导航和菜单中移除。
+
+### 疾病层级树 (server.py → query_disease_tree)
+**V2.0 三层诊断结构**：
+```
+Specialty → has_disease_category → DiseaseCategory(CAT- 前缀)
+  → has_disease → Disease(broad_diagnosis / independent_disease)
+    → has_clinical_subtype → Disease(clinical_subtype)
+```
+- `diagnostic_role` 决定疾病在诊断链中的位置：broad_diagnosis（疑似诊断）、clinical_subtype（具体分型）、independent_disease（独立诊断）
+- 诊断名称和编码从 `has_standard_diagnosis → StandardDiagnosis(valid_flag=1)` 读取 ICD-10
+- `DiseaseSubcategory` 不参与诊断链，仅保留给后台目录管理
+- 核心展示结构固定为：**疾病大类 → 待分型疾病 → 具体疾病分型**
+
+### 左侧树视图模式 (explore.html / disease.html)
+搜索框上方有「疾病 / 疾病大类」单选切换，状态保存在 `localStorage.kg_view_mode`：
+- **疾病模式**（默认）：只展示 broad_diagnosis / independent_disease，按覆盖率从高到低排序，有子分型的疾病可折叠展开
+- **疾病大类模式**：保持 V2.0 三层层级树（大类 → 疾病 → 子分型），全部默认展开
+
+### 25个临床维度 (app.js → DIM_KEYS)
+```
+Symptom, Sign, Exam, LabTest, Medication, Procedure, RiskFactor,
+Complication, DifferentialDiagnosis, RiskStratification, Prognosis,
+FollowUp, TreatmentPlan, DiagnosisCriteria, Etiology, Epidemiology,
+Pathophysiology, Evidence, Guideline, ThresholdRule, ExamIndicator,
+LabTestIndicator, DiseaseClassification, Prevention, Definition
+```
+
+### 疾病编码规则 (app.js → parseParentCode)
+格式 `DIS-{大类缩写}-{亚类缩写}-{序号}`，如 `DIS-CARD-CAD-AMI`
+- 大类映射：CARD=冠心病, HF=心力衰竭, ARR=心律失常, VASC=血管病, VALV=瓣膜病, CONG=先心病 等
+
+---
+
+## 七、部署流程
+
+### 标准部署（python deploy.py）
+1. SFTP 上传 18 个文件到 `/zoesoft/zoekgweb/`
+2. Redis `FLUSHALL` 清除缓存
+3. `pkill` 旧进程 + `setsid` 后台启动新 `server.py`
+4. 验证 API 正常
+
+### 轻量更新（仅静态页面变更）
+SFTP 覆盖单个文件即可，不清 Redis、不重启服务。
+
+### 需要重启的操作
+- 修改 `server.py`（后端逻辑变更）
+- 修改 `_shared/js/app.js` 或 `_shared/css/style.css`（需清除浏览器缓存）
+- 新增/删除 API 接口
+
+---
+
+## 八、已完成功能（截至 2026-07-16）
+
+### 今日改造内容
+1. **疾病层级树优化**：
+   - 去掉了 DiseaseClassification 中间层（分型节点），改为子疾病通过 `has_classification → maps_to → Disease` 直接挂在父疾病下
+   - 子疾病（如 AMI 下的 STEMI/NSTEMI）通过 `▼` 折叠按钮控制，默认展开
+   - 同名大类/亚类自动合并，消除重复层级
+   - 修复了 `disease.html` 中 `.grp-items` 缺少 `display:none` 导致无法收缩的 bug
+
+2. **视图模式切换**：
+   - 左侧搜索框上方新增「疾病 / 疾病大类」单选切换
+   - 疾病模式：扁平列表，按覆盖率从高到低排序（100% 在前）
+   - 疾病大类模式：保持原层级树
+   - 状态保存在 `localStorage.kg_view_mode`
+   - 两个页面同步改造：`explore.html` + `disease.html`
+
+3. **专科辅助诊疗菜单**：
+   - 从本地 `E:\BigMouse\0.CDSS文献诊疗指南材料PDF\AI专科知识图谱生成\原型设计_prototype\specialty-cdss-prototype.html` 同步最新版到服务器
+   - 导航栏点击在新浏览器标签页打开（`target="_blank"`）
+
+---
+
+## 九、已知问题与待办
+
+1. **版本号不一致**：VERSION 文件为 `1.3.0`，但 app.js 硬编码默认值为 `v1.5.0`
+2. **左侧树圆点样式**：疾病大类/亚类的圆点标记样式已从 emoji 改为 CSS 圆点（`.cat-dot` / `.sub-dot`）
+3. **disease.html 的搜索**：疾病模式下搜索匹配到子疾病时，父疾病行也会自动显示
+
+---
+
+## 十、开发规范
+
+### 代码风格
+- **前端**：纯 ES5+ 原生 JS，不用箭头函数（兼容性），不用 `let/const`（部分旧代码），不使用 npm 构建
+- **CSS**：CSS 变量体系（`var(--accent)` 等），BEM 无严格遵循，组件前缀如 `ex-`（explore）、`di-`（disease）
+- **后端**：Python 3.6+，标准库为主，Neo4j Bolt 驱动
+
+### 文件修改规则
+- 前端共享逻辑改 `_shared/js/app.js`
+- 样式改 `_shared/css/style.css`
+- 页面特定逻辑改对应 `.html` 文件中的 `<script>` 标签
+- 后端改 `server.py`
+- 修改后运行 `python deploy.py` 部署
+
+### 数据库查询
+- 所有 Neo4j 查询在 `server.py` 中
+- 疾病层级树查询：`query_disease_tree()`（有 Redis 缓存）
+- 疾病数据查询：`query_disease_data()`（按编码查，有 Redis 缓存）
+- 全局统计：`query_stats()`（有 Redis 缓存）
+
+---
+
+## 十一、给 AI 模型的使用说明
+
+### 接手新会话时的开场白模板：
+```
+请先阅读 PROJECT_CONTEXT.md 了解项目现状。
+今天需要你做 [具体任务]。
+```
+
+### 关键注意事项：
+1. 这个项目**没有前端框架**，都是原生 JS，不要引入 React/Vue
+2. 所有前端页面共享 `_shared/js/app.js` 和 `_shared/css/style.css`
+3. 修改代码后必须运行 `python deploy.py` 部署到服务器
+4. 疾病编码格式为 `DIS-{大类}-{亚类}-{序号}`，修改时注意保持一致
+5. 左侧树的疾病层级结构在 `server.py → query_disease_tree()` 中构建
+6. 两个页面共用疾病树逻辑：`explore.html` 和 `disease.html`，改动需要同步
+7. `specialty-cdss-prototype.html` 是独立的 CDSS 原型，有自己的侧边栏菜单体系，不共享导航栏
+8. 浏览器验证地址：`http://192.168.3.27:4001`

@@ -60,7 +60,7 @@ const doc = new Document({
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 2400 },
-        children: [new TextRun({ text: "版本：v1.4.1", size: 20 })]
+        children: [new TextRun({ text: "版本：v1.3.0", size: 20 })]
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,

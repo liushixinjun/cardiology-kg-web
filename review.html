@@ -339,6 +339,12 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
       <div class="rv-tab" data-tab="detail" onclick="switchTab('detail')">
         边级证据追溯 <span class="rv-tab-badge" id="tab-badge-detail">0</span>
       </div>
+      <div class="rv-tab" data-tab="cdss" onclick="switchTab('cdss')">
+        CDSS推荐审核 <span class="rv-tab-badge" id="tab-badge-cdss">-</span>
+      </div>
+      <div class="rv-tab" data-tab="skeleton" onclick="switchTab('skeleton')">
+        教材骨架审计 <span class="rv-tab-badge" id="tab-badge-skeleton">-</span>
+      </div>
     </div>
   </div>
   <!-- 内容区域 -->
@@ -347,6 +353,8 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
     <div class="rv-panel" id="panel-scenario"></div>
     <div class="rv-panel" id="panel-pharmacist"></div>
     <div class="rv-panel" id="panel-detail"></div>
+    <div class="rv-panel" id="panel-cdss"></div>
+    <div class="rv-panel" id="panel-skeleton"></div>
   </div>
 </div>
 <button class="rv-export-btn" onclick="exportDecisions()">
@@ -354,7 +362,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 </button>
 
 <!-- 加载共享导航 -->
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -387,12 +395,18 @@ var MISSING_FIELD_LABELS = {
 
 var RELATION_LABELS = {
   treated_by_medication: '药物治疗',
-  includes_procedure: '包含手术',
+  includes_medication: '治疗药物',
+  includes_procedure: '治疗手术',
   treated_by_procedure: '手术治疗',
   has_symptom: '症状表现',
   has_sign: '体征表现',
   has_exam: '检查项目',
   has_lab_test: '检验项目',
+  has_exam_plan: '辅助检查方案',
+  includes_exam_item: '检查项目',
+  includes_lab_item: '检验项目',
+  exam_item_has_observation: '检查发现',
+  lab_item_has_subitem: '检验细项',
   has_risk_factor: '危险因素',
   has_complication: '并发症',
   has_differential: '鉴别诊断',
@@ -411,8 +425,13 @@ var TARGET_TYPE_LABELS = {
   Procedure: '手术/操作',
   Symptom: '症状',
   Sign: '体征',
-  Exam: '检查',
-  LabTest: '检验',
+  ExamItem: '检查项目',
+  LabItem: '检验项目',
+  ExamObservation: '检查发现',
+  LabSubitem: '检验细项',
+  StandardDiagnosis: '标准诊断',
+  SourceAdjudication: '来源裁决',
+  Contraindication: '禁忌',
   RiskFactor: '危险因素',
   Complication: '并发症',
   DifferentialDiagnosis: '鉴别诊断',
@@ -426,8 +445,7 @@ var TARGET_TYPE_LABELS = {
   Etiology: '病因',
   Evidence: '证据',
   Guideline: '指南',
-  ThresholdRule: '阈值规则',
-  ExamIndicator: '检查指标'
+  ThresholdRule: '阈值规则'
 };
 
 /* 颜色映射 */
@@ -1240,11 +1258,156 @@ function downloadFile(content, filename, type) {
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
 /* =====================================================================
+   Tab 6: 教材骨架质量审计（V1.11）
+   ===================================================================== */
+function loadSkeletonAudit() {
+  fetch('/api/kg/skeleton-audit?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderSkeletonPanel(data);
+      document.getElementById('tab-badge-skeleton').textContent = data.textbook_node_total || 0;
+    })
+    .catch(function() {
+      document.getElementById('panel-skeleton').innerHTML =
+        '<div class="rv-empty"><div class="rv-empty-icon">&#9888;</div><div class="rv-empty-text">加载教材骨架审计数据失败</div></div>';
+    });
+}
+
+function renderSkeletonPanel(data) {
+  var panel = document.getElementById('panel-skeleton');
+  var h = '';
+  var gate = data.gate_check || {};
+  var allPass = gate.all_pass;
+
+  // 硬闸门状态
+  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : 'var(--yellow)') + '">';
+  h += '<span>' + (allPass ? '&#9989;' : '&#9888;') + '</span>';
+  h += '<span>教材骨架硬闸门：' + (allPass ? '全部通过' : '存在未通过项') + '</span>';
+  h += '</div>';
+
+  // KPI
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
+  var kpis = [
+    { num: data.textbook_node_total, label: '教材来源节点', color: 'var(--accent)', icon: '&#128218;' },
+    { num: gate.textbook_without_knowledge_layer, label: '缺knowledge_layer', color: gate.textbook_without_knowledge_layer > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128202;' },
+    { num: gate.textbook_core_without_skeleton_slot, label: '缺skeleton_slot', color: gate.textbook_core_without_skeleton_slot > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128203;' },
+    { num: gate.textbook_without_section_path, label: '缺章节路径', color: gate.textbook_without_section_path > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128196;' },
+    { num: gate.textbook_without_page, label: '缺页码', color: gate.textbook_without_page > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128209;' },
+    { num: gate.textbook_without_anchor, label: '缺文本锚点', color: gate.textbook_without_anchor > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128279;' },
+    { num: gate.relation_with_skeleton_slot, label: '关系级skeleton_slot', color: 'var(--accent)', icon: '&#128279;' },
+    { num: gate.relation_with_knowledge_layer, label: '关系级knowledge_layer', color: 'var(--accent)', icon: '&#128279;' },
+  ];
+  kpis.forEach(function(k) {
+    h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
+    h += '<div style="font-size:10px;color:var(--muted);margin-bottom:6px">' + k.icon + ' ' + k.label + '</div>';
+    h += '<div style="font-size:28px;font-weight:800;color:' + k.color + '">' + k.num + '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+
+  // 分布表格
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+  h += renderDistTable('skeleton_slot 分布', data.skeleton_slot_distribution, '#ffd43b');
+  h += renderDistTable('knowledge_layer 分布', data.knowledge_layer_distribution, '#22b8cf');
+  h += renderDistTable('source_type 分布', data.source_type_distribution, '#cc5de8');
+  h += '</div>';
+
+  panel.innerHTML = h;
+}
+
+/* =====================================================================
+   Tab 5: CDSS 推荐审核（RecommendationStatement）
+   ===================================================================== */
+function loadCDSSReview() {
+  fetch('/api/kg/rs-review?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderCDSSPanel(data);
+      document.getElementById('tab-badge-cdss').textContent = data.total || 0;
+    })
+    .catch(function() {
+      document.getElementById('panel-cdss').innerHTML =
+        '<div class="rv-empty"><div class="rv-empty-icon">&#9888;</div><div class="rv-empty-text">加载CDSS推荐审核数据失败</div></div>';
+    });
+}
+
+function renderCDSSPanel(data) {
+  var panel = document.getElementById('panel-cdss');
+  var h = '';
+
+  // 硬闸门状态
+  var gate = data.gate_check || {};
+  var allPass = gate.all_have_action && gate.all_have_evidence && gate.all_have_guideline;
+  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : 'var(--yellow)') + '">';
+  h += '<span>' + (allPass ? '&#9989;' : '&#9888;') + '</span>';
+  h += '<span>全库硬闸门：' + (allPass ? '全部通过' : '存在未通过项') + '</span>';
+  h += '</div>';
+
+  // KPI 指标
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
+  var kpis = [
+    { num: data.total, label: 'RS总数', color: 'var(--accent)', icon: '&#128203;' },
+    { num: data.formal_cdss_ready, label: 'CDSS就绪', color: '#52c41a', icon: '&#9989;' },
+    { num: data.formal_cdss_not_ready, label: '未就绪', color: '#ff6b6b', icon: '&#9888;' },
+    { num: data.no_action_count, label: '无动作RS', color: '#ffd43b', icon: '&#128269;' },
+    { num: data.no_evidence_count, label: '无证据RS', color: '#ffd43b', icon: '&#128214;' },
+    { num: data.no_guideline_count, label: '无指南RS', color: '#ffd43b', icon: '&#128220;' },
+  ];
+  kpis.forEach(function(k) {
+    h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
+    h += '<div style="font-size:10px;color:var(--muted);margin-bottom:6px">' + k.icon + ' ' + k.label + '</div>';
+    h += '<div style="font-size:28px;font-weight:800;color:' + k.color + '">' + k.num + '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+
+  // 分布表格
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+
+  // clinical_review_status 分布
+  h += renderDistTable('审核状态分布', data.clinical_review_status, 'var(--accent)');
+
+  // recommendation_class 分布
+  h += renderDistTable('推荐等级分布', data.recommendation_class, '#52c41a');
+
+  // evidence_level 分布
+  h += renderDistTable('证据等级分布', data.evidence_level, '#22b8cf');
+
+  // recommendation_type 分布
+  h += renderDistTable('推荐类型分布', data.recommendation_type, '#cc5de8');
+
+  h += '</div>';
+
+  panel.innerHTML = h;
+}
+
+function renderDistTable(title, dist, color) {
+  var h = '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">' + title + '</div>';
+  var total = 0;
+  Object.keys(dist).forEach(function(k) { total += dist[k]; });
+  Object.keys(dist).sort(function(a, b) { return dist[b] - dist[a]; }).forEach(function(k) {
+    var pct = total > 0 ? Math.round(dist[k] / total * 100) : 0;
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+    h += '<div style="font-size:12px;color:var(--ink);min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + k + '">' + k + '</div>';
+    h += '<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">';
+    h += '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:3px"></div>';
+    h += '</div>';
+    h += '<div style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">' + dist[k] + ' (' + pct + '%)</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+/* =====================================================================
    初始化
    ===================================================================== */
 document.addEventListener('DOMContentLoaded', function() {
   renderNav('review');
   loadReviewData();
+  loadCDSSReview();
+  loadSkeletonAudit();
 });
 </script>
 </body>

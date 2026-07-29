@@ -1,0 +1,677 @@
+{
+  "version": "1.0.0",
+  "disease_code": "DIS-CARD-CAD-AMI",
+  "disease_name": "急性心肌梗死",
+  "disease_name_en": "Acute Myocardial Infarction",
+  "specialty": "心血管内科",
+
+  "subtypes": {
+    "STEMI": {
+      "name": "ST段抬高型心肌梗死",
+      "criteria": [
+        "新发ST段抬高：相邻2个导联J点抬高≥0.1mV（V2-V3导联男性≥0.2mV，女性≥0.15mV）",
+        "或新发左束支传导阻滞（LBBB）",
+        "合并心肌标志物（cTnI/cTnT）升高"
+      ],
+      "urgency": "极高危",
+      "time_window": "发病<12h为再灌注治疗时间窗"
+    },
+    "NSTEMI": {
+      "name": "非ST段抬高型心肌梗死",
+      "criteria": [
+        "无ST段抬高",
+        "心肌标志物（cTnI/cTnT）动态升高和/或降低",
+        "缺血性症状（胸痛/胸闷等）"
+      ],
+      "urgency": "高危",
+      "time_window": "根据GRACE评分决定介入时机"
+    }
+  },
+
+  "diagnostic_workflow": {
+    "step1_screening": {
+      "name": "高危大类筛查",
+      "trigger": "急诊主诉保存",
+      "conditions": ["胸痛", "胸闷", "压榨感", "大汗", "濒死感", "放射痛"],
+      "output": "疑似ACS",
+      "next": "step2_evidence"
+    },
+    "step2_evidence": {
+      "name": "证据补齐",
+      "trigger": "心电图/检验回传",
+      "required_exams": ["心电图", "肌钙蛋白I/T", "CK-MB"],
+      "optional_exams": ["D-二聚体", "血气分析", "BNP/NT-proBNP", "心超"],
+      "output": "证据充分/证据不足",
+      "next": "step3_diagnosis"
+    },
+    "step3_diagnosis": {
+      "name": "诊断确认与分型",
+      "trigger": "诊断保存",
+      "branching": {
+        "STEMI": "ST段抬高或新发LBBB + cTn升高",
+        "NSTEMI": "无ST段抬高 + cTn动态变化",
+        "unstable_angina": "无ST段抬高 + cTn正常",
+        "exclude": "心电图和cTn均正常"
+      },
+      "next": "step4_stratification"
+    },
+    "step4_stratification": {
+      "name": "风险分层",
+      "trigger": "评估完成",
+      "scales": ["GRACE", "TIMI", "Killip"],
+      "next": "step5_treatment"
+    },
+    "step5_treatment": {
+      "name": "治疗决策",
+      "trigger": "分型+分层完成",
+      "next": "step6_monitoring"
+    },
+    "step6_monitoring": {
+      "name": "治疗执行与监测",
+      "trigger": "医嘱执行",
+      "next": "step7_discharge"
+    },
+    "step7_discharge": {
+      "name": "出院准备",
+      "trigger": "病情稳定",
+      "next": "step8_followup"
+    },
+    "step8_followup": {
+      "name": "随访管理",
+      "trigger": "出院后"
+    }
+  },
+
+  "differential_diagnosis": [
+    {
+      "name": "主动脉夹层",
+      "key_features": ["撕裂样疼痛", "双上肢血压差>20mmHg", "脉搏不对称"],
+      "key_exams": ["主动脉CTA", "经食管超声心动图(TEE)", "D-二聚体"],
+      "exclude_signs": ["CTA未见主动脉夹层征象"],
+      "urgency": "极高危"
+    },
+    {
+      "name": "肺栓塞",
+      "key_features": ["突发呼吸困难", "胸痛", "咯血", "下肢深静脉血栓史"],
+      "key_exams": ["CTPA", "D-二聚体", "血气分析", "下肢深静脉超声"],
+      "exclude_signs": ["CTPA未见充盈缺损"],
+      "urgency": "高危"
+    },
+    {
+      "name": "急性心包炎",
+      "key_features": ["胸痛与呼吸/体位相关", "心包摩擦音", "发热"],
+      "key_exams": ["心超", "心电图（弥漫ST段弓背向下抬高）", "CRP/ESR"],
+      "exclude_signs": ["无弥漫ST段弓背向下抬高"],
+      "urgency": "中等"
+    },
+    {
+      "name": "气胸",
+      "key_features": ["突发胸痛", "呼吸困难", "患侧呼吸音消失"],
+      "key_exams": ["胸部X线", "胸部CT"],
+      "exclude_signs": ["胸片未见气胸征象"],
+      "urgency": "高危"
+    }
+  ],
+
+  "risk_scales": {
+    "GRACE": {
+      "name": "GRACE评分（全球急性冠脉事件注册评分）",
+      "applicable": "所有ACS患者",
+      "fields": [
+        {"id": "age", "label": "年龄(岁)", "type": "number", "max_score": 100},
+        {"id": "heart_rate", "label": "心率(次/分)", "type": "number", "max_score": 46},
+        {"id": "systolic_bp", "label": "收缩压(mmHg)", "type": "number", "max_score": 58},
+        {"id": "creatinine", "label": "肌酐(mg/dL)", "type": "number", "max_score": 28},
+        {"id": "killip_class", "label": "Killip分级", "type": "select", "options": ["I","II","III","IV"], "scores": [0,20,39,59]},
+        {"id": "cardiac_arrest", "label": "就诊时心脏骤停", "type": "boolean", "scores": [0,39]},
+        {"id": "st_deviation", "label": "ST段偏移", "type": "boolean", "scores": [0,28]},
+        {"id": "biomarker_elevated", "label": "心肌标志物升高", "type": "boolean", "scores": [0,14]}
+      ],
+      "risk_levels": [
+        {"level": "低危", "range": "≤108", "in_hospital_mortality": "<3%", "color": "#51cf66"},
+        {"level": "中危", "range": "109-140", "in_hospital_mortality": "3-8%", "color": "#ffd43b"},
+        {"level": "高危", "range": "141-372", "in_hospital_mortality": ">8%", "color": "#ff6b6b"}
+      ],
+      "source": "GRACE Risk Score, Eur Heart J 2007"
+    },
+    "TIMI": {
+      "name": "TIMI评分（NSTEMI/UA）",
+      "applicable": "NSTEMI/不稳定型心绞痛",
+      "fields": [
+        {"id": "age_ge65", "label": "年龄≥65岁", "type": "boolean", "score": 1},
+        {"id": "cad_risk_factors", "label": "≥3个CAD危险因素", "type": "boolean", "score": 1},
+        {"id": "known_cad_stenosis", "label": "已知冠脉狭窄≥50%", "type": "boolean", "score": 1},
+        {"id": "st_deviation", "label": "ST段偏移≥0.5mm", "type": "boolean", "score": 1},
+        {"id": "severe_angina", "label": "24h内严重心绞痛≥2次", "type": "boolean", "score": 1},
+        {"id": "aspirin_7days", "label": "近7天内服用阿司匹林", "type": "boolean", "score": 1},
+        {"id": "biomarker_elevated", "label": "心肌标志物升高", "type": "boolean", "score": 1}
+      ],
+      "risk_levels": [
+        {"level": "低危", "range": "0-2分", "14d_events": "4.7%", "color": "#51cf66"},
+        {"level": "中危", "range": "3-4分", "14d_events": "8.3-13.2%", "color": "#ffd43b"},
+        {"level": "高危", "range": "5-7分", "14d_events": "19.9-40.9%", "color": "#ff6b6b"}
+      ],
+      "source": "TIMI Risk Score, JAMA 2000"
+    },
+    "Killip": {
+      "name": "Killip分级",
+      "applicable": "AMI患者心功能评估",
+      "levels": [
+        {"grade": "I", "criteria": "无心衰征象，无肺部啰音", "mortality": "6%", "color": "#51cf66"},
+        {"grade": "II", "criteria": "轻-中度心衰，肺部湿啰音<50%肺野，S3奔马律，颈静脉怒张", "mortality": "17%", "color": "#ffd43b"},
+        {"grade": "III", "criteria": "重度心衰/急性肺水肿，湿啰音>50%肺野", "mortality": "38%", "color": "#ff922b"},
+        {"grade": "IV", "criteria": "心源性休克，收缩压<90mmHg，少尿，意识障碍", "mortality": "81%", "color": "#ff6b6b"}
+      ],
+      "source": "Killip & Kimball, Am J Cardiol 1967"
+    },
+    "HAS_BLED": {
+      "name": "HAS-BLED出血风险评分",
+      "applicable": "评估抗栓治疗出血风险",
+      "fields": [
+        {"id": "hypertension", "label": "高血压（收缩压>160mmHg）", "type": "boolean", "score": 1},
+        {"id": "abnormal_renal", "label": "肾功能异常", "type": "boolean", "score": 1},
+        {"id": "abnormal_liver", "label": "肝功能异常", "type": "boolean", "score": 1},
+        {"id": "stroke", "label": "卒中史", "type": "boolean", "score": 1},
+        {"id": "bleeding", "label": "出血史/倾向", "type": "boolean", "score": 1},
+        {"id": "labile_inr", "label": "INR不稳定", "type": "boolean", "score": 1},
+        {"id": "elderly", "label": "年龄>65岁", "type": "boolean", "score": 1},
+        {"id": "drugs", "label": "抗血小板/NSAIDs", "type": "boolean", "score": 1},
+        {"id": "alcohol", "label": "酗酒", "type": "boolean", "score": 1}
+      ],
+      "risk_levels": [
+        {"level": "低危", "range": "0-2分", "color": "#51cf66"},
+        {"level": "高危", "range": "≥3分", "color": "#ff6b6b", "note": "高出血风险，需加强监测"}
+      ],
+      "source": "HAS-BLED, Eur Heart J 2010"
+    }
+  },
+
+  "pathway_stages": {
+    "STAGE-CARD-CAD-AMI-SCREENING": {
+      "code": "STAGE-CARD-CAD-AMI-SCREENING",
+      "name": "高危筛查决策阶段",
+      "description": "判断患者是否属于高危方向，是否需要进入AMI诊疗流程",
+      "entry_conditions": ["胸痛", "胸闷", "压榨感", "大汗", "濒死感"],
+      "exit_conditions": ["排除ACS", "证据不足留观"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-ECG-TROPONIN-ORDER"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-SCREEN-001"],
+      "next_stage": "STAGE-CARD-CAD-AMI-EVIDENCE"
+    },
+    "STAGE-CARD-CAD-AMI-EVIDENCE": {
+      "code": "STAGE-CARD-CAD-AMI-EVIDENCE",
+      "name": "证据补齐决策阶段",
+      "description": "收集心电图、肌钙蛋白、心肌酶等诊断依据，判断证据是否充分",
+      "entry_conditions": ["疑似ACS筛查阳性"],
+      "exit_conditions": ["证据充分进入分型", "证据不足继续观察"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-ECG-TROPONIN-ORDER", "PLAN-CARD-CAD-AMI-DIFFERENTIAL-ORDER"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-STEMI-001", "RULE-CARD-CAD-AMI-NSTEMI-001", "RULE-CARD-CAD-AMI-DIFF-001"],
+      "next_stage": "STAGE-CARD-CAD-AMI-SUBTYPING"
+    },
+    "STAGE-CARD-CAD-AMI-SUBTYPING": {
+      "code": "STAGE-CARD-CAD-AMI-SUBTYPING",
+      "name": "分型分层决策阶段",
+      "description": "根据心电图和肌钙蛋白判断STEMI/NSTEMI，完成风险评分",
+      "entry_conditions": ["心电图异常", "肌钙蛋白升高"],
+      "exit_conditions": ["STEMI确诊", "NSTEMI确诊", "排除AMI"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-GRACE-ASSESSMENT", "PLAN-CARD-CAD-AMI-TIMI-ASSESSMENT"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-STRATIFY-001"],
+      "next_stage": "STAGE-CARD-CAD-AMI-REPERFUSION-DECISION"
+    },
+    "STAGE-CARD-CAD-AMI-REPERFUSION-DECISION": {
+      "code": "STAGE-CARD-CAD-AMI-REPERFUSION-DECISION",
+      "name": "再灌注决策阶段",
+      "description": "STEMI患者：评估发病时间窗、PCI/溶栓适应证和禁忌证，决定再灌注策略",
+      "entry_conditions": ["STEMI确诊", "发病<12h"],
+      "exit_conditions": ["PCI方案确认", "溶栓方案确认", "超出时间窗转保守"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-PRIMARY-PCI", "PLAN-CARD-CAD-AMI-THROMBOLYSIS"],
+      "blocking_rules": {
+        "PCI_block": ["活动性出血", "严重凝血障碍", "主动脉夹层"],
+        "thrombolysis_block": ["出血性卒中史", "近期大手术", "主动脉夹层"]
+      },
+      "clinical_rules": ["RULE-CARD-CAD-AMI-REPERFUSION-SELECT"],
+      "next_stage": "STAGE-CARD-CAD-AMI-TREATMENT-EXECUTION"
+    },
+    "STAGE-CARD-CAD-AMI-TREATMENT-EXECUTION": {
+      "code": "STAGE-CARD-CAD-AMI-TREATMENT-EXECUTION",
+      "name": "治疗执行与监测阶段",
+      "description": "执行已确认的治疗方案，持续监测并发症风险",
+      "entry_conditions": ["再灌注策略确认或药物保守方案确认"],
+      "exit_conditions": ["治疗完成", "出现并发症转入并发症处置"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-DAPT-THERAPY", "PLAN-CARD-CAD-AMI-STATIN-THERAPY", "PLAN-CARD-CAD-AMI-BETA-BLOCKER-THERAPY"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-PCI-CHECK-001"],
+      "next_stage": "STAGE-CARD-CAD-AMI-COMPLICATION-MONITORING"
+    },
+    "STAGE-CARD-CAD-AMI-COMPLICATION-MONITORING": {
+      "code": "STAGE-CARD-CAD-AMI-COMPLICATION-MONITORING",
+      "name": "并发症监测阶段",
+      "description": "监测心衰、心律失常、出血等并发症风险，触发异常分支",
+      "entry_conditions": ["治疗执行中"],
+      "exit_conditions": ["无并发症转入出院准备", "出现并发症转入处置"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-DISCHARGE-PREP"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-RISK-001"],
+      "next_stage": "STAGE-CARD-CAD-AMI-DISCHARGE-SECONDARY-PREVENTION"
+    },
+    "STAGE-CARD-CAD-AMI-DISCHARGE-SECONDARY-PREVENTION": {
+      "code": "STAGE-CARD-CAD-AMI-DISCHARGE-SECONDARY-PREVENTION",
+      "name": "出院二级预防决策阶段",
+      "description": "评估出院条件，确认二级预防方案完整性，生成随访计划",
+      "entry_conditions": ["病情稳定", "达到出院标准"],
+      "exit_conditions": ["二级预防方案完整", "随访计划生成"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-DISCHARGE-ORDERS"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-SECONDARY-PREVENTION"],
+      "next_stage": "STAGE-CARD-CAD-AMI-FOLLOWUP-MANAGEMENT"
+    },
+    "STAGE-CARD-CAD-AMI-FOLLOWUP-MANAGEMENT": {
+      "code": "STAGE-CARD-CAD-AMI-FOLLOWUP-MANAGEMENT",
+      "name": "随访管理阶段",
+      "description": "出院后定期复查、用药依从性评估、再入院风险监测",
+      "entry_conditions": ["出院后"],
+      "exit_conditions": ["随访完成", "再入院"],
+      "available_plans": ["PLAN-CARD-CAD-AMI-FOLLOWUP-PLAN"],
+      "clinical_rules": ["RULE-CARD-CAD-AMI-FOLLOWUP-001"],
+      "next_stage": null
+    }
+  },
+
+  "stage_plan_map": {
+    "STAGE-CARD-CAD-AMI-REPERFUSION-DECISION": {
+      "stage_name": "再灌注决策阶段",
+      "plans": [
+        {"plan_code": "PLAN-CARD-CAD-AMI-PRIMARY-PCI", "plan_name": "急诊PCI方案", "priority": 1, "conditions": ["STEMI确诊", "发病<12h", "无PCI禁忌证"]},
+        {"plan_code": "PLAN-CARD-CAD-AMI-THROMBOLYSIS", "plan_name": "溶栓治疗方案", "priority": 2, "conditions": ["STEMI确诊", "发病<12h", "无法行急诊PCI", "无溶栓禁忌证"]}
+      ],
+      "blocking_check": {
+        "PLAN-CARD-CAD-AMI-PRIMARY-PCI": ["活动性出血", "严重凝血障碍", "主动脉夹层", "严重未控制高血压>200/120"],
+        "PLAN-CARD-CAD-AMI-THROMBOLYSIS": ["活动性出血", "出血性卒中史", "近期大手术", "主动脉夹层"]
+      }
+    },
+    "STAGE-CARD-CAD-AMI-TREATMENT-EXECUTION": {
+      "stage_name": "治疗执行与监测阶段",
+      "plans": [
+        {"plan_code": "PLAN-CARD-CAD-AMI-DAPT-THERAPY", "plan_name": "双联抗血小板治疗方案"},
+        {"plan_code": "PLAN-CARD-CAD-AMI-STATIN-THERAPY", "plan_name": "高强度他汀降脂方案"},
+        {"plan_code": "PLAN-CARD-CAD-AMI-BETA-BLOCKER-THERAPY", "plan_name": "β受体阻滞剂方案"}
+      ]
+    }
+  },
+
+  "treatment_plans": {
+    "STEMI_emergency_pci": {
+      "name": "STEMI急诊PCI",
+      "priority": "首选",
+      "conditions": ["确诊STEMI", "发病<12h", "无PCI禁忌证"],
+      "contraindications": ["活动性内出血", "近期大手术(2周内)", "严重未控制高血压>200/120mmHg", "主动脉夹层"],
+      "pre_orders": [
+        "阿司匹林300mg嚼服",
+        "P2Y12抑制剂负荷（氯吡格雷600mg或替格瑞洛180mg）",
+        "普通肝素60-70U/kg（最大4000U）静推",
+        "建立静脉通路",
+        "床旁心电监护"
+      ],
+      "procedure": "急诊冠脉造影+经皮冠状动脉介入治疗(PCI)",
+      "post_orders": [
+        "双联抗血小板治疗(DAPT)≥12个月",
+        "高强度他汀（阿托伐他汀40-80mg或瑞舒伐他汀20mg）",
+        "β受体阻滞剂（无禁忌时）",
+        "ACEI/ARB（前壁梗死/心衰/EF≤40%时）",
+        "醛固酮拮抗剂（EF≤40%+心衰/糖尿病时）"
+      ],
+      "guideline": "ESC STEMI Guidelines 2017, ACC/AHA STEMI Guidelines 2013"
+    },
+    "STEMI_thrombolysis": {
+      "name": "STEMI溶栓治疗",
+      "priority": "次选（无法行急诊PCI时）",
+      "conditions": ["确诊STEMI", "发病<12h", "无法在120min内行PCI", "无溶栓禁忌证"],
+      "contraindications": [
+        "活动性内出血", "出血性卒中史", "缺血性卒中3个月内",
+        "颅内肿瘤/AVM/动脉瘤", "已知出血倾向", "严重未控制高血压",
+        "近期大手术(2周内)", "主动脉夹层", "妊娠"
+      ],
+      "agents": [
+        {"name": "阿替普酶(rt-PA)", "dose": "15mg静推+0.75mg/kg(30min)+0.5mg/kg(60min)，最大100mg"},
+        {"name": "替奈普酶(TNK-tPA)", "dose": "根据体重单次静推：30mg(<60kg)至50mg(≥90kg)"},
+        {"name": "瑞替普酶(r-PA)", "dose": "10U静推+10U静推(30min后)"}
+      ],
+      "adjunct": ["普通肝素或低分子肝素", "阿司匹林300mg", "氯吡格雷300mg负荷"],
+      "success_criteria": ["胸痛缓解>50%", "抬高ST段回落>50%", "再灌注心律失常", "cTn峰值前移"],
+      "guideline": "ESC STEMI Guidelines 2017"
+    },
+    "NSTEMI_conservative": {
+      "name": "NSTEMI药物保守治疗",
+      "priority": "低中危NSTEMI",
+      "conditions": ["确诊NSTEMI", "GRACE评分≤108（低危）", "无反复缺血发作"],
+      "orders": [
+        "双联抗血小板：阿司匹林100mg qd + 氯吡格雷75mg qd",
+        "抗凝：低分子肝素（依诺肝素1mg/kg q12h）",
+        "他汀：阿托伐他汀20-40mg qn",
+        "β受体阻滞剂：美托洛尔缓释片47.5mg qd（无禁忌时）",
+        "ACEI/ARB（合并心衰/糖尿病/肾功能不全时）",
+        "硝酸酯类（胸痛发作时）"
+      ],
+      "monitoring": ["持续心电监护", "q6h cTn", "每日心电图", "肾功能/电解质"],
+      "guideline": "ESC NSTE-ACS Guidelines 2020"
+    },
+    "NSTEMI_invasive": {
+      "name": "NSTEMI侵入性策略",
+      "priority": "高危NSTEMI",
+      "conditions": ["确诊NSTEMI", "GRACE评分>140（高危）", "或反复缺血发作", "或血流动力学不稳定"],
+      "timing": "24h内行冠脉造影",
+      "pre_orders": ["同药物保守", "碘对比剂过敏评估", "肾功能评估"],
+      "guideline": "ESC NSTE-ACS Guidelines 2020"
+    }
+  },
+
+  "order_sets": {
+    "emergency_initial": {
+      "name": "急诊首诊医嘱集",
+      "scene": "急诊接诊",
+      "orders": [
+        {"name": "心电图(12导联)", "category": "检查", "urgency": "立即", "note": "首份心电图10min内完成"},
+        {"name": "心肌肌钙蛋白I/T(高敏)", "category": "检验", "urgency": "立即"},
+        {"name": "CK-MB", "category": "检验", "urgency": "立即"},
+        {"name": "血常规", "category": "检验", "urgency": "立即"},
+        {"name": "凝血功能(PT/APTT/INR/FIB)", "category": "检验", "urgency": "立即"},
+        {"name": "肝肾功能+电解质", "category": "检验", "urgency": "立即"},
+        {"name": "血脂全套", "category": "检验", "urgency": "立即"},
+        {"name": "血糖+糖化血红蛋白", "category": "检验", "urgency": "立即"},
+        {"name": "血气分析", "category": "检验", "urgency": "立即"},
+        {"name": "BNP/NT-proBNP", "category": "检验", "urgency": "立即"},
+        {"name": "D-二聚体", "category": "检验", "urgency": "立即", "note": "鉴别肺栓塞/主动脉夹层"},
+        {"name": "床旁心电监护", "category": "护理", "urgency": "立即"},
+        {"name": "吸氧(SpO2<90%时)", "category": "护理", "urgency": "立即"},
+        {"name": "建立静脉通路", "category": "护理", "urgency": "立即"}
+      ]
+    },
+    "stemi_immediate": {
+      "name": "STEMI即刻处理医嘱集",
+      "scene": "确诊STEMI后",
+      "orders": [
+        {"name": "阿司匹林肠溶片300mg嚼服", "category": "药物", "urgency": "立即"},
+        {"name": "氯吡格雷片600mg负荷剂量", "category": "药物", "urgency": "立即", "alternative": "替格瑞洛180mg"},
+        {"name": "普通肝素钠注射液60-70U/kg静推(最大4000U)", "category": "药物", "urgency": "立即"},
+        {"name": "阿托伐他汀钙片40mg口服", "category": "药物", "urgency": "立即"},
+        {"name": "硝酸甘油注射液5mg+NS250ml静滴(根据血压调整)", "category": "药物", "urgency": "即刻", "note": "收缩压>90mmHg时"},
+        {"name": "吗啡注射液3-5mg静推(必要时)", "category": "药物", "urgency": "必要时", "note": "胸痛剧烈且硝酸甘油无效时"}
+      ]
+    },
+    "inpatient_daily": {
+      "name": "住院日常医嘱集",
+      "scene": "住院期间",
+      "orders": [
+        {"name": "阿司匹林肠溶片100mg qd", "category": "药物"},
+        {"name": "氯吡格雷片75mg qd", "category": "药物", "note": "DAPT至少12个月"},
+        {"name": "阿托伐他汀钙片20mg qn", "category": "药物"},
+        {"name": "美托洛尔缓释片47.5mg qd", "category": "药物", "note": "无禁忌时"},
+        {"name": "低分子肝素(依诺肝素)1mg/kg q12h皮下注射", "category": "药物", "note": "根据肾功能调整"},
+        {"name": "床旁心电监护", "category": "护理"},
+        {"name": "记录24h出入量", "category": "护理"},
+        {"name": "每日心电图", "category": "检查"},
+        {"name": "q8h心肌标志物(至峰值回落)", "category": "检验"}
+      ]
+    },
+    "discharge": {
+      "name": "出院带药及随访计划",
+      "scene": "出院",
+      "orders": [
+        {"name": "阿司匹林肠溶片100mg qd(长期)", "category": "出院带药"},
+        {"name": "氯吡格雷片75mg qd(至少12个月)", "category": "出院带药"},
+        {"name": "阿托伐他汀钙片20mg qn(长期)", "category": "出院带药"},
+        {"name": "美托洛尔缓释片47.5mg qd(长期)", "category": "出院带药"},
+        {"name": "培哚普利4mg qd(心衰/前壁梗死时)", "category": "出院带药", "note": "根据EF值决定"},
+        {"name": "螺内酯20mg qd(EF≤40%时)", "category": "出院带药"}
+      ],
+      "followup_plan": [
+        {"time": "出院后1个月", "items": ["心电图", "血常规", "肝肾功能", "血脂", "心肌标志物"]},
+        {"time": "出院后3个月", "items": ["心电图", "血脂", "心超(LVEF)", "血糖/HbA1c"]},
+        {"time": "出院后6个月", "items": ["心电图", "血脂", "心超", "运动负荷试验(必要时)"]},
+        {"time": "出院后12个月", "items": ["心电图", "血脂", "心超", "冠脉CTA/造影(必要时)"]}
+      ]
+    }
+  },
+
+  "templates": [
+    {
+      "name": "急性胸痛评估记录",
+      "stage": "急诊",
+      "fields": [
+        "主诉(疼痛部位、性质、持续时间、放射、诱因、伴随症状)",
+        "生命体征(BP/HR/RR/SpO2/T)",
+        "疼痛评分(VAS 0-10)",
+        "ECG结果",
+        "初步判断",
+        "处理措施"
+      ]
+    },
+    {
+      "name": "入院记录(AMI)",
+      "stage": "住院",
+      "fields": [
+        "主诉", "现病史(发病时间、诱因、症状演变、院前处置)",
+        "既往史(高血压/糖尿病/冠心病/卒中/出血/手术)",
+        "个人史(吸烟/饮酒)",
+        "家族史(心血管病家族史)",
+        "体格检查(心肺腹部/四肢)",
+        "辅助检查(ECG/心超/实验室)",
+        "初步诊断", "鉴别诊断", "诊疗计划"
+      ]
+    },
+    {
+      "name": "首次病程记录(AMI)",
+      "stage": "住院",
+      "fields": [
+        "病例特点(症状、体征、ECG、实验室、影像)",
+        "诊断依据(分型依据、诊断标准)",
+        "鉴别诊断(主动脉夹层/肺栓塞/心包炎)",
+        "诊疗计划(治疗策略、医嘱、监测、评估)"
+      ]
+    },
+    {
+      "name": "PCI术前评估",
+      "stage": "术前",
+      "fields": [
+        "PCI适应证",
+        "PCI禁忌证",
+        "抗栓方案",
+        "对比剂过敏评估",
+        "肾功能评估(eGFR)",
+        "知情同意",
+        "术前用药"
+      ]
+    },
+    {
+      "name": "PCI手术记录",
+      "stage": "手术",
+      "fields": [
+        "术前诊断", "术后诊断", "手术名称",
+        "入路(桡动脉/股动脉)", "造影结果", "病变描述",
+        "支架信息(型号/尺寸)", "TIMI血流", "术中并发症",
+        "术中用药", "术后医嘱"
+      ]
+    },
+    {
+      "name": "出院小结(AMI)",
+      "stage": "出院",
+      "fields": [
+        "入院日期/出院日期", "住院天数",
+        "入院诊断/出院诊断",
+        "住院经过(关键检查、治疗、手术)",
+        "出院时情况",
+        "出院带药(含剂量/频次/疗程)",
+        "随访计划(复查时间/项目)",
+        "注意事项(症状识别/紧急就医指征)"
+      ]
+    }
+  ],
+
+  "patient_tags": {
+    "disease_tags": [
+      {"tag": "疑似AMI", "source": "系统推荐", "trigger": "筛查规则命中"},
+      {"tag": "确诊AMI", "source": "医生确认", "trigger": "诊断保存"},
+      {"tag": "STEMI", "source": "系统分型", "trigger": "ECG+cTn"},
+      {"tag": "NSTEMI", "source": "系统分型", "trigger": "ECG+cTn"}
+    ],
+    "risk_tags": [
+      {"tag": "再灌注窗口内", "source": "系统计算", "trigger": "发病时间<12h"},
+      {"tag": "GRACE高危", "source": "评分计算", "trigger": "GRACE>140"},
+      {"tag": "Killip≥II", "source": "临床评估", "trigger": "心衰征象"},
+      {"tag": "高出血风险", "source": "HAS-BLED≥3", "trigger": "评分计算"},
+      {"tag": "EF≤40%", "source": "心超结果", "trigger": "报告回传"}
+    ],
+    "treatment_tags": [
+      {"tag": "PCI术前", "source": "医嘱确认", "trigger": "PCI术前医嘱"},
+      {"tag": "PCI术后", "source": "手术记录", "trigger": "PCI完成"},
+      {"tag": "药物保守", "source": "医生决策", "trigger": "未行PCI"},
+      {"tag": "DAPT治疗中", "source": "医嘱跟踪", "trigger": "双抗医嘱"}
+    ],
+    "quality_tags": [
+      {"tag": "二级预防待完善", "source": "质控规则", "trigger": "出院前检查"},
+      {"tag": "随访未生成", "source": "质控规则", "trigger": "出院后检查"}
+    ]
+  },
+
+  "quality_indicators": {
+    "ecg_within_10min": {
+      "name": "首份心电图完成时间≤10min",
+      "type": "time",
+      "target": 10,
+      "unit": "分钟",
+      "data_source": "心电图报告时间-接诊时间"
+    },
+    "troponin_first_result": {
+      "name": "首份肌钙蛋白结果获取",
+      "type": "completeness",
+      "data_source": "检验报告回传"
+    },
+    "door_to_balloon": {
+      "name": "D2B时间(门-球时间)≤90min",
+      "type": "time",
+      "target": 90,
+      "unit": "分钟",
+      "data_source": "PCI开始时间-到达医院时间",
+      "applicable": "STEMI行PCI患者"
+    },
+    "dapt_prescribed": {
+      "name": "双联抗血小板处方",
+      "type": "order_check",
+      "data_source": "医嘱系统",
+      "check_items": ["阿司匹林", "P2Y12抑制剂"]
+    },
+    "statin_prescribed": {
+      "name": "他汀处方",
+      "type": "order_check",
+      "data_source": "医嘱系统"
+    },
+    "beta_blocker_prescribed": {
+      "name": "β受体阻滞剂处方(无禁忌时)",
+      "type": "order_check",
+      "data_source": "医嘱系统",
+      "exceptions": ["心动过缓", "低血压", "严重心衰急性期"]
+    },
+    "acei_arb_prescribed": {
+      "name": "ACEI/ARB处方(适应证时)",
+      "type": "order_check",
+      "data_source": "医嘱系统",
+      "applicable": "前壁梗死/心衰/EF≤40%/糖尿病"
+    },
+    "discharge_secondary_prevention": {
+      "name": "出院二级预防计划完整性",
+      "type": "completeness",
+      "check_items": ["DAPT", "他汀", "β受体阻滞剂", "生活方式指导", "随访计划"]
+    },
+    "followup_30d_plan": {
+      "name": "30天随访计划",
+      "type": "completeness",
+      "data_source": "出院小结/随访系统"
+    }
+  },
+
+  "event_rules": [
+    {
+      "id": "RULE_AMI_SCREEN_001",
+      "name": "急诊胸痛疑似ACS筛查",
+      "event": "EVT_EMR_SAVE",
+      "scene": "急诊",
+      "conditions": {
+        "symptoms": ["胸痛", "胸闷", "压榨感", "大汗", "濒死感", "放射痛"],
+        "logic": "ANY"
+      },
+      "output": {
+        "action": "disease_recommendation",
+        "content": "疑似急性冠脉综合征(ACS)",
+        "level": "提醒",
+        "recommended_exams": ["心电图", "肌钙蛋白I/T", "CK-MB"]
+      },
+      "knowledge_basis": "ESC NSTE-ACS Guidelines 2020 §3.1"
+    },
+    {
+      "id": "RULE_AMI_STEMI_001",
+      "name": "STEMI确诊规则",
+      "event": "EVT_REPORT_BACK",
+      "scene": "急诊/住院",
+      "conditions": {
+        "ecg": "ST段抬高≥0.1mV(相邻2导联)或新发LBBB",
+        "biomarker": "cTn升高",
+        "logic": "AND"
+      },
+      "output": {
+        "action": "subtype_recommendation",
+        "content": "STEMI",
+        "level": "紧急",
+        "recommended_actions": ["立即启动再灌注流程", "评估PCI/溶栓适应证"]
+      },
+      "knowledge_basis": "ESC STEMI Guidelines 2017 §4.2"
+    },
+    {
+      "id": "RULE_AMI_NSTEMI_001",
+      "name": "NSTEMI确诊规则",
+      "event": "EVT_REPORT_BACK",
+      "scene": "急诊/住院",
+      "conditions": {
+        "ecg": "无ST段抬高",
+        "biomarker": "cTn动态升高和/或降低",
+        "symptoms": "缺血性症状",
+        "logic": "AND"
+      },
+      "output": {
+        "action": "subtype_recommendation",
+        "content": "NSTEMI",
+        "level": "紧急",
+        "recommended_actions": ["GRACE评分", "决定介入时机"]
+      },
+      "knowledge_basis": "ESC NSTE-ACS Guidelines 2020 §4.3"
+    },
+    {
+      "id": "RULE_AMI_DIFF_001",
+      "name": "鉴别诊断提示",
+      "event": "EVT_DIAGNOSIS_SAVE",
+      "scene": "急诊/住院",
+      "conditions": {
+        "diagnosis": "疑似AMI",
+        "evidence_insufficient": true
+      },
+      "output": {
+        "action": "differential_recommendation",
+        "content": "需鉴别：主动脉夹层、肺栓塞、心包炎",
+        "recommended_exams": ["D-二聚体", "CTA/CTPA", "心超"]
+      },
+      "knowledge_basis": "ESC NSTE-ACS Guidelines 2020 §3.2"
+    },
+    {
+      "id": "RULE_PCI_CHECK_001",
+      "name": "PCI术前禁忌证校验",
+      "event": "EVT_ORDER_SAVE_PRE",
+      "scene": "住院",
+      "conditions": {
+        "order_contains": "PCI",
+        "check_contraindications": true
+      },
+      "contraindications": ["活动性出血", "严重凝血障碍", "主动脉夹层", "严重未控制高血压"],
+      "output": {
+        "action": "order_validation",
+        "content": "PCI禁忌证校验",
+        "level": "拦截/提醒"
+      },
+      "knowledge_basis": "ACC/AHA STEMI Guidelines 2013 §5"
+    }
+  ]
+}

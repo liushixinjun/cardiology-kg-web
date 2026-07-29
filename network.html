@@ -503,7 +503,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 <div class="nw-datasource" id="nw-datasource"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
 /* ================================================================
    网络探索 - 知识图谱交互分析
@@ -546,68 +546,63 @@ function buildDefaultDiseases(diseases) {
   scored.sort(function(a, b) { return b.dimCount - a.dimCount; });
   DEFAULT_DISEASE_NAMES = scored.slice(0, 5).map(function(s) { return s.name; });
 }
-var DEFAULT_VISIBLE_DIMS = ['Symptom', 'Exam', 'LabTest', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan'];
+var DEFAULT_VISIBLE_DIMS = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan', 'StandardDiagnosis'];
 var MAX_OTHER_DISEASES = 24;
 
 /* ---------- Init ---------- */
+var DISEASE_TREE = [];
 loadData(function(d) {
   renderNav('network');
-  populateDiseaseSelect(d);
   initDimFilters();
   bindLevelRadio();
-  var defaultCode = chooseDefaultDisease(d);
-  if (defaultCode) {
-    document.getElementById('nw-disease-select').value = defaultCode;
-    loadDiseaseData(defaultCode, function(dd) {
-      if (dd) onDiseaseSelect();
-    });
-  }
   renderDataSourceBar(d);
+  // V2.0：从统一疾病树构建下拉
+  fetch('/api/kg/disease-tree?v='+Date.now()).then(function(r){return r.json()}).then(function(tree){
+    DISEASE_TREE = tree;
+    populateDiseaseSelect(tree);
+    var defaultCode = getDefaultDiseaseCode() || chooseDefaultDisease(tree);
+    if (defaultCode) {
+      document.getElementById('nw-disease-select').value = defaultCode;
+      loadDiseaseData(defaultCode, function(dd) {
+        if (dd) onDiseaseSelect();
+      });
+    }
+  }).catch(function(e){console.error('load disease tree failed',e)});
 });
 
 /* ================================================================
    Disease Select
    ================================================================ */
-function chooseDefaultDisease(d) {
-  buildDefaultDiseases(d.diseases);
+function chooseDefaultDisease(tree) {
+  var allDiseases = [];
+  function walk(nodes){
+    nodes.forEach(function(n){
+      if(n.type==='Disease') allDiseases.push(n);
+      if(n.children) walk(n.children);
+    });
+  }
+  walk(tree);
   for (var i = 0; i < DEFAULT_DISEASE_NAMES.length; i++) {
     var target = DEFAULT_DISEASE_NAMES[i];
     var found = null;
-    Object.keys(d.diseases).forEach(function(code) {
-      if (!found && d.diseases[code].info.name === target) found = code;
-    });
+    allDiseases.forEach(function(n){ if(!found && n.name===target) found=n.code; });
     if (found) return found;
   }
-
-  var bestCode = null;
-  var bestScore = -1;
-  Object.keys(d.diseases).forEach(function(code) {
-    var item = d.diseases[code];
-    var score = 0;
-    DIM_KEYS.forEach(function(k) { score += (item.dimensions[k] || []).length; });
-    if (score > bestScore) {
-      bestScore = score;
-      bestCode = code;
-    }
-  });
-  return bestCode;
+  // 默认选第一个覆盖率最高的疾病
+  allDiseases.sort(function(a,b){return getCoverage(b.code)-getCoverage(a.code)});
+  return allDiseases.length ? allDiseases[0].code : null;
 }
 
-function populateDiseaseSelect(d) {
+function populateDiseaseSelect(tree) {
   var sel = document.getElementById('nw-disease-select');
-  var groups = {};
-  Object.keys(d.diseases).forEach(function(code) {
-    var info = d.diseases[code].info;
-    var g = parseParentCode(info.parent).group;
-    if (!groups[g]) groups[g] = [];
-    groups[g].push({ code: code, name: info.name });
-  });
   var html = '<option value="">请选择疾病</option>';
-  Object.keys(groups).sort().forEach(function(g) {
-    html += '<optgroup label="' + g + '">';
-    groups[g].sort(function(a, b) { return a.name.localeCompare(b.name); });
-    groups[g].forEach(function(d) {
-      html += '<option value="' + d.code + '">' + d.name + '</option>';
+  tree.forEach(function(cat){
+    html += '<optgroup label="' + cat.name + '">';
+    (cat.children||[]).forEach(function(dis){
+      html += '<option value="' + dis.code + '">' + dis.name + '</option>';
+      (dis.children||[]).forEach(function(sub){
+        html += '<option value="' + sub.code + '">　' + sub.name + '</option>';
+      });
     });
     html += '</optgroup>';
   });
@@ -768,8 +763,9 @@ function buildGraphData() {
     var items = disease.dimensions[k] || [];
     var color = DIM_COLORS[k] || '#888';
     items.forEach(function(e) {
+      var eName = cleanName(e);
       var n = {
-        name: e.name,
+        name: eName,
         code: e.code || '',
         nodeType: 'entity',
         type: k,
@@ -783,36 +779,70 @@ function buildGraphData() {
       pushUniqueNode(nodes, n);
       pushUniqueLink(links, {
         source: disease.info.name,
-        target: e.name,
+        target: eName,
         value: k,
         lineStyle: { color: color, width: 2, type: 'dashed', opacity: 0.6 }
       });
 
-      /* 1.5-hop: TreatmentPlan → sub_medication / sub_procedure */
-      if (k === 'TreatmentPlan' && (e.sub_medication || e.sub_procedure)) {
+      /* 1.5-hop: TreatmentPlan → sub_medication / sub_procedure / sub_evidence */
+      if (k === 'TreatmentPlan' && (e.sub_medication || e.sub_procedure || e.sub_evidence)) {
         var subColor = '#ff922b';
         (e.sub_medication || []).forEach(function(sm) {
+          var smName = cleanName(sm);
           pushUniqueNode(nodes, {
-            name: sm.name, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
+            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
             category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
             symbolSize: 26, itemStyle: { color: subColor },
             label: { show: true, fontSize: 9, color: '#e8eaf0' }
           });
           pushUniqueLink(links, {
-            source: e.name, target: sm.name, value: 'includes_medication',
+            source: eName, target: smName, value: 'includes_medication',
             lineStyle: { color: subColor, width: 1.5, type: 'dotted', opacity: 0.7 }
           });
         });
         (e.sub_procedure || []).forEach(function(sp) {
+          var spName = cleanName(sp);
           pushUniqueNode(nodes, {
-            name: sp.name, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
+            name: spName, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
             category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 1.5,
             symbolSize: 26, itemStyle: { color: '#f06595' },
             label: { show: true, fontSize: 9, color: '#e8eaf0' }
           });
           pushUniqueLink(links, {
-            source: e.name, target: sp.name, value: 'includes_procedure',
+            source: eName, target: spName, value: 'includes_procedure',
             lineStyle: { color: '#f06595', width: 1.5, type: 'dotted', opacity: 0.7 }
+          });
+          /* 2-hop: Procedure → StandardProcedure */
+          (sp.std_procedures || []).forEach(function(spd) {
+            var spdName = cleanName(spd);
+            pushUniqueNode(nodes, {
+              name: spdName, code: spd.code || '', nodeType: 'entity-sub', type: 'StandardProcedure',
+              category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'StandardProcedure', level: 2,
+              symbolSize: 20, itemStyle: { color: '#cc5de8', opacity: 0.75 },
+              label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            });
+            pushUniqueLink(links, {
+              source: spName, target: spdName, value: 'has_standard_procedure',
+              lineStyle: { color: '#cc5de8', width: 1, type: 'dotted', opacity: 0.5 }
+            });
+          });
+        });
+        (e.sub_evidence || []).forEach(function(se) {
+          var seName = cleanName(se);
+          /* 截断过长的证据名称 */
+          if (seName.length > 30) {
+            seName = seName.substring(0, 28) + '…';
+          }
+          var evColor = DIM_COLORS['Evidence'] || '#40c057';
+          pushUniqueNode(nodes, {
+            name: seName, code: se.code || '', nodeType: 'entity-sub', type: 'Evidence',
+            category: DIM_KEYS.indexOf('Evidence') + 1, dimKey: 'Evidence', level: 1.5,
+            symbolSize: 22, itemStyle: { color: evColor, opacity: 0.8 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: seName, value: 'supported_by_evidence',
+            lineStyle: { color: evColor, width: 1.5, type: 'dotted', opacity: 0.6 }
           });
         });
       }
@@ -821,20 +851,135 @@ function buildGraphData() {
       if (k === 'Medication' && e.sub_medication) {
         var medSubColor = '#ff922b';
         (e.sub_medication || []).forEach(function(sm) {
+          var smName = cleanName(sm);
           pushUniqueNode(nodes, {
-            name: sm.name, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
+            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
             category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
             symbolSize: 22, itemStyle: { color: medSubColor, opacity: 0.75 },
             label: { show: true, fontSize: 8, color: '#b0b8c8' }
           });
           pushUniqueLink(links, {
-            source: e.name, target: sm.name, value: 'has_specific_medication',
+            source: eName, target: smName, value: 'has_specific_medication',
             lineStyle: { color: medSubColor, width: 1, type: 'dotted', opacity: 0.5 }
+          });
+        });
+      }
+
+      /* 1.5-hop: Procedure → std_procedures (标准手术编码) */
+      if (k === 'Procedure' && e.std_procedures && e.std_procedures.length) {
+        var spSubColor = '#cc5de8';
+        e.std_procedures.forEach(function(sp) {
+          var spName = cleanName(sp);
+          pushUniqueNode(nodes, {
+            name: spName, code: sp.code || '', nodeType: 'entity-sub', type: 'StandardProcedure',
+            category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'StandardProcedure', level: 1.5,
+            symbolSize: 22, itemStyle: { color: spSubColor, opacity: 0.75 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: spName, value: 'has_standard_procedure',
+            lineStyle: { color: spSubColor, width: 1, type: 'dotted', opacity: 0.5 }
+          });
+        });
+      }
+
+      /* 1.5-hop: DiagnosisCriteria → sub_component (诊断明细组件) */
+      if (k === 'DiagnosisCriteria' && (e.sub_component && e.sub_component.length || e.sub_evidence)) {
+        var dcSubColor = '#ffd43b';
+        (e.sub_component || []).forEach(function(sc) {
+          var scName = cleanName(sc);
+          pushUniqueNode(nodes, {
+            name: scName, code: sc.code || '', nodeType: 'entity-sub', type: 'DiagnosisCriteria',
+            category: DIM_KEYS.indexOf('DiagnosisCriteria') + 1, dimKey: 'DiagnosisCriteria', level: 1.5,
+            symbolSize: 22, itemStyle: { color: dcSubColor, opacity: 0.75 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: scName, value: 'has_diagnostic_component',
+            lineStyle: { color: dcSubColor, width: 1, type: 'dotted', opacity: 0.5 }
+          });
+        });
+        /* DiagnosisCriteria → Evidence */
+        (e.sub_evidence || []).forEach(function(se) {
+          var seName = cleanName(se);
+          if (seName.length > 30) seName = seName.substring(0, 28) + '…';
+          var evColor = DIM_COLORS['Evidence'] || '#40c057';
+          pushUniqueNode(nodes, {
+            name: seName, code: se.code || '', nodeType: 'entity-sub', type: 'Evidence',
+            category: DIM_KEYS.indexOf('Evidence') + 1, dimKey: 'Evidence', level: 1.5,
+            symbolSize: 22, itemStyle: { color: evColor, opacity: 0.8 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: seName, value: 'supported_by_evidence',
+            lineStyle: { color: evColor, width: 1.5, type: 'dotted', opacity: 0.6 }
+          });
+        });
+      }
+
+      /* 1.5-hop: DifferentialDiagnosis → differential_points / exclusion_exams */
+      if (k === 'DifferentialDiagnosis') {
+        var ddxColor = '#ffd43b';
+        (e.differential_points || []).forEach(function(dp) {
+          var dpName = cleanName(dp);
+          pushUniqueNode(nodes, {
+            name: dpName, code: dp.code || '', nodeType: 'entity-sub', type: 'DifferentialDiagnosis',
+            category: DIM_KEYS.indexOf('DifferentialDiagnosis') + 1, dimKey: 'DifferentialDiagnosis', level: 1.5,
+            symbolSize: 18, itemStyle: { color: ddxColor, opacity: 0.6 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: dpName, value: 'has_differential_point',
+            lineStyle: { color: ddxColor, width: 1, type: 'dotted', opacity: 0.4 }
+          });
+        });
+        (e.exclusion_exams || []).forEach(function(ex) {
+          var exName = cleanName(ex);
+          pushUniqueNode(nodes, {
+            name: exName, code: ex.code || '', nodeType: 'entity-sub', type: 'ExamItem',
+            category: DIM_KEYS.indexOf('ExamItem') + 1, dimKey: 'ExamItem', level: 1.5,
+            symbolSize: 18, itemStyle: { color: '#22b8cf', opacity: 0.6 },
+            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+          });
+          pushUniqueLink(links, {
+            source: eName, target: exName, value: 'requires_exclusion_exam',
+            lineStyle: { color: '#22b8cf', width: 1, type: 'dotted', opacity: 0.4 }
           });
         });
       }
     });
   });
+
+  /* ClinicalPathway → PathwayStage */
+  if (disease.pathways && disease.pathways.length) {
+    var pwColor = '#339af0';
+    disease.pathways.forEach(function(pw) {
+      var pwName = cleanName(pw) || '临床路径';
+      pushUniqueNode(nodes, {
+        name: pwName, code: pw.code || '', nodeType: 'entity', type: 'ClinicalPathway',
+        category: 0, level: 1,
+        symbolSize: 40, itemStyle: { color: pwColor },
+        label: { show: true, fontSize: 11, fontWeight: 'bold', color: '#fff' }
+      });
+      pushUniqueLink(links, {
+        source: disease.info.name, target: pwName, value: 'has_clinical_pathway',
+        lineStyle: { color: pwColor, width: 2, opacity: 0.6 }
+      });
+      (pw.stages || []).forEach(function(stg) {
+        var stgName = cleanName(stg) || '阶段';
+        pushUniqueNode(nodes, {
+          name: stgName, code: stg.code || '', nodeType: 'entity-sub', type: 'PathwayStage',
+          category: 0, level: 1.5,
+          symbolSize: 24, itemStyle: { color: pwColor, opacity: 0.7 },
+          label: { show: true, fontSize: 9, color: '#e8eaf0' }
+        });
+        pushUniqueLink(links, {
+          source: pwName, target: stgName, value: 'has_pathway_stage',
+          lineStyle: { color: pwColor, width: 1.5, type: 'dotted', opacity: 0.5 }
+        });
+      });
+    });
+  }
 
   /* Level 2+: Entity-associated other diseases via shared entities */
   if (MAX_LEVEL >= 2) {
@@ -846,11 +991,12 @@ function buildGraphData() {
       DIM_KEYS.forEach(function(k) {
         if (!DIM_FILTERS[k]) return;
         (dd.dimensions[k] || []).forEach(function(e) {
-          if (ALL_GRAPH_NODES[e.name]) {
+          var eName = cleanName(e);
+          if (ALL_GRAPH_NODES[eName]) {
             if (!sharedDiseaseScore[dc]) sharedDiseaseScore[dc] = 0;
             if (!sharedDiseaseLinks[dc]) sharedDiseaseLinks[dc] = [];
             sharedDiseaseScore[dc]++;
-            sharedDiseaseLinks[dc].push({ entity: e.name, dim: k });
+            sharedDiseaseLinks[dc].push({ entity: eName, dim: k });
           }
         });
       });
@@ -899,9 +1045,10 @@ function buildGraphData() {
       DIM_KEYS.forEach(function(k) {
         if (!DIM_FILTERS[k]) return;
         (dd.dimensions[k] || []).slice(0, 6).forEach(function(e) {
-          if (!ALL_GRAPH_NODES[e.name]) {
+          var eName = cleanName(e);
+          if (!ALL_GRAPH_NODES[eName]) {
             var n = {
-              name: e.name,
+              name: eName,
               code: e.code || '',
               nodeType: 'entity-l3',
               type: k,
@@ -915,7 +1062,7 @@ function buildGraphData() {
             pushUniqueNode(nodes, n);
             pushUniqueLink(links, {
               source: dName,
-              target: e.name,
+              target: eName,
               value: k,
               lineStyle: { color: DIM_COLORS[k] || '#888', width: 0.8, opacity: 0.25 }
             });
@@ -1154,7 +1301,7 @@ function overviewCard(num, label) {
 }
 
 function getStarterEntities(d, limit) {
-  var preferredDims = ['Symptom', 'Exam', 'LabTest', 'Medication', 'Procedure', 'RiskFactor', 'Complication'];
+  var preferredDims = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'StandardDiagnosis'];
   var result = [];
   preferredDims.forEach(function(k) {
     if (result.length >= limit) return;
@@ -1293,7 +1440,7 @@ function showDiseaseDetail(name, nd) {
   h += '<span class="nw-dim-tag" style="background:' + DISEASE_COLOR + '">疾病</span>';
   h += '<div class="nw-detail-rows">';
   h += detailRow('关联疾病', (d.relations_summary ? d.relations_summary.length : 0) + ' 条');
-  h += detailRow('完整率', Math.round(cov) + '%');
+  h += detailRow('覆盖率', Math.round(cov) + '%');
   h += detailRow('证据数', (d.evidence_count || 0) + ' 条');
   h += '</div>';
 

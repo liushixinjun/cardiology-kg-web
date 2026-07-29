@@ -1,0 +1,4 @@
+{"timestamp": "2026-07-11T10:35:48.718573", "action": "update", "entity_code": "DIS-CARD-AORTA-AD", "operator": "test", "old": {"icd_code": null}, "new": {"icd_code": "I71.0"}}
+{"timestamp": "2026-07-11T10:36:41.446176", "action": "unlink", "entity_code": "DIS-CARD-AORTA-AD", "operator": "test", "old": {"to": "SYM-CARD-B479F36AE54A", "rel_type": "has_symptom"}, "new": null}
+{"timestamp": "2026-07-11T10:37:30.794048", "action": "link", "entity_code": "DIS-CARD-AORTA-AD", "operator": "restore", "old": null, "new": {"to": "SYM-CARD-B479F36AE54A", "rel_type": "has_symptom"}}
+{"timestamp": "2026-07-11T10:37:32.924488", "action": "update", "entity_code": "DIS-CARD-AORTA-AD", "operator": "restore", "old": {"icd_code": "I71.0"}, "new": {"icd_code": null}}

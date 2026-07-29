@@ -12,21 +12,52 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-left{background:var(--bg2);border-right:1px solid var(--rule);display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .ex-main{overflow-y:auto;overflow-x:hidden;padding:22px;background:var(--bg)}
 .ex-right{background:var(--bg2);border-left:1px solid var(--rule);overflow-y:auto;overflow-x:hidden;padding:18px}
+.ex-view-mode{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule)}
+.ex-view-mode label{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:6px;background:var(--bg3);flex:1;transition:all .15s}
+.ex-view-mode label:hover{color:var(--ink)}
+.ex-view-mode input[type=radio]{display:none}
+.ex-view-mode label.active{color:var(--accent);background:rgba(79,140,255,.15);font-weight:600}
 .ex-search{padding:12px;border-bottom:1px solid var(--rule)}
 .ex-search input{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}
 .ex-search input:focus{border-color:var(--accent)}
 .ex-tree{flex:1;overflow:auto;padding:4px 0}.ex-tree::-webkit-scrollbar,.ex-main::-webkit-scrollbar,.ex-right::-webkit-scrollbar{width:5px}.ex-tree::-webkit-scrollbar-thumb,.ex-main::-webkit-scrollbar-thumb,.ex-right::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
 .ex-group{margin-bottom:1px}.ex-group-head{display:flex;align-items:center;gap:7px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:11px;font-weight:700}.ex-group-head:hover{background:var(--bg3);color:var(--ink)}.ex-group-head .arr{font-size:8px;transition:transform .2s}.ex-group.open .arr{transform:rotate(90deg)}.ex-group-head .count{margin-left:auto;background:var(--bg3);border-radius:999px;padding:1px 7px;font-size:9px;color:var(--muted)}.ex-group-items{display:none}.ex-group.open .ex-group-items{display:block}
-.ex-disease{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 32px;border-left:3px solid transparent;cursor:pointer;font-size:12px}.ex-disease:hover{background:rgba(79,140,255,.06)}.ex-disease.active{background:rgba(79,140,255,.1);border-left-color:var(--accent);color:var(--accent)}.ex-disease .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ex-disease .cov{font-size:9px;border-radius:999px;padding:2px 6px;font-weight:700;line-height:1}
+.ex-disease{display:flex;align-items:flex-start;gap:8px;padding:8px 14px 8px 32px;border-left:3px solid transparent;cursor:pointer;font-size:12px;line-height:1.4}.ex-disease:hover{background:rgba(79,140,255,.06)}.ex-disease.active{background:rgba(79,140,255,.1);border-left-color:var(--accent);color:var(--accent)}.ex-disease .name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ex-disease .name-row{display:flex;align-items:center;gap:6px}.ex-disease .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.ex-disease .meta{font-size:10px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}.ex-disease .cov{font-size:9px;border-radius:999px;padding:2px 6px;font-weight:700;line-height:1;flex-shrink:0;margin-top:1px}.ex-disease.has-children{padding-right:6px}.ex-disease .ex-child-toggle{font-size:9px;color:var(--muted);cursor:pointer;padding:2px 4px;margin-left:auto;transition:color .15s;flex-shrink:0}.ex-disease .ex-child-toggle:hover{color:var(--accent)}.dx-role-badge{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;white-space:nowrap;flex-shrink:0}.dx-role-badge.broad{background:rgba(255,193,7,.15);color:#ffc107}.dx-role-badge.subtype{background:rgba(81,207,102,.15);color:#51cf66}.dx-role-badge.independent{background:rgba(34,184,207,.12);color:#22b8cf}.icd-code{font-size:9px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);background:var(--bg3);padding:1px 4px;border-radius:3px}.subtype-count{font-size:9px;color:var(--accent);background:rgba(79,140,255,.1);padding:1px 5px;border-radius:4px}.ex-children{display:none;border-left:2px solid var(--rule);margin-left:14px;background:rgba(255,255,255,.02)}.ex-children.open{display:block}.ex-children .ex-disease.level-2{padding-left:14px}.ex-children .ex-disease.level-3{padding-left:28px}
+/* 层级树 */
+.ex-tree .ex-group-head{padding-left:14px}
+.ex-tree .level-1 > .ex-group-head{padding-left:14px}
+.ex-tree .level-2 > .ex-group-head{padding-left:28px}
+.ex-tree .ex-disease.level-1{padding-left:28px}
+.ex-tree .ex-disease.level-2{padding-left:42px}
+.ex-tree .ex-disease.ex-class{padding-left:56px;font-size:11px;color:var(--muted)}
+.ex-tree .ex-disease.ex-class:hover{background:rgba(79,140,255,.04);color:var(--ink)}
+.ex-tree .ex-disease.ex-class .maps-icon{color:var(--accent);font-size:10px}
+.ex-tree .ex-disease.ex-class .cov{display:none}
+.tree-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0}
+.cat-dot{background:var(--accent)}
+.sub-dot{background:var(--accent2);opacity:.7}
+.tree-leaf{color:var(--muted);font-size:10px;margin-right:4px;flex-shrink:0}
+.ex-disease.has-cls{flex-wrap:wrap;padding-bottom:4px}
+.ex-cls-bar{width:100%;padding-left:14px;margin-top:2px}
+.ex-cls-toggle{font-size:10px;color:var(--muted);background:var(--bg3);padding:2px 8px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.ex-cls-toggle:hover{color:var(--accent);background:rgba(79,140,255,.1)}
+.ex-cls-chips{width:100%;padding-left:14px;margin-top:4px;display:none;gap:6px;flex-wrap:wrap}
+.ex-cls-chips.open{display:flex}
+.ex-cls-chip{font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--rule);padding:2px 6px;border-radius:4px;cursor:pointer}
+.ex-cls-chip:hover{color:var(--accent);background:rgba(79,140,255,.1);border-color:var(--accent)}
 .ex-tabs{display:flex;background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-bottom:18px}.ex-tab{flex:1;padding:12px 14px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;border-bottom:2px solid transparent}.ex-tab:hover{background:var(--bg3);color:var(--ink)}.ex-tab.active{color:var(--accent);background:var(--bg3);border-bottom-color:var(--accent)}
 .ex-head{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:18px;margin-bottom:16px}.ex-head h1{font-size:24px;font-weight:800;margin-bottom:6px}.ex-meta{font-size:12px;color:var(--muted);line-height:1.7}.ex-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent)}
 .ex-panel{display:none}.ex-panel.active{display:block}.ex-dim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
-.ex-card{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px}
-.ex-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.ex-card{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px;display:flex;flex-direction:column;max-height:320px}
+.ex-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;flex-shrink:0}
 .ex-card-title{font-size:12px;font-weight:800;color:var(--muted)}
 .ex-card-count{font-size:11px;border-radius:999px;padding:2px 8px;font-weight:700}
 .ex-card-count.ok{background:rgba(81,207,102,.15);color:#51cf66}
 .ex-card-count.zz{background:rgba(255,255,255,.05);color:var(--muted)}
+.ex-card-body{flex:1;overflow-y:auto;min-height:0}
+.ex-card-body::-webkit-scrollbar{width:4px}
+.ex-card-body::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+.ex-card-body::-webkit-scrollbar-track{background:transparent}
 .ex-tags{display:flex;flex-wrap:wrap;gap:6px}
 .ex-tag{font-size:11px;padding:4px 9px;border-radius:6px;background:var(--bg3);border:1px solid var(--rule);color:var(--ink);cursor:pointer;transition:all .15s}
 .ex-tag:hover{border-color:var(--accent);background:rgba(79,140,255,.08);transform:translateY(-1px)}
@@ -39,19 +70,175 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-entity-tools{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:14px}.ex-entity-tools input,.ex-entity-tools select{padding:10px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}.ex-entity-tools input:focus,.ex-entity-tools select:focus{border-color:var(--accent)}
 .ex-table-wrap{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:auto;max-height:640px}.ex-table{width:100%;border-collapse:collapse;font-size:12px}.ex-table th{position:sticky;top:0;background:var(--bg3);padding:10px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.ex-table td{padding:9px 12px;border-top:1px solid var(--rule);vertical-align:top}.ex-table tr{cursor:pointer}.ex-table tr:hover td{background:rgba(79,140,255,.06)}.ex-ename{font-weight:700;color:var(--ink)}.ex-ecode{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px}.ex-dim-badge{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.1);color:var(--accent);white-space:nowrap}
 .ex-side-empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}.ex-side-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:5px}.ex-side-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px;margin-bottom:14px}.ex-side-section{border-top:1px solid var(--rule);padding-top:12px;margin-top:12px}.ex-side-section h4{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px}.ex-row{display:grid;grid-template-columns:88px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule)}.ex-row:last-child{border-bottom:none}.ex-row-label{font-size:10px;font-weight:800;color:var(--muted)}.ex-row-value{font-size:12px;color:var(--ink);line-height:1.5;word-break:break-all}.ex-small-item{font-size:12px;color:var(--ink);padding:5px 0;border-bottom:1px solid var(--rule)}.ex-small-item:last-child{border-bottom:none}.ex-empty{display:flex;align-items:center;justify-content:center;height:420px;color:var(--muted);font-size:14px;text-align:center;background:var(--bg2);border:1px solid var(--rule);border-radius:12px}
+/* 子组件/鉴别诊断下钻样式 */
+.ex-drill-list{margin:2px 0 6px 0}
+.ex-drill-item{margin-bottom:6px;padding-bottom:4px;border-bottom:1px dashed var(--rule)}
+.ex-drill-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.ex-sub-toggle{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--accent);cursor:pointer;padding:2px 0 2px 4px;user-select:none;opacity:.85;transition:opacity .15s}
+.ex-sub-toggle:hover{opacity:1;text-decoration:underline}
+.ex-sub-list{display:none;margin:3px 0 4px 14px;padding:0;animation:fadeIn .2s}
+.ex-sub-list.open{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ex-sub-item{font-size:12px;color:var(--muted);padding:3px 8px;cursor:default;border-radius:4px;line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-sub-item:hover{background:rgba(79,140,255,.06);color:var(--ink)}
+.ex-diff-label{font-size:10px;font-weight:700;color:var(--accent);margin-right:4px;white-space:nowrap}
+/* 路径阶段样式 */
+.ex-pathway-stage{font-size:12px;color:var(--muted);padding:4px 10px;margin:3px 0 3px 8px;border-left:2px solid var(--accent);background:var(--bg3);border-radius:0 6px 6px 0;line-height:1.6}
+.ex-pathway-stage .stage-order{font-size:10px;font-weight:700;color:var(--accent);margin-right:4px}
+.ex-pathway-stage .stage-goal{font-size:10px;color:var(--muted);margin-left:4px;font-style:italic}
+/* 详情面板子组件样式 */
+.ex-sub-detail{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:12px;margin:8px 0}
+.ex-sub-detail-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ex-sub-detail-title .idx{font-size:10px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.12);border-radius:999px;padding:1px 6px}
+.ex-sub-detail-row{font-size:11px;color:var(--muted);padding:3px 0 3px 8px;line-height:1.6}
+.ex-sub-detail-row b{color:var(--ink);font-weight:700}
+.ex-evidence-item{font-size:11px;color:var(--muted);padding:2px 0 2px 16px;line-height:1.5}
+.ex-evidence-item .src{color:var(--accent);font-size:10px}
+.ex-api-loading{font-size:11px;color:var(--muted);padding:4px 0}
+
+/* === 推荐卡片 === */
+.ex-rec-section{margin:16px 0}
+.ex-rec-section h3{font-size:14px;font-weight:700;color:var(--ink);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.ex-rec-section h3 .badge{background:var(--accent);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.ex-rec-grid{display:grid;gap:10px}
+.ex-rec-card{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s}
+.ex-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(79,140,255,.12)}
+.ex-rec-card-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ex-rec-card-title{font-size:13px;font-weight:600;color:var(--ink);flex:1;line-height:1.3}
+.ex-rec-card-type{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
+.ex-rec-card-type.recommend{background:#d3f9d8;color:#2b8a3e}
+.ex-rec-card-type.block{background:#ffe3e3;color:#c92a2a}
+.ex-rec-card-meta{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;gap:12px;flex-wrap:wrap}
+.ex-rec-card-meta span{display:inline-flex;align-items:center;gap:3px}
+.ex-rec-card-action{font-size:12px;color:var(--accent);font-weight:600;margin:4px 0}
+.ex-rec-card-ev{font-size:10px;color:var(--muted);border-top:1px solid var(--rule);padding-top:6px;margin-top:6px}
+.ex-rec-card-ev .ev-guide{color:var(--accent);font-weight:500}
+.ex-rec-card-stmt{font-size:11px;color:var(--ink);margin-top:4px;padding:6px 8px;background:var(--bg2);border-radius:4px;line-height:1.4}
+
 @media(max-width:1100px){.ex-layout{grid-template-columns:260px 1fr}.ex-right{display:none}}@media(max-width:760px){.ex-layout{grid-template-columns:1fr;height:auto}.ex-left{height:320px}.ex-main{padding:14px}.ex-entity-tools{grid-template-columns:1fr}}
+
+/* CDSS流程视角 */
+.cdss-pathway { padding: 16px; }
+.cdss-pathway-head {
+  background: linear-gradient(135deg, var(--accent), #748ffc);
+  border-radius: 12px; padding: 20px; margin-bottom: 20px;
+  color: #fff;
+}
+.cdss-pathway-head h2 { margin: 0 0 8px; font-size: 20px; }
+.cdss-pathway-head .cdss-meta { font-size: 12px; opacity: .85; display: flex; gap: 12px; flex-wrap: wrap; }
+.cdss-pathway-head .cdss-meta span { background: rgba(255,255,255,.15); padding: 2px 10px; border-radius: 12px; }
+
+.cdss-stage {
+  background: var(--bg2); border: 1px solid var(--rule);
+  border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+}
+.cdss-stage-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; background: var(--bg3);
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer; user-select: none;
+}
+.cdss-stage-head:hover { background: rgba(79,140,255,.08); }
+.cdss-stage-icon { font-size: 20px; }
+.cdss-stage-title { font-size: 15px; font-weight: 700; color: var(--ink); flex: 1; }
+.cdss-stage-count { font-size: 11px; color: var(--muted); background: var(--bg2); padding: 2px 8px; border-radius: 8px; }
+.cdss-stage-body { padding: 16px; }
+
+.cdss-rule {
+  background: var(--bg3); border: 1px solid var(--rule);
+  border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+}
+.cdss-rule-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; cursor: pointer;
+}
+.cdss-rule-head:hover { background: rgba(79,140,255,.05); }
+.cdss-rule-icon { font-size: 16px; }
+.cdss-rule-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
+.cdss-rule-body { padding: 0 14px 14px; }
+
+.cdss-rec {
+  background: var(--bg2); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px;
+  cursor: pointer; transition: all .15s;
+}
+.cdss-rec:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(79,140,255,.15); transform: translateY(-1px); }
+.cdss-rec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cdss-rec-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+.cdss-rec-badge.recommend { background: #d3f9d8; color: #2b8a3e; }
+.cdss-rec-badge.block { background: #ffe3e3; color: #c92a2a; }
+.cdss-rec-class { font-size: 11px; color: var(--accent); font-weight: 700; }
+.cdss-rec-ev { font-size: 11px; color: var(--muted); }
+.cdss-rec-text { font-size: 13px; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
+.cdss-rec-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.cdss-rec-action {
+  font-size: 11px; background: rgba(79,140,255,.1); color: var(--accent);
+  padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(79,140,255,.2);
+}
+.cdss-rec-blocked {
+  font-size: 11px; background: rgba(255,107,107,.1); color: var(--accent2);
+  padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,.2);
+}
+.cdss-rec-source { font-size: 11px; color: var(--muted); display: block; line-height: 1.6; margin-top: 4px; }
+.cdss-rec-source .page { font-size: 10px; color: var(--accent); background: rgba(79,140,255,.1); padding: 0 5px; border-radius: 4px; margin-left: 2px; }
+.cdss-rec-evidence { font-size: 12px; color: var(--ink); background: rgba(79,140,255,.06); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; line-height: 1.6; }
+
+.cdss-empty { text-align: center; padding: 40px; color: var(--muted); }
+.cdss-loading { text-align: center; padding: 40px; color: var(--muted); }
+
+/* 疾病树CDSS就绪率 */
+.cdss-ready-badge {
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;
+  margin-left: 4px;
+}
+.cdss-ready-badge.high { background: #d3f9d8; color: #2b8a3e; }
+.cdss-ready-badge.mid { background: #fff3bf; color: #e67700; }
+.cdss-ready-badge.low { background: #ffe3e3; color: #c92a2a; }
+
+/* 覆盖率说明弹层 */
+.cov-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(79,140,255,.12);color:var(--accent);font-size:10px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none;margin-left:4px;vertical-align:middle}
+.cov-help:hover{background:rgba(79,140,255,.25);transform:scale(1.1)}
+.cov-help.active{background:var(--accent);color:#fff}
+.cov-help-panel{position:fixed;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:14px 18px;font-size:12px;color:var(--ink);line-height:1.7;width:460px;max-width:90vw;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s}
+.cov-help-panel h4{font-size:13px;font-weight:700;color:var(--accent);margin:0 0 6px}
+.cov-help-panel .cov-help-item{display:flex;gap:8px;padding:3px 0}
+.cov-help-panel .cov-help-key{font-weight:700;min-width:110px;flex-shrink:0}
+.cov-help-panel .cov-help-key.indep{color:#22b8cf}
+.cov-help-panel .cov-help-key.broad{color:#ffc107}
+.cov-help-panel .cov-help-key.sub{color:#51cf66}
+.cov-help-panel .cov-help-val{color:var(--ink);flex:1}
+.cov-help.active .cov-help-panel{opacity:1;pointer-events:auto}
+.ex-view-mode{position:relative}
+.cov-note{font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px;padding:12px 14px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);border-radius:8px;display:none}
+.cov-note.show{display:block}
+.cov-note h4{font-size:12px;font-weight:700;color:var(--text);margin:0 0 6px 0}
+.cov-note ul{margin:0;padding-left:16px}
+.cov-note li{margin-bottom:4px}
+.cov-note .cov-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;font-weight:700;margin:0 2px}
+.cov-note .cov-tag.core{background:rgba(79,140,255,.15);color:var(--accent)}
+.cov-note .cov-tag.indep{background:rgba(81,207,102,.15);color:#51cf66}
+.cov-note .cov-tag.broad{background:rgba(255,193,7,.15);color:#ffc107}
+.cov-note .cov-tag.sub{background:rgba(255,146,43,.15);color:#ff922b}
 </style>
 </head>
 <body>
 <div class="nav"></div>
 <div class="ex-layout">
   <aside class="ex-left">
+    <div class="ex-view-mode" id="view-mode">
+      <label class="active"><input type="radio" name="view-mode" value="disease" checked> 疾病</label>
+      <label><input type="radio" name="view-mode" value="category"> 疾病大类</label>
+      <span class="cov-help" onclick="event.stopPropagation();toggleHelpPanel(this)">?<div class="cov-help-panel"><h4>诊断角色与覆盖率说明</h4><div class="cov-help-item"><span class="cov-help-key indep">独立诊断</span><span class="cov-help-val">可独立确诊的疾病，如"心脏骤停"。自身17维度独立统计覆盖率</span></div><div class="cov-help-item"><span class="cov-help-key broad">疑似诊断</span><span class="cov-help-val">宽口径/待分型疾病，如"急性心肌梗死"。覆盖率 = 自身维度 ∪ 所有分型的维度合集</span></div><div class="cov-help-item"><span class="cov-help-key sub">具体分型</span><span class="cov-help-val">疑似诊断下的子分型，如"STEMI"。覆盖率 = 自身维度 + 从父疾病继承的维度</span></div><div class="cov-help-item"><span class="cov-help-key">覆盖率计算</span><span class="cov-help-val">有数据的维度数 ÷ 17 核心临床维度 × 100%。17维度 = 症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理</span></div><div class="cov-help-item"><span class="cov-help-key">疾病视图</span><span class="cov-help-val">平铺显示所有独立/疑似诊断疾病，按覆盖率降序排列</span></div><div class="cov-help-item"><span class="cov-help-key">疾病大类视图</span><span class="cov-help-val">树形展示 学科→大类→疾病→分型 的完整层级结构</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病覆盖率；本页可查看单个疾病的维度明细和诊疗链路</span></div></div></span>
+    </div>
     <div class="ex-search"><input id="disease-search" placeholder="搜索疾病名称或编码..."></div>
     <div class="ex-tree" id="disease-tree"></div>
   </aside>
   <main class="ex-main">
     <div class="ex-tabs">
-      <div class="ex-tab active" data-view="disease" onclick="switchView('disease')">疾病视角</div>
+      <div class="ex-tab active" data-view="cdss" onclick="switchView('cdss')">诊疗流程</div>
+      <div class="ex-tab" data-view="disease" onclick="switchView('disease')">知识总览</div>
       <div class="ex-tab" data-view="graph" onclick="switchView('graph')">关系视角</div>
       <div class="ex-tab" data-view="entity" onclick="switchView('entity')">实体视角</div>
     </div>
@@ -60,48 +247,231 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
-var CURRENT_DISEASE=null,CURRENT_VIEW='disease',GRAPH=null,ALL_ENTITIES=[];
+var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
+var CURRENT_DISEASE = null;
+var CDSS_PATHWAY_DATA = null;  // CDSS路径数据缓存
+var CDSS_DISEASES_MAP = {};   // CDSS疾病就绪状态缓存
+var GRAPH=null,ALL_ENTITIES=[];
 var COLORS = DIM_COLORS_ARR;
-loadData(function(){renderNav('explore');buildDiseaseTree();renderCurrent();
+// 预加载CDSS疾病列表（用于就绪率徽章）
+fetch('/api/kg/cdss/diseases?v=' + Date.now()).then(function(r){return r.json()}).then(function(list){
+  if (Array.isArray(list)) {
+    list.forEach(function(d){ CDSS_DISEASES_MAP[d.disease_code] = d; });
+  }
+  // 数据到达后刷新疾病树的就绪率徽章
+  if (typeof KG_DATA !== 'undefined' && KG_DATA.diseases) {
+    buildDiseaseTree();
+  }
+}).catch(function(){});
+loadData(function(){renderNav('explore');initViewMode();buildDiseaseTree();renderCurrent();
   // 读取 URL code 参数，有则选中对应疾病，无则选第一个
   var urlCode = new URLSearchParams(window.location.search).get('code');
-  var targetCode = (urlCode && KG_DATA.diseases[urlCode]) ? urlCode : Object.keys(KG_DATA.diseases)[0];
+  var targetCode = (urlCode && KG_DATA.diseases[urlCode]) ? urlCode : getDefaultDiseaseCode();
   if (targetCode) selectDisease(targetCode);
   // 异步加载实体索引
   buildEntityIndexAsync();
 });
-function buildDiseaseTree(){
-  var ds=KG_DATA.diseases,groups={};
-  Object.keys(ds).forEach(function(code){var info=ds[code].info,g=parseParentCode(info.parent).group;if(!groups[g])groups[g]=[];groups[g].push({code:code,name:info.name,cov:getCoverage(code)});});
-  /* 已解析PDF的大类优先展示 */
-  var parsedFirst=['冠心病','心肌病','心力衰竭'];
-  var allGroups=Object.keys(groups);
-  var sorted=parsedFirst.filter(function(g){return groups[g]}).concat(allGroups.filter(function(g){return parsedFirst.indexOf(g)===-1}).sort());
-  var html='';
-  sorted.forEach(function(g){
-    var list=groups[g],ic=GROUP_ICONS[g]||'📁';
-    /* 每大类下疾病按百分比高到低排序 */
-    list.sort(function(a,b){return b.cov-a.cov});
-    var avgCov=list.length?Math.round(list.reduce(function(s,d){return s+d.cov},0)/list.length):0;
-    var avgCls=avgCov>=80?'cov-full':avgCov>=60?'cov-good':avgCov>=40?'cov-mid':'cov-low';
-    html+='<div class="ex-group open"><div class="ex-group-head" onclick="toggleGroup(this)"><span class="arr">▶</span><span>'+ic+'</span><span>'+g+'</span><span class="count">'+list.length+'</span><span class="cov '+avgCls+'">'+avgCov+'%</span></div><div class="ex-group-items">';
-    list.forEach(function(d){
-      html+='<div class="ex-disease" data-code="'+d.code+'" onclick="selectDisease(\''+d.code+'\')"><span class="name">'+d.name+'</span><span class="cov '+covClass(d.cov)+'">'+Math.round(d.cov)+'%</span></div>';
-    });
-    html+='</div></div>';
+document.getElementById('view-mode').addEventListener('change', function(e){
+  if(e.target.name === 'view-mode'){
+    setViewMode(e.target.value);
+  }
+});
+var CURRENT_VIEW_MODE = 'disease';
+function initViewMode(){
+  var saved = localStorage.getItem('kg_view_mode');
+  if(saved === 'disease' || saved === 'category'){
+    CURRENT_VIEW_MODE = saved;
+  }
+  document.querySelectorAll('#view-mode input[name="view-mode"]').forEach(function(input){
+    input.checked = (input.value === CURRENT_VIEW_MODE);
+    input.parentElement.classList.toggle('active', input.checked);
   });
-  document.getElementById('disease-tree').innerHTML=html;
+}
+function setViewMode(mode){
+  if(mode !== 'disease' && mode !== 'category') return;
+  CURRENT_VIEW_MODE = mode;
+  localStorage.setItem('kg_view_mode', mode);
+  document.querySelectorAll('#view-mode input[name="view-mode"]').forEach(function(input){
+    input.parentElement.classList.toggle('active', input.value === mode);
+  });
+  if(DISEASE_TREE) renderDiseaseTree(DISEASE_TREE);
+}
+function buildDiseaseTree(){
+  var treeContainer=document.getElementById('disease-tree');
+  treeContainer.innerHTML='<div class="ex-api-loading" style="padding:14px">加载疾病层级树...</div>';
+  fetch('/api/kg/disease-tree?v='+Date.now()).then(function(r){return r.json()}).then(function(tree){
+    DISEASE_TREE = tree;
+    renderDiseaseTree(tree);
+  }).catch(function(e){
+    console.error('Load disease tree failed', e);
+    treeContainer.innerHTML='<div class="ex-api-loading" style="padding:14px;color:var(--accent2)">层级树加载失败</div>';
+  });
+}
+function renderDiseaseTree(tree){
+  var treeContainer=document.getElementById('disease-tree');
+  if(CURRENT_VIEW_MODE === 'disease'){
+    // 疾病模式：平铺所有宽口径/独立疾病，按知识覆盖率排序
+    var diseases = collectTopDiseases(tree);
+    diseases.sort(function(a,b){return getCoverage(b.code) - getCoverage(a.code)});
+    treeContainer.innerHTML = renderDiseaseFlat(diseases, 1);
+  } else {
+    // 疾病大类模式：展示 DiseaseCategory -> broad/independent -> subtype
+    treeContainer.innerHTML = renderTreeNodes(tree, 1);
+    document.querySelectorAll('#disease-tree .ex-group').forEach(function(g){g.classList.add('open')});
+  }
+}
+function collectTopDiseases(nodes){
+  // 只收集诊断层级中的顶层可点击疾病（宽口径/独立疾病），不直接平铺具体分型
+  var result=[];
+  function walk(nlist){
+    nlist.forEach(function(n){
+      if(n.type==='Disease' && (n.diagnostic_role==='broad_diagnosis' || n.diagnostic_role==='independent_disease')){
+        result.push(n);
+      } else if(n.children){
+        walk(n.children);
+      }
+    });
+  }
+  walk(nodes);
+  return result;
+}
+function dxRoleBadge(role){
+  if(role==='broad_diagnosis') return '<span class="dx-role-badge broad">疑似诊断</span>';
+  if(role==='clinical_subtype') return '<span class="dx-role-badge subtype">具体分型</span>';
+  if(role==='independent_disease') return '<span class="dx-role-badge independent">独立诊断</span>';
+  return '';
+}
+function diseaseNodeHTML(node, level, includeCov){
+  var cov=getCoverage(node.code);
+  var hasChildren=node.children && node.children.length;
+  var role=node.diagnostic_role || '';
+  var icd=node.icd_code || '';
+  var metaItems=[];
+  if(icd) metaItems.push('<span class="icd-code">'+(node.coding_system?node.coding_system.split('（')[0]+' ':'')+icd+'</span>');
+  if(role==='broad_diagnosis' && node.subtype_count>0) metaItems.push('<span class="subtype-count">分型 '+node.subtype_count+'</span>');
+  var html='<div class="ex-disease level-'+level+(hasChildren?' has-children':'')+'" data-code="'+node.code+'" onclick="selectDisease(\''+node.code+'\')">';
+  html+='<div class="name-block"><div class="name-row"><span class="name" title="'+(node.icd_name||node.name)+'">'+node.name+'</span>'+dxRoleBadge(role)+'</div>';
+  if(metaItems.length){
+    html+='<div class="meta">'+metaItems.join('')+'</div>';
+  }
+  html+='</div>';
+  if(includeCov!==false){
+    html+='<span class="cov '+covClass(cov)+'">'+Math.round(cov)+'%</span>';
+  }
+  if(hasChildren){
+    html+='<span class="ex-child-toggle" onclick="toggleChildren(this,event)">▼</span>';
+  }
+  html+='</div>';
+  return html;
+}
+function renderDiseaseFlat(nodes, level){
+  if(!nodes || nodes.length===0) return '';
+  var html='';
+  nodes.forEach(function(node){
+    html+=diseaseNodeHTML(node, level, true);
+    if(node.children && node.children.length){
+      var sortedChildren = node.children.slice().sort(function(a,b){return getCoverage(b.code) - getCoverage(a.code)});
+      html+='<div class="ex-children open">'+renderDiseaseFlat(sortedChildren, level+1)+'</div>';
+    }
+  });
+  return html;
+}
+function renderTreeNodes(nodes, level){
+  if(!nodes || nodes.length===0) return '';
+  var html='';
+  nodes.forEach(function(node){
+    if(node.type==='DiseaseCategory'){
+      var childCount = node.children ? node.children.length : 0;
+      html+='<div class="ex-group level-'+level+'">';
+      html+='<div class="ex-group-head" onclick="toggleGroup(this)"><span class="arr">▶</span><span class="tree-dot cat-dot"></span><span class="name">'+node.name+'</span><span class="count">'+childCount+'</span></div>';
+      html+='<div class="ex-group-items">'+renderTreeNodes(node.children, level+1)+'</div>';
+      html+='</div>';
+    } else if(node.type==='Disease'){
+      html+=diseaseNodeHTML(node, level, true);
+      if(node.children && node.children.length){
+        html+='<div class="ex-children open">'+renderTreeNodes(node.children, level+1)+'</div>';
+      }
+    }
+  });
+  return html;
+}
+function toggleChildren(el,ev){
+  if(ev) ev.stopPropagation();
+  var children=el.parentElement.nextElementSibling;
+  if(!children) return;
+  var isOpen=children.classList.toggle('open');
+  el.textContent=isOpen?'▼':'▶';
 }
 function toggleGroup(el){el.parentElement.classList.toggle('open')}
-document.getElementById('disease-search').addEventListener('input',function(e){var q=e.target.value.toLowerCase();document.querySelectorAll('.ex-group').forEach(function(g){var visible=false;g.querySelectorAll('.ex-disease').forEach(function(d){var s=(d.textContent+d.dataset.code).toLowerCase(),show=!q||s.indexOf(q)!==-1;d.style.display=show?'flex':'none';if(show)visible=true;});g.style.display=visible?'block':'none';if(q&&visible)g.classList.add('open');});});
+function filterDiseaseTree(keyword){
+  keyword = (keyword||'').toLowerCase();
+  var leaves = document.querySelectorAll('#disease-tree .ex-disease');
+  var groups = document.querySelectorAll('#disease-tree .ex-group');
+  var toggles = document.querySelectorAll('#disease-tree .ex-child-toggle');
+  if(!keyword){
+    leaves.forEach(function(el){el.style.display='flex';el.classList.remove('visible')});
+    groups.forEach(function(g){g.style.display='block';g.classList.add('open')});
+    document.querySelectorAll('#disease-tree .ex-children').forEach(function(c){c.classList.add('open');});
+    toggles.forEach(function(t){t.textContent='▼';});
+    return;
+  }
+  leaves.forEach(function(el){el.style.display='none';el.classList.remove('visible')});
+  groups.forEach(function(g){g.classList.remove('open');});
+  leaves.forEach(function(el){
+    var text = (el.textContent + ' ' + (el.dataset.code||'') + ' ' + (el.dataset.maps||'')).toLowerCase();
+    if(text.indexOf(keyword)!==-1){
+      el.style.display='flex';
+      el.classList.add('visible');
+      // 展开其下的子疾病容器
+      var childContainer = el.nextElementSibling;
+      if(childContainer && childContainer.classList.contains('ex-children')){
+        childContainer.classList.add('open');
+        var toggle = el.querySelector('.ex-child-toggle');
+        if(toggle) toggle.textContent='▼';
+      }
+      var p = el.parentElement;
+      while(p && p.id !== 'disease-tree'){
+        if(p.classList.contains('ex-group')){ p.classList.add('open'); }
+        if(p.classList.contains('ex-children')){ p.classList.add('open'); }
+        p = p.parentElement;
+      }
+    }
+  });
+  // 疾病模式下：若子疾病匹配，其父疾病行也显示
+  if(CURRENT_VIEW_MODE === 'disease'){
+    leaves.forEach(function(el){
+      if(el.classList.contains('visible') && el.parentElement.classList.contains('ex-children')){
+        var parentRow = el.parentElement.previousElementSibling;
+        if(parentRow && parentRow.classList.contains('ex-disease')){
+          parentRow.style.display='flex';
+          parentRow.classList.add('visible');
+        }
+      }
+    });
+  }
+  groups.forEach(function(g){
+    g.style.display = g.querySelectorAll('.ex-disease.visible').length > 0 ? 'block' : 'none';
+  });
+}
+document.getElementById('disease-search').addEventListener('input',function(e){filterDiseaseTree(e.target.value);});
 function selectDisease(code){
   // 先确保完整数据已加载
   loadDiseaseData(code, function(d) {
     if (!d) return;
+    CDSS_PATHWAY_DATA = null;  // 清除CDSS缓存
     CURRENT_DISEASE = code;
     document.querySelectorAll('.ex-disease').forEach(function(el){el.classList.toggle('active',el.dataset.code===code)});
+    var activeDi = document.querySelector('.ex-disease[data-code="'+code+'"]');
+    if(activeDi){
+      activeDi.scrollIntoView({block:'nearest'});
+      var p = activeDi.parentElement;
+      while(p && p.id !== 'disease-tree'){
+        if(p.classList.contains('ex-group')) p.classList.add('open');
+        p = p.parentElement;
+      }
+    }
     renderCurrent();
     // 实体视角：同步更新疾病筛选器
     if(CURRENT_VIEW==='entity'){
@@ -112,55 +482,374 @@ function selectDisease(code){
   });
 }
 function switchView(view){CURRENT_VIEW=view;document.querySelectorAll('.ex-tab').forEach(function(t){t.classList.toggle('active',t.dataset.view===view)});renderCurrent();}
-function renderCurrent(){if(CURRENT_VIEW==='entity'){renderEntityView();return;}if(!CURRENT_DISEASE){document.getElementById('workspace').innerHTML='<div class="ex-empty">请先从左侧选择一种疾病</div>';return;}if(CURRENT_VIEW==='disease')renderDiseaseView(CURRENT_DISEASE);else renderGraphView(CURRENT_DISEASE);}
+function renderCDSSView(code) {
+  var ws = document.getElementById('workspace');
+  if (!code) {
+    ws.innerHTML = '<div class="cdss-empty">请先从左侧选择一种疾病，查看诊疗流程</div>';
+    return;
+  }
+  ws.innerHTML = '<div class="cdss-loading">正在加载诊疗路径...</div>';
+  // 从缓存或API加载
+  if (CDSS_PATHWAY_DATA && CDSS_PATHWAY_DATA.disease && CDSS_PATHWAY_DATA.disease.code === code) {
+    renderCDSSContent(CDSS_PATHWAY_DATA);
+    return;
+  }
+  fetch('/api/kg/cdss/pathway?diseaseCode=' + encodeURIComponent(code))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      CDSS_PATHWAY_DATA = data;
+      renderCDSSContent(data);
+    })
+    .catch(function(e) {
+      ws.innerHTML = '<div class="cdss-empty">加载诊疗路径失败: ' + e.message + '</div>';
+    });
+}
+function renderCDSSContent(data) {
+  var ws = document.getElementById('workspace');
+  if (!data.pathways || data.pathways.length === 0) {
+    var disease = data.disease || {};
+    var cdss = CDSS_DISEASES_MAP[disease.code];
+    var msg = '该疾病暂无诊疗路径';
+    if (cdss) {
+      msg += '<br><span style="font-size:13px;color:var(--muted);margin-top:8px;display:block">已有 ' + (cdss.recommendation_count||0) + ' 条推荐 · ' + (cdss.evidence_count||0) + ' 条证据 · ' + (cdss.guideline_count||0) + ' 份指南</span>';
+    }
+    ws.innerHTML = '<div class="cdss-empty">' + msg + '</div>';
+    return;
+  }
+  var html = '<div class="cdss-pathway">';
+  // 疾病头部
+  var disease = data.disease || {};
+  html += '<div class="cdss-pathway-head">';
+  html += '<h2>' + escAttr(disease.name || disease.code) + ' 诊疗路径</h2>';
+  html += '<div class="cdss-meta">';
+  // 统计（只计动态路径）
+  var totalStages = 0, totalRules = 0, totalRecs = 0;
+  data.pathways.forEach(function(p) {
+    var pwRecs = 0;
+    (p.stages || []).forEach(function(s) {
+      totalStages++;
+      (s.rules || []).forEach(function(r) {
+        totalRules++;
+        pwRecs += (r.recommendations || []).length;
+      });
+    });
+    totalRecs += pwRecs;
+    p._recCount = pwRecs;
+  });
+  html += '<span>' + data.pathways.length + ' 条路径</span>';
+  html += '<span>' + totalStages + ' 个阶段</span>';
+  html += '<span>' + totalRules + ' 条规则</span>';
+  html += '<span>' + totalRecs + ' 条推荐</span>';
+  // CDSS就绪状态
+  var cdss = CDSS_DISEASES_MAP[disease.code];
+  if (cdss) {
+    var evCount = cdss.evidence_count || 0;
+    var glCount = cdss.guideline_count || 0;
+    html += '<span>📖 ' + evCount + ' 证据</span>';
+    html += '<span>📋 ' + glCount + ' 指南</span>';
+    var readyLabel = totalRecs >= 5 ? '✅ 就绪' : (totalRecs >= 1 ? '🟡 测试中' : '🔴 未就绪');
+    html += '<span style="font-weight:700">' + readyLabel + '</span>';
+  }
+  html += '</div></div>';
+  // 遍历路径（动态CDSS路径优先，0推荐的旧路径折叠到末尾）
+  var dynamicPathways = data.pathways.filter(function(p) { return p._recCount > 0; });
+  var legacyPathways = data.pathways.filter(function(p) { return p._recCount === 0; });
+  dynamicPathways.forEach(function(pw) {
+    html += '<div class="cdss-pathway-section">';
+    html += '<div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">\u{1F5FA}\uFE0F ' + escAttr(pw.name || pw.code) + '</div>';
+    // 遍历阶段
+    (pw.stages || []).forEach(function(stage) {
+      var stageIcon = getStageIcon(stage.type);
+      var recCount = 0;
+      (stage.rules || []).forEach(function(r) { recCount += (r.recommendations || []).length; });
+      html += '<div class="cdss-stage">';
+      html += '<div class="cdss-stage-head" onclick="toggleCDSSStage(this)">';
+      html += '<span class="cdss-stage-icon">' + stageIcon + '</span>';
+      html += '<span class="cdss-stage-title">' + escAttr(stage.name || stage.code) + '</span>';
+      html += '<span class="cdss-stage-count">' + (stage.rules || []).length + ' 规则 \u00B7 ' + recCount + ' 推荐</span>';
+      html += '<span class="cdss-stage-toggle">\u25BC</span>';
+      html += '</div>';
+      html += '<div class="cdss-stage-body">';
+      // 遍历规则
+      (stage.rules || []).forEach(function(rule) {
+        html += '<div class="cdss-rule">';
+        html += '<div class="cdss-rule-head" onclick="toggleCDSSRule(this)">';
+        html += '<span class="cdss-rule-icon">\u2699\uFE0F</span>';
+        html += '<span class="cdss-rule-title">' + escAttr(rule.name || rule.code) + '</span>';
+        html += '<span class="cdss-stage-count">' + (rule.recommendations || []).length + ' 推荐</span>';
+        html += '</div>';
+        html += '<div class="cdss-rule-body">';
+        // 遍历推荐（按statement_text去重合并）
+        var recs = rule.recommendations || [];
+        var grouped = {};
+        var groupOrder = [];
+        recs.forEach(function(rec) {
+          var key = rec.statement_text || rec.code || '';
+          if (!grouped[key]) {
+            grouped[key] = { rec: rec, actions: [].concat(rec.actions || []), blocked: [].concat(rec.blocked || []) };
+            groupOrder.push(key);
+          } else {
+            (rec.actions || []).forEach(function(a) {
+              var exists = grouped[key].actions.some(function(x) { return (x.code || x.name) === (a.code || a.name); });
+              if (!exists) grouped[key].actions.push(a);
+            });
+            (rec.blocked || []).forEach(function(b) {
+              var exists = grouped[key].blocked.some(function(x) { return (x.code || x.name) === (b.code || b.name); });
+              if (!exists) grouped[key].blocked.push(b);
+            });
+          }
+        });
+        groupOrder.forEach(function(key) {
+          var g = grouped[key];
+          var merged = Object.assign({}, g.rec, { actions: g.actions, blocked: g.blocked });
+          html += renderCDSSRecCard(merged);
+        });
+        html += '</div></div>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+  // 历史静态路径（折叠区）
+  if (legacyPathways.length > 0) {
+    html += '<div style="margin-top:12px">';
+    html += '<div style="cursor:pointer;padding:10px 14px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)" onclick="var b=this.nextElementSibling;b.style.display=b.style.display===\'none\'?\'block\':\'none\'">';
+    html += '<span>📦 历史静态路径（' + legacyPathways.length + '条，仅作参考）</span>';
+    html += '<span style="margin-left:auto">▼</span></div>';
+    html += '<div style="display:none;padding:12px">';
+    legacyPathways.forEach(function(pw) {
+      html += '<div style="font-size:12px;color:var(--muted);padding:4px 0">· ' + escAttr(pw.name || pw.code) + '</div>';
+    });
+    html += '</div></div>';
+  }
+  html += '</div>';
+  ws.innerHTML = html;
+}
+function renderCDSSRecCard(rec) {
+  var html = '<div class="cdss-rec" onclick="showRecommendationDetail(\'' + escAttr(rec.code) + '\')">';
+  // 头部：类型徽章 + 推荐等级 + 证据等级
+  html += '<div class="cdss-rec-head">';
+  var isBlock = (rec.blocked && rec.blocked.length > 0);
+  html += '<span class="cdss-rec-badge ' + (isBlock ? 'block' : 'recommend') + '">' + (isBlock ? '\u{1F6AB} 阻断' : '\u2705 推荐') + '</span>';
+  if (rec.recommendation_class) {
+    html += '<span class="cdss-rec-class">等级 ' + escAttr(rec.recommendation_class) + '</span>';
+  }
+  if (rec.evidence_level) {
+    html += '<span class="cdss-rec-ev">证据 ' + escAttr(rec.evidence_level) + '</span>';
+  }
+  html += '</div>';
+  // 推荐陈述
+  if (rec.statement_text) {
+    html += '<div class="cdss-rec-text">' + escAttr(rec.statement_text) + '</div>';
+  }
+  // 动作
+  var actions = rec.actions || [];
+  if (actions.length > 0) {
+    html += '<div class="cdss-rec-actions">';
+    actions.slice(0, 4).forEach(function(a) {
+      html += '<span class="cdss-rec-action">' + escAttr(a.name || a.code) + '</span>';
+    });
+    if (actions.length > 4) html += '<span class="cdss-rec-action">+' + (actions.length - 4) + '</span>';
+    html += '</div>';
+  }
+  // 阻断动作
+  var blocked = rec.blocked || [];
+  if (blocked.length > 0) {
+    html += '<div class="cdss-rec-actions">';
+    blocked.slice(0, 3).forEach(function(b) {
+      html += '<span class="cdss-rec-blocked">\u{1F6AB} ' + escAttr(b.name || b.code) + '</span>';
+    });
+    html += '</div>';
+  }
+  // 证据摘要（核心内容）
+  if (rec.primary_evidence_summary) {
+    html += '<div class="cdss-rec-evidence">' + escAttr(rec.primary_evidence_summary) + '</div>';
+  }
+  // 来源：指南名 + 页码（紧凑）
+  if (rec.primary_source_name || rec.primary_guideline_name) {
+    var srcName = rec.primary_source_name || rec.primary_guideline_name;
+    html += '<div class="cdss-rec-source">';
+    html += '<span>\u{1F4D6} ' + escAttr(srcName) + '</span>';
+    if (rec.primary_source_page) html += '<span class="page">p.' + rec.primary_source_page + '</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+function getStageIcon(stageType) {
+  var icons = {
+    '诊断确认': '\u{1F50D}', '诊断': '\u{1F50D}', '筛查': '\u{1F50D}',
+    '风险分层': '\u{1F4CA}', '分型': '\u{1F4CA}', '评估': '\u{1F4CA}',
+    '治疗决策': '\u{1F48A}', '治疗': '\u{1F48A}', '再灌注': '\u{1F48A}',
+    '随访管理': '\u{1F4C5}', '随访': '\u{1F4C5}', '出院': '\u{1F4C5}',
+    '急救': '\u{1F6A8}', '急诊': '\u{1F6A8}',
+    '预防': '\u{1F6E1}\uFE0F', '二级预防': '\u{1F6E1}\uFE0F'
+  };
+  return icons[stageType] || '\u{1F4CB}';
+}
+function toggleCDSSStage(el) {
+  var body = el.nextElementSibling;
+  var toggle = el.querySelector('.cdss-stage-toggle');
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    toggle.textContent = '\u25BC';
+  } else {
+    body.style.display = 'none';
+    toggle.textContent = '\u25B6';
+  }
+}
+function toggleCDSSRule(el) {
+  var body = el.nextElementSibling;
+  if (body.style.display === 'none') {
+    body.style.display = '';
+  } else {
+    body.style.display = 'none';
+  }
+}
+function renderCurrent(){
+  if(CURRENT_VIEW==='entity'){renderEntityView();return;}
+  if(!CURRENT_DISEASE){document.getElementById('workspace').innerHTML='<div class="ex-empty">请先从左侧选择一种疾病</div>';return;}
+  if(CURRENT_VIEW==='cdss') renderCDSSView(CURRENT_DISEASE);
+  else if(CURRENT_VIEW==='disease') renderDiseaseView(CURRENT_DISEASE);
+  else renderGraphView(CURRENT_DISEASE);
+}
+
+/* 覆盖率说明面板切换 */
+function toggleCovNote(el){
+  var note=document.getElementById('cov-note-panel');
+  if(!note)return;
+  var show=!note.classList.contains('show');
+  note.classList.toggle('show',show);
+  el.classList.toggle('active',show);
+}
+
+/* 顶部帮助面板切换 */
+function toggleHelpPanel(el){
+  document.querySelectorAll('.cov-help.active').forEach(function(e){ if(e!==el) e.classList.remove('active'); });
+  var isActive = el.classList.toggle('active');
+  if (isActive) {
+    var panel = el.querySelector('.cov-help-panel');
+    if (panel) {
+      var rect = el.getBoundingClientRect();
+      var panelW = 460;
+      var left = rect.left;
+      if (left + panelW > window.innerWidth - 16) left = window.innerWidth - panelW - 16;
+      panel.style.top = (rect.bottom + 8) + 'px';
+      panel.style.left = left + 'px';
+    }
+  }
+}
+document.addEventListener('click', function(e){
+  if (!e.target.closest('.cov-help')) {
+    document.querySelectorAll('.cov-help.active').forEach(function(e){ e.classList.remove('active'); });
+  }
+});
 function renderDiseaseView(code){
   var d=KG_DATA.diseases[code],info=d.info,cv=getCoverage(code);
   var h='';
 
-  // 疾病头部信息
-  h+='<div class="ex-head"><h1>'+info.name+'</h1>';
-  h+='<div class="ex-meta"><span class="ex-code">'+info.code+'</span>';
-  if(info.name_en) h+=' · '+info.name_en;
-  h+=' · 完整率 <b style="color:var(--accent)">'+Math.round(cv)+'%</b>';
-  h+=' · 证据 <b style="color:var(--accent)">'+(d.evidence_count||0)+'</b> 条';
-  h+='</div></div>';
+  // 疾病头部信息（V2.0：标准诊断名、ICD-10、diagnostic_role、分型入口）
+  var roleTag='';
+  if(info.diagnostic_role==='broad_diagnosis') roleTag='<span class="dx-role-badge broad">疑似诊断</span>';
+  else if(info.diagnostic_role==='clinical_subtype') roleTag='<span class="dx-role-badge subtype">具体分型</span>';
+  else if(info.diagnostic_role==='independent_disease') roleTag='<span class="dx-role-badge independent">独立诊断</span>';
 
-  // 按临床逻辑分组展示
+  h+='<div class="ex-head"><h1>'+info.name+' '+roleTag+'</h1>';
+  h+='<div class="ex-meta">';
+  if(info.icd_code) h+='<span class="icd-code" style="font-size:11px;padding:2px 6px;margin-right:8px">'+(info.coding_system||'ICD-10')+' '+info.icd_code+'</span>';
+  h+='<span class="ex-code">'+info.code+'</span>';
+  if(info.name_en) h+=' · '+info.name_en;
+  h+=' · 覆盖率 <b style="color:var(--accent)">'+Math.round(cv)+'%</b>';
+  h+='<span class="cov-help" onclick="toggleCovNote(this)" title="覆盖率统计说明">?</span>';
+  h+=' · 证据 <b style="color:var(--accent)">'+(d.evidence_count||0)+'</b> 条';
+  h+='</div>';
+
+  // 覆盖率统计说明面板
+  var roleText = info.diagnostic_role==='broad_diagnosis' ? '疑似/宽泛诊断' :
+                 info.diagnostic_role==='clinical_subtype' ? '具体分型' : '独立诊断';
+  h+='<div class="cov-note" id="cov-note-panel">';
+  h+='<h4>覆盖率统计说明</h4>';
+  h+='<ul>';
+  h+='<li>覆盖率 = 有数据的维度数 / 17 核心临床维度 × 100%</li>';
+  h+='<li>17 核心维度：<span class="cov-tag core">症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理</span></li>';
+  h+='<li>检查项目/检验项目通过辅助检查方案中转查询（Schema V2.x）</li>';
+  h+='<li>药物/手术通过治疗方案中转查询（Schema V2.x）</li>';
+  h+='<li>当前疾病类型：<span class="cov-tag '+(info.diagnostic_role==='broad_diagnosis'?'broad':info.diagnostic_role==='clinical_subtype'?'sub':'indep')+'">'+roleText+'</span></li>';
+  h+='<li>疑似/宽泛诊断：合并其所有分型的维度数据统计</li>';
+  h+='<li>具体分型：自身维度 + 从父疾病继承的维度</li>';
+  h+='<li>覆盖率反映知识完整性，不等于 CDSS 可上线率</li>';
+  h+='</ul>';
+  h+='</div>';
+
+  // 若是宽口径/独立疾病，列出具体分型入口
+  if(info.subtypes && info.subtypes.length>0){
+    h+='<div class="ex-subtype-panel" style="margin-top:12px;padding:12px;background:rgba(79,140,255,.08);border:1px solid rgba(79,140,255,.2);border-radius:8px">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">具体分型（'+info.subtypes.length+'）</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    info.subtypes.forEach(function(subCode){
+      var sub=KG_DATA.diseases[subCode];
+      var subName=sub?sub.info.name:subCode;
+      var subIcd=sub&&sub.info.icd_code?sub.info.icd_code:'';
+      h+='<span class="ex-tag" style="cursor:pointer" onclick="selectDisease(\''+subCode+'\')">'+subName+(subIcd?' <span class="icd-code">'+subIcd+'</span>':'')+'</span>';
+    });
+    h+='</div></div>';
+  }
+  // 若是具体分型，提示所属宽口径疾病
+  if(info.diagnostic_role==='clinical_subtype' && info.parent){
+    var parent=KG_DATA.diseases[info.parent];
+    var parentName=parent?parent.info.name:info.parent;
+    h+='<div class="ex-parent-hint" style="margin-top:10px;font-size:11px;color:var(--muted)">所属疑似诊断：<span class="ex-tag" style="cursor:pointer" onclick="selectDisease(\''+info.parent+'\')">'+parentName+'</span></div>';
+  }
+  h+='</div>';
+
+  // V2.0 三层架构分组展示
   var groups = [
+    // 第一层：疾病知识层
     {
-      name: '临床表现', icon: '🩺',
+      name: '定义与基础', icon: '📖', layer: 'knowledge',
+      dims: ['Definition'],
+      desc: '疾病定义和基本概念'
+    },
+    {
+      name: '临床表现', icon: '🩺', layer: 'knowledge',
       dims: ['Symptom','Sign'],
       desc: '患者主诉和医生观察到的异常'
     },
     {
-      name: '诊断检查', icon: '🔬',
-      dims: ['Exam','LabTest'],
+      name: '诊断检查', icon: '🔬', layer: 'knowledge',
+      dims: ['ExamItem','LabItem'],
       desc: '辅助诊断的客观检查和化验'
     },
     {
-      name: '治疗方案', icon: '💊',
+      name: '治疗方案', icon: '💊', layer: 'knowledge',
       dims: ['TreatmentPlan','Medication','Procedure'],
       desc: '治疗策略、药物和手术操作'
     },
     {
-      name: '预后与随访', icon: '📋',
-      dims: ['Prognosis','FollowUp','Complication'],
-      desc: '疾病转归、并发症和随访计划'
+      name: '预后与预防', icon: '📋', layer: 'knowledge',
+      dims: ['Prognosis','FollowUp','Complication','Prevention'],
+      desc: '疾病转归、并发症、预防措施和随访计划'
     },
     {
-      name: '病因与机制', icon: '🧬',
+      name: '病因与机制', icon: '🧬', layer: 'knowledge',
       dims: ['Etiology','Pathophysiology','Epidemiology'],
       desc: '疾病发生的原因、病理机制和流行病学'
     },
     {
-      name: '风险与诊断', icon: '⚠️',
-      dims: ['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis'],
-      desc: '危险因素、风险分层和鉴别诊断'
+      name: '风险与诊断', icon: '⚠️', layer: 'knowledge',
+      dims: ['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis','Contraindication'],
+      desc: '危险因素、风险分层、鉴别诊断和禁忌条件'
     },
     {
-      name: '证据链与指南', icon: '📚',
-      dims: ['Evidence','Guideline','ThresholdRule','ExamIndicator'],
-      desc: '循证来源、临床指南、阈值规则和检查指标'
+      name: '证据链与指南', icon: '📚', layer: 'knowledge',
+      dims: ['Evidence','Guideline','ThresholdRule','ExamObservation','LabSubitem'],
+      desc: '循证来源、临床指南、阈值规则、检查发现和检验细项'
+    },
+    // 第二层：CDSS标准主数据层
+    {
+      name: '标准主数据', icon: '🏷️', layer: 'masterdata',
+      dims: ['StandardDiagnosis'],
+      desc: 'CDSS标准诊断字典(ICD-10等)'
     }
   ];
 
@@ -177,23 +866,387 @@ function renderDiseaseView(code){
 
     grp.dims.forEach(function(k) {
       var it = d.dimensions[k] || [];
-      if (it.length === 0) return;
+      // 检查发现/检验细项即使为空也显示（提示数据缺失）
+      var alwaysShow = (k === 'ExamObservation' || k === 'LabSubitem');
+      if (it.length === 0 && !alwaysShow) return;
       var cls = it.length ? 'ok' : 'zz';
       h+='<div class="ex-card"><div class="ex-card-head">';
       h+='<span class="ex-card-title">'+DIM_NAMES[k]+'</span>';
       h+='<span class="ex-card-count '+cls+'">'+it.length+'</span>';
-      h+='</div><div class="ex-tags">';
-      it.forEach(function(e) {
-        h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+(e.code||'')+'\')">'+e.name+'</span>';
-      });
-      h+='</div></div>';
+      h+='</div>';
+      h+='<div class="ex-card-body">';
+      if (k === 'DiagnosisCriteria') {
+        h+='<div class="ex-drill-list">';
+        it.forEach(function(e) {
+          h+='<div class="ex-drill-item">';
+          h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+          if (e.sub_component && e.sub_component.length) {
+            h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 明细组件（'+e.sub_component.length+'）</div>';
+            h+='<div class="ex-sub-list">';
+            e.sub_component.forEach(function(sc) {
+              h+='<div class="ex-sub-item">'+cleanName(sc)+'</div>';
+            });
+            h+='</div>';
+          } else {
+            h+='<div class="ex-sub-item" style="color:var(--muted);font-style:italic;font-size:11px">待补明细</div>';
+          }
+          h+='</div>';
+        });
+        h+='</div>';
+      } else if (k === 'DifferentialDiagnosis') {
+        h+='<div class="ex-drill-list">';
+        it.forEach(function(e) {
+          h+='<div class="ex-drill-item">';
+          h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+          var _hasDrill=(e.differential_points&&e.differential_points.length)||(e.exclusion_exams&&e.exclusion_exams.length)||(e.blocked_actions&&e.blocked_actions.length);
+          if (_hasDrill) {
+            h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 鉴别详情</div>';
+            h+='<div class="ex-sub-list">';
+            if (e.differential_points && e.differential_points.length) {
+              e.differential_points.forEach(function(dp) {
+                h+='<div class="ex-sub-item"><span class="ex-diff-label">鉴别要点</span>'+cleanName(dp)+'</div>';
+              });
+            }
+            if (e.exclusion_exams && e.exclusion_exams.length) {
+              h+='<div class="ex-sub-item"><span class="ex-diff-label">排除检查</span>'+e.exclusion_exams.map(function(x){return cleanName(x)}).join('、')+'</div>';
+            }
+            if (e.blocked_actions && e.blocked_actions.length) {
+              h+='<div class="ex-sub-item"><span class="ex-diff-label">阻断动作</span>'+e.blocked_actions.map(function(x){return cleanName(x)}).join('、')+'</div>';
+            }
+            h+='</div>';
+          }
+          h+='</div>';
+        });
+        h+='</div>';
+      } else if (k === 'Definition') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无定义</div>';
+        } else {
+          it.forEach(function(e) {
+            var defText = e.definition_text || e.description || e.original_text || '';
+            h+='<div style="margin-bottom:8px;padding:10px 12px;background:rgba(116,143,252,.06);border:1px solid rgba(116,143,252,.15);border-radius:6px">';
+            h+='<div style="font-weight:700;color:var(--accent);margin-bottom:6px">'+cleanName(e)+'</div>';
+            if (defText) {
+              h+='<div style="font-size:13px;line-height:1.6;color:var(--fg2)">'+defText+'</div>';
+            }
+            var meta = [];
+            if (e.source_type) meta.push(e.source_type);
+            if (e.source_section_path) meta.push(e.source_section_path);
+            if (meta.length) h+='<div style="font-size:10px;color:var(--muted);margin-top:6px">'+meta.join(' · ')+'</div>';
+            /* DefinitionComponent 下钻 */
+            if (e.sub_component && e.sub_component.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)" style="margin-top:8px;cursor:pointer;color:var(--accent);font-size:12px">▸ 定义明细（'+e.sub_component.length+'）</div>';
+              h+='<div class="ex-sub-list">';
+              e.sub_component.forEach(function(sc) {
+                h+='<div class="ex-sub-item">'+cleanName(sc)+'</div>';
+              });
+              h+='</div>';
+            }
+            h+='</div>';
+          });
+        }
+      } else if (k === 'StandardDiagnosis') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无标准诊断</div>';
+        } else {
+          it.forEach(function(e) {
+            var icdTag = e.standard_code ? '<span style="background:rgba(255,146,43,.15);color:#ff922b;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:4px">'+e.standard_code+'</span>' : '';
+            var codingTag = e.coding_system ? '<span style="color:var(--muted);font-size:10px;margin-left:4px">'+e.coding_system+'</span>' : '';
+            var validTag = (e.valid_flag == 1 || e.valid_flag === '1') ? '<span style="color:#51cf66;font-size:10px;margin-left:2px">✓ 有效</span>' : '';
+            var srcTag = e.source_table ? '<span style="color:var(--muted);font-size:9px;margin-left:2px">['+e.source_table+']</span>' : '';
+            h+='<div style="margin-bottom:6px;padding:8px 10px;background:rgba(255,146,43,.06);border:1px solid rgba(255,146,43,.15);border-radius:6px">';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            h+=icdTag+codingTag+validTag+srcTag;
+            h+='</div>';
+          });
+        }
+      } else if (k === 'TreatmentPlan') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无治疗方案</div>';
+        } else {
+          it.forEach(function(e) {
+            h+='<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,146,43,.06);border:1px solid rgba(255,146,43,.15);border-radius:6px">';
+            h+='<div style="font-weight:700;color:#ff922b;margin-bottom:6px">'+cleanName(e)+'</div>';
+            // 药物
+            if (e.sub_medication && e.sub_medication.length) {
+              h+='<div style="font-size:11px;color:var(--muted);margin-bottom:4px">💊 药物（'+e.sub_medication.length+'）</div>';
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 展开药物列表</div>';
+              h+='<div class="ex-sub-list">';
+              e.sub_medication.forEach(function(sm) {
+                h+='<div class="ex-sub-item">'+cleanName(sm)+'</div>';
+              });
+              h+='</div>';
+            }
+            // 手术操作 + 标准手术编码
+            if (e.sub_procedure && e.sub_procedure.length) {
+              h+='<div style="font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:4px">🔧 手术操作（'+e.sub_procedure.length+'）</div>';
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 展开手术列表</div>';
+              h+='<div class="ex-sub-list">';
+              e.sub_procedure.forEach(function(sp) {
+                var spHtml = '<div class="ex-sub-item">' + cleanName(sp);
+                if (sp.std_procedures && sp.std_procedures.length) {
+                  sp.std_procedures.forEach(function(spd) {
+                    var codeTag = spd.standard_code ? '<span style="background:rgba(255,146,43,.15);color:#ff922b;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:4px">'+spd.standard_code+'</span>' : '';
+                    var sysTag = spd.coding_system ? '<span style="color:var(--muted);font-size:10px;margin-left:4px">'+spd.coding_system+'</span>' : '';
+                    spHtml += '<div style="font-size:10px;color:var(--muted);margin-left:12px;margin-top:2px">↳ ' + cleanName(spd) + codeTag + sysTag + '</div>';
+                  });
+                }
+                spHtml += '</div>';
+                h += spHtml;
+              });
+              h+='</div>';
+            }
+            // 证据
+            if (e.sub_evidence && e.sub_evidence.length) {
+              h+='<div style="font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:4px">📖 证据（'+e.sub_evidence.length+'）</div>';
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 展开证据</div>';
+              h+='<div class="ex-sub-list">';
+              e.sub_evidence.forEach(function(se) {
+                h+='<div class="ex-sub-item">'+cleanName(se)+'</div>';
+              });
+              h+='</div>';
+            }
+            h+='</div>';
+          });
+        }
+      } else if (k === 'Procedure') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无手术操作</div>';
+        } else {
+          h+='<div class="ex-drill-list">';
+          it.forEach(function(e) {
+            h+='<div class="ex-drill-item">';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            // StandardProcedure 标准手术编码
+            if (e.std_procedures && e.std_procedures.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 标准手术编码（'+e.std_procedures.length+'）</div>';
+              h+='<div class="ex-sub-list">';
+              e.std_procedures.forEach(function(sp) {
+                var spCode = sp.standard_code ? '<span style="background:rgba(255,146,43,.15);color:#ff922b;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:4px">'+sp.standard_code+'</span>' : '';
+                var spSys = sp.coding_system ? '<span style="color:var(--muted);font-size:10px;margin-left:4px">'+sp.coding_system+'</span>' : '';
+                h+='<div class="ex-sub-item">'+cleanName(sp)+spCode+spSys+'</div>';
+              });
+              h+='</div>';
+            }
+            h+='</div>';
+          });
+          h+='</div>';
+        }
+      } else {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无数据（待补'+DIM_NAMES[k]+'节点）</div>';
+        } else {
+          h+='<div class="ex-tags">';
+          it.forEach(function(e) {
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+          });
+          h+='</div>';
+        }
+      }
+      h+='</div>';
+      h+='</div>';
     });
 
     h+='</div></div>';
   });
 
+  // 临床路径（ClinicalPathway）
+  var pathways = d.pathways || [];
+  if (pathways.length) {
+    h+='<div class="ex-clinical-group">';
+    h+='<div class="ex-clinical-title"><span class="icon">🗺️</span>临床路径<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">'+pathways.length+' 条路径</span></div>';
+    h+='<div class="ex-clinical-grid">';
+    pathways.forEach(function(pw) {
+      h+='<div class="ex-card"><div class="ex-card-head">';
+      h+='<span class="ex-card-title">'+pw.name+'</span>';
+      if (pw.stages) h+='<span class="ex-card-count ok">'+pw.stages.length+'</span>';
+      h+='</div>';
+      if (pw.stages && pw.stages.length) {
+        h+='<div class="ex-drill-list">';
+        pw.stages.forEach(function(st, idx) {
+          var stName = st.name || ('阶段'+(idx+1));
+          h+='<div class="ex-pathway-stage"><span class="stage-order">阶段'+(idx+1)+'</span>'+stName;
+          if (st.stage_goal) h+='<span class="stage-goal">— '+st.stage_goal+'</span>';
+          h+='</div>';
+        });
+        h+='</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div></div>';
+  }
+
   document.getElementById('workspace').innerHTML = h;
 }
+
+function renderRecommendationCards(code) {
+  var container = document.getElementById('rec-cards-container');
+  if (!container) return;
+  fetch('/api/kg/disease/' + encodeURIComponent(code) + '/recommendations?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(recs) {
+      if (!recs || !recs.length) {
+        container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">暂无推荐卡片数据</div>';
+        return;
+      }
+      var h = '<div class="ex-rec-grid">';
+      recs.forEach(function(rec) {
+        var typeCls = rec.recommendation_type === 'block' ? 'block' : 'recommend';
+        var typeLabel = rec.recommendation_type === 'block' ? '阻断' : '推荐';
+        h += '<div class="ex-rec-card" onclick="showRecommendationDetail(\'' + escAttr(rec.code) + '\')">';
+        h += '<div class="ex-rec-card-head">';
+        h += '<span class="ex-rec-card-title">' + cleanName(rec) + '</span>';
+        h += '<span class="ex-rec-card-type ' + typeCls + '">' + typeLabel + '</span>';
+        h += '</div>';
+        // 元信息
+        h += '<div class="ex-rec-card-meta">';
+        if (rec.stage_name) h += '<span>📋 ' + rec.stage_name + '</span>';
+        if (rec.rule_name) h += '<span>⚙️ ' + rec.rule_name + '</span>';
+        if (rec.recommendation_class && rec.recommendation_class !== '未结构化')
+          h += '<span>📊 ' + rec.recommendation_class + '</span>';
+        if (rec.evidence_level && rec.evidence_level !== '未结构化')
+          h += '<span>📈 ' + rec.evidence_level + '</span>';
+        h += '</div>';
+        // 推荐动作
+        if (rec.action_name) {
+          h += '<div class="ex-rec-card-action">→ ' + rec.action_name;
+          if (rec.action_entity_type) h += ' <span style="font-weight:400;color:var(--muted);font-size:10px">(' + rec.action_entity_type + ')</span>';
+          h += '</div>';
+        }
+        // 证据摘要
+        if (rec.primary_guideline_name) {
+          h += '<div class="ex-rec-card-ev">';
+          h += '<span class="ev-guide">📖 ' + rec.primary_guideline_name + '</span>';
+          h += '</div>';
+        }
+        // 推荐陈述
+        if (rec.statement_text) {
+          h += '<div class="ex-rec-card-stmt">' + rec.statement_text + '</div>';
+        }
+        h += '</div>';
+      });
+      h += '</div>';
+      container.innerHTML = h;
+    })
+    .catch(function() {
+      container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">加载推荐卡片失败</div>';
+    });
+}
+
+function showRecommendationDetail(rsCode) {
+  var panel = document.getElementById('detail-panel');
+  panel.innerHTML = '<div class="ex-api-loading">加载推荐详情...</div>';
+  fetch('/api/cdss/recommendation/' + encodeURIComponent(rsCode) + '?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(detail) {
+      if (detail.error) { panel.innerHTML = '<div class="ex-side-empty">' + detail.error + '</div>'; return; }
+      var h = '<div class="ex-side-title">' + cleanName(detail) + '</div>';
+      h += '<div class="ex-side-code">' + (detail.code || '') + '</div>';
+      // 基本信息
+      var metaRows = [
+        ['推荐类型', detail.recommendation_type === 'block' ? '🚫 阻断' : '✅ 推荐'],
+        ['规则来源', detail.rule_name || '-'],
+        ['适用阶段', detail.stage_name || '-'],
+        ['适用疾病', detail.scope_target || '-'],
+        ['推荐等级', detail.recommendation_class || '-'],
+        ['证据等级', detail.evidence_level || '-'],
+        ['审核状态', detail.clinical_review_status || '-'],
+        ['就绪', detail.formal_cdss_ready ? '是' : '否'],
+      ];
+      metaRows.forEach(function(r) {
+        h += '<div class="ex-row"><div class="ex-row-label">' + r[0] + '</div><div class="ex-row-value">' + r[1] + '</div></div>';
+      });
+      // 推荐陈述
+      if (detail.statement_text) {
+        h += '<div class="ex-side-section"><h4>推荐陈述</h4>';
+        h += '<div style="font-size:12px;line-height:1.5;color:var(--ink)">' + detail.statement_text + '</div>';
+        h += '</div>';
+      }
+      // 证据来源（摘要 + 原文摘录 + 指南）
+      if (detail.primary_evidence_summary || detail.primary_source_name || detail.primary_guideline_name) {
+        h += '<div style="margin-bottom:12px;padding:12px;background:var(--bg3);border-radius:8px">';
+        h += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">\u{1F4D6} 证据来源</div>';
+        // 证据摘要（最重要）
+        if (detail.primary_evidence_summary) {
+          h += '<div style="font-size:13px;color:var(--ink);line-height:1.7;border-left:3px solid var(--accent);padding:6px 10px;background:rgba(79,140,255,.06);border-radius:0 6px 6px 0;margin-bottom:8px">' + escAttr(detail.primary_evidence_summary) + '</div>';
+        }
+        // 指南名 + 页码
+        var srcName = detail.primary_source_name || detail.primary_guideline_name || '';
+        if (srcName) {
+          h += '<div style="font-size:12px;color:var(--muted)">' + escAttr(srcName);
+          if (detail.primary_source_page) h += ' <span style="color:var(--accent)">p.' + detail.primary_source_page + '</span>';
+          h += '</div>';
+        }
+        // 原文摘录（折叠）
+        if (detail.primary_evidence_raw_excerpt) {
+          h += '<div style="margin-top:8px">';
+          h += '<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="cursor:pointer;font-size:11px;color:var(--accent);font-weight:600">\u{1F4CC} 查看原文摘录 ▾</div>';
+          h += '<div style="display:none;margin-top:6px;font-size:11px;color:var(--muted);line-height:1.8;background:var(--bg2);padding:8px;border-radius:6px;white-space:pre-wrap;max-height:200px;overflow-y:auto">' + escAttr(detail.primary_evidence_raw_excerpt) + '</div>';
+          h += '</div>';
+        }
+        h += '</div>';
+      }
+      // 推荐/阻断动作
+      if (detail.actions && detail.actions.length) {
+        h += '<div class="ex-side-section"><h4>推荐动作（' + detail.actions.length + '）</h4>';
+        detail.actions.forEach(function(a) {
+          h += '<div class="ex-small-item" style="color:var(--accent);font-weight:600">→ ' + cleanName(a);
+          if (a.entityType) h += ' <span style="font-weight:400;color:var(--muted);font-size:10px">(' + a.entityType + ')</span>';
+          h += '</div>';
+        });
+        h += '</div>';
+      }
+      if (detail.blocks && detail.blocks.length) {
+        h += '<div class="ex-side-section"><h4>阻断动作（' + detail.blocks.length + '）</h4>';
+        detail.blocks.forEach(function(b) {
+          h += '<div class="ex-small-item" style="color:#c92a2a;font-weight:600">🚫 ' + cleanName(b) + '</div>';
+        });
+        h += '</div>';
+      }
+      // 指南
+      if (detail.guidelines && detail.guidelines.length) {
+        h += '<div class="ex-side-section"><h4>指南来源（' + detail.guidelines.length + '）</h4>';
+        detail.guidelines.forEach(function(g) {
+          h += '<div class="ex-small-item"><span style="color:var(--accent)">📖</span> ' + cleanName(g);
+          if (g.year) h += ' <span style="color:var(--muted)">(' + g.year + ')</span>';
+          h += '</div>';
+        });
+        h += '</div>';
+      }
+      // 证据
+      if (detail.evidence && detail.evidence.length) {
+        h += '<div class="ex-side-section"><h4>证据来源（' + detail.evidence.length + '）</h4>';
+        detail.evidence.slice(0, 5).forEach(function(ev) {
+          h += '<div class="ex-evidence-item">' + cleanName(ev);
+          if (ev.source_file) h += ' <span class="src">[' + ev.source_file;
+          if (ev.source_page) h += ' p.' + ev.source_page;
+          if (ev.source_file) h += ']</span>';
+          h += '</div>';
+        });
+        if (detail.evidence.length > 5) {
+          h += '<div class="ex-small-item" style="color:var(--accent);cursor:pointer">展开更多（共' + detail.evidence.length + '条）</div>';
+        }
+        h += '</div>';
+      }
+      // 触发条件
+      if (detail.indication_conditions && detail.indication_conditions !== 'N/A') {
+        h += '<div class="ex-side-section"><h4>触发条件</h4>';
+        h += '<div style="font-size:11px;line-height:1.4;color:var(--muted)">' + detail.indication_conditions + '</div>';
+        h += '</div>';
+      }
+      // 禁忌条件
+      if (detail.contraindication_conditions && detail.contraindication_conditions !== 'N/A') {
+        h += '<div class="ex-side-section"><h4>禁忌条件</h4>';
+        h += '<div style="font-size:11px;line-height:1.4;color:#c92a2a">' + detail.contraindication_conditions + '</div>';
+        h += '</div>';
+      }
+      panel.innerHTML = h;
+    })
+    .catch(function() {
+      panel.innerHTML = '<div class="ex-side-empty">加载推荐详情失败</div>';
+    });
+}
+
 function renderGraphView(code){
   var d=KG_DATA.diseases[code];
   var h='<div class="ex-graph-box"><div class="ex-graph-toolbar">';
@@ -218,12 +1271,13 @@ function drawGraph(code){
   var links=[];
   var cGroups=[
     {name:'临床表现',dims:['Symptom','Sign'],color:'#51cf66'},
-    {name:'诊断检查',dims:['Exam','LabTest'],color:'#22b8cf'},
+    {name:'诊断检查',dims:['ExamItem','LabItem'],color:'#22b8cf'},
     {name:'治疗方案',dims:['TreatmentPlan','Medication','Procedure'],color:'#ff922b'},
     {name:'预后随访',dims:['Prognosis','FollowUp','Complication'],color:'#cc5de8'},
     {name:'病因机制',dims:['Etiology','Pathophysiology','Epidemiology'],color:'#748ffc'},
     {name:'风险诊断',dims:['RiskFactor','RiskStratification','DiagnosisCriteria','DifferentialDiagnosis'],color:'#ffd43b'},
-    {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule','ExamIndicator'],color:'#40c057'}
+    {name:'标准诊断',dims:['StandardDiagnosis'],color:'#ff922b'},
+    {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule','ExamObservation'],color:'#40c057'}
   ];
   cGroups.forEach(function(grp){
     var total=grp.dims.reduce(function(s,k){return s+(d.dimensions[k]||[]).length;},0);
@@ -237,11 +1291,47 @@ function drawGraph(code){
       if(!seen[dn]){nodes.push({name:dn, symbolSize:Math.min(16+it.length,36), itemStyle:{color:grp.color+'bb'}, label:{fontSize:9,fontWeight:'bold',color:'#e8eaf0'}});seen[dn]=1;}
       links.push({source:grp.name, target:dn, lineStyle:{color:grp.color+'88',width:1.5,opacity:.5}});
       it.slice(0,5).forEach(function(e){
-        if(!seen[e.name]){nodes.push({name:e.name, symbolSize:11, itemStyle:{color:grp.color+'99'}, label:{fontSize:8,color:'#b0b8c8'}});seen[e.name]=1;}
-        links.push({source:dn, target:e.name, lineStyle:{color:grp.color+'55',width:1,opacity:.4}});
+        var eName=cleanName(e);
+        if(!seen[eName]){nodes.push({name:eName, symbolSize:11, itemStyle:{color:grp.color+'99'}, label:{fontSize:8,color:'#b0b8c8'}});seen[eName]=1;}
+        links.push({source:dn, target:eName, lineStyle:{color:grp.color+'55',width:1,opacity:.4}});
+        // DiagnosisCriteria 二跳：sub_component
+        if(k==='DiagnosisCriteria' && e.sub_component && e.sub_component.length){
+          e.sub_component.slice(0,8).forEach(function(sc){
+            var scName=cleanName(sc);
+            if(!seen[scName]){nodes.push({name:scName, symbolSize:9, itemStyle:{color:'#ffd43b77'}, label:{fontSize:7,color:'#b0b8c8'}});seen[scName]=1;}
+            links.push({source:eName, target:scName, lineStyle:{color:'#ffd43b44',width:1,opacity:.3}});
+          });
+        }
+        // DifferentialDiagnosis 二跳：differential_points / exclusion_exams
+        if(k==='DifferentialDiagnosis'){
+          (e.differential_points||[]).slice(0,3).forEach(function(dp){
+            var dn2='[鉴别]'+cleanName(dp);
+            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'}});seen[dn2]=1;}
+            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}});
+          });
+          (e.exclusion_exams||[]).slice(0,3).forEach(function(ex){
+            var dn2='[排除]'+cleanName(ex);
+            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'}});seen[dn2]=1;}
+            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}});
+          });
+        }
       });
     });
   });
+  // ClinicalPathway 路径分组
+  if(d.pathways && d.pathways.length){
+    var pwColor='#339af0';
+    d.pathways.forEach(function(pw){
+      var pwName=cleanName(pw)||'临床路径';
+      if(!seen[pwName]){nodes.push({name:pwName, symbolSize:36, itemStyle:{color:pwColor,opacity:.85}, label:{fontSize:10,fontWeight:'bold',color:'#fff'}});seen[pwName]=1;}
+      links.push({source:d.info.name, target:pwName, lineStyle:{color:pwColor,width:2,opacity:.6}});
+      (pw.stages||[]).forEach(function(stg,i){
+        var stgName=cleanName(stg)||('阶段'+(i+1));
+        if(!seen[stgName]){nodes.push({name:stgName, symbolSize:18, itemStyle:{color:pwColor+'bb'}, label:{fontSize:9,color:'#e8eaf0'}});seen[stgName]=1;}
+        links.push({source:pwName, target:stgName, lineStyle:{color:pwColor+'88',width:1.5,opacity:.5}});
+      });
+    });
+  }
   GRAPH.setOption({tooltip:{show:true},series:[{type:'graph',layout:'force',data:nodes,links:links,roam:true,label:{show:true,fontSize:9,color:'#e8eaf0'},force:{repulsion:200,gravity:.08,edgeLength:[50,160],friction:.6}}]});
   // 点击节点展开关联内容
   GRAPH.on('click',function(p){
@@ -253,10 +1343,11 @@ function drawGraph(code){
         grp.dims.forEach(function(k){
           var it=d.dimensions[k]||[];
           it.forEach(function(e){
-            if(!seen[e.name]){
-              nodes.push({name:e.name,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
-              seen[e.name]=1;
-              links.push({source:name,target:e.name,lineStyle:{color:grp.color+'44',width:1,opacity:.3}});
+            var eName=cleanName(e);
+            if(!seen[eName]){
+              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              seen[eName]=1;
+              links.push({source:name,target:eName,lineStyle:{color:grp.color+'44',width:1,opacity:.3}});
             }
           });
         });
@@ -268,10 +1359,11 @@ function drawGraph(code){
         if(dimKey && d.dimensions[dimKey]){
           var grpColor=cGroups.find(function(g){return g.dims.indexOf(dimKey)!==-1;})?.color||'#ff922b';
           d.dimensions[dimKey].forEach(function(e){
-            if(!seen[e.name]){
-              nodes.push({name:e.name,symbolSize:13,itemStyle:{color:grpColor+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
-              seen[e.name]=1;
-              links.push({source:name,target:e.name,lineStyle:{color:grpColor+'44',width:1,opacity:.3}});
+            var eName=cleanName(e);
+            if(!seen[eName]){
+              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grpColor+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              seen[eName]=1;
+              links.push({source:name,target:eName,lineStyle:{color:grpColor+'44',width:1,opacity:.3}});
             }
           });
           GRAPH.setOption({series:[{data:nodes,links:links}]});
@@ -297,9 +1389,160 @@ function buildEntityIndexAsync(){
 }
 function renderEntityView(){var dc=CURRENT_DISEASE||'';var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select><select id="entity-disease" onchange="filterEntities()"><option value="">全部疾病</option>'+Object.keys(KG_DATA.diseases).map(function(code){return '<option value="'+code+'"'+(code===dc?' selected':'')+'>'+KG_DATA.diseases[code].info.name+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
 function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var diseaseCode=(document.getElementById('entity-disease')?document.getElementById('entity-disease').value:'');var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim)&&(!diseaseCode||e.diseaseCode===diseaseCode);}).slice(0,500);var html=rows.map(function(e){return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
-function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['完整率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}
-function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+e.name+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
-function showEntityDetail(dc,k,ec){var d=KG_DATA.diseases[dc],it=d.dimensions[k]||[],en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];if(!en)return;var h='<div class="ex-side-title">'+en.name+'</div><div class="ex-side-code">'+(en.code||'无编码')+'</div>';[['实体类型',DIM_NAMES[k]+' / '+k],['关联疾病',d.info.name],['疾病编码',d.info.code],['同维度实体数',it.length+' 个'],['疾病证据数',(d.evidence_count||0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});if(rs.length){h+='<div class="ex-side-section"><h4>关联关系</h4>';rs.forEach(function(r){h+='<div class="ex-small-item">'+r.rel+' → '+r.name+'</div>';});h+='</div>';}h+='<div class="ex-side-section"><h4>同维度其他实体</h4>';it.slice(0,20).forEach(function(e){if(e.name!==en.name)h+='<div class="ex-small-item">'+e.name+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
+function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['覆盖率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}
+function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+cleanName(e)+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
+function getCDSSReady(code) {
+  var cdss = CDSS_DISEASES_MAP[code];
+  if (!cdss) return {cls: 'low', label: '未就绪'};
+  var recs = cdss.recommendation_count || 0;
+  var evs = cdss.evidence_count || 0;
+  if (recs >= 5 && evs >= 3) return {cls: 'high', label: '就绪 ' + recs + '推荐'};
+  if (recs >= 1) return {cls: 'mid', label: '测试中 ' + recs + '推荐'};
+  return {cls: 'low', label: '未就绪'};
+}
+function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList.toggle('open');}
+function showEntityDetail(dc,k,ec){
+  var d=KG_DATA.diseases[dc],it=d.dimensions[k]||[];
+  var en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];
+  if(!en)return;
+  var panel=document.getElementById('detail-panel');
+  var h='<div class="ex-side-title">'+cleanName(en)+'</div><div class="ex-side-code">'+(en.code||'无编码')+'</div>';
+  [['实体类型',DIM_NAMES[k]+' / '+k],['关联疾病',d.info.name],['疾病编码',d.info.code],['同维度实体数',it.length+' 个'],['疾病证据数',(d.evidence_count||0)+' 条']].forEach(function(r){
+    h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';
+  });
+  var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});
+  if(rs.length){
+    h+='<div class="ex-side-section"><h4>关联关系</h4>';
+    rs.forEach(function(r){h+='<div class="ex-small-item">'+r.rel+' → '+r.name+'</div>';});
+    h+='</div>';
+  }
+  // Definition: 展示定义完整内容
+  if(k==='Definition'){
+    var defText=en.definition_text||en.description||en.original_text||'';
+    if(defText){
+      h+='<div class="ex-side-section"><h4>📖 定义内容</h4>';
+      h+='<div style="font-size:13px;line-height:1.7;color:var(--fg2);padding:8px;background:rgba(116,143,252,.06);border-radius:6px">'+defText+'</div>';
+      h+='</div>';
+    }
+    if(en.source_section_path){
+      h+='<div class="ex-side-section"><h4>来源</h4>';
+      h+='<div class="ex-small-item">'+en.source_section_path+'</div>';
+      h+='</div>';
+    }
+  }
+  // StandardDiagnosis: 展示CDSS标准诊断完整属性
+  if(k==='StandardDiagnosis'){
+    h+='<div class="ex-side-section"><h4>CDSS标准诊断属性</h4>';
+    var attrs=[
+      ['ICD-10编码',en.standard_code||''],
+      ['编码体系',en.coding_system||''],
+      ['编码版本',en.coding_system_version||''],
+      ['CDSS字典UUID',en.cdss_dict_id||''],
+      ['有效标志',en.valid_flag==1||en.valid_flag==='1'?'✓ 有效':''],
+      ['来源表',en.source_table||''],
+      ['来源版本',en.source_version||''],
+    ];
+    attrs.forEach(function(a){
+      if(a[1])h+='<div class="ex-row"><div class="ex-row-label">'+a[0]+'</div><div class="ex-row-value">'+a[1]+'</div></div>';
+    });
+    h+='</div>';
+  }
+  // DiagnosisCriteria: 展示 sub_component 诊断明细（证据绑定到推荐动作）
+  if(k==='DiagnosisCriteria'){
+    var subs=en.sub_component||[];
+    if(subs.length){
+      h+='<div class="ex-side-section"><h4>诊断明细（'+subs.length+'）</h4>';
+      subs.forEach(function(sc,idx){
+        h+='<div class="ex-sub-detail">';
+        h+='<div class="ex-sub-detail-title"><span class="idx">'+(idx+1)+'</span>'+cleanName(sc)+'</div>';
+        if(sc.rule_logic) h+='<div class="ex-sub-detail-row"><b>规则说明：</b>'+sc.rule_logic+'</div>';
+        if(sc.actions&&sc.actions.length){
+          h+='<div class="ex-sub-detail-row"><b>推荐动作：</b></div>';
+          sc.actions.forEach(function(a){
+            h+='<div class="ex-evidence-item"><b>'+cleanName(a)+'</b></div>';
+            // 绑定该动作的证据（从组件级证据中展示）
+            if(sc.evidence&&sc.evidence.length){
+              sc.evidence.forEach(function(ev){
+                var src=ev.source_file?(ev.source_file+(ev.source_page?' p.'+ev.source_page:'')):'';
+                var evMeta=[];
+                if(ev.recommendation_class)evMeta.push('推荐等级:'+ev.recommendation_class);
+                if(ev.evidence_level)evMeta.push('证据等级:'+ev.evidence_level);
+                h+='<div class="ex-evidence-item" style="padding-left:24px;font-size:11px;color:var(--muted)">';
+                h+='  '+(ev.name||ev.code);
+                if(src)h+=' <span class="src">['+src+']</span>';
+                if(evMeta.length)h+=' <span class="src">('+evMeta.join(', ')+')</span>';
+                h+='</div>';
+              });
+            }
+          });
+        }
+        h+='</div>';
+      });
+      h+='</div>';
+    } else {
+      h+='<div class="ex-side-section"><h4>诊断明细</h4>';
+      h+='<div class="ex-small-item" style="color:var(--muted);font-style:italic">待补明细</div>';
+      h+='</div>';
+    }
+  }
+  // DifferentialDiagnosis: 展示鉴别详情
+  if(k==='DifferentialDiagnosis'){
+    if(en.differential_points&&en.differential_points.length){
+      h+='<div class="ex-side-section"><h4>鉴别要点（'+en.differential_points.length+'）</h4>';
+      en.differential_points.forEach(function(dp){h+='<div class="ex-small-item">'+cleanName(dp)+'</div>';});
+      h+='</div>';
+    }
+    if(en.exclusion_exams&&en.exclusion_exams.length){
+      h+='<div class="ex-side-section"><h4>排除检查（'+en.exclusion_exams.length+'）</h4>';
+      en.exclusion_exams.forEach(function(ex){h+='<div class="ex-small-item">'+cleanName(ex)+'</div>';});
+      h+='</div>';
+    }
+    if(en.blocked_actions&&en.blocked_actions.length){
+      h+='<div class="ex-side-section"><h4>阻断动作（'+en.blocked_actions.length+'）</h4>';
+      en.blocked_actions.forEach(function(ba){h+='<div class="ex-small-item">'+cleanName(ba)+'</div>';});
+      h+='</div>';
+    }
+  }
+  // V1.11 教材骨架字段
+  var hasSkeleton = en.skeleton_slot || en.knowledge_layer || en.source_type || en.source_section_path;
+  if (hasSkeleton) {
+    h+='<div class="ex-side-section"><h4>教材骨架信息</h4>';
+    if (en.source_type) h+='<div class="ex-row"><div class="ex-row-label">来源类型</div><div class="ex-row-value">'+sourceTypeName(en.source_type)+'</div></div>';
+    if (en.knowledge_layer) h+='<div class="ex-row"><div class="ex-row-label">知识层级</div><div class="ex-row-value">'+knowledgeLayerName(en.knowledge_layer)+'</div></div>';
+    if (en.skeleton_slot) h+='<div class="ex-row"><div class="ex-row-label">骨架槽位</div><div class="ex-row-value">'+skeletonSlotName(en.skeleton_slot)+'</div></div>';
+    if (en.source_section_path) h+='<div class="ex-row"><div class="ex-row-label">章节路径</div><div class="ex-row-value" style="font-size:11px;line-height:1.4">'+en.source_section_path+'</div></div>';
+    var pageInfo='';
+    if (en.pdf_page_start) pageInfo+='PDF: '+en.pdf_page_start+(en.pdf_page_end?'-'+en.pdf_page_end:'')+'页';
+    if (en.book_page_start) pageInfo+=(pageInfo?' | ':'')+'书内: '+en.book_page_start+(en.book_page_end?'-'+en.book_page_end:'')+'页';
+    if (pageInfo) h+='<div class="ex-row"><div class="ex-row-label">页码</div><div class="ex-row-value">'+pageInfo+'</div></div>';
+    if (en.text_anchor) h+='<div class="ex-row"><div class="ex-row-label">文本锚点</div><div class="ex-row-value" style="font-size:11px;color:var(--muted)">'+en.text_anchor+'</div></div>';
+    h+='</div>';
+  }
+  h+='<div class="ex-side-section"><h4>同维度其他实体</h4>';
+  it.slice(0,20).forEach(function(e){if(e.name!==en.name)h+='<div class="ex-small-item">'+cleanName(e)+'</div>';});
+  h+='</div>';
+  // 异步加载实体元数据（别名、跨疾病关联）
+  if(en.code){
+    h+='<div id="entity-api-detail" class="ex-side-section"><div class="ex-api-loading">加载实体元数据...</div></div>';
+  }
+  panel.innerHTML=h;
+  // 调用 /api/kg/entity/<code> 获取额外详情
+  if(en.code){
+    fetch('/api/kg/entity/'+encodeURIComponent(en.code)).then(function(r){return r.json()}).then(function(data){
+      if(data.error)return;
+      var apiH='<h4>实体元数据</h4>';
+      if(data.name_en)apiH+='<div class="ex-row"><div class="ex-row-label">英文名</div><div class="ex-row-value">'+data.name_en+'</div></div>';
+      if(data.aliases&&data.aliases.length)apiH+='<div class="ex-row"><div class="ex-row-label">别名</div><div class="ex-row-value">'+data.aliases.join('、')+'</div></div>';
+      if(data.diseases&&data.diseases.length){
+        apiH+='<div class="ex-small-item" style="margin-top:6px"><b>关联疾病（'+data.diseases.length+'）：</b></div>';
+        data.diseases.forEach(function(d2){apiH+='<div class="ex-small-item">'+d2.disease_name+' <span style="color:var(--muted);font-size:10px">'+d2.rel_type+'</span></div>';});
+      }
+      var el=document.getElementById('entity-api-detail');
+      if(el)el.innerHTML=apiH;
+    }).catch(function(){var el=document.getElementById('entity-api-detail');if(el)el.style.display='none';});
+  }
+}
 </script>
 </body>
 </html>

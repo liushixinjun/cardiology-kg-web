@@ -3,7 +3,11 @@
 
 /* 帮助说明切换 */
 function togglePanelNote(el) {
-  var note = el.closest('.panel').querySelector('.panel-note');
+  var note = el.nextElementSibling;
+  if (!note || !note.classList.contains('panel-note')) {
+    var panel = el.closest('.panel') || el.closest('.section');
+    if (panel) note = panel.querySelector('.panel-note');
+  }
   if (!note) return;
   var show = !note.classList.contains('show');
   note.classList.toggle('show', show);
@@ -26,9 +30,9 @@ function getDimCount(code) {
   if (!KG_DATA || !KG_DATA.diseases[code]) return 0;
   var d = KG_DATA.diseases[code], f = 0;
   if (d._loaded && d.dimensions) {
-    DIM_KEYS.forEach(function(k) { if (d.dimensions[k] && d.dimensions[k].length > 0) f++; });
+    CORE_DIM_KEYS.forEach(function(k) { if (d.dimensions[k] && d.dimensions[k].length > 0) f++; });
   } else if (d.dim_counts) {
-    DIM_KEYS.forEach(function(k) { if (d.dim_counts[k] && d.dim_counts[k] > 0) f++; });
+    CORE_DIM_KEYS.forEach(function(k) { if (d.dim_counts[k] && d.dim_counts[k] > 0) f++; });
   }
   return f;
 }
@@ -43,7 +47,7 @@ function getMedCount(code) {
 
 function buildGroupDims(diseases) {
   var vec = [];
-  DIM_KEYS.forEach(function(k) {
+  CORE_DIM_KEYS.forEach(function(k) {
     var has = 0;
     diseases.forEach(function(d) {
       if (!KG_DATA || !KG_DATA.diseases[d.code]) return;
@@ -96,21 +100,13 @@ function renderDashboard() {
 /* ====== Hero KPIs ====== */
 
 function renderFlowBar(stats, groups) {
-  var ds = KG_DATA.diseases, totalNodes = 0;
-  Object.keys(ds).forEach(function(code) {
-    var d = ds[code];
-    if (d._loaded && d.dimensions) {
-      DIM_KEYS.forEach(function(k) { totalNodes += (d.dimensions[k] || []).length; });
-    } else if (d.dim_counts) {
-      DIM_KEYS.forEach(function(k) { totalNodes += (d.dim_counts[k] || 0); });
-    }
-  });
-  var groupCount = Object.keys(groups).length;
+  var groupCount = stats.disease_category_count || Object.keys(groups).length;
+  var entityCount = stats.visual_entity_count || 0;
   var el = function(id) { return document.getElementById(id); };
   var kg = el('k-groups'), kd = el('k-diseases'), ke = el('k-entities'), kr = el('k-relations');
   if (kg) kg.textContent = groupCount;
   if (kd) kd.textContent = stats.disease_count;
-  if (ke) ke.textContent = totalNodes.toLocaleString();
+  if (ke) ke.textContent = entityCount.toLocaleString();
   if (kr) kr.textContent = (stats.total_relationships || 0).toLocaleString();
   /* 兼容旧 flow-bar（如有） */
   var fb = el('flow-bar');
@@ -119,9 +115,9 @@ function renderFlowBar(stats, groups) {
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
     '<div class="fb-node"><div class="fb-num">' + stats.disease_count + '</div><div class="fb-label">专病数量</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
-    '<div class="fb-node"><div class="fb-num">' + DIM_KEYS.length + '</div><div class="fb-label">知识维度</div></div>' +
+    '<div class="fb-node"><div class="fb-num">' + CORE_DIM_KEYS.length + '</div><div class="fb-label">知识维度</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
-    '<div class="fb-node"><div class="fb-num">' + totalNodes.toLocaleString() + '</div><div class="fb-label">知识实体</div></div>' +
+    '<div class="fb-node"><div class="fb-num">' + entityCount.toLocaleString() + '</div><div class="fb-label">可视化实体</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
     '<div class="fb-node"><div class="fb-num">' + (stats.total_relationships || 0).toLocaleString() + '</div><div class="fb-label">图谱关系</div></div>';
 }
@@ -132,17 +128,17 @@ function renderDiseaseTable(groups) {
   var el = document.getElementById('disease-table');
   if (!el) return;
   var groupOrder = getGroupOrder(groups);
-  /* 按完整率百分比排序（高→低） */
+  /* 按覆盖率百分比排序（高→低） */
   var sorted = groupOrder.filter(function(g){return groups[g]}).sort(function(a,b){return groups[b].coverage - groups[a].coverage});
   var DEFAULT_SHOW = 5;
   var showAll = false;
 
   function renderRows(order) {
-    var html = '<table><thead><tr><th>大类</th><th>专病数</th><th>平均完整率</th><th>维度覆盖</th><th>操作</th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>大类</th><th>专病数</th><th>平均覆盖率</th><th>维度覆盖</th><th>操作</th></tr></thead><tbody>';
     order.forEach(function(g, idx) {
       var gr = groups[g], cov = gr.coverage;
       var covCls = cov >= 80 ? 'cov-full' : cov >= 60 ? 'cov-good' : cov >= 40 ? 'cov-mid' : 'cov-low';
-      var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (DIM_NAMES[DIM_KEYS[i]] || DIM_KEYS[i]) + '"></span>'; }).join('');
+      var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>'; }).join('');
       var realIdx = groupOrder.indexOf(g);
       html += '<tr class="dt-row" onclick="openModal(' + realIdx + ')">';
       html += '<td><span class="dt-icon">' + gr.icon + '</span> ' + g + '</td>';
@@ -185,7 +181,7 @@ function openModal(groupIdx) {
     html += '<div class="d-card-name">' + d.name + '</div>';
     html += '<div class="d-card-meta">';
     html += '<span class="tag ' + covCls + '">' + d.pct + '%</span>';
-    html += '<span class="d-card-dim">' + d.dimCount + '/' + DIM_KEYS.length + ' 维度</span>';
+    html += '<span class="d-card-dim">' + d.dimCount + '/' + CORE_DIM_KEYS.length + ' 维度</span>';
     if (d.medCount > 0) html += '<span class="d-card-med">' + d.medCount + ' 药物</span>';
     html += '</div></a>';
   });
@@ -211,15 +207,23 @@ function renderGraph(groups) {
   var ch = echarts.init(el, null, { renderer: 'svg' });
   var nodes = [], links = [];
   var catColors = ['#dc2626','#ec4899','#8b5cf6','#f472b6','#14b8a6','#ef4444','#38bdf8','#a78bfa','#f97316','#fbbf24','#f87171','#94a3b8'];
+  /* 预收集所有大类名，避免疾病名与大类名冲突导致 ECharts 重复节点崩溃 */
+  var groupNames = {};
+  getGroupOrder(groups).forEach(function(g) { if (groups[g]) groupNames[g] = true; });
   /* 中心节点：心血管内科 */
   nodes.push({ name: '心血管内科', symbolSize: 55, category: 2, value: Object.keys(groups).length, itemStyle: { color: '#3b82f6' } });
   var gi = 0;
   getGroupOrder(groups).forEach(function(g) {
     if (!groups[g]) return;
     var gr = groups[g];
-    nodes.push({ name: g, symbolSize: 36, category: 0, value: gr.count, itemStyle: { color: catColors[gi % catColors.length] } });
+    /* 大类节点去重：若同名疾病节点已存在则跳过 */
+    if (!nodes.find(function(n) { return n.name === g; })) {
+      nodes.push({ name: g, symbolSize: 36, category: 0, value: gr.count, itemStyle: { color: catColors[gi % catColors.length] } });
+    }
     links.push({ source: '心血管内科', target: g });
     gr.diseases.slice().sort(function(a,b){return b.pct - a.pct}).slice(0, 5).forEach(function(d) {
+      /* 跳过与大类名同名的疾病，避免 ECharts 重复节点名崩溃（如"心肌炎"既是疾病又是大类） */
+      if (groupNames[d.name]) return;
       if (!nodes.find(function(n) { return n.name === d.name; })) {
         nodes.push({ name: d.name, symbolSize: Math.max(12, Math.round(d.pct / 5)), category: 1, value: d.pct, diseaseCode: d.code });
       }
@@ -237,7 +241,7 @@ function renderGraph(groups) {
         var cat = p.data.category;
         if (cat === 2) return p.data.name + ' (专科)';
         if (cat === 0) return p.data.name + ' (大类 ' + p.data.value + '种)';
-        return p.data.name + '<br/>完整率: <b>' + p.data.value + '%</b>';
+        return p.data.name + '<br/>覆盖率: <b>' + p.data.value + '%</b>';
       }
     },
     series: [{
@@ -281,7 +285,7 @@ function renderRadar() {
   var ch = echarts.init(el, null, { renderer: 'canvas' });
   var ds = KG_DATA.diseases, total = Object.keys(ds).length;
   var indicators = [], values = [];
-  DIM_KEYS.forEach(function(k) {
+  CORE_DIM_KEYS.forEach(function(k) {
     var filled = 0;
     Object.keys(ds).forEach(function(code) {
       var d = ds[code];
@@ -321,9 +325,9 @@ function renderDimChart() {
   if (!el || typeof echarts === 'undefined') return;
   var ch = echarts.init(el, null, { renderer: 'canvas' });
   var ds = KG_DATA.diseases, totals = {}, filled = {};
-  DIM_KEYS.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
+  CORE_DIM_KEYS.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
   Object.keys(ds).forEach(function(code) {
-    DIM_KEYS.forEach(function(k) {
+    CORE_DIM_KEYS.forEach(function(k) {
       var d = ds[code], items = [];
       if (d._loaded && d.dimensions) items = d.dimensions[k] || [];
       else if (d.dim_counts) items = new Array(d.dim_counts[k] || 0);
@@ -336,14 +340,14 @@ function renderDimChart() {
     tooltip: {
       trigger: 'axis',
       formatter: function(ps) {
-        var p = ps[0], k = DIM_KEYS[p.dataIndex];
+        var p = ps[0], k = CORE_DIM_KEYS[p.dataIndex];
         return (DIM_NAMES[k] || k) + '<br/>有数据疾病: ' + filled[k] + '/' + total + '<br/>实体总量: ' + totals[k];
       }
     },
     grid: { top: 10, bottom: 70, left: 50, right: 18 },
     xAxis: {
       type: 'category',
-      data: DIM_KEYS.map(function(k) { return DIM_NAMES[k] || k; }),
+      data: CORE_DIM_KEYS.map(function(k) { return DIM_NAMES[k] || k; }),
       axisLabel: { rotate: 45, fontSize: 10, color: '#8b90a0' }
     },
     yAxis: {
@@ -352,7 +356,7 @@ function renderDimChart() {
     },
     series: [{
       name: '有数据疾病数', type: 'bar',
-      data: DIM_KEYS.map(function(k) { return filled[k]; }),
+      data: CORE_DIM_KEYS.map(function(k) { return filled[k]; }),
       itemStyle: {
         color: function(p) {
           var v = p.value / total;
@@ -372,16 +376,16 @@ function renderGaps() {
   if (!el) return;
   var ds = KG_DATA.diseases, total = Object.keys(ds).length;
   var missing = {};
-  DIM_KEYS.forEach(function(k) { missing[k] = 0; });
+  CORE_DIM_KEYS.forEach(function(k) { missing[k] = 0; });
   Object.keys(ds).forEach(function(code) {
-    DIM_KEYS.forEach(function(k) {
+    CORE_DIM_KEYS.forEach(function(k) {
       var d = ds[code], has = false;
       if (d._loaded && d.dimensions && d.dimensions[k] && d.dimensions[k].length > 0) has = true;
       if (!has && d.dim_counts && d.dim_counts[k] && d.dim_counts[k] > 0) has = true;
       if (!has) missing[k]++;
     });
   });
-  var sorted = DIM_KEYS.slice().sort(function(a, b) { return missing[b] - missing[a]; });
+  var sorted = CORE_DIM_KEYS.slice().sort(function(a, b) { return missing[b] - missing[a]; });
   var html = '';
   sorted.forEach(function(k) {
     var m = missing[k];

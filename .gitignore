@@ -13,3 +13,6 @@ Thumbs.db
 *.tmp
 *.log
 __pycache__/
+
+# Sensitive config (contains passwords)
+.server-config.json

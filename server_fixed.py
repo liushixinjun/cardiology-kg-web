@@ -8,8 +8,22 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.parse
 from neo4j import GraphDatabase
+
+# ============ 缓存机制（300秒） ============
+CACHE_TTL = 300
+_cache = {}
+
+def get_cache(key):
+    entry = _cache.get(key)
+    if entry and time.time() - entry["time"] < CACHE_TTL:
+        return entry["data"]
+    return None
+
+def set_cache(key, data):
+    _cache[key] = {"data": data, "time": time.time()}
 
 # ============ Neo4j 配置 ============
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://192.168.3.27:7687")
@@ -77,7 +91,12 @@ def get_driver():
 
 
 def query_disease_list():
-    """获取所有疾病列表（含维度数量）"""
+    """获取所有疾病列表（含维度数量）（缓存300秒）"""
+    cache_key = "disease_list"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         results = sess.run("""
@@ -103,11 +122,17 @@ def query_disease_list():
         for d in disease_list:
             d["dim_counts"] = dim_counts.get(d["code"], {})
 
+        set_cache(cache_key, disease_list)
         return disease_list
 
 
 def query_diseases_summary():
-    """获取所有疾病的维度实体摘要（用于实体索引构建）"""
+    """获取所有疾病的维度实体摘要（用于实体索引构建）（缓存300秒）"""
+    cache_key = "diseases_summary"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         diseases = sess.run("""
@@ -140,11 +165,17 @@ def query_diseases_summary():
                 dims[dim] = items
             result[code] = {"info": d_info, "dimensions": dims}
 
+        set_cache(cache_key, result)
         return result
 
 
 def query_disease_full(code):
-    """获取单个疾病的完整17维度数据 + 二跳展开"""
+    """获取单个疾病的完整17维度数据 + 二跳展开（缓存300秒）"""
+    cache_key = f"disease_full_{code}"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         # 基本信息
@@ -262,17 +293,39 @@ def query_disease_full(code):
             RETURN count(e) as cnt
         """, code=code).single()["cnt"]
 
-        return {
+        result = {
             "info": info,
             "dimensions": dimensions,
             "relations_summary": relations_summary,
             "evidence_count": ev_cnt,
             "guidelines": [e["name"] for e in dimensions.get("Guideline", [])],
         }
+        set_cache(cache_key, result)
+        return result
+
+
+def parse_parent_code(pc):
+    """解析parentCode，提取疾病大类"""
+    if not pc:
+        return "其他"
+    parts = pc.replace("SUB-CARD-", "").split("-")
+    main = parts[0]
+    group_map = {
+        "HF": "心力衰竭", "ARR": "心律失常", "CAD": "冠心病", "CM": "心肌病",
+        "VHD": "瓣膜性心脏病", "PERICARD": "心包疾病", "HTN": "高血压",
+        "CHD": "先天性心脏病", "IE": "感染性心内膜炎", "SCD": "心脏骤停/猝死",
+        "AORTA": "主动脉/外周血管", "PAD": "外周血管", "NEUROSIS": "心脏神经症"
+    }
+    return group_map.get(main, main)
 
 
 def query_global_stats():
-    """全局统计"""
+    """全局统计（缓存300秒）"""
+    cache_key = "global_stats"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         total_nodes = sess.run("MATCH (n:KGNode) RETURN count(n) as cnt").single()["cnt"]
@@ -282,16 +335,31 @@ def query_global_stats():
         disease_count = sess.run("MATCH (d:Disease) RETURN count(d) as cnt").single()["cnt"]
         shell_count = 0  # 空壳实体在导出时已过滤
 
-        return {
+        # 计算疾病大类数量
+        diseases = sess.run("MATCH (d:Disease) RETURN d.parentCode as parent").data()
+        groups = set()
+        for r in diseases:
+            groups.add(parse_parent_code(r["parent"]))
+
+        result = {
             "total_nodes": total_nodes,
+            "visual_entity_count": total_nodes,  # 兼容前端
             "total_relationships": total_rels,
             "disease_count": disease_count,
+            "disease_category_count": len(groups),  # 兼容前端
             "shell_entity_count": shell_count,
         }
+        set_cache(cache_key, result)
+        return result
 
 
 def query_guidelines():
-    """获取所有指南及其关联疾病"""
+    """获取所有指南及其关联疾病（缓存300秒）"""
+    cache_key = "guidelines"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         results = sess.run("""
@@ -311,11 +379,18 @@ def query_guidelines():
                 "level": r["level"] or "",
                 "diseases": r["diseases"] or []
             })
-        return {"guidelines": guidelines, "total": len(guidelines)}
+        result = {"guidelines": guidelines, "total": len(guidelines)}
+        set_cache(cache_key, result)
+        return result
 
 
 def query_entity_detail(code):
-    """查询单个实体的详细信息（别名、英文名、关联疾病）"""
+    """查询单个实体的详细信息（别名、英文名、关联疾病）（缓存300秒）"""
+    cache_key = f"entity_detail_{code}"
+    cached = get_cache(cache_key)
+    if cached:
+        return cached
+
     d = get_driver()
     with d.session() as sess:
         r = sess.run("""
@@ -349,7 +424,7 @@ def query_entity_detail(code):
         
         aliases = [a for a in (r["aliases"] or []) if a != name]
         
-        return {
+        result = {
             "name": r["pre"] or name,
             "code": code,
             "name_en": r["name_en"] or "",
@@ -358,6 +433,8 @@ def query_entity_detail(code):
             "diseases": disease_list,
             "cross_diseases": cross_list
         }
+        set_cache(cache_key, result)
+        return result
 
 
 class KGHandler(http.server.SimpleHTTPRequestHandler):
@@ -373,7 +450,11 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == '/api/kg/diseases/all':
-            # 获取所有疾病列表
+            # 获取所有疾病列表（整体缓存300秒）
+            cached_all = get_cache("diseases_all")
+            if cached_all:
+                self._json_response(cached_all)
+                return
             diseases_list = query_disease_list()
             # 对每个疾病获取完整数据
             all_diseases = {}
@@ -382,7 +463,9 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 if full:
                     all_diseases[d['code']] = full
             stats = query_global_stats()
-            self._json_response({"diseases": all_diseases, "stats": stats})
+            result = {"diseases": all_diseases, "stats": stats}
+            set_cache("diseases_all", result)
+            self._json_response(result)
             return
 
         if path == '/api/kg/diseases/summary':

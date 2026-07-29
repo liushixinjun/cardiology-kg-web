@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
 /* ===== Diagnosis Page Styles ===== */
-.diagnosis-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; min-height: 600px; }
+.diagnosis-layout { display: grid; grid-template-columns: 360px 1fr 380px; gap: 18px; min-height: 600px; }
 
 /* ===== Architecture Toggle ===== */
 .arch-section { background: linear-gradient(135deg, #0c1426 0%, #111b33 40%, #0f2027 100%); border: 1px solid rgba(79,140,255,.18); border-radius: 14px; margin-bottom: 28px; box-shadow: 0 0 60px rgba(79,140,255,.06); overflow: hidden; }
@@ -168,7 +168,88 @@
 /* Footer disclaimer */
 .diagnosis-footer { margin-top: 24px; padding: 14px 18px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; font-size: 12px; color: var(--muted); line-height: 1.7; text-align: center; }
 
+/* Structured input */
+.struct-input-section { margin-top: 14px; padding: 14px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 8px; }
+.struct-input-title { font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.struct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.struct-field label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+.struct-field select, .struct-field input { width: 100%; padding: 6px 8px; background: var(--bg4); border: 1px solid var(--rule); border-radius: 4px; color: var(--ink); font-size: 11px; outline: none; }
+.struct-field select:focus, .struct-field input:focus { border-color: var(--accent); }
+
+/* ===== Three-Column Layout: Middle + Right ===== */
+.patient-status-section { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; }
+
+/* Three-step entry indicator */
+.three-step-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.step-badge { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 16px; font-size: 11px; font-weight: 600; background: var(--bg3); border: 1px solid var(--rule); color: var(--muted); transition: all .2s; }
+.step-badge.active { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: var(--accent); }
+.step-badge.done { background: rgba(81,207,102,.1); border-color: rgba(81,207,102,.3); color: var(--green); }
+.step-badge-arrow { color: var(--muted); font-size: 10px; }
+
+/* Current stage tag */
+.stage-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; background: var(--bg3); color: var(--muted); border: 1px solid var(--rule); }
+.stage-tag.active { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: var(--accent); }
+.stage-tag.confirmed { background: rgba(81,207,102,.1); border-color: rgba(81,207,102,.3); color: var(--green); }
+
+/* Disease tags row */
+.disease-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.disease-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; background: var(--bg3); color: var(--muted); border: 1px solid var(--rule); }
+.disease-tag.type { background: rgba(255,107,107,.1); border-color: rgba(255,107,107,.25); color: var(--accent2); }
+.disease-tag.risk { background: rgba(255,146,43,.1); border-color: rgba(255,146,43,.25); color: var(--orange); }
+.disease-tag.subtype { background: rgba(204,93,232,.1); border-color: rgba(204,93,232,.25); color: var(--purple); }
+
+/* Score panel */
+.score-panel { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.score-item { background: var(--bg3); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; }
+.score-item-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+.score-item-value { font-size: 15px; font-weight: 700; color: var(--ink); }
+.score-item-level { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; margin-left: 4px; }
+.score-level-high { background: rgba(255,107,107,.15); color: #ff6b6b; }
+.score-level-mid { background: rgba(255,210,59,.15); color: #ffd43b; }
+.score-level-low { background: rgba(81,207,102,.15); color: #51cf66; }
+
+/* Step content area */
+.step-content-area { margin-top: 12px; }
+.step-item { padding: 10px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; }
+.step-item-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.step-item-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* CDSS Panel (right column) */
+.cdss-section { background: var(--bg2); border: 2px solid var(--accent); border-radius: 10px; overflow: hidden; }
+.cdss-header { background: var(--accent); color: #fff; padding: 10px 16px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.cdss-body { padding: 14px; max-height: calc(100vh - 280px); overflow-y: auto; }
+
+.cdss-block { margin-bottom: 12px; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--rule); border-radius: 8px; }
+.cdss-block-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.cdss-block-title.green { color: var(--green); }
+.cdss-block-title.yellow { color: var(--orange); }
+.cdss-block-title.blue { color: var(--accent); }
+.cdss-block-title.red { color: var(--accent2); }
+.cdss-block-title.purple { color: var(--purple); }
+.cdss-block-title.cyan { color: var(--cyan); }
+
+.cdss-item { display: flex; align-items: flex-start; gap: 6px; padding: 4px 0; font-size: 12px; color: var(--ink); line-height: 1.6; }
+.cdss-item .icon { flex-shrink: 0; font-size: 12px; }
+.cdss-item.muted { color: var(--muted); }
+
+.cdss-feedback { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.cdss-feedback-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.cdss-feedback-btn { padding: 5px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg3); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.cdss-feedback-btn:hover { border-color: var(--accent); color: var(--accent); }
+.cdss-feedback-btn.selected { background: rgba(79,140,255,.12); border-color: var(--accent); color: var(--accent); }
+
+.cdss-empty { text-align: center; padding: 30px 16px; color: var(--muted); }
+.cdss-empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: .5; }
+
+/* Pathway confirm button */
+.pathway-confirm-area { margin-top: 14px; padding: 12px; background: rgba(81,207,102,.04); border: 1px dashed rgba(81,207,102,.3); border-radius: 8px; text-align: center; }
+.pathway-confirm-area .pathway-name { font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+.pathway-confirm-area .pathway-detail { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
+
 /* Responsive */
+@media (max-width: 1200px) {
+  .diagnosis-layout { grid-template-columns: 320px 1fr 340px; }
+}
 @media (max-width: 960px) {
   .diagnosis-layout { grid-template-columns: 1fr; }
   .input-section { position: static; }
@@ -182,8 +263,13 @@
 </div>
 <div class="page">
   <div class="page-header">
-    <h1>临床诊断模拟</h1>
-    <div class="subtitle">基于心血管专科知识图谱的疾病智能匹配</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h1>临床诊断模拟</h1>
+        <div class="subtitle">基于心血管专科知识图谱的疾病智能匹配</div>
+      </div>
+      <button onclick="showReasoningModal()" style="padding:8px 16px;background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.3);border-radius:8px;color:#74c0fc;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(79,140,255,.2)'" onmouseout="this.style.background='rgba(79,140,255,.12)'">🧠 推理逻辑</button>
+    </div>
   </div>
 
   <!-- ===== Architecture Overview (collapsed by default) ===== -->
@@ -282,41 +368,99 @@
     <div class="input-section">
       <div class="section-title">患者临床信息</div>
 
-      <!-- Sample patient cases -->
+      <!-- 场景选择器 -->
       <div class="sample-cases">
-        <div class="sample-cases-title">快速加载示例病例</div>
+        <div class="sample-cases-title">快速加载示例场景</div>
         <div class="sample-list">
-          <div class="sample-item" onclick="loadSample(0)">
+          <div class="sample-item" onclick="selectScenario('stemi')" id="scene-stemi">
             <span class="sample-icon">&#128680;</span>
-            <div class="sample-info"><div class="sample-name">急性心肌梗死</div><div class="sample-desc">65岁男性，胸痛2小时，ST段抬高</div></div>
+            <div class="sample-info"><div class="sample-name">STEMI急诊</div><div class="sample-desc">胸痛+ST抬高+cTn升高</div></div>
             <span class="sample-badge">STEMI</span>
           </div>
-          <div class="sample-item" onclick="loadSample(1)">
-            <span class="sample-icon">&#9889;</span>
-            <div class="sample-info"><div class="sample-name">心房颤动</div><div class="sample-desc">72岁女性，心悸、心律不齐</div></div>
+          <div class="sample-item" onclick="selectScenario('af')" id="scene-af">
+            <span class="sample-icon">&#129516;</span>
+            <div class="sample-info"><div class="sample-name">心房颤动</div><div class="sample-desc">心悸+心动过速+心律不齐</div></div>
             <span class="sample-badge">AF</span>
           </div>
-          <div class="sample-item" onclick="loadSample(2)">
+          <div class="sample-item" onclick="selectScenario('ahf')" id="scene-ahf">
             <span class="sample-icon">&#128146;</span>
-            <div class="sample-info"><div class="sample-name">急性心力衰竭</div><div class="sample-desc">68岁男性，呼吸困难、端坐呼吸、水肿</div></div>
+            <div class="sample-info"><div class="sample-name">急性心力衰竭</div><div class="sample-desc">呼吸困难+端坐呼吸+水肿</div></div>
             <span class="sample-badge">AHF</span>
           </div>
-          <div class="sample-item" onclick="loadSample(3)">
+          <div class="sample-item" onclick="selectScenario('ua')" id="scene-ua">
             <span class="sample-icon">&#128163;</span>
-            <div class="sample-info"><div class="sample-name">不稳定型心绞痛</div><div class="sample-desc">58岁男性，胸骨后压榨性疼痛，休息时发作</div></div>
+            <div class="sample-info"><div class="sample-name">不稳定型心绞痛</div><div class="sample-desc">胸骨后压榨性疼痛+ST压低</div></div>
             <span class="sample-badge">UA</span>
           </div>
-          <div class="sample-item" onclick="loadSample(4)">
+          <div class="sample-item" onclick="selectScenario('dcm')" id="scene-dcm">
             <span class="sample-icon">&#128269;</span>
-            <div class="sample-info"><div class="sample-name">扩张型心肌病</div><div class="sample-desc">45岁男性，活动后气促、心脏扩大、EF降低</div></div>
+            <div class="sample-info"><div class="sample-name">扩张型心肌病</div><div class="sample-desc">活动后气促+心脏扩大+EF降低</div></div>
             <span class="sample-badge">DCM</span>
           </div>
         </div>
       </div>
 
       <textarea class="patient-textarea" id="patient-input" placeholder="请输入患者的主诉、现病史、既往史、个人史、家族史等临床信息..."></textarea>
+
+      <!-- 结构化输入（折叠面板，默认展开） -->
+      <div class="struct-input-section">
+        <div class="struct-input-title">结构化输入（可选，提升匹配精度）</div>
+        <div class="struct-grid">
+          <div class="struct-field">
+            <label>ECG结果</label>
+            <select id="struct-ecg">
+              <option value="">-- 未填写 --</option>
+              <option value="ST段抬高">ST段抬高</option>
+              <option value="ST段压低">ST段压低</option>
+              <option value="T波倒置">T波倒置</option>
+              <option value="新发LBBB">新发左束支传导阻滞</option>
+              <option value="正常">正常心电图</option>
+            </select>
+          </div>
+          <div class="struct-field">
+            <label>肌钙蛋白</label>
+            <select id="struct-troponin">
+              <option value="">-- 未出结果 --</option>
+              <option value="cTnI升高">cTnI升高</option>
+              <option value="cTnT升高">cTnT升高</option>
+              <option value="正常">正常</option>
+            </select>
+          </div>
+          <div class="struct-field">
+            <label>CK-MB</label>
+            <select id="struct-ckmb">
+              <option value="">-- 未出结果 --</option>
+              <option value="CK-MB升高">升高</option>
+              <option value="正常">正常</option>
+            </select>
+          </div>
+          <div class="struct-field">
+            <label>年龄</label>
+            <input type="number" id="struct-age" placeholder="岁" min="1" max="120">
+          </div>
+          <div class="struct-field">
+            <label>心率(次/分)</label>
+            <input type="number" id="struct-hr" placeholder="bpm" min="20" max="300">
+          </div>
+          <div class="struct-field">
+            <label>收缩压(mmHg)</label>
+            <input type="number" id="struct-bp" placeholder="mmHg" min="50" max="300">
+          </div>
+          <div class="struct-field">
+            <label>Killip分级</label>
+            <select id="struct-killip">
+              <option value="">-- 未评估 --</option>
+              <option value="I">I - 无心衰征象</option>
+              <option value="II">II - 轻-中度心衰</option>
+              <option value="III">III - 急性肺水肿</option>
+              <option value="IV">IV - 心源性休克</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="runDiagnosis()">匹配诊断</button>
+        <button class="btn btn-primary" id="btn-next-step" onclick="nextStep()">下一步</button>
         <button class="btn btn-outline" onclick="clearInput()">清空输入</button>
       </div>
       <div class="keywords-section" id="keywords-section" style="display:none;">
@@ -325,34 +469,195 @@
       </div>
     </div>
 
-    <!-- Right: Results -->
-    <div class="result-section">
-      <div class="section-title">候选疾病匹配结果</div>
-      <div class="stats-bar" id="stats-bar" style="display:none;">
-        <span>匹配疾病: <span class="stat-val" id="stat-matched">0</span></span>
-        <span>最高得分: <span class="stat-val" id="stat-max">0</span></span>
-        <span>命中关键词: <span class="stat-val" id="stat-kw">0</span></span>
-        <span>覆盖维度: <span class="stat-val" id="stat-dims">0</span></span>
+    <!-- Middle: Patient Status Panel -->
+    <div class="patient-status-section">
+      <div class="section-title">患者状态面板</div>
+
+      <!-- Three-step entry indicator -->
+      <div class="three-step-indicator" id="three-step-indicator">
+        <div class="step-badge active" id="step-badge-1">① 高危筛查</div>
+        <span class="step-badge-arrow">&rarr;</span>
+        <div class="step-badge" id="step-badge-2">② 专病推荐</div>
+        <span class="step-badge-arrow">&rarr;</span>
+        <div class="step-badge" id="step-badge-3">③ 确认入径</div>
       </div>
-      <div class="match-list" id="diagnosis-results">
-        <div class="no-results">
-          <div class="no-results-icon">&#128269;</div>
-          <div>请输入患者临床信息后点击"匹配诊断"</div>
+
+      <!-- Current stage + status tags -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span class="stage-tag" id="pathway-stage">未入径</span>
+        <span class="stage-tag" id="pathway-status">等待开始</span>
+      </div>
+
+      <!-- Disease tags (shown after screening) -->
+      <div class="disease-tags" id="disease-tags" style="display:none;"></div>
+
+      <!-- Score panel (shown when relevant) -->
+      <div class="score-panel" id="score-panel" style="display:none;">
+        <div class="score-item" id="score-grace">
+          <div class="score-item-label">GRACE评分</div>
+          <div class="score-item-value">--</div>
+        </div>
+        <div class="score-item" id="score-timi">
+          <div class="score-item-label">TIMI评分</div>
+          <div class="score-item-value">--</div>
+        </div>
+        <div class="score-item" id="score-killip" style="grid-column:1/-1">
+          <div class="score-item-label">Killip分级</div>
+          <div class="score-item-value">--</div>
+        </div>
+      </div>
+
+      <!-- Step content area -->
+      <div class="step-content-area" id="step-content-area">
+        <div class="step-item">
+          <div class="step-item-title">📋 9步诊疗流程</div>
+          <div class="step-item-desc">
+            1.高危筛查 &rarr; 2.专病推荐 &rarr; 3.确认入径 &rarr; 4.证据补齐 &rarr; 5.分型分层 &rarr; 6.治疗决策 &rarr; 7.治疗执行 &rarr; 8.出院准备 &rarr; 9.随访计划
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;">
+          请在左侧输入患者信息，点击"下一步"开始诊疗流程
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: CDSS Assistant Panel -->
+    <div class="cdss-section">
+      <div class="cdss-header">
+        <span>&#127973;</span> 专科辅助诊疗助手
+      </div>
+      <div class="cdss-body" id="cdss-panel">
+        <div class="cdss-empty">
+          <div class="cdss-empty-icon">&#129302;</div>
+          <div>等待诊疗流程开始...</div>
+          <div style="font-size:11px;margin-top:6px;color:var(--muted)">选择场景并点击"下一步"后，此处将显示辅助诊疗建议</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="diagnosis-footer">
-    本功能基于关键词匹配和加权评分算法，从<span id="diag-disease-count">-</span>种心血管专病的<span class="dcp">17</span>个知识维度中检索匹配。仅供辅助参考，不构成临床诊断依据。
+    本功能基于Neo4j心血管专科知识图谱（92种疾病 × 19个维度）的四维度图谱查询推理，从<span id="diag-disease-count">-</span>种心血管专病中检索匹配。仅供辅助参考，不构成临床诊断依据。
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<!-- 推理逻辑弹窗 -->
+<div class="modal-overlay" id="reasoning-modal">
+  <div class="modal" style="max-width:900px;max-height:85vh;overflow-y:auto">
+    <button class="modal-close" onclick="hideReasoningModal()">&times;</button>
+    <h3>🧠 知识图谱推理逻辑</h3>
+    <div class="modal-code" style="font-size:12px;line-height:1.8">
+      <div style="margin-bottom:16px;padding:12px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);border-radius:8px">
+        <div style="font-weight:700;color:#74c0fc;margin-bottom:8px">📊 推理架构（4层9步）</div>
+        <div>输入解析层 → 图谱查询层 → 聚合推理层 → 临床决策层</div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#51cf66;margin-bottom:8px">🔍 第1步：主诉语义解析 → 症状关键词</div>
+        <div style="color:var(--muted)">输入："胸痛2小时，向左肩放射，伴出汗、恶心"</div>
+        <div style="margin:6px 0;padding:8px;background:#0d1117;border-radius:6px;font-family:monospace;font-size:11px;color:#c9d1d9">
+          "胸痛" → 胸痛、胸闷<br>
+          "向左肩放射" → 放射痛<br>
+          "出汗" → 出汗<br>
+          "恶心" → 恶心呕吐
+        </div>
+        <div style="color:var(--muted)">图谱查询：<code style="color:#51cf66">MATCH (d:Disease)-[:has_symptom]->(n:KGNode)</code></div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#cc5de8;margin-bottom:8px">🩺 第2步：体征提取 → 生命体征和查体映射</div>
+        <div style="color:var(--muted)">输入：HR=90, BP=130, Killip=I</div>
+        <div style="margin:6px 0;padding:8px;background:#0d1117;border-radius:6px;font-family:monospace;font-size:11px;color:#c9d1d9">
+          HR=90 → 正常范围（60-100），不触发<br>
+          BP=130 → 正常偏高，不触发<br>
+          Killip=I → 无心衰征象，不触发体征
+        </div>
+        <div style="color:var(--muted)">图谱查询：<code style="color:#cc5de8">MATCH (d:Disease)-[:has_sign]->(n:KGNode)</code></div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#22b8cf;margin-bottom:8px">📋 第3步：ECG结果解析 → 检查关键词</div>
+        <div style="color:var(--muted)">输入："ST段抬高"</div>
+        <div style="margin:6px 0;padding:8px;background:#0d1117;border-radius:6px;font-family:monospace;font-size:11px;color:#c9d1d9">
+          "ST段抬高" → ST段抬高、心电图异常
+        </div>
+        <div style="color:var(--muted)">图谱查询：<code style="color:#22b8cf">MATCH (d:Disease)-[:requires_exam]->(n:KGNode)</code></div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#748ffc;margin-bottom:8px">🧪 第4步：检验结果解析 → 检验关键词</div>
+        <div style="color:var(--muted)">输入："cTnI升高" + "CK-MB升高"</div>
+        <div style="margin:6px 0;padding:8px;background:#0d1117;border-radius:6px;font-family:monospace;font-size:11px;color:#c9d1d9">
+          "cTnI升高" → 肌钙蛋白升高、心肌标志物升高<br>
+          "CK-MB升高" → CK-MB升高
+        </div>
+        <div style="color:var(--muted)">图谱查询：<code style="color:#748ffc">MATCH (d:Disease)-[:has_exam_plan]->()-[:includes_lab_item]->(n:KGNode)</code></div>
+      </div>
+      
+      <div style="margin-bottom:16px;padding:12px;background:rgba(255,146,43,.06);border:1px solid rgba(255,146,43,.15);border-radius:8px">
+        <div style="font-weight:700;color:#ff922b;margin-bottom:8px">📐 第5步：多维度聚合 → 置信度计算</div>
+        <div>聚合规则（四维度：症状+体征+检查+检验）：</div>
+        <div style="font-family:monospace;font-size:11px;color:#c9d1d9;margin:6px 0">
+          置信度 = min(0.55 + 命中实体数×0.08, 0.98) + 命中维度数×0.05
+        </div>
+      </div>
+      
+      <div style="margin-bottom:16px;padding:12px;background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.15);border-radius:8px">
+        <div style="font-weight:700;color:#ff6b6b;margin-bottom:8px">⚡ 第6步：强信号检测 → AMI置信度提升</div>
+        <div>当三个强信号同时出现（胸痛 + ST抬高 + 肌钙蛋白阳性），强制将AMI提升到Top1。</div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#f06595;margin-bottom:8px">🔬 第7步：分型判断 → STEMI/NSTEMI</div>
+        <div style="font-family:monospace;font-size:11px;color:#c9d1d9">
+          STEMI = ST段抬高 或 新发LBBB + 肌钙蛋白升高<br>
+          NSTEMI = 无ST段抬高 + 肌钙蛋白动态变化
+        </div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;color:#fcc419;margin-bottom:8px">📊 第8步：风险评分计算 → GRACE/TIMI/Killip</div>
+        <div style="color:var(--muted)">从患者数据中提取评分字段，计算三项风险评分。</div>
+      </div>
+      
+      <div style="margin-bottom:16px;padding:12px;background:rgba(81,207,102,.06);border:1px solid rgba(81,207,102,.15);border-radius:8px">
+        <div style="font-weight:700;color:#51cf66;margin-bottom:8px">💊 第9步：治疗方案匹配 → 推荐PCI</div>
+        <div>根据分型 + 风险评分 + 禁忌证，匹配最优治疗方案。</div>
+      </div>
+      
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)">
+        <div style="font-weight:700;margin-bottom:8px">📋 5个示例病例推理路径对比</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse">
+          <tr style="background:var(--bg3)">
+            <th style="padding:6px;text-align:left;border:1px solid var(--rule)">病例</th>
+            <th style="padding:6px;text-align:left;border:1px solid var(--rule)">主导维度</th>
+            <th style="padding:6px;text-align:left;border:1px solid var(--rule)">Top1疾病</th>
+            <th style="padding:6px;text-align:left;border:1px solid var(--rule)">治疗推荐</th>
+          </tr>
+          <tr><td style="padding:6px;border:1px solid var(--rule)">STEMI</td><td style="padding:6px;border:1px solid var(--rule)">症状+检查+检验</td><td style="padding:6px;border:1px solid var(--rule)"><strong>急性心肌梗死</strong></td><td style="padding:6px;border:1px solid var(--rule)">急诊PCI</td></tr>
+          <tr><td style="padding:6px;border:1px solid var(--rule)">房颤</td><td style="padding:6px;border:1px solid var(--rule)">症状+体征</td><td style="padding:6px;border:1px solid var(--rule)"><strong>心房颤动</strong></td><td style="padding:6px;border:1px solid var(--rule)">抗凝+心率控制</td></tr>
+          <tr><td style="padding:6px;border:1px solid var(--rule)">AHF</td><td style="padding:6px;border:1px solid var(--rule)">症状+体征</td><td style="padding:6px;border:1px solid var(--rule)"><strong>急性心力衰竭</strong></td><td style="padding:6px;border:1px solid var(--rule)">利尿+扩血管</td></tr>
+          <tr><td style="padding:6px;border:1px solid var(--rule)">UA</td><td style="padding:6px;border:1px solid var(--rule)">症状+检查</td><td style="padding:6px;border:1px solid var(--rule)"><strong>不稳定型心绞痛</strong></td><td style="padding:6px;border:1px solid var(--rule)">抗栓+观察</td></tr>
+          <tr><td style="padding:6px;border:1px solid var(--rule)">DCM</td><td style="padding:6px;border:1px solid var(--rule)">症状+体征</td><td style="padding:6px;border:1px solid var(--rule)"><strong>扩张型心肌病</strong></td><td style="padding:6px;border:1px solid var(--rule)">新四联药物</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./_shared/js/app.js"></script>
 <script>
 /* ============================================================
    临床诊断模拟 — <span class="dcp">17</span>维度加权匹配引擎
    ============================================================ */
+
+/* ---- 推理逻辑弹窗 ---- */
+function showReasoningModal() {
+  document.getElementById('reasoning-modal').classList.add('show');
+}
+function hideReasoningModal() {
+  document.getElementById('reasoning-modal').classList.remove('show');
+}
 
 /* ---- 1. 维度权重配置 ---- */
 var DIM_WEIGHTS = {
@@ -666,96 +971,703 @@ loadData(function(d) {
   });
 });
 
-/* ---- 4. 主匹配函数 ---- */
-function runDiagnosis() {
-  var text = document.getElementById('patient-input').value.trim();
-  if (!text) { alert('请输入患者临床信息'); return; }
+/* ---- 4. 全局状态 ---- */
+var currentStep = 0;
+var patientData = {};
+var pathwayConfirmed = false;
+var currentScenarioId = '';
+var stepHistory = [];  // 保存每步结果
+
+/* ---- 5. 9步步骤定义 ---- */
+var STEP_DEFS = [
+  { id: 0, name: '等待开始', icon: '⏳', desc: '请选择场景并输入患者信息' },
+  { id: 1, name: '高危筛查', icon: '🔍', desc: '基于主诉和检查结果进行高危疾病筛查', apiStep: 'screening' },
+  { id: 2, name: '专病推荐', icon: '💡', desc: '根据筛查结果推荐最可能的专病', apiStep: 'disease_recommendation' },
+  { id: 3, name: '确认入径', icon: '🏥', desc: '确认是否进入专病诊疗路径', apiStep: 'confirm_pathway' },
+  { id: 4, name: '证据补齐', icon: '📋', desc: '补齐诊断所需的证据和检查', apiStep: 'stage_push' },
+  { id: 5, name: '分型分层', icon: '🔬', desc: '确定疾病分型和风险分层', apiStep: 'stage_push' },
+  { id: 6, name: '治疗决策', icon: '💊', desc: '制定治疗方案和决策', apiStep: 'stage_push' },
+  { id: 7, name: '治疗执行', icon: '⚡', desc: '执行治疗方案', apiStep: 'stage_push' },
+  { id: 8, name: '出院准备', icon: '📋', desc: '评估出院条件和准备', apiStep: 'stage_push' },
+  { id: 9, name: '随访计划', icon: '📅', desc: '制定出院后随访计划', apiStep: 'stage_push' }
+];
+
+/* ---- 6. 场景选择器 ---- */
+var SCENARIOS = [
+  {
+    id: 'stemi',
+    name: 'STEMI急诊',
+    data: {
+      chief_complaint: '65岁男性，胸痛2小时，向左肩放射，伴出汗、恶心。既往高血压病史10年，吸烟30年。查体：BP 130/85mmHg，HR 90次/分，双肺呼吸音清。',
+      ecg_result: 'ST段抬高', troponin: 'cTnI升高', ckmb: 'CK-MB升高',
+      age: 65, heart_rate: 90, bp_systolic: 130, killip: 'I'
+    }
+  },
+  {
+    id: 'af',
+    name: '心房颤动',
+    data: {
+      chief_complaint: '72岁女性，心悸、心律不齐3天，伴头晕、乏力。既往房颤病史5年，高血压20年。查体：BP 140/90mmHg，HR 120次/分，心律绝对不齐。',
+      ecg_result: '', troponin: '', ckmb: '',
+      age: 72, heart_rate: 120, bp_systolic: 140, killip: 'I'
+    }
+  },
+  {
+    id: 'ahf',
+    name: '急性心力衰竭',
+    data: {
+      chief_complaint: '68岁男性，呼吸困难、端坐呼吸、双下肢水肿1周。既往陈旧性心肌梗死3年。查体：BP 110/70mmHg，HR 100次/分，双肺底湿啰音，双下肢凹陷性水肿。',
+      ecg_result: '', troponin: '', ckmb: '',
+      age: 68, heart_rate: 100, bp_systolic: 110, killip: 'III'
+    }
+  },
+  {
+    id: 'ua',
+    name: '不稳定型心绞痛',
+    data: {
+      chief_complaint: '58岁男性，胸骨后压榨性疼痛，休息时发作，持续15分钟可缓解。既往高脂血症5年。查体：BP 135/85mmHg，HR 78次/分。',
+      ecg_result: 'ST段压低', troponin: '', ckmb: '',
+      age: 58, heart_rate: 78, bp_systolic: 135, killip: 'I'
+    }
+  },
+  {
+    id: 'dcm',
+    name: '扩张型心肌病',
+    data: {
+      chief_complaint: '45岁男性，活动后气促2个月，心脏扩大，EF 35%。查体：BP 100/65mmHg，HR 95次/分，心界扩大，S3奔马律。',
+      ecg_result: '', troponin: '', ckmb: '',
+      age: 45, heart_rate: 95, bp_systolic: 100, killip: 'II'
+    }
+  }
+];
+
+function selectScenario(id) {
+  var scenario = SCENARIOS.find(function(s){ return s.id === id; });
+  if (!scenario) return;
+  currentScenarioId = id;
+
+  // 填充输入
+  document.getElementById('patient-input').value = scenario.data.chief_complaint;
+  document.getElementById('struct-ecg').value = scenario.data.ecg_result || '';
+  document.getElementById('struct-troponin').value = scenario.data.troponin || '';
+  document.getElementById('struct-ckmb').value = scenario.data.ckmb || '';
+  document.getElementById('struct-age').value = scenario.data.age || '';
+  document.getElementById('struct-hr').value = scenario.data.heart_rate || '';
+  document.getElementById('struct-bp').value = scenario.data.bp_systolic || '';
+  document.getElementById('struct-killip').value = scenario.data.killip || '';
+
+  // 重置步骤
+  currentStep = 0;
+  pathwayConfirmed = false;
+  stepHistory = [];
+
+  // 更新场景选择器样式
+  var sceneIds = ['stemi','af','ahf','ua','dcm'];
+  sceneIds.forEach(function(sid) {
+    var el = document.getElementById('scene-' + sid);
+    if (el) el.style.borderColor = (sid === id) ? 'rgba(79,140,255,.6)' : '';
+    if (el) el.style.background = (sid === id) ? 'rgba(79,140,255,.06)' : '';
+  });
+
+  // 重置中栏
+  updateMiddlePanel();
+  // 重置右栏
+  document.getElementById('cdss-panel').innerHTML =
+    '<div class="cdss-empty"><div class="cdss-empty-icon">&#129302;</div><div>已加载场景: ' + scenario.name + '</div><div style="font-size:11px;margin-top:6px;color:var(--muted)">点击"下一步"开始诊疗流程</div></div>';
 
   // 提取关键词
-  var keywords = extractKeywords(text);
+  var keywords = extractKeywords(scenario.data.chief_complaint);
   displayKeywords(keywords);
+}
 
-  if (keywords.length === 0) {
-    document.getElementById('diagnosis-results').innerHTML =
-      '<div class="no-results"><div class="no-results-icon">&#128269;</div><div>未提取到有效医学关键词，请使用更具体的医学术语</div></div>';
-    document.getElementById('stats-bar').style.display = 'none';
-    return;
+/* ---- 7. 收集患者数据 ---- */
+function collectPatientData() {
+  return {
+    chief_complaint: document.getElementById('patient-input').value.trim(),
+    ecg_result: document.getElementById('struct-ecg').value,
+    troponin: document.getElementById('struct-troponin').value,
+    ckmb: document.getElementById('struct-ckmb').value,
+    age: parseInt(document.getElementById('struct-age').value) || 0,
+    heart_rate: parseInt(document.getElementById('struct-hr').value) || 0,
+    bp_systolic: parseInt(document.getElementById('struct-bp').value) || 0,
+    killip: document.getElementById('struct-killip').value
+  };
+}
+
+/* ---- 8. 下一步（核心9步推进函数） ---- */
+function nextStep() {
+  // 收集当前输入
+  patientData = collectPatientData();
+  if (!patientData.chief_complaint) { alert('请输入患者临床信息'); return; }
+
+  currentStep++;
+  if (currentStep > 9) { currentStep = 9; return; }
+
+  var stepDef = STEP_DEFS[currentStep];
+
+  // 更新按钮状态
+  var btn = document.getElementById('btn-next-step');
+  btn.textContent = '处理中...';
+  btn.disabled = true;
+
+  // 更新中栏状态
+  updateMiddlePanel();
+
+  // 更新右栏为加载状态
+  document.getElementById('cdss-panel').innerHTML =
+    '<div class="cdss-empty"><div class="cdss-empty-icon">&#9203;</div><div>正在执行: ' + stepDef.name + '...</div></div>';
+
+  // 提取关键词（首次）
+  if (currentStep === 1) {
+    var keywords = extractKeywords(patientData.chief_complaint);
+    displayKeywords(keywords);
   }
 
-  // 对每个疾病做加权匹配
-  var matches = [];
-  var allHitDims = {}; // 全局统计命中维度
+  // 构建API请求
+  var payload = Object.assign({}, patientData, {
+    step: stepDef.apiStep || 'screening',
+    current_step: currentStep,
+    pathway_confirmed: pathwayConfirmed,
+    scenario_id: currentScenarioId,
+    step_history: stepHistory
+  });
 
-  Object.keys(KG_DATA.diseases).forEach(function(code) {
-    var disease = KG_DATA.diseases[code];
-    var dims = disease.dimensions;
-    var hitDimensions = {}; // dimKey -> [entityName, ...]
-    var dimHitCount = {};   // dimKey -> count
-    var totalScore = 0;
-    var totalHits = 0;
+  // 调用API
+  fetch('/api/kg/diagnose', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    // 保存步骤历史
+    stepHistory.push({ step: currentStep, data: data });
 
-    // 遍历全部17维度（DifferentialDiagnosis权重为0，但仍可显示）
-    DIM_KEYS.forEach(function(dimKey) {
-      var items = dims[dimKey] || [];
-      if (items.length === 0) return;
-      var weight = DIM_WEIGHTS[dimKey] || 0;
-      var dimHits = [];
+    // 渲染CDSS面板
+    renderCDSSPanel(currentStep, data);
 
-      items.forEach(function(entity) {
-        var entityName = entity.name;
-        // 检查实体名是否包含任一关键词，或关键词是否包含实体名
-        for (var k = 0; k < keywords.length; k++) {
-          var kw = keywords[k];
-          if (entityName.indexOf(kw) !== -1 || kw.indexOf(entityName) !== -1) {
-            if (dimHits.indexOf(entityName) === -1) {
-              dimHits.push(entityName);
-            }
-            break;
-          }
-        }
-      });
+    // 更新中栏（评分等）
+    updateMiddlePanelWithData(data);
 
-      if (dimHits.length > 0) {
-        hitDimensions[dimKey] = dimHits;
-        dimHitCount[dimKey] = dimHits.length;
-        totalScore += dimHits.length * weight;
-        totalHits += dimHits.length;
-        if (!allHitDims[dimKey]) allHitDims[dimKey] = 0;
-        allHitDims[dimKey] += dimHits.length;
+    // 恢复按钮
+    btn.disabled = false;
+    if (currentStep >= 9) {
+      btn.textContent = '已完成';
+      btn.disabled = true;
+    } else {
+      btn.textContent = '下一步';
+    }
+  }).catch(function(e) {
+    console.error('Step API error:', e);
+    // 降级到本地推理
+    var localData = generateLocalStepResult(currentStep);
+    stepHistory.push({ step: currentStep, data: localData });
+    renderCDSSPanel(currentStep, localData);
+    updateMiddlePanelWithData(localData);
+    btn.disabled = false;
+    btn.textContent = (currentStep >= 9) ? '已完成' : '下一步';
+  });
+}
+
+/* ---- 9. 本地降级推理（API不可用时） ---- */
+function generateLocalStepResult(step) {
+  var keywords = extractKeywords(patientData.chief_complaint);
+  var hasSTUp = patientData.ecg_result === 'ST段抬高' || keywords.indexOf('ST段抬高') !== -1;
+  var hasTroponinUp = patientData.troponin && patientData.troponin.indexOf('升高') !== -1;
+  var hasChestPain = keywords.indexOf('胸痛') !== -1 || keywords.indexOf('心前区疼痛') !== -1;
+  var hasPalpitation = keywords.indexOf('心悸') !== -1;
+  var hasDyspnea = keywords.indexOf('呼吸困难') !== -1 || keywords.indexOf('端坐呼吸') !== -1;
+  var killip = patientData.killip || '';
+
+  var result = { step: STEP_DEFS[step].name, step_id: step };
+
+  if (step === 1) {
+    // 高危筛查
+    var cats = [
+      { category: '急性冠脉综合征(ACS)', matched: hasChestPain && (hasSTUp || hasTroponinUp), matched_symptoms: [] },
+      { category: '心力衰竭', matched: hasDyspnea || killip === 'II' || killip === 'III' || killip === 'IV', matched_symptoms: [] },
+      { category: '心律失常', matched: hasPalpitation || patientData.heart_rate > 100 || patientData.heart_rate < 60, matched_symptoms: [] },
+      { category: '主动脉急症', matched: keywords.indexOf('撕裂样疼痛') !== -1, matched_symptoms: [] },
+      { category: '肺栓塞', matched: keywords.indexOf('呼吸急促') !== -1 && keywords.indexOf('胸痛') !== -1, matched_symptoms: [] }
+    ];
+    cats.forEach(function(c) {
+      if (c.matched) {
+        c.matched_symptoms = keywords.slice(0, 3);
       }
     });
+    var matched = cats.filter(function(c){return c.matched;});
+    result.high_risk_categories = cats;
+    result.matched_count = matched.length;
+    result.recommended_exams = ['心电图','心肌标志物','血常规','肝肾功能','凝血功能'];
+    if (hasChestPain) result.recommended_exams.push('冠状动脉造影','超声心动图');
+  } else if (step === 2) {
+    // 专病推荐
+    var diseases = [];
+    if (hasChestPain && hasSTUp && hasTroponinUp) {
+      diseases.push({ name: '急性心肌梗死(STEMI)', code: 'AMI_STEMI', confidence: 0.95, reason: '胸痛+ST抬高+肌钙蛋白升高三联征' });
+    } else if (hasChestPain && hasTroponinUp) {
+      diseases.push({ name: '非ST段抬高型心肌梗死(NSTEMI)', code: 'AMI_NSTEMI', confidence: 0.85, reason: '胸痛+肌钙蛋白升高' });
+    } else if (hasChestPain && patientData.ecg_result === 'ST段压低') {
+      diseases.push({ name: '不稳定型心绞痛(UA)', code: 'UA', confidence: 0.75, reason: '胸痛+ST段压低' });
+    } else if (hasPalpitation) {
+      diseases.push({ name: '心房颤动', code: 'AF', confidence: 0.80, reason: '心悸+心动过速' });
+    } else if (hasDyspnea) {
+      diseases.push({ name: '急性心力衰竭', code: 'AHF', confidence: 0.80, reason: '呼吸困难+端坐呼吸' });
+    }
+    if (diseases.length === 0) {
+      diseases.push({ name: '待进一步鉴别', code: 'UNKNOWN', confidence: 0.3, reason: '症状不典型，需补充检查' });
+    }
+    result.recommendations = diseases;
+    result.top_disease = diseases[0];
+  } else if (step === 3) {
+    // 确认入径
+    var pathwayName = '冠心病诊疗路径';
+    if (hasPalpitation) pathwayName = '心律失常诊疗路径';
+    else if (hasDyspnea && !hasChestPain) pathwayName = '心力衰竭诊疗路径';
+    result.pathway_name = pathwayName;
+    result.satisfied_conditions = [];
+    result.missing_conditions = [];
+    if (hasChestPain) result.satisfied_conditions.push('主诉胸痛');
+    if (hasSTUp) result.satisfied_conditions.push('ECG: ST段抬高');
+    if (hasTroponinUp) result.satisfied_conditions.push('肌钙蛋白升高');
+    if (patientData.age > 0) result.satisfied_conditions.push('年龄: ' + patientData.age + '岁');
+    if (!patientData.ecg_result) result.missing_conditions.push('ECG结果未填写');
+    if (!patientData.troponin) result.missing_conditions.push('肌钙蛋白未出结果');
+    result.can_enter = result.satisfied_conditions.length >= 2;
+  } else if (step === 4) {
+    // 证据补齐
+    result.evidence_status = [];
+    result.evidence_status.push({ item: '主诉信息', status: 'complete', detail: patientData.chief_complaint.substring(0, 30) + '...' });
+    result.evidence_status.push({ item: 'ECG结果', status: patientData.ecg_result ? 'complete' : 'missing', detail: patientData.ecg_result || '未填写' });
+    result.evidence_status.push({ item: '肌钙蛋白', status: patientData.troponin ? 'complete' : 'missing', detail: patientData.troponin || '未出结果' });
+    result.evidence_status.push({ item: 'CK-MB', status: patientData.ckmb ? 'complete' : 'missing', detail: patientData.ckmb || '未出结果' });
+    result.evidence_status.push({ item: 'Killip分级', status: patientData.killip ? 'complete' : 'missing', detail: patientData.killip ? 'Killip ' + patientData.killip : '未评估' });
+    result.missing_evidence = result.evidence_status.filter(function(e){return e.status==='missing';});
+    result.complete_count = result.evidence_status.filter(function(e){return e.status==='complete';}).length;
+  } else if (step === 5) {
+    // 分型分层
+    var subtype = '待定';
+    var risk = '中危';
+    if (hasSTUp && hasTroponinUp) { subtype = 'STEMI'; risk = '高危'; }
+    else if (hasTroponinUp && !hasSTUp) { subtype = 'NSTEMI'; risk = '高危'; }
+    else if (hasChestPain && patientData.ecg_result === 'ST段压低') { subtype = 'UA'; risk = '中危'; }
+    else if (hasPalpitation) { subtype = '房颤'; risk = patientData.heart_rate > 150 ? '高危' : '中危'; }
+    else if (hasDyspnea) { subtype = killip === 'III' || killip === 'IV' ? '重度心衰' : '轻-中度心衰'; risk = killip === 'IV' ? '极高危' : (killip === 'III' ? '高危' : '中危'); }
+    result.subtype = subtype;
+    result.risk_level = risk;
+    result.grace_score = calculateGrace(patientData);
+    result.timi_score = calculateTIMI(patientData);
+  } else if (step === 6) {
+    // 治疗决策
+    result.treatment_options = [];
+    if (hasSTUp && hasTroponinUp) {
+      result.treatment_options.push({ name: '急诊PCI（首选）', priority: 'I类推荐', guideline: 'ESC 2023', confidence: 0.95 });
+      result.treatment_options.push({ name: '溶栓治疗（无PCI条件时）', priority: 'I类推荐', guideline: 'ACC/AHA', confidence: 0.85 });
+      result.treatment_options.push({ name: 'DAPT（双联抗血小板）', priority: 'I类推荐', guideline: 'ESC 2023', confidence: 0.95 });
+    } else if (hasTroponinUp) {
+      result.treatment_options.push({ name: '抗栓治疗', priority: 'I类推荐', guideline: 'ESC 2023', confidence: 0.90 });
+      result.treatment_options.push({ name: '早期侵入策略评估', priority: 'IIa类推荐', guideline: 'ACC/AHA', confidence: 0.80 });
+    } else if (hasPalpitation) {
+      result.treatment_options.push({ name: '抗凝治疗（CHA2DS2-VASc评估）', priority: 'I类推荐', guideline: 'ESC 2024', confidence: 0.90 });
+      result.treatment_options.push({ name: '心率控制（β阻滞剂/CCB）', priority: 'I类推荐', guideline: 'ESC 2024', confidence: 0.85 });
+    } else if (hasDyspnea) {
+      result.treatment_options.push({ name: '利尿剂（袢利尿剂）', priority: 'I类推荐', guideline: 'ESC 2023', confidence: 0.90 });
+      result.treatment_options.push({ name: '血管扩张剂', priority: 'IIa类推荐', guideline: 'ACC/AHA', confidence: 0.80 });
+    } else {
+      result.treatment_options.push({ name: '进一步检查评估', priority: '', guideline: '', confidence: 0.60 });
+    }
+    result.recommended = result.treatment_options[0];
+  } else if (step === 7) {
+    // 治疗执行
+    result.execution_plan = [];
+    if (hasSTUp && hasTroponinUp) {
+      result.execution_plan.push({ action: '阿司匹林 300mg 负荷', time: '立即', status: 'pending' });
+      result.execution_plan.push({ action: '氯吡格雷/替格瑞洛 负荷剂量', time: '立即', status: 'pending' });
+      result.execution_plan.push({ action: '肝素 抗凝', time: '立即', status: 'pending' });
+      result.execution_plan.push({ action: '急诊PCI术', time: 'D-to-B ≤90min', status: 'pending' });
+    } else {
+      result.execution_plan.push({ action: '完善相关检查', time: '入院后', status: 'pending' });
+      result.execution_plan.push({ action: '药物治疗', time: '医嘱下达后', status: 'pending' });
+    }
+    result.alerts = [];
+    if (patientData.age > 75) result.alerts.push('高龄患者，注意出血风险评估');
+    if (killip === 'III' || killip === 'IV') result.alerts.push('心功能不全，注意血流动力学监测');
+  } else if (step === 8) {
+    // 出院准备
+    result.discharge_criteria = [
+      { item: '血流动力学稳定', met: true },
+      { item: '心肌标志物下降', met: hasTroponinUp ? false : true },
+      { item: '无再发胸痛', met: true },
+      { item: '二级预防药物已调整', met: true },
+      { item: '患者教育完成', met: false }
+    ];
+    result.ready_count = result.discharge_criteria.filter(function(c){return c.met;}).length;
+    result.total_count = result.discharge_criteria.length;
+    result.can_discharge = result.ready_count >= 4;
+  } else if (step === 9) {
+    // 随访计划
+    result.followup_plan = [
+      { time: '1周', content: '伤口评估、心电图', type: '门诊' },
+      { time: '1月', content: '血脂、心电图、超声心动图', type: '门诊' },
+      { time: '3月', content: '运动负荷试验', type: '门诊' },
+      { time: '6月', content: '血脂、心电图、超声心动图', type: '门诊' },
+      { time: '1年', content: '冠脉CTA/造影复查', type: '门诊' }
+    ];
+    result.discharge_meds = ['阿司匹林 100mg qd', '氯吡格雷 75mg qd（至少12月）', '阿托伐他汀 20mg qn', '美托洛尔缓释片 47.5mg qd'];
+    result.lifestyle = ['戒烟', '低盐低脂饮食', '适量运动', '控制体重', '定期监测血压/血糖'];
+  }
 
-    if (totalHits > 0) {
-      matches.push({
-        code: code,
-        name: disease.info.name,
-        nameEn: disease.info.name_en || '',
-        hitDimensions: hitDimensions,
-        dimHitCount: dimHitCount,
-        totalScore: totalScore,
-        totalHits: totalHits,
-        coverage: getCoverage(code),
-        dimCoverage: Object.keys(hitDimensions).length
+  return result;
+}
+
+/* ---- 10. GRACE/TIMI本地计算 ---- */
+function calculateGrace(d) {
+  var score = 0;
+  score += Math.max(0, (d.age - 40)) * 1.8;
+  if (d.heart_rate > 100) score += (d.heart_rate - 100) * 0.5;
+  if (d.bp_systolic < 100) score += 50;
+  else if (d.bp_systolic < 120) score += 30;
+  else if (d.bp_systolic < 140) score += 10;
+  if (d.killip === 'II') score += 20;
+  else if (d.killip === 'III') score += 40;
+  else if (d.killip === 'IV') score += 60;
+  if (d.troponin && d.troponin.indexOf('升高') !== -1) score += 15;
+  var level = score > 140 ? '高危' : (score > 108 ? '中危' : '低危');
+  return { score: Math.round(score), level: level };
+}
+function calculateTIMI(d) {
+  var score = 0;
+  if (d.age >= 65) score++;
+  if (d.troponin && d.troponin.indexOf('升高') !== -1) score++;
+  if (d.ecg_result && d.ecg_result !== '正常') score++;
+  var level = score >= 5 ? '高危' : (score >= 3 ? '中危' : '低危');
+  return { score: score, level: level };
+}
+
+/* ---- 11. 渲染CDSS面板（右栏） ---- */
+function renderCDSSPanel(step, data) {
+  var panel = document.getElementById('cdss-panel');
+  var h = '';
+
+  if (step === 1) {
+    // 高危筛查结果
+    h += '<div class="cdss-block"><div class="cdss-block-title green">&#9989; 高危筛查结果</div>';
+    (data.high_risk_categories || []).forEach(function(cat) {
+      h += '<div class="cdss-item"><span class="icon">' + (cat.matched ? '&#9989;' : '&#10060;') + '</span>';
+      h += '<span>' + cat.category + '</span>';
+      if (cat.matched && cat.matched_symptoms && cat.matched_symptoms.length) {
+        h += '<span style="margin-left:auto;font-size:10px;color:var(--accent)">命中: ' + cat.matched_symptoms.slice(0,3).join(', ') + '</span>';
+      }
+      h += '</div>';
+    });
+    h += '</div>';
+
+    // 推荐检查
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128203; 推荐检查</div>';
+    (data.recommended_exams || []).forEach(function(exam) {
+      h += '<div class="cdss-item"><span class="icon">&#8226;</span><span>' + exam + '</span></div>';
+    });
+    h += '</div>';
+
+    // 匹配统计
+    h += '<div class="cdss-block"><div class="cdss-block-title cyan">&#128202; 统计</div>';
+    h += '<div class="cdss-item muted">匹配高危类别: ' + (data.matched_count || 0) + '个</div>';
+    h += '</div>';
+
+  } else if (step === 2) {
+    // 专病推荐
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128161; 专病推荐结果</div>';
+    (data.recommendations || []).forEach(function(rec, i) {
+      var conf = Math.round((rec.confidence || 0) * 100);
+      var confColor = conf >= 80 ? 'var(--green)' : (conf >= 60 ? 'var(--orange)' : 'var(--muted)');
+      h += '<div style="padding:8px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;margin-bottom:6px">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+      h += '<span style="font-weight:700;font-size:13px;color:var(--ink)">' + (i+1) + '. ' + rec.name + '</span>';
+      h += '<span style="font-size:12px;font-weight:700;color:' + confColor + '">' + conf + '%</span>';
+      h += '</div>';
+      if (rec.reason) h += '<div style="font-size:11px;color:var(--muted);margin-top:3px">' + rec.reason + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+  } else if (step === 3) {
+    // 确认入径
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#127973; 路径确认</div>';
+    h += '<div style="font-weight:800;font-size:15px;color:var(--ink);margin-bottom:8px">' + (data.pathway_name || '诊疗路径') + '</div>';
+
+    h += '<div style="margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--green)">&#9989; 已满足条件:</span></div>';
+    (data.satisfied_conditions || []).forEach(function(c) {
+      h += '<div class="cdss-item"><span class="icon" style="color:var(--green)">&#9989;</span><span>' + c + '</span></div>';
+    });
+
+    if (data.missing_conditions && data.missing_conditions.length) {
+      h += '<div style="margin-top:6px;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--orange)">&#9888;&#65039; 缺失信息:</span></div>';
+      data.missing_conditions.forEach(function(c) {
+        h += '<div class="cdss-item"><span class="icon" style="color:var(--orange)">&#9888;&#65039;</span><span>' + c + '</span></div>';
       });
+    }
+    h += '</div>';
+
+    // 入径按钮
+    h += '<div class="pathway-confirm-area">';
+    h += '<div class="pathway-name">' + (data.pathway_name || '诊疗路径') + '</div>';
+    if (data.can_enter !== false) {
+      h += '<div class="pathway-detail">已满足 ' + (data.satisfied_conditions||[]).length + ' 项条件，可进入路径</div>';
+      h += '<button class="btn btn-primary" style="margin-right:8px" onclick="confirmPathway()">确认进入路径</button>';
+    } else {
+      h += '<div class="pathway-detail">条件不足，建议先完善检查</div>';
+    }
+    h += '<button class="btn btn-outline" onclick="skipPathway()">排除，继续观察</button>';
+    h += '</div>';
+
+  } else if (step === 4) {
+    // 证据补齐
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128203; 证据补齐状态</div>';
+    (data.evidence_status || []).forEach(function(ev) {
+      var icon = ev.status === 'complete' ? '&#9989;' : '&#9888;&#65039;';
+      var color = ev.status === 'complete' ? 'var(--green)' : 'var(--orange)';
+      h += '<div class="cdss-item"><span class="icon" style="color:' + color + '">' + icon + '</span>';
+      h += '<span><strong>' + ev.item + '</strong>: ' + ev.detail + '</span></div>';
+    });
+    h += '</div>';
+
+    if (data.missing_evidence && data.missing_evidence.length) {
+      h += '<div class="cdss-block"><div class="cdss-block-title yellow">&#9888;&#65039; 缺失信息</div>';
+      data.missing_evidence.forEach(function(ev) {
+        h += '<div class="cdss-item"><span class="icon">&#8226;</span><span>' + ev.item + ': 建议补充</span></div>';
+      });
+      h += '</div>';
+    }
+
+    h += '<div class="cdss-block"><div class="cdss-block-title green">&#128202; 完成度: ' + (data.complete_count||0) + '/' + (data.evidence_status||[]).length + '</div></div>';
+
+  } else if (step === 5) {
+    // 分型分层
+    h += '<div class="cdss-block"><div class="cdss-block-title purple">&#128300; 分型分层结果</div>';
+    h += '<div class="cdss-item"><span class="icon">&#127973;</span><span>疾病分型: <strong style="color:var(--accent)">' + (data.subtype || '待定') + '</strong></span></div>';
+    var riskColor = data.risk_level === '高危' || data.risk_level === '极高危' ? 'var(--accent2)' : (data.risk_level === '中危' ? 'var(--orange)' : 'var(--green)');
+    h += '<div class="cdss-item"><span class="icon">&#9888;&#65039;</span><span>风险等级: <strong style="color:' + riskColor + '">' + (data.risk_level || '待评估') + '</strong></span></div>';
+    h += '</div>';
+
+    if (data.grace_score || data.timi_score) {
+      h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128202; 风险评分</div>';
+      if (data.grace_score) {
+        var gc = data.grace_score.level === '高危' ? 'score-level-high' : (data.grace_score.level === '中危' ? 'score-level-mid' : 'score-level-low');
+        h += '<div class="cdss-item"><span>GRACE: <strong>' + data.grace_score.score + '</strong></span><span class="score-item-level ' + gc + '">' + data.grace_score.level + '</span></div>';
+      }
+      if (data.timi_score) {
+        var tc = data.timi_score.level === '高危' ? 'score-level-high' : (data.timi_score.level === '中危' ? 'score-level-mid' : 'score-level-low');
+        h += '<div class="cdss-item"><span>TIMI: <strong>' + data.timi_score.score + '</strong></span><span class="score-item-level ' + tc + '">' + data.timi_score.level + '</span></div>';
+      }
+      h += '</div>';
+    }
+
+  } else if (step === 6) {
+    // 治疗决策
+    h += '<div class="cdss-block"><div class="cdss-block-title green">&#128138; 治疗方案推荐</div>';
+    (data.treatment_options || []).forEach(function(opt, i) {
+      h += '<div style="padding:8px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;margin-bottom:6px">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+      h += '<span style="font-weight:700;font-size:12px;color:var(--ink)">' + (i===0 ? '&#9733; ' : '') + opt.name + '</span>';
+      if (opt.priority) h += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(79,140,255,.1);color:var(--accent)">' + opt.priority + '</span>';
+      h += '</div>';
+      if (opt.guideline) h += '<div style="font-size:10px;color:var(--muted);margin-top:3px">依据: ' + opt.guideline + ' | 置信度: ' + Math.round((opt.confidence||0)*100) + '%</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+  } else if (step === 7) {
+    // 治疗执行
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#9889; 治疗执行计划</div>';
+    (data.execution_plan || []).forEach(function(ep) {
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule)">';
+      h += '<span style="font-size:10px;color:var(--accent);font-weight:600;min-width:80px">' + (ep.time || '') + '</span>';
+      h += '<span style="font-size:12px;color:var(--ink)">' + ep.action + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+    if (data.alerts && data.alerts.length) {
+      h += '<div class="cdss-block"><div class="cdss-block-title red">&#9888;&#65039; 注意事项</div>';
+      data.alerts.forEach(function(alert) {
+        h += '<div class="cdss-item"><span class="icon" style="color:var(--accent2)">&#9888;&#65039;</span><span>' + alert + '</span></div>';
+      });
+      h += '</div>';
+    }
+
+  } else if (step === 8) {
+    // 出院准备
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128203; 出院评估</div>';
+    (data.discharge_criteria || []).forEach(function(c) {
+      var icon = c.met ? '&#9989;' : '&#10060;';
+      var color = c.met ? 'var(--green)' : 'var(--accent2)';
+      h += '<div class="cdss-item"><span class="icon" style="color:' + color + '">' + icon + '</span><span>' + c.item + '</span></div>';
+    });
+    h += '</div>';
+
+    h += '<div class="cdss-block"><div class="cdss-block-title ' + (data.can_discharge ? 'green' : 'yellow') + '">';
+    h += data.can_discharge ? '&#9989; 可以出院' : '&#9888;&#65039; 暂不建议出院';
+    h += ' (' + (data.ready_count||0) + '/' + (data.total_count||0) + ' 达标)</div></div>';
+
+  } else if (step === 9) {
+    // 随访计划
+    h += '<div class="cdss-block"><div class="cdss-block-title blue">&#128197; 随访计划</div>';
+    (data.followup_plan || []).forEach(function(fp) {
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule)">';
+      h += '<span style="font-size:10px;color:var(--accent);font-weight:600;min-width:40px">' + fp.time + '</span>';
+      h += '<span style="font-size:12px;color:var(--ink)">' + fp.content + '</span>';
+      h += '<span style="margin-left:auto;font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg2);color:var(--muted)">' + (fp.type || '') + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+    if (data.discharge_meds) {
+      h += '<div class="cdss-block"><div class="cdss-block-title green">&#128138; 出院带药</div>';
+      data.discharge_meds.forEach(function(med) {
+        h += '<div class="cdss-item"><span class="icon">&#8226;</span><span>' + med + '</span></div>';
+      });
+      h += '</div>';
+    }
+
+    if (data.lifestyle) {
+      h += '<div class="cdss-block"><div class="cdss-block-title purple">&#128170; 生活方式建议</div>';
+      data.lifestyle.forEach(function(ls) {
+        h += '<div class="cdss-item"><span class="icon">&#9679;</span><span>' + ls + '</span></div>';
+      });
+      h += '</div>';
+    }
+
+    // 完成提示
+    h += '<div style="text-align:center;padding:12px;background:rgba(81,207,102,.06);border:1px solid rgba(81,207,102,.2);border-radius:8px;margin-top:8px">';
+    h += '<div style="font-size:16px;margin-bottom:4px">&#127881;</div>';
+    h += '<div style="font-size:13px;font-weight:700;color:var(--green)">9步诊疗流程已完成</div>';
+    h += '</div>';
+  }
+
+  // 添加医生反馈区（除第3步外）
+  if (step !== 3) {
+    h += '<div class="cdss-feedback">';
+    h += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">&#128100;&#8205;&#9877;&#65039; 医生反馈</div>';
+    h += '<div class="cdss-feedback-btns">';
+    h += '<span class="cdss-feedback-btn" onclick="setFeedback(this,\'adopted\')">&#9989; 已采纳</span>';
+    h += '<span class="cdss-feedback-btn" onclick="setFeedback(this,\'ignored\')">&#10060; 已忽略</span>';
+    h += '<span class="cdss-feedback-btn" onclick="setFeedback(this,\'pending\')">&#9203; 暂不处理</span>';
+    h += '</div></div>';
+  }
+
+  panel.innerHTML = h;
+}
+
+/* ---- 12. 医生反馈 ---- */
+function setFeedback(el, type) {
+  var siblings = el.parentNode.querySelectorAll('.cdss-feedback-btn');
+  siblings.forEach(function(s){ s.classList.remove('selected'); });
+  el.classList.add('selected');
+  console.log('Doctor feedback:', currentStep, type);
+}
+
+/* ---- 13. 入径确认/跳过 ---- */
+function confirmPathway() {
+  pathwayConfirmed = true;
+  document.getElementById('pathway-stage').textContent = '已入径';
+  document.getElementById('pathway-stage').className = 'stage-tag confirmed';
+  document.getElementById('pathway-status').textContent = '路径已激活';
+  document.getElementById('pathway-status').className = 'stage-tag active';
+  // 自动进入下一步
+  nextStep();
+}
+
+function skipPathway() {
+  pathwayConfirmed = false;
+  document.getElementById('pathway-stage').textContent = '未入径（排除）';
+  document.getElementById('pathway-stage').className = 'stage-tag';
+  document.getElementById('pathway-status').textContent = '继续观察';
+  // 显示排除提示
+  document.getElementById('cdss-panel').innerHTML =
+    '<div class="cdss-empty"><div class="cdss-empty-icon">&#128269;</div><div>已排除该路径，继续观察患者</div><div style="font-size:11px;margin-top:6px;color:var(--muted)">可点击"下一步"继续高危筛查</div></div>';
+  currentStep = 0;
+}
+
+/* ---- 14. 更新中栏面板 ---- */
+function updateMiddlePanel() {
+  // 更新三级判断入口
+  var badges = ['step-badge-1','step-badge-2','step-badge-3'];
+  badges.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (currentStep > i + 1) {
+      el.className = 'step-badge done';
+    } else if (currentStep === i + 1) {
+      el.className = 'step-badge active';
+    } else {
+      el.className = 'step-badge';
     }
   });
 
-  // 按得分降序排序
-  matches.sort(function(a, b) { return b.totalScore - a.totalScore; });
+  // 更新阶段标签
+  var stageEl = document.getElementById('pathway-stage');
+  var statusEl = document.getElementById('pathway-status');
+  if (currentStep === 0) {
+    stageEl.textContent = '未入径';
+    stageEl.className = 'stage-tag';
+    statusEl.textContent = '等待开始';
+    statusEl.className = 'stage-tag';
+  } else if (currentStep <= 3 && !pathwayConfirmed) {
+    stageEl.textContent = '未入径';
+    stageEl.className = 'stage-tag';
+    statusEl.textContent = STEP_DEFS[currentStep].name;
+    statusEl.className = 'stage-tag active';
+  } else if (pathwayConfirmed) {
+    stageEl.textContent = '已入径';
+    stageEl.className = 'stage-tag confirmed';
+    statusEl.textContent = STEP_DEFS[currentStep].name;
+    statusEl.className = 'stage-tag active';
+  }
 
-  // 计算最大得分（用于进度条百分比）
-  var maxScore = matches.length > 0 ? matches[0].totalScore : 1;
+  // 更新步骤内容区
+  var stepArea = document.getElementById('step-content-area');
+  var stepHtml = '';
+  stepHtml += '<div class="step-item"><div class="step-item-title">';
+  stepHtml += STEP_DEFS[currentStep].icon + ' 第' + currentStep + '步: ' + STEP_DEFS[currentStep].name;
+  stepHtml += '</div><div class="step-item-desc">' + STEP_DEFS[currentStep].desc + '</div></div>';
+  stepArea.innerHTML = stepHtml;
+}
 
-  // 统计信息
-  var matchedDims = 0;
-  Object.keys(allHitDims).forEach(function() { matchedDims++; });
-  document.getElementById('stat-matched').textContent = matches.length;
-  document.getElementById('stat-max').textContent = matches.length > 0 ? matches[0].totalScore : 0;
-  document.getElementById('stat-kw').textContent = keywords.length;
-  document.getElementById('stat-dims').textContent = matchedDims;
-  document.getElementById('stats-bar').style.display = 'flex';
+function updateMiddlePanelWithData(data) {
+  // 更新疾病标签
+  if (data.subtype || data.risk_level) {
+    var tagsEl = document.getElementById('disease-tags');
+    tagsEl.style.display = 'flex';
+    var tagsHtml = '';
+    if (data.subtype) tagsHtml += '<span class="disease-tag type">' + data.subtype + '</span>';
+    if (data.risk_level) tagsHtml += '<span class="disease-tag risk">' + data.risk_level + '</span>';
+    if (data.pathway_name) tagsHtml += '<span class="disease-tag subtype">' + data.pathway_name + '</span>';
+    tagsEl.innerHTML = tagsHtml;
+  }
 
-  displayResults(matches, maxScore);
+  // 更新评分面板
+  if (data.grace_score || data.timi_score || patientData.killip) {
+    var scorePanel = document.getElementById('score-panel');
+    scorePanel.style.display = 'grid';
+
+    if (data.grace_score) {
+      var gc = data.grace_score.level === '高危' ? 'score-level-high' : (data.grace_score.level === '中危' ? 'score-level-mid' : 'score-level-low');
+      document.getElementById('score-grace').querySelector('.score-item-value').innerHTML =
+        data.grace_score.score + ' <span class="score-item-level ' + gc + '">' + data.grace_score.level + '</span>';
+    }
+    if (data.timi_score) {
+      var tc = data.timi_score.level === '高危' ? 'score-level-high' : (data.timi_score.level === '中危' ? 'score-level-mid' : 'score-level-low');
+      document.getElementById('score-timi').querySelector('.score-item-value').innerHTML =
+        data.timi_score.score + ' <span class="score-item-level ' + tc + '">' + data.timi_score.level + '</span>';
+    }
+    if (patientData.killip) {
+      document.getElementById('score-killip').querySelector('.score-item-value').textContent = 'Killip ' + patientData.killip;
+    }
+  }
+}
+
+/* ---- 15. 主匹配函数（保留API兼容，由nextStep调用） ---- */
+function runDiagnosis() {
+  // 向后兼容：直接调用nextStep
+  nextStep();
 }
 
 /* ---- 5. 关键词提取 ---- */
@@ -902,6 +1814,20 @@ function displayResults(matches, maxScore) {
     });
     h += '</div></div>';
 
+    // 指南来源（循证依据）
+    var gls = m.guidelines || [];
+    if (gls.length > 0) {
+      h += '<div class="hit-entities" style="margin-top:8px">';
+      h += '<div class="hit-entities-title">📋 诊疗指南依据 (' + gls.length + '条)</div>';
+      h += '<div class="hit-entity-list" style="flex-direction:column;gap:4px">';
+      gls.forEach(function(gl) {
+        // 去掉文件扩展名，展示干净的指南名
+        var glName = gl.replace(/\.(pdf|docx)$/i, '');
+        h += '<span class="hit-entity" style="background:rgba(250,176,5,0.12);color:#fab005;border:1px solid rgba(250,176,5,0.25);white-space:normal;word-break:break-all;line-height:1.4" title="' + gl + '">📘 ' + glName + '</span>';
+      });
+      h += '</div></div>';
+    }
+
     h += '</div>'; // card-body
     h += '</div>'; // match-card
   }
@@ -912,6 +1838,125 @@ function displayResults(matches, maxScore) {
   for (var i = 0; i < displayCount; i++) {
     drawRadar('radar-' + i, matches[i]);
   }
+}
+
+/* ---- 7b. 显示API诊断结果 ---- */
+function displayAPIResults(candidates, input) {
+  var h = '';
+  var displayCount = Math.min(candidates.length, 10);
+  var maxConf = candidates[0].confidence || 1;
+
+  for (var idx = 0; idx < displayCount; idx++) {
+    var c = candidates[idx];
+    var isTop3 = idx < 3;
+    var pct = maxConf > 0 ? Math.round((c.confidence / maxConf) * 100) : 0;
+    var cardClass = 'match-card' + (isTop3 ? ' top3' : '');
+
+    h += '<div class="' + cardClass + '">';
+    h += '<div class="card-bar"></div>';
+    h += '<div class="card-body">';
+
+    // Header: rank + name + confidence + subtype
+    h += '<div class="card-top">';
+    h += '<div class="card-name' + (isTop3 ? ' card-top3' : '') + '">';
+    h += '<span class="rank">' + (idx + 1) + '</span>';
+    h += c.disease_name;
+    if (c.disease_name_en) h += '<span class="card-name-en">' + c.disease_name_en + '</span>';
+    if (c.subtype) h += ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;background:rgba(255,107,107,0.15);color:#ff6b6b;margin-left:6px">' + c.subtype + '</span>';
+    h += '</div>';
+    h += '<div class="card-score-badge">';
+    h += '<div><div class="card-score-num">' + Math.round(c.confidence * 100) + '%</div><div class="card-score-label">置信度</div></div>';
+    h += '</div></div>';
+
+    // Score bar
+    h += '<div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:' + pct + '%"></div></div></div>';
+
+    // Matched dimensions
+    var dims = c.matched_dimensions || {};
+    if (Object.keys(dims).length > 0) {
+      h += '<div class="dim-tags-wrap">';
+      Object.keys(dims).forEach(function(dimKey) {
+        var names = dims[dimKey];
+        h += '<span class="dim-tag dim-' + dimKey + '">' + (DIM_NAMES[dimKey] || dimKey) + '<span class="dim-count">x' + names.length + '</span></span>';
+      });
+      h += '</div>';
+    }
+
+    // Risk scores panel (GRACE/TIMI/Killip)
+    if (c.risk_scores) {
+      h += '<div style="margin:10px 0;padding:10px;background:rgba(79,140,255,0.04);border:1px solid rgba(79,140,255,0.12);border-radius:6px">';
+      h += '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">风险评估</div>';
+      h += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+      var rs = c.risk_scores;
+      if (rs.GRACE) {
+        var gc = rs.GRACE.level === '高危' ? '#ff6b6b' : (rs.GRACE.level === '中危' ? '#ffd43b' : '#51cf66');
+        h += '<div style="font-size:11px"><span style="color:var(--muted)">GRACE:</span> <span style="font-weight:700;color:' + gc + '">' + rs.GRACE.score + ' (' + rs.GRACE.level + ')</span></div>';
+      }
+      if (rs.TIMI) {
+        var tc = rs.TIMI.level === '高危' ? '#ff6b6b' : (rs.TIMI.level === '中危' ? '#ffd43b' : '#51cf66');
+        h += '<div style="font-size:11px"><span style="color:var(--muted)">TIMI:</span> <span style="font-weight:700;color:' + tc + '">' + rs.TIMI.score + ' (' + rs.TIMI.level + ')</span></div>';
+      }
+      if (rs.Killip) {
+        h += '<div style="font-size:11px"><span style="color:var(--muted)">Killip:</span> <span style="font-weight:700">' + rs.Killip.grade + '</span></div>';
+      }
+      h += '</div></div>';
+    }
+
+    // Treatment recommendation
+    if (c.treatment_recommendation && c.treatment_recommendation.name && c.treatment_recommendation.name !== '证据不足，暂无法推荐方案') {
+      var tr = c.treatment_recommendation;
+      h += '<div style="margin:8px 0;padding:10px;background:rgba(81,207,102,0.04);border:1px solid rgba(81,207,102,0.15);border-radius:6px">';
+      h += '<div style="font-size:11px;font-weight:700;color:#51cf66;margin-bottom:4px">推荐方案: ' + tr.name + '</div>';
+      if (tr.priority) h += '<div style="font-size:10px;color:var(--muted)">优先级: ' + tr.priority + '</div>';
+      if (tr.guideline) h += '<div style="font-size:10px;color:var(--muted);margin-top:2px">依据: ' + tr.guideline + '</div>';
+      h += '</div>';
+    }
+
+    // Differential diagnosis
+    if (c.differential && c.differential.length > 0) {
+      h += '<div class="hit-entities"><div class="hit-entities-title">鉴别诊断</div><div class="hit-entity-list">';
+      c.differential.forEach(function(dd) {
+        h += '<span class="hit-entity" style="background:rgba(204,93,232,0.08);color:#cc5de8" title="' + (dd.key_exams || []).join(', ') + '">' + dd.name + '</span>';
+      });
+      h += '</div></div>';
+    }
+
+    // Recommended exams
+    if (c.recommended_exams && c.recommended_exams.length > 0) {
+      h += '<div class="hit-entities"><div class="hit-entities-title">推荐检查</div><div class="hit-entity-list">';
+      c.recommended_exams.forEach(function(exam) {
+        h += '<span class="hit-entity" style="background:rgba(34,184,207,0.08);color:#22b8cf">' + exam + '</span>';
+      });
+      h += '</div></div>';
+    }
+
+    // Guidelines
+    if (c.guidelines && c.guidelines.length > 0) {
+      h += '<div class="hit-entities" style="margin-top:8px"><div class="hit-entities-title">诊疗指南依据 (' + c.guidelines.length + '条)</div><div class="hit-entity-list" style="flex-direction:column;gap:4px">';
+      c.guidelines.slice(0, 5).forEach(function(gl) {
+        var glName = gl.replace(/\.(pdf|docx)$/i, '');
+        h += '<span class="hit-entity" style="background:rgba(250,176,5,0.12);color:#fab005;border:1px solid rgba(250,176,5,0.25);white-space:normal;word-break:break-all;line-height:1.4" title="' + gl + '">📘 ' + glName + '</span>';
+      });
+      h += '</div></div>';
+    }
+
+    // Generate pathway button (only for top candidate)
+    if (idx === 0 && c.disease_code) {
+      h += '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--rule)">';
+      h += '<button onclick="goToPathway(\'' + c.disease_code + '\')" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity 0.15s">生成诊疗路径</button>';
+      h += '<span style="font-size:10px;color:var(--muted);margin-left:8px">跳转到路径编辑器</span>';
+      h += '</div>';
+    }
+
+    h += '</div></div>'; // card-body + match-card
+  }
+
+  document.getElementById('diagnosis-results').innerHTML = h;
+}
+
+/* ---- 7c. 跳转到诊疗路径编辑器 ---- */
+function goToPathway(diseaseCode) {
+  window.location.href = 'engine.html?disease=' + encodeURIComponent(diseaseCode);
 }
 
 /* ---- 8. 维度颜色映射 ---- */
@@ -1015,10 +2060,38 @@ function drawRadar(canvasId, match) {
 /* ---- 10. 清空 ---- */
 function clearInput() {
   document.getElementById('patient-input').value = '';
+  // 清空结构化输入
+  document.getElementById('struct-ecg').value = '';
+  document.getElementById('struct-troponin').value = '';
+  document.getElementById('struct-ckmb').value = '';
+  document.getElementById('struct-age').value = '';
+  document.getElementById('struct-hr').value = '';
+  document.getElementById('struct-bp').value = '';
+  document.getElementById('struct-killip').value = '';
   document.getElementById('keywords-section').style.display = 'none';
-  document.getElementById('stats-bar').style.display = 'none';
-  document.getElementById('diagnosis-results').innerHTML =
-    '<div class="no-results"><div class="no-results-icon">&#128269;</div><div>请输入患者临床信息后点击"匹配诊断"</div></div>';
+  // 重置步骤状态
+  currentStep = 0;
+  pathwayConfirmed = false;
+  currentScenarioId = '';
+  stepHistory = [];
+  patientData = {};
+  // 重置场景选择器样式
+  var sceneIds = ['stemi','af','ahf','ua','dcm'];
+  sceneIds.forEach(function(sid) {
+    var el = document.getElementById('scene-' + sid);
+    if (el) { el.style.borderColor = ''; el.style.background = ''; }
+  });
+  // 重置中栏
+  updateMiddlePanel();
+  document.getElementById('disease-tags').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'none';
+  // 重置右栏
+  document.getElementById('cdss-panel').innerHTML =
+    '<div class="cdss-empty"><div class="cdss-empty-icon">&#129302;</div><div>等待诊疗流程开始...</div><div style="font-size:11px;margin-top:6px;color:var(--muted)">选择场景并点击"下一步"后，此处将显示辅助诊疗建议</div></div>';
+  // 重置按钮
+  var btn = document.getElementById('btn-next-step');
+  btn.textContent = '下一步';
+  btn.disabled = false;
 }
 
 /* ---- 11. 架构图折叠/展开 ---- */
@@ -1037,18 +2110,21 @@ function toggleArch() {
   }
 }
 
-/* ---- 12. 示例病例数据 ---- */
+/* ---- 12. 示例病例数据（保留向后兼容） ---- */
 var SAMPLE_CASES = [
-  '患者男性，65岁，因"胸痛2小时"入院。2小时前无明显诱因出现胸骨后压榨性疼痛，向左肩放射，伴大汗、恶心、呕吐。既往有高血压病史10年，糖尿病史5年，吸烟30年。查体：BP 160/95mmHg，心率102次/分，心电图示ST段抬高。肌钙蛋白升高。诊断为急性ST段抬高型心肌梗死。',
-  '患者女性，72岁，反复心悸、胸闷1周加重2天就诊。既往有高血压病史15年，2型糖尿病史8年。查体：心率130次/分，心律绝对不齐，心音强弱不等。心电图示心房颤动，心室率130次/分。心脏超声示左房扩大(48mm)，左室射血分数55%。D-二聚体升高。',
-  '患者男性，68岁，因"呼吸困难3天，加重伴端坐呼吸1天"急诊入院。既往有冠心病、陈旧性心肌梗死病史5年，高血压病史12年。查体：端坐位，呼吸急促，双肺可闻及湿啰音，心率110次/分，双下肢凹陷性水肿。BNP 1800pg/ml，肌钙蛋白轻度升高。胸片示肺淤血、心影增大。',
-  '患者男性，58岁，反复胸骨后压榨性疼痛3个月，近1周加重，休息时也发作，含服硝酸甘油可缓解。既往有高血压病史8年，吸烟20年。查体：BP 150/90mmHg，心率88次/分。心电图示V4-V6 ST段压低0.2mV。肌钙蛋白正常。诊断为不稳定型心绞痛。',
-  '患者男性，45岁，因"活动后气促6个月，加重2周"就诊。既往体健，无高血压糖尿病史。查体：心率90次/分，心界向左下扩大，心尖区可闻及3/6级收缩期吹风样杂音，双下肢轻度水肿。心脏超声示左室明显扩大(LVEDD 68mm)，左室射血分数30%，室壁运动弥漫性减弱。BNP 850pg/ml。'
+  { id: 'stemi', text: '65岁男性，胸痛2小时，向左肩放射，伴出汗、恶心。既往高血压病史10年，吸烟30年。查体：BP 130/85mmHg，HR 90次/分，双肺呼吸音清。', ecg: 'ST段抬高', troponin: 'cTnI升高', ckmb: 'CK-MB升高', age: 65, hr: 90, bp: 130, killip: 'I' },
+  { id: 'af', text: '72岁女性，心悸、心律不齐3天，伴头晕、乏力。既往房颤病史5年，高血压20年。查体：BP 140/90mmHg，HR 120次/分，心律绝对不齐。', ecg: '', troponin: '', ckmb: '', age: 72, hr: 120, bp: 140, killip: 'I' },
+  { id: 'ahf', text: '68岁男性，呼吸困难、端坐呼吸、双下肢水肿1周。既往陈旧性心肌梗死3年。查体：BP 110/70mmHg，HR 100次/分，双肺底湿啰音，双下肢凹陷性水肿。', ecg: '', troponin: '', ckmb: '', age: 68, hr: 100, bp: 110, killip: 'III' },
+  { id: 'ua', text: '58岁男性，胸骨后压榨性疼痛，休息时发作，持续15分钟可缓解。既往高脂血症5年。查体：BP 135/85mmHg，HR 78次/分。', ecg: 'ST段压低', troponin: '', ckmb: '', age: 58, hr: 78, bp: 135, killip: 'I' },
+  { id: 'dcm', text: '45岁男性，活动后气促2个月，心脏扩大，EF 35%。查体：BP 100/65mmHg，HR 95次/分，心界扩大，S3奔马律。', ecg: '', troponin: '', ckmb: '', age: 45, hr: 95, bp: 100, killip: 'II' }
 ];
 
 function loadSample(idx) {
-  document.getElementById('patient-input').value = SAMPLE_CASES[idx];
-  document.getElementById('patient-input').focus();
+  // 向后兼容：调用selectScenario
+  var s = SAMPLE_CASES[idx];
+  if (s && s.id) { selectScenario(s.id); return; }
+  // 降级处理
+  selectScenario('stemi');
 }
 </script>
 </body>

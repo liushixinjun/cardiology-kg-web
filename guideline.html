@@ -7,24 +7,25 @@
 <title>专科知识图谱 · 心血管内科 - 临床指南库</title>
 <link rel="stylesheet" href="./_shared/css/style.css">
 <style>
-.g-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-.g-search { display: flex; gap: 12px; margin-bottom: 20px; }
-.g-search input { flex: 1; padding: 10px 14px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg2); color: var(--ink); font-size: 13px; outline: none; transition: border-color .2s; }
+.g-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.g-search { display: flex; gap: 12px; margin-bottom: 14px; }
+.g-search input { flex: 1; padding: 8px 14px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg2); color: var(--ink); font-size: 13px; outline: none; transition: border-color .2s; }
 .g-search input:focus { border-color: var(--accent); }
 .g-search input::placeholder { color: var(--muted); }
-.g-group-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
-.g-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 14px; }
-.g-card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; transition: border-color .2s, transform .15s; }
+.g-group-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--rule); }
+.g-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 8px; }
+.g-card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; transition: border-color .2s, transform .15s; }
 .g-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.g-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-.g-card-title { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.4; flex: 1; }
-.g-card-year { font-size: 11px; color: var(--accent); background: rgba(79,140,255,.1); padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; margin-left: 8px; }
-.g-card-org { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-.g-card-level { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--bg3); color: var(--muted); margin-bottom: 10px; }
-.g-card-diseases { display: flex; flex-wrap: wrap; gap: 5px; }
-.g-card-tag { font-size: 11px; padding: 3px 8px; border-radius: 5px; background: rgba(79,140,255,.1); color: var(--accent); cursor: pointer; transition: background .15s; }
+.g-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.g-card-title { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.3; flex: 1; }
+.g-card-year { font-size: 10px; color: var(--accent); background: rgba(79,140,255,.1); padding: 1px 7px; border-radius: 10px; font-weight: 600; white-space: nowrap; margin-left: 8px; }
+.g-card-org { font-size: 11px; color: var(--muted); margin-bottom: 4px; line-height: 1.3; }
+.g-card-level { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 4px; background: var(--bg3); color: var(--muted); margin-bottom: 6px; }
+.g-card-diseases { display: flex; flex-wrap: wrap; gap: 4px; }
+.g-card-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: rgba(79,140,255,.1); color: var(--accent); cursor: pointer; transition: background .15s; }
 .g-card-tag:hover { background: rgba(79,140,255,.2); }
-.g-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+.g-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+.g-group-wrapper { margin-bottom: 4px; }
 @media(max-width:768px){ .g-stats { grid-template-columns: repeat(2, 1fr); } .g-list { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -41,7 +42,7 @@
   </div>
   <div id="gContent"></div>
 </div>
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
 renderNav('guideline');
 var ALL_GUIDELINES = [];
@@ -102,8 +103,11 @@ function renderCard(g) {
   h += '<span class="g-card-title">' + (g.name || '未命名指南') + '</span>';
   if(g.year) h += '<span class="g-card-year">' + g.year + '</span>';
   h += '</div>';
-  if(g.organization) h += '<div class="g-card-org">📋 ' + g.organization + (g.version ? ' · ' + g.version : '') + '</div>';
-  if(g.level) h += '<span class="g-card-level">推荐等级: ' + g.level + '</span>';
+  var orgLine = '';
+  if(g.organization) orgLine += '📋 ' + g.organization;
+  if(g.version) orgLine += (orgLine ? ' · ' : '') + g.version;
+  if(g.level) orgLine += (orgLine ? ' · ' : '') + '推荐等级: ' + g.level;
+  if(orgLine) h += '<div class="g-card-org">' + orgLine + '</div>';
   if(g.diseases && g.diseases.length > 0){
     h += '<div class="g-card-diseases">';
     g.diseases.forEach(function(d){

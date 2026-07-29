@@ -311,16 +311,27 @@
   <div class="total-stats" id="total-stats">加载中...</div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
-/* ===== Schema 维度顺序（严格按要求从上到下） ===== */
+/* ===== V2.0 三层架构维度顺序 ===== */
 var SCHEMA_ORDER = [
+  /* 第一层：疾病知识层 */
   'Disease',
   'Specialty', 'DiseaseCategory', 'DiseaseSubcategory',
-  'Etiology', 'Epidemiology', 'Pathophysiology', 'Symptom', 'Sign',
-  'RiskFactor', 'Complication', 'Exam', 'ExamIndicator', 'LabTest',
-  'DiagnosisCriteria', 'RiskStratification', 'Medication', 'Procedure',
+  'Definition', 'DefinitionComponent', 'Etiology', 'Epidemiology', 'Pathophysiology',
+  'Symptom', 'Sign',
+  'RiskFactor', 'Complication', 'Contraindication',
+  'ExamItem', 'ExamObservation', 'LabItem', 'LabSubitem', 'LabSpecimen',
+  'DiagnosisCriteria', 'DiagnosisCriteriaComponent', 'RiskStratification',
+  'Prevention',
+  'Medication', 'Procedure', 'TreatmentItem',
   'TreatmentPlan', 'Prognosis', 'FollowUp', 'DifferentialDiagnosis',
+  'ThresholdRule',
+  /* 第二层：CDSS标准主数据层 */
+  'StandardDiagnosis',
+  /* 第三层：临床决策层 */
+  'ClinicalPathway', 'PathwayStage', 'ClinicalRule',
+  'RecommendationStatement', 'SourceAdjudication',
   'Evidence', 'Guideline'
 ];
 
@@ -330,6 +341,9 @@ var SCHEMA_NAMES = {
   'Specialty': '学科',
   'DiseaseCategory': '疾病大类',
   'DiseaseSubcategory': '疾病亚类',
+  'StandardDiagnosis': '标准诊断',
+  'Definition': '定义',
+  'DefinitionComponent': '定义明细',
   'Etiology': '病因',
   'Epidemiology': '流行病学',
   'Pathophysiology': '病理生理',
@@ -337,17 +351,29 @@ var SCHEMA_NAMES = {
   'Sign': '体征',
   'RiskFactor': '危险因素',
   'Complication': '并发症',
-  'Exam': '检查',
-  'ExamIndicator': '检查指标',
-  'LabTest': '检验',
+  'Contraindication': '禁忌',
+  'ExamItem': '检查项目',
+  'ExamObservation': '检查发现',
+  'LabItem': '检验项目',
+  'LabSubitem': '检验细项',
+  'LabSpecimen': '检验标本',
   'DiagnosisCriteria': '诊断标准',
+  'DiagnosisCriteriaComponent': '诊断标准明细',
   'RiskStratification': '风险分层',
+  'Prevention': '预防',
   'Medication': '药物',
   'Procedure': '手术',
+  'TreatmentItem': '治疗项目',
   'TreatmentPlan': '治疗方案',
   'Prognosis': '预后',
   'FollowUp': '随访',
   'DifferentialDiagnosis': '鉴别诊断',
+  'ThresholdRule': '阈值规则',
+  'ClinicalPathway': '诊疗路径',
+  'PathwayStage': '路径阶段',
+  'ClinicalRule': '临床规则',
+  'RecommendationStatement': '推荐陈述',
+  'SourceAdjudication': '来源裁决',
   'Evidence': '证据',
   'Guideline': '指南'
 };

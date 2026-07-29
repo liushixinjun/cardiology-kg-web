@@ -557,7 +557,7 @@ body { display: flex; flex-direction: column; }
 
 </div>
 
-<script src="./_shared/js/app.js?v=20260703b"></script>
+<script src="./_shared/js/app.js?v=20260729"></script>
 <script>
 /* ================================================================
    Medical Terminology Knowledge Base — Three-Column Layout
@@ -576,8 +576,10 @@ var TOTAL_DISEASES = 0;
 var DIM_DESC = {
   Symptom: '患者主观感受到的不适或异常感觉，如胸痛、呼吸困难、心悸等。症状是临床诊断的第一线索。',
   Sign: '医生通过视诊、触诊、叩诊、听诊等方法发现的客观异常表现，如心脏杂音、颈静脉怒张等。',
-  Exam: '借助仪器设备进行的辅助检查项目，包括心电图、超声心动图、冠脉CTA等。',
-  LabTest: '通过实验室分析血液、尿液等标本获得的生化指标和数据，如肌钙蛋白、BNP等。',
+  ExamItem: '借助仪器设备进行的辅助检查项目，包括心电图、超声心动图、冠脉CTA等。',
+  ExamObservation: '检查报告中的结构化发现，如ST段抬高、病理性Q波等。',
+  LabItem: '通过实验室分析血液、尿液等标本获得的生化指标和数据，如肌钙蛋白、BNP等。',
+  LabSubitem: '检验项目下的具体可报告指标，如肌钙蛋白I、肌酸激酶同工酶等。',
   Medication: '心血管疾病治疗的核心药物，涵盖抗血小板药、他汀类、ACEI/ARB等多类药物。',
   Procedure: '通过外科手术或介入操作进行的治疗，如PCI、CABG、起搏器植入等。',
   RiskFactor: '增加疾病发生风险的因素，如高血压、糖尿病、吸烟等。',
@@ -594,7 +596,11 @@ var DIM_DESC = {
   Evidence: '支持疾病知识的循证医学证据来源，包括教材、指南、文献等。',
   Guideline: '临床实践指南或专家共识，如ACC/AHA、ESC等权威发布的诊疗建议。',
   ThresholdRule: '检验检查指标的临界值判定规则，用于辅助诊断和风险评估。',
-  ExamIndicator: '检查项目中的具体量化指标，如射血分数、心室壁厚度等。'
+  StandardDiagnosis: 'CDSS标准诊断字典条目，直接对应ICD-10等标准编码，含UUID和有效标志。',
+  Contraindication: '阻断推荐的临床原因，如活动性出血禁用溶栓。',
+  Prevention: '一级/二级预防和患者教育，如戒烟和血脂管理。',
+  Definition: '疾病定义和基本概念。',
+  DefinitionComponent: '定义中的独立要点，可单独追溯。'
 };
 
 /* Dimension colors for progress bars */
