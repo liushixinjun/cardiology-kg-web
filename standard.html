@@ -73,6 +73,20 @@
 .std-rule-detail{display:none;margin-top:8px}
 .std-rule-detail.show{display:block}
 
+/* ====== 三元组分组组件 ====== */
+.std-tri-group{padding:14px 0 10px;border-bottom:1px dashed var(--rule)}
+.std-tri-group:first-of-type{padding-top:6px}
+.std-tri-group:last-of-type{border-bottom:none}
+.std-tri-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.22);border-radius:5px;padding:2px 10px;margin-bottom:8px}
+.std-tri-note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:5px}
+.std-tri-note code{background:var(--bg4);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent);font-family:'SF Mono','Cascadia Code','Consolas',monospace}
+.std-tri-props{margin-top:16px;background:var(--bg4);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
+.std-tri-props-label{font-size:12.5px;font-weight:700;color:var(--accent);margin-bottom:10px}
+.std-tri-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12.5px;line-height:1.8;color:var(--ink);white-space:pre;overflow-x:auto;margin:0}
+.std-tri-code .field{color:#ff922b;font-weight:600}
+.std-tri-code .value{color:var(--green)}
+.std-tri-code .comment{color:var(--muted);font-style:italic}
+
 /* ====== 页面总览卡片 ====== */
 .std-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px}
 .std-overview-stat{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px;text-align:center}
@@ -318,34 +332,69 @@
       <section class="std-section" id="guide">
         <h2>阅读指引</h2>
         <div class="std-section-desc">
-          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 26,000+ 节点、53,000+ 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
+          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 32,229 节点、138,153 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
           本章介绍三个基础概念，理解后即可阅读后续全部章节。
         </div>
 
         <h3 id="guide-triple">三元组：图谱最小的知识单元</h3>
-        <div class="std-section-desc">图谱中所有医学知识均以「节点 -> 关系 -> 节点」的三元组形式存储。以下示例均取自当前图谱真实数据：</div>
+        <div class="std-section-desc">图谱中所有医学知识均以「节点 -[关系]-> 节点」的三元组存储：节点带属性，关系带方向与类型编码。以下四组三元组全部取自当前库真实数据，均可直接用 Cypher 复核。</div>
         <div class="std-concept">
-          <div class="std-concept-label">真实三元组（急性心肌梗死）</div>
-          <div class="std-chain">
-            <span class="std-chain-node entity">急性心肌梗死</span>
-            <span class="std-chain-arrow">-[有症状]-></span>
-            <span class="std-chain-node entity">胸痛</span>
+          <div class="std-concept-label">真实三元组（急性心肌梗死 · 当前库 32,229 节点 / 138,153 关系）</div>
+
+          <div class="std-tri-group">
+            <span class="std-tri-tag">① 医学事实</span>
+            <div class="std-chain">
+              <span class="std-chain-node entity">急性心肌梗死</span>
+              <span class="std-chain-arrow">-[有症状 has_symptom]-></span>
+              <span class="std-chain-node entity">胸痛</span>
+            </div>
+            <div class="std-tri-note">同库同类：出汗 · 呼吸困难 · 濒死感 等 26 项症状（均为 <code>Symptom</code> 类型节点）；另有「-[有危险因素 has_risk_factor]-> 高血压」</div>
           </div>
-          <div class="std-chain">
-            <span class="std-chain-node entity">急性心肌梗死</span>
-            <span class="std-chain-arrow">-[分型入口]-></span>
-            <span class="std-chain-node entity">STEMI</span>
+
+          <div class="std-tri-group">
+            <span class="std-tri-tag">② 疾病结构</span>
+            <div class="std-chain">
+              <span class="std-chain-node entity">急性心肌梗死</span>
+              <span class="std-chain-arrow">-[包含临床分型 has_clinical_subtype]-></span>
+              <span class="std-chain-node entity">ST段抬高型心肌梗死</span>
+            </div>
+            <div class="std-tri-note">兄弟分型：非ST段抬高型心肌梗死（<code>DIS-CARD-CAD-NSTEMI</code>）；父级与分型同为 <code>Disease</code> 类型，靠关系区分层级</div>
           </div>
-          <div class="std-chain">
-            <span class="std-chain-node data">患者：胸痛2小时+出汗+高血压10年</span>
-            <span class="std-chain-arrow">-[症状命中]-></span>
-            <span class="std-chain-node entity">急性心肌梗死</span>
-            <span class="std-chain-arrow">-[推荐动作]-></span>
-            <span class="std-chain-node action">经皮冠状动脉介入治疗</span>
+
+          <div class="std-tri-group">
+            <span class="std-tri-tag">③ 检查检验</span>
+            <div class="std-chain">
+              <span class="std-chain-node entity">心电图</span>
+              <span class="std-chain-arrow">-[包含检查发现 exam_item_has_observation]-></span>
+              <span class="std-chain-node entity">ST段持续抬高提示室壁瘤</span>
+            </div>
+            <div class="std-tri-note">同类发现：T波倒置 · V1至V5导联QS型提示前壁梗死；检验侧：「心肌损伤标志物 -[包含检验细项 lab_item_has_subitem]-> 肌钙蛋白」</div>
           </div>
-          <div class="std-concept-text" style="margin-top:12px">
-            <strong>节点</strong>：图谱中的知识条目，涵盖疾病、症状、药品、检查项目、证据、推荐陈述等类型；<strong>关系</strong>：节点之间带方向、带语义的医学关联，如「有症状」「有临床分型」「推荐动作」；<strong>属性</strong>：节点或关系上承载的字段，如疾病节点携带 ICD 编码、推荐陈述节点携带证据等级。<br><br>
-            整个图谱由数万条此类三元组连接构成。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2、3章）；数据如何生产与质量控制（第4章）</strong>。
+
+          <div class="std-tri-group">
+            <span class="std-tri-tag">④ 正式推荐（V3.0 推荐链）</span>
+            <div class="std-chain">
+              <span class="std-chain-node entity">ST段抬高型心肌梗死</span>
+              <span class="std-chain-arrow">-[有正式推荐 has_recommendation_statement]-></span>
+              <span class="std-chain-node action">STEMI溶栓治疗推荐陈述</span>
+              <span class="std-chain-arrow">-[推荐具体项目 recommends_action]-></span>
+              <span class="std-chain-node action">溶栓治疗</span>
+            </div>
+            <div class="std-tri-note">推荐陈述携带真实属性：<code>trigger_condition="STEMI且PCI延迟且无溶栓禁忌"</code>，<code>primary_evidence_code</code> 指向指南证据原文。疾病不直连推荐动作，必须经推荐陈述落地（第2章核心原则）</div>
+          </div>
+
+          <div class="std-tri-props">
+            <div class="std-tri-props-label">节点属性真实示例：疾病节点「急性心肌梗死」（(:KGNode:Disease)）</div>
+            <pre class="std-tri-code"><span class="field">code</span>:           <span class="value">"DIS-CARD-CAD-AMI"</span>     <span class="comment">// 全局唯一编码，关系引用它而非名称</span>
+<span class="field">entityType</span>:     <span class="value">"Disease"</span>              <span class="comment">// 实体类型（第3章类型表取值）</span>
+<span class="field">name</span>:           <span class="value">"急性心肌梗死"</span>           <span class="comment">// 医生可读标准名</span>
+<span class="field">aliases</span>:        [<span class="value">"AMI"</span>, <span class="value">"急性心梗"</span>, <span class="value">"心梗"</span>]  <span class="comment">// 别名（检索与召回）</span>
+<span class="field">schema_version</span>: <span class="value">"V2.0"</span>                <span class="comment">// 数据批次版本</span></pre>
+          </div>
+
+          <div class="std-concept-text" style="margin-top:14px">
+            <strong>节点</strong>：知识条目，携带 code、entityType、name 等属性，涵盖疾病、症状、药品、检查项目、证据、推荐陈述等类型；<strong>关系</strong>：节点间带方向的医学关联，编码统一小写下划线（<code>has_symptom</code>、<code>recommends_action</code>），同一编码全局语义唯一；<strong>属性</strong>：节点或关系上的字段，如上例疾病节点的 code 与 aliases，推荐陈述的 trigger_condition 与 primary_evidence_code。<br><br>
+            整个图谱即由 32,229 个节点、138,153 条此类三元组关系连接构成（其中证据关系 91,136 条）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2、3章）；数据如何生产与质量控制（第4章）</strong>。
           </div>
         </div>
 
@@ -411,8 +460,8 @@
 
         <h3 id="guide-terms">名词对照表</h3>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:140px">名词</th><th>在本项目中的定义</th></tr></thead><tbody>
-          <tr><td class="name">节点 / 实体</td><td class="require">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等；当前库中 26,000+ 个</td></tr>
-          <tr><td class="name">关系</td><td class="require">节点之间带方向、带语义的医学关联，如「急性心肌梗死-[有症状]->胸痛」；当前库中 53,000+ 条</td></tr>
+          <tr><td class="name">节点 / 实体</td><td class="require">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等；当前库中 32,229 个</td></tr>
+          <tr><td class="name">关系</td><td class="require">节点之间带方向、带语义的医学关联，如「急性心肌梗死-[有症状]->胸痛」；当前库中 138,153 条</td></tr>
           <tr><td class="name">属性</td><td class="require">节点或关系上承载的字段：疾病节点携带 ICD 编码、推荐陈述节点携带证据等级、关系携带优先级</td></tr>
           <tr><td class="name">三元组</td><td class="require">「节点->关系->节点」，图谱最小的知识单元</td></tr>
           <tr><td class="name">Schema</td><td class="require">即本规范：定义节点类型、关系类型与字段标准</td></tr>
@@ -1786,7 +1835,7 @@
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260827"></script>
+<script src="./_shared/js/app.js?v=20260828"></script>
 <script>
 loadData(function(){injectDimCount();renderNav('standard');});
 
