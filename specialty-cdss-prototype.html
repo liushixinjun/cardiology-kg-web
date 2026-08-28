@@ -2124,7 +2124,7 @@
           <div class="page-head">
             <div>
               <h1 class="page-title">专科辅助诊疗建设方案总览</h1>
-              <p class="page-desc">按“先识别、再鉴别、后分型、再进入专病流程、最后治疗、围术期与质控”的顺序组织。</p>
+              <p class="page-desc">心血管内科专科辅助诊疗原型：132种疾病、572条推荐陈述、STEMI专病路径6阶段，覆盖疑似诊断->检查检验->分型确诊->治疗方案->专病路径->质控全流程。</p>
             </div>
             <div class="rule-actions">
               <button class="btn primary" data-page-link="simulation">进入辅助诊疗模拟</button>
@@ -2148,10 +2148,10 @@
               <div class="arch-row">
                 <div class="arch-label">2<br>知识图谱建设</div>
                 <div class="arch-lane">
-                  <div class="arch-node"><strong>Schema V2.16</strong><span class="mini muted">统一建模标准</span></div>
-                  <div class="arch-node"><strong>实体结构</strong><span class="mini muted">疾病/检查/治疗/证据</span></div>
+                  <div class="arch-node"><strong>Schema V3.0</strong><span class="mini muted">32,229节点/138,153关系</span></div>
+                  <div class="arch-node"><strong>五层结构</strong><span class="mini muted">目录/诊断/知识/决策/证据</span></div>
                   <div class="arch-node"><strong>关系标准</strong><span class="mini muted">分型/方案/推荐链</span></div>
-                  <div class="arch-node"><strong>标准字典映射</strong><span class="mini muted">诊断/手术/医嘱候选</span></div>
+                  <div class="arch-node"><strong>两大主线</strong><span class="mini muted">冠心病8种/心肌病8种</span></div>
                   <div class="arch-node"><strong>CDSS展示过滤</strong><span class="mini muted">临床字段展示</span></div>
                   <button class="btn primary" data-page-link="knowledgeGraph">查看图谱结构</button>
                 </div>
@@ -2166,7 +2166,7 @@
                   <span class="arch-arrow">→</span>
                   <div class="arch-node"><strong>分型确诊</strong><span class="mini muted">STEMI/NSTEMI</span></div>
                   <span class="arch-arrow">→</span>
-                  <div class="arch-node"><strong>流程承接</strong><span class="mini muted">阶段化管理</span></div>
+                  <div class="arch-node"><strong>流程承接</strong><span class="mini muted">STEMI路径6阶段</span></div>
                   <span class="arch-arrow">→</span>
                   <div class="arch-node"><strong>围术期</strong><span class="mini muted">术前/术中/术后</span></div>
                   <span class="arch-arrow">→</span>
@@ -2242,14 +2242,14 @@
                     <button class="module-card" data-page-link="knowledgeGraph">
                       <span>
                         <h3>知识图谱结构</h3>
-                        <p>按 Schema V2.16 展示实体、关系、证据、标准字典映射和 CDSS 展示边界。</p>
+                        <p>按 Schema V3.0 五层架构展示实体、关系、证据、推荐链和 CDSS 展示边界。</p>
                       </span>
                       <span class="btn primary">进入</span>
                     </button>
                     <button class="module-card" data-page-link="rules">
                       <span>
                         <h3>规则管理</h3>
-                        <p>展示 4.2 的 11 条 AMI 详细规则，可筛选、展开、启停和模拟触发。</p>
+                        <p>展示 AMI 临床规则（STEMI直接PCI触发/溶栓禁忌/抗栓治疗等），可筛选、展开、启停和模拟触发。</p>
                       </span>
                       <span class="btn primary">进入</span>
                     </button>
@@ -2263,7 +2263,7 @@
                     <button class="module-card" data-page-link="simulation">
                       <span>
                         <h3>辅助诊疗模拟</h3>
-                        <p>按 AMI 病例模拟疑似疾病、检查推荐、分型、流程、治疗和围术期提醒。</p>
+                        <p>按 AMI 真实病例模拟疑似诊断（26项症状命中）、检查推荐、STEMI分型、再灌注路径和围术期提醒。</p>
                       </span>
                       <span class="btn primary">进入</span>
                     </button>
@@ -2294,7 +2294,7 @@
           <div class="page-head">
             <div>
               <h1 class="page-title">专科知识图谱结构说明</h1>
-              <p class="page-desc">基于《专科知识图谱 Schema 标准》V2.16，展示专科知识图谱建设范围、Schema结构分层及其在辅助诊疗中的调用方式。</p>
+              <p class="page-desc">基于 Schema V3.0 五层架构，当前图谱含 32,229 节点、138,153 关系（证据 18,924 条、临床规则 7,792 条、推荐陈述 572 条），覆盖 15 个疾病大类、132 种疾病。</p>
             </div>
             <div class="rule-actions">
               <button class="btn primary" data-page-link="simulation">查看辅助诊疗使用</button>
@@ -2308,15 +2308,15 @@
               <div class="panel">
                 <div class="panel-head">
                   <div class="panel-title">知识图谱建设规划</div>
-                  <span class="badge green">Schema V2.16</span>
+                  <span class="badge green">Schema V3.0</span>
                 </div>
                 <div class="panel-body">
                   <div class="kg-hero">
-                    <div class="kg-step"><strong>1. 来源整理</strong><span>教材、指南、专家共识、CDSS标准字典分开使用。</span></div>
+                    <div class="kg-step"><strong>1. 来源整理</strong><span>教材搭骨架（定义/症状/病因），指南补决策（适应证/禁忌/等级），CDSS字典提供系统编码。</span></div>
                     <div class="kg-step"><strong>2. 实体建模</strong><span>疾病、症状、检查、检验、治疗、手术、证据按类型入库。</span></div>
                     <div class="kg-step"><strong>3. 关系建模</strong><span>分型、检查方案、诊断标准、治疗方案和推荐链路显式连接。</span></div>
                     <div class="kg-step"><strong>4. 字典映射</strong><span>诊断、检查、检验、药品、手术映射 CDSS 有效标准字典。</span></div>
-                    <div class="kg-step"><strong>5. CDSS使用</strong><span>医生端只展示临床字段，治理字段不渲染成图谱节点。</span></div>
+                    <div class="kg-step"><strong>5. CDSS使用</strong><span>572条推荐陈述经「规则->陈述->动作->证据」链路落地，医生端只展示临床字段。</span></div>
                   </div>
                   <div class="boundary">
                     图谱不是单纯知识浏览库。它负责给辅助诊疗提供可查询的疾病结构、检查检验依据、诊断分型依据、治疗/手术动作、推荐证据和标准字典身份。
@@ -2332,24 +2332,24 @@
                 <div class="panel-body">
                   <div class="kg-card-grid">
                     <button class="kg-card active" data-kg-card="diagnosis">
-                      <h3>疾病目录与诊断层</h3>
-                      <p>区分目录、临床疾病、具体分型和标准诊断，避免把疾病大类直接当诊断。</p>
+                      <h3>目录与临床诊断层</h3>
+                      <p>区分目录分组、待分型疾病、具体分型和标准诊断编码，冠心病8种+心肌病8种。</p>
                       <div class="kg-tagline"><span class="tag blue">Disease</span><span class="tag">StandardDiagnosis</span></div>
                     </button>
                     <button class="kg-card" data-kg-card="exam">
-                      <h3>检查检验层</h3>
-                      <p>先建辅助检查方案，再下钻到检查项目、检查发现、检验项目和检验细项。</p>
+                      <h3>医学知识层</h3>
+                      <p>疾病定义、症状体征、检查检验、药品手术。心电图->ST段抬高、肌钙蛋白->心肌损伤标志物。</p>
                       <div class="kg-tagline"><span class="tag blue">ExamPlan</span><span class="tag">LabSubitem</span></div>
                     </button>
                     <button class="kg-card" data-kg-card="therapy">
-                      <h3>治疗与手术层</h3>
-                      <p>治疗方案只是知识容器，正式推荐必须落到药品、手术或治疗项目。</p>
+                      <h3>CDSS决策层</h3>
+                      <p>正式推荐走「疾病->推荐陈述->具体动作->证据」，572条推荐陈述，疾病不直连动作。</p>
                       <div class="kg-tagline"><span class="tag blue">TreatmentPlan</span><span class="tag">Procedure</span></div>
                     </button>
                     <button class="kg-card" data-kg-card="decision">
-                      <h3>临床决策推荐层</h3>
-                      <p>路径阶段、临床规则、推荐陈述和证据链共同形成当前患者可展示推荐。</p>
-                      <div class="kg-tagline"><span class="tag blue">ClinicalRule</span><span class="tag">RecommendationStatement</span></div>
+                      <h3>证据治理层</h3>
+                      <p>指南原文、页码、证据摘要。18,924条证据节点，医生端只露证据摘要入口。</p>
+                      <div class="kg-tagline"><span class="tag blue">Guideline</span><span class="tag">Evidence</span></div>
                     </button>
                     <button class="kg-card" data-kg-card="display">
                       <h3>CDSS导入与展示边界</h3>
