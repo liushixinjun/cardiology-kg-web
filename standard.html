@@ -87,6 +87,16 @@
 .std-tri-code .value{color:var(--green)}
 .std-tri-code .comment{color:var(--muted);font-style:italic}
 
+/* ====== 术语速查卡 ====== */
+.std-term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
+.std-term{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;transition:border-color .2s}
+.std-term:hover{border-color:rgba(79,140,255,.35)}
+.std-term-name{font-size:16px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.std-term-en{font-size:11px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);padding:1px 8px;border-radius:4px;font-family:'SF Mono','Cascadia Code','Consolas',monospace}
+.std-term-def{font-size:13.5px;color:var(--muted);line-height:1.7;margin-top:8px}
+.std-term-eg{margin-top:10px;font-size:12px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent);background:var(--bg4);border-radius:6px;padding:7px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.std-term-eg .eg-label{color:var(--muted);font-style:italic;font-family:inherit;margin-right:6px}
+
 /* ====== 页面总览卡片 ====== */
 .std-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px}
 .std-overview-stat{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px;text-align:center}
@@ -274,8 +284,8 @@
       <a class="std-anchor active" href="#guide">图谱长什么样</a>
       <div class="std-toc-sub">
         <a class="std-anchor" href="#guide-triple">三元组：最小知识单元</a>
+        <a class="std-anchor" href="#guide-terms">术语速查</a>
         <a class="std-anchor" href="#guide-scene">用在哪些临床场景</a>
-        <a class="std-anchor" href="#guide-terms">名词对照表</a>
       </div>
       <div class="std-side-part">第2章 · 总体架构与原则</div>
       <a class="std-anchor" href="#principles">核心原则</a>
@@ -389,12 +399,52 @@
 <span class="field">entityType</span>:     <span class="value">"Disease"</span>              <span class="comment">// 实体类型（第3章类型表取值）</span>
 <span class="field">name</span>:           <span class="value">"急性心肌梗死"</span>           <span class="comment">// 医生可读标准名</span>
 <span class="field">aliases</span>:        [<span class="value">"AMI"</span>, <span class="value">"急性心梗"</span>, <span class="value">"心梗"</span>]  <span class="comment">// 别名（检索与召回）</span>
-<span class="field">schema_version</span>: <span class="value">"V2.0"</span>                <span class="comment">// 数据批次版本</span></pre>
+</pre>
           </div>
 
           <div class="std-concept-text" style="margin-top:14px">
             <strong>节点</strong>：知识条目，携带 code、entityType、name 等属性，涵盖疾病、症状、药品、检查项目、证据、推荐陈述等类型；<strong>关系</strong>：节点间带方向的医学关联，编码统一小写下划线（<code>has_symptom</code>、<code>recommends_action</code>），同一编码全局语义唯一；<strong>属性</strong>：节点或关系上的字段，如上例疾病节点的 code 与 aliases，推荐陈述的 trigger_condition 与 primary_evidence_code。<br><br>
             整个图谱即由 32,229 个节点、138,153 条此类三元组关系连接构成（其中证据关系 91,136 条）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2、3章）；数据如何生产与质量控制（第4章）</strong>。
+          </div>
+        </div>
+
+        <h3 id="guide-terms">术语速查</h3>
+        <div class="std-section-desc">以上术语在后续章节反复出现。每张卡片底部给出当前库中的真实取值，遇到不熟悉的词可随时回到本节查阅。</div>
+        <div class="std-term-grid">
+          <div class="std-term">
+            <div class="std-term-name">节点<span class="std-term-en">Node / Entity</span></div>
+            <div class="std-term-def">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等。每个节点有全局唯一编码，当前库 32,229 个。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>DIS-CARD-CAD-AMI 急性心肌梗死</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">关系<span class="std-term-en">Relationship</span></div>
+            <div class="std-term-def">节点之间带方向的医学关联，同一编码全局语义唯一。当前库 138,153 条。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>has_symptom = 有症状</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">属性<span class="std-term-en">Property</span></div>
+            <div class="std-term-def">节点或关系上承载的字段，如编码、别名、诊断角色、推荐等级。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>aliases: ["AMI","急性心梗","心梗"]</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">三元组<span class="std-term-en">Triple</span></div>
+            <div class="std-term-def">「节点 -[关系]-> 节点」，图谱最小的知识单元，全库由此构成。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>急性心肌梗死 -[有症状]-> 胸痛</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">类型标识<span class="std-term-en">entityType</span></div>
+            <div class="std-term-def">节点的类型标签，决定它在查询、展示与推荐中的角色，取值见第3章类型表。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>Disease · Symptom · Medication</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">图谱规范<span class="std-term-en">Schema</span></div>
+            <div class="std-term-def">节点类型、关系类型与字段标准的统一定义，即本文档。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>本文档第2-4章</div>
+          </div>
+          <div class="std-term">
+            <div class="std-term-name">临床决策支持<span class="std-term-en">CDSS</span></div>
+            <div class="std-term-def">临床决策支持系统：查询本图谱，在医生端生成疑似诊断、检查检验与治疗推荐。</div>
+            <div class="std-term-eg"><span class="eg-label">真实示例</span>医生端推荐卡</div>
           </div>
         </div>
 
@@ -458,16 +508,6 @@
           </div>
         </div>
 
-        <h3 id="guide-terms">名词对照表</h3>
-        <div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:140px">名词</th><th>在本项目中的定义</th></tr></thead><tbody>
-          <tr><td class="name">节点 / 实体</td><td class="require">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等；当前库中 32,229 个</td></tr>
-          <tr><td class="name">关系</td><td class="require">节点之间带方向、带语义的医学关联，如「急性心肌梗死-[有症状]->胸痛」；当前库中 138,153 条</td></tr>
-          <tr><td class="name">属性</td><td class="require">节点或关系上承载的字段：疾病节点携带 ICD 编码、推荐陈述节点携带证据等级、关系携带优先级</td></tr>
-          <tr><td class="name">三元组</td><td class="require">「节点->关系->节点」，图谱最小的知识单元</td></tr>
-          <tr><td class="name">Schema</td><td class="require">即本规范：定义节点类型、关系类型与字段标准</td></tr>
-          <tr><td class="name">entityType</td><td class="require">节点的类型标识（Disease、Symptom、Medication 等），决定节点在图谱中的角色</td></tr>
-          <tr><td class="name">CDSS</td><td class="require">临床决策支持系统：医生端查询图谱数据，生成诊断、检查与治疗推荐</td></tr>
-        </tbody></table></div>
       </section>
 
 <div class="std-part-divider"><span class="std-part-num">第2章</span><span class="std-part-title">总体架构 -- 五层结构与核心原则</span><span class="std-part-line"></span></div>
@@ -879,7 +919,7 @@
             <tr><td>4</td><td class="code">aliases</td><td class="name">别名</td><td class="require">字符串数组；没有别名时为 []；中文简称、英文缩写、旧称放入数组</td><td class="example">["AMI","急性心梗"]</td></tr>
             <tr><td>5</td><td class="code">source_type</td><td class="name">来源类型</td><td class="require">只允许：authoritative_textbook、guideline、consensus、clinical_pathway、cdss_standard_dict、external_authority、governed_composite</td><td class="example">cdss_standard_dict</td></tr>
             <tr><td>6</td><td class="code">batch_id</td><td class="name">批次编号</td><td class="require">能追溯到批次台账和目录</td><td class="example">BATCH-CARD-CAD-20260719-001</td></tr>
-            <tr><td>7</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">使用 V主版本.次版本</td><td class="example">V2.11</td></tr>
+            <tr><td>7</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">使用 V主版本.次版本</td><td class="example">V2.0</td></tr>
             <tr><td>8</td><td class="code">clinical_use_status</td><td class="name">临床使用状态</td><td class="require">draft、review_ready、clinical_ready、blocked</td><td class="example">clinical_ready</td></tr>
           </tbody></table></div>
         </div>
@@ -892,7 +932,7 @@
             <tr><td>3</td><td class="code">relationType</td><td class="name">关系类型</td><td class="require">必须来自本标准关系表</td><td class="example">has_clinical_subtype</td></tr>
             <tr><td>4</td><td class="code">target_code</td><td class="name">终点实体编码</td><td class="require">必须引用真实节点 code</td><td class="example">DIS-CARD-CAD-STEMI</td></tr>
             <tr><td>5</td><td class="code">batch_id</td><td class="name">批次编号</td><td class="require">与产生该关系的批次一致</td><td class="example">BATCH-CARD-CAD-20260719-001</td></tr>
-            <tr><td>6</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">固定为当前生成版本</td><td class="example">V2.11</td></tr>
+            <tr><td>6</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">固定为当前生成版本</td><td class="example">V1.15</td></tr>
             <tr><td>7</td><td class="code">review_status</td><td class="name">自动审核状态</td><td class="require">pending、passed、failed</td><td class="example">passed</td></tr>
             <tr><td>8</td><td class="code">clinical_review_status</td><td class="name">临床使用状态</td><td class="require">pending、clinical_ready、blocked、not_required</td><td class="example">not_required</td></tr>
           </tbody></table></div>
@@ -945,7 +985,7 @@
             <tr><td>3</td><td class="name">名称字段</td><td class="require">医生可读中文标准名优先；英文缩写放 aliases</td><td class="example">AMI诊断明细：肌钙蛋白升高</td><td class="example">name="肌钙蛋白升高及动态变化"</td></tr>
             <tr><td>4</td><td class="name">别名字段</td><td class="require">必须是数组；英文缩写、中文简称、旧称都放数组</td><td class="example">aliases="AMI,急性心梗"</td><td class="example">aliases=["AMI","急性心梗"]</td></tr>
             <tr><td>5</td><td class="name">状态字段</td><td class="require">必须使用固定枚举值；不能自由写自然语言</td><td class="example">clinical_review_status="挺好"</td><td class="example">clinical_review_status="clinical_ready"</td></tr>
-            <tr><td>6</td><td class="name">版本字段</td><td class="require">必须写 Schema 版本，不写脚本版本</td><td class="example">schema_version="脚本V3"</td><td class="example">schema_version="V2.11"</td></tr>
+            <tr><td>6</td><td class="name">版本字段</td><td class="require">必须写 Schema 版本，不写脚本版本</td><td class="example">schema_version="脚本V3"</td><td class="example">schema_version="V2.0"</td></tr>
             <tr><td>7</td><td class="name">时间字段</td><td class="require">使用 YYYY-MM-DD HH:mm:ss；不能只写年月</td><td class="example">2026-07</td><td class="example">2026-07-19 00:19:13</td></tr>
             <tr><td>8</td><td class="name">证据文本字段</td><td class="require">evidence_text 必须保存原文摘录；中文翻译可另存，不得覆盖原文</td><td class="example">只保存改写总结，不保留原文</td><td class="example">evidence_text="Primary PCI is recommended..."</td></tr>
             <tr><td>9</td><td class="name">SOURCE 字段</td><td class="require">保存原始资料名称而非处理过程；无法定位时写"待补充权威来源"</td><td class="example">SOURCE="图谱V2.0"</td><td class="example">SOURCE="内科学（第9版）"</td></tr>
@@ -1930,7 +1970,7 @@ var jsonExamples = {
     "aliases": ["AMI", "急性心梗"],
     "source_type": "guideline",
     "batch_id": "BATCH-CARD-CAD-20260719-001",
-    "schema_version": "V2.11",
+    "schema_version": "V2.0",
     "clinical_use_status": "clinical_ready",
     "diagnostic_role": "broad_diagnosis",
     "is_diagnosable": true,
@@ -1943,7 +1983,7 @@ var jsonExamples = {
     "relationType": "has_clinical_subtype",
     "target_code": "DIS-CARD-CAD-STEMI",
     "batch_id": "BATCH-CARD-CAD-20260719-001",
-    "schema_version": "V2.11",
+    "schema_version": "V1.15",
     "review_status": "passed",
     "clinical_review_status": "not_required"
   }
@@ -1954,10 +1994,10 @@ function showJsonExample(type) {
   var title = document.getElementById('jsonModalTitle');
   var content = document.getElementById('jsonModalContent');
   if (type === 'node') {
-    title.textContent = '节点最小示例（V2.11）';
+    title.textContent = '节点最小示例';
     content.textContent = JSON.stringify(jsonExamples.node, null, 2);
   } else {
-    title.textContent = '关系最小示例（V2.11）';
+    title.textContent = '关系最小示例';
     content.textContent = JSON.stringify(jsonExamples.relation, null, 2);
   }
   modal.style.display = 'block';
