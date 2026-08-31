@@ -75,7 +75,7 @@ REL_MAP = {
     "Sign": "has_sign",
     "RiskFactor": "has_risk_factor",
     "Complication": "may_cause_complication",
-    "DifferentialDiagnosis": "differentiates_from",
+    "DifferentialDiagnosis": "has_differential_diagnosis",
     "RiskStratification": "has_risk_stratification",
     "Prognosis": "has_prognosis",
     "FollowUp": "has_follow_up",
@@ -668,7 +668,8 @@ def query_disease_full(code):
                         sub_comps = sess.run("""
                             MATCH (def:KGNode {code: $def_code})-[:has_definition_component]->(c)
                             RETURN DISTINCT c.code as code, c.name as name, c.preferred_name as pref,
-                                   c.display_name as dn, c.name_en as name_en, c.content as content
+                                   c.display_name as dn, c.name_en as name_en,
+                                   c.description as content, c.original_text as original_text
                             ORDER BY c.name LIMIT 20
                         """, def_code=r["ncode"])
                         for sc in sub_comps:
@@ -677,6 +678,7 @@ def query_disease_full(code):
                                 "name": n, "code": sc["code"],
                                 "name_en": sc["name_en"] or "",
                                 "content": sc["content"] or "",
+                                "original_text": sc["original_text"] or "",
                             })
                     except Exception:
                         pass
@@ -685,6 +687,7 @@ def query_disease_full(code):
                 if dim == "TreatmentPlan" and r["ncode"]:
                     item["sub_medication"] = []
                     item["sub_procedure"] = []
+                    item["sub_treatment_item"] = []
                     item["sub_evidence"] = []
                     try:
                         sub_meds = sess.run("""
@@ -695,6 +698,15 @@ def query_disease_full(code):
                         for sm in sub_meds:
                             n = clean_name_from_row(sm, 'pref', 'name', 'code')
                             item["sub_medication"].append({"name": n, "code": sm["code"]})
+
+                        sub_tis = sess.run("""
+                            MATCH (tp:KGNode {code: $tp_code})-[:includes_treatment_item]->(t)
+                            RETURN DISTINCT t.code as code, t.name as name, t.preferred_name as pref
+                            ORDER BY t.name LIMIT 15
+                        """, tp_code=r["ncode"])
+                        for st in sub_tis:
+                            n = clean_name_from_row(st, 'pref', 'name', 'code')
+                            item["sub_treatment_item"].append({"name": n, "code": st["code"]})
 
                         sub_procs = sess.run("""
                             MATCH (tp:KGNode {code: $tp_code})-[:includes_procedure]->(p)
@@ -842,54 +854,117 @@ def query_disease_full(code):
                 if dim == "DifferentialDiagnosis" and r["ncode"]:
                     item["differential_points"] = []
                     item["exclusion_exams"] = []
+                    item["exclusion_labs"] = []
                     item["blocked_actions"] = []
+                    item["differential_rules"] = []
+                    item["related_exams"] = []
+                    item["related_labs"] = []
+                    dd_code = r["ncode"]
+                    seen_ex = {}
+                    seen_lb = {}
+                    # 查询1：鉴别规则 + 规则下的排除检查/检验
                     try:
-                        # has_differential_point
-                        dp_rs = sess.run("""
-                            MATCH (dd:KGNode {code: $dd_code})-[:has_differential_point]->(p)
-                            RETURN DISTINCT p.code as code, p.name as name, p.preferred_name as pref,
-                                   p.display_name as dn
-                            ORDER BY p.name LIMIT 30
-                        """, dd_code=r["ncode"])
-                        for dp in dp_rs:
-                            item["differential_points"].append({
-                                "name": clean_name_from_row(dp, 'pref', 'name', 'code'),
-                                "code": dp["code"],
+                        rule_rs = sess.run("""
+                            MATCH (dd:KGNode {code: $dd_code})-[:has_differential_rule]->(cr:KGNode)
+                            OPTIONAL MATCH (cr)-[:requires_exclusion_exam]->(rex:KGNode)
+                            OPTIONAL MATCH (cr)-[:requires_exclusion_lab]->(rlb:KGNode)
+                            WITH cr, collect(DISTINCT rex) as rex_list, collect(DISTINCT rlb) as rlb_list
+                            RETURN cr.code AS cr_code, cr.name AS cr_name, cr.preferred_name AS cr_pref,
+                                   cr.display_name AS cr_dn, cr.rule_logic AS cr_logic,
+                                   rex_list, rlb_list
+                            ORDER BY cr.name LIMIT 20
+                        """, dd_code=dd_code)
+                        for rr in rule_rs:
+                            rname = clean_name_from_row(rr, "cr_pref", "cr_name", "cr_code")
+                            item["differential_rules"].append({
+                                "name": rname,
+                                "rule_logic": rr["cr_logic"] or "",
                             })
+                            for rex in (rr["rex_list"] or []):
+                                nm = clean_name_from_row(rex, "preferred_name", "name", "code")
+                                if nm and nm not in seen_ex:
+                                    seen_ex[nm] = {"name": nm, "code": rex.get("code") or "", "purpose": "排除"}
+                                    item["exclusion_exams"].append({"name": nm, "code": rex.get("code") or ""})
+                            for rlb in (rr["rlb_list"] or []):
+                                nm = clean_name_from_row(rlb, "preferred_name", "name", "code")
+                                if nm and nm not in seen_lb:
+                                    seen_lb[nm] = {"name": nm, "code": rlb.get("code") or "", "purpose": "排除"}
+                                    item["exclusion_labs"].append({"name": nm, "code": rlb.get("code") or ""})
                     except Exception:
                         pass
+                    # 查询2：DD直连的所有检查/检验实体
                     try:
-                        # requires_exclusion_exam
-                        ex_rs = sess.run("""
-                            MATCH (dd:KGNode {code: $dd_code})-[:requires_exclusion_exam]->(e)
+                        dd_exam_rs = sess.run("""
+                            MATCH (dd:KGNode {code: $dd_code})-[r]->(e:KGNode)
+                            WHERE e.entityType IN ["ExamItem", "ExamObservation"]
                             RETURN DISTINCT e.code as code, e.name as name, e.preferred_name as pref,
-                                   e.display_name as dn
-                            ORDER BY e.name LIMIT 30
-                        """, dd_code=r["ncode"])
-                        for ex in ex_rs:
-                            item["exclusion_exams"].append({
-                                "name": clean_name_from_row(ex, 'pref', 'name', 'code'),
-                                "code": ex["code"],
-                            })
+                                   e.display_name as dn, type(r) as rel_type
+                            ORDER BY e.name LIMIT 50
+                        """, dd_code=dd_code)
+                        for ex in dd_exam_rs:
+                            nm = clean_name_from_row(ex, "pref", "name", "code")
+                            if not nm or nm in seen_ex:
+                                continue
+                            purpose = "排除" if "exclusion" in (ex.get("rel_type") or "").lower() else "辅助鉴别"
+                            seen_ex[nm] = {"name": nm, "code": ex.get("code") or "", "purpose": purpose}
+                            if purpose == "排除":
+                                item["exclusion_exams"].append({"name": nm, "code": ex.get("code") or ""})
                     except Exception:
                         pass
                     try:
-                        # may_block_action / blocks_action
+                        dd_lab_rs = sess.run("""
+                            MATCH (dd:KGNode {code: $dd_code})-[r]->(l:KGNode)
+                            WHERE l.entityType IN ["LabItem", "LabSubitem"]
+                            RETURN DISTINCT l.code as code, l.name as name, l.preferred_name as pref,
+                                   l.display_name as dn, type(r) as rel_type
+                            ORDER BY l.name LIMIT 50
+                        """, dd_code=dd_code)
+                        for lb in dd_lab_rs:
+                            nm = clean_name_from_row(lb, "pref", "name", "code")
+                            if not nm or nm in seen_lb:
+                                continue
+                            purpose = "排除" if "exclusion" in (lb.get("rel_type") or "").lower() else "辅助鉴别"
+                            seen_lb[nm] = {"name": nm, "code": lb.get("code") or "", "purpose": purpose}
+                            if purpose == "排除":
+                                item["exclusion_labs"].append({"name": nm, "code": lb.get("code") or ""})
+                    except Exception:
+                        pass
+                    item["related_exams"] = list(seen_ex.values())
+                    item["related_labs"] = list(seen_lb.values())
+                    # 查询3：阻断动作
+                    try:
                         for blk_rel in ["may_block_action", "blocks_action"]:
                             blk_rs = sess.run("""
                                 MATCH (dd:KGNode {code: $dd_code})-[:%s]->(b)
                                 RETURN DISTINCT b.code as code, b.name as name, b.preferred_name as pref,
                                        b.display_name as dn
                                 ORDER BY b.name LIMIT 30
-                            """ % blk_rel, dd_code=r["ncode"])
+                            """ % blk_rel, dd_code=dd_code)
                             for blk in blk_rs:
                                 item["blocked_actions"].append({
-                                    "name": clean_name_from_row(blk, 'pref', 'name', 'code'),
+                                    "name": clean_name_from_row(blk, "pref", "name", "code"),
                                     "code": blk["code"],
                                 })
                     except Exception:
                         pass
-
+                    # 查询4：鉴别要点（与规则重名的剔除）
+                    try:
+                        dp_rs = sess.run("""
+                            MATCH (dd:KGNode {code: $dd_code})-[:has_differential_point]->(p)
+                            RETURN DISTINCT p.code as code, p.name as name, p.preferred_name as pref,
+                                   p.display_name as dn
+                            ORDER BY p.name LIMIT 30
+                        """, dd_code=dd_code)
+                        rule_names = {x["name"] for x in item["differential_rules"]}
+                        for dp in dp_rs:
+                            nm = clean_name_from_row(dp, "pref", "name", "code")
+                            if nm not in rule_names:
+                                item["differential_points"].append({
+                                    "name": nm,
+                                    "code": dp["code"],
+                                })
+                    except Exception:
+                        pass
                 items.append(item)
             dimensions[dim] = items
 
@@ -962,6 +1037,80 @@ def query_disease_full(code):
                 except Exception:
                     pass
             dimensions[dim] = items
+
+        # ClinicalRule 维度（临床规则）
+        clinical_rules = []
+        seen_rule_codes = set()
+        try:
+            # 路径1: 诊断标准 -> 诊断组件 -> ClinicalRule
+            cr_rs1 = sess.run("""
+                MATCH (d:Disease {code: $code})
+                      -[:has_diagnostic_criteria]->(dx:KGNode)
+                      -[:has_diagnostic_component]->(r:KGNode {entityType:'ClinicalRule'})
+                WHERE (r.status IS NULL OR r.status <> 'deprecated')
+                RETURN DISTINCT r.code as code, r.name as name, r.preferred_name as pref,
+                       r.display_name as dn, r.description as desc,
+                       r.rule_logic as logic, r.trigger_condition as trigger,
+                       r.output_content as output, r.usage_boundary as boundary,
+                       r.trigger_phase as phase, r.read_fields as fields,
+                       r.category as category, r.stage as stage
+                ORDER BY r.name LIMIT 100
+            """, code=code)
+            for r in cr_rs1:
+                if r["code"] not in seen_rule_codes:
+                    seen_rule_codes.add(r["code"])
+                    clinical_rules.append({
+                        "name": clean_name_from_row(r, 'pref', 'name', 'code'),
+                        "code": r["code"],
+                        "description": r["desc"] or "",
+                        "rule_logic": r["logic"] or "",
+                        "trigger_condition": r["trigger"] or "",
+                        "output_content": r["output"] or "",
+                        "usage_boundary": r["boundary"] or "",
+                        "trigger_phase": r["phase"] or "",
+                        "read_fields": r["fields"] or "",
+                        "category": r["category"] or "",
+                        "stage": r["stage"] or "",
+                        "source": "diagnostic_criteria",
+                    })
+            # 路径2: 临床路径 -> 阶段 -> ClinicalRule
+            cr_rs2 = sess.run("""
+                MATCH (d:Disease {code: $code})
+                      -[:has_clinical_pathway]->(p:KGNode)
+                      -[:has_pathway_stage]->(s:KGNode)
+                      -[:has_stage_rule]->(r:KGNode {entityType:'ClinicalRule'})
+                WHERE (r.status IS NULL OR r.status <> 'deprecated')
+                RETURN DISTINCT r.code as code, r.name as name, r.preferred_name as pref,
+                       r.display_name as dn, r.description as desc,
+                       r.rule_logic as logic, r.trigger_condition as trigger,
+                       r.output_content as output, r.usage_boundary as boundary,
+                       r.trigger_phase as phase, r.read_fields as fields,
+                       r.category as category, r.stage as stage,
+                       s.name as stage_name, p.name as pathway_name
+                ORDER BY r.name LIMIT 100
+            """, code=code)
+            for r in cr_rs2:
+                if r["code"] not in seen_rule_codes:
+                    seen_rule_codes.add(r["code"])
+                    clinical_rules.append({
+                        "name": clean_name_from_row(r, 'pref', 'name', 'code'),
+                        "code": r["code"],
+                        "description": r["desc"] or "",
+                        "rule_logic": r["logic"] or "",
+                        "trigger_condition": r["trigger"] or "",
+                        "output_content": r["output"] or "",
+                        "usage_boundary": r["boundary"] or "",
+                        "trigger_phase": r["phase"] or "",
+                        "read_fields": r["fields"] or "",
+                        "category": r["category"] or "",
+                        "stage": r["stage"] or "",
+                        "source": "clinical_pathway",
+                        "stage_name": r["stage_name"] or "",
+                        "pathway_name": r["pathway_name"] or "",
+                    })
+        except Exception:
+            pass
+        dimensions["ClinicalRule"] = clinical_rules
 
         # 关系统计
         rel_stats = sess.run("""
@@ -1082,6 +1231,165 @@ def query_disease_full(code):
         except Exception:
             pass
 
+        # ===== 专科CDSS诊疗链路：首诊辅助检查/检验（Disease->has_exam_plan->ExamPlan->includes_exam_item/includes_lab_item）=====
+        # 关系级元数据：clinical_stage / purpose / service_target_name / priority_level
+        exam_plans = []
+        try:
+            ep_rs = sess.run("""
+                MATCH (d:Disease {code: $code})-[:has_exam_plan]->(ep:KGNode)
+                OPTIONAL MATCH (ep)-[r:includes_exam_item|includes_lab_item]->(n:KGNode)
+                WHERE n IS NULL OR n.status IS NULL OR n.status <> 'deprecated'
+                RETURN ep.code AS ep_code, ep.name AS ep_name,
+                       ep.preferred_name AS ep_pref, ep.display_name AS ep_dn,
+                       n.code AS n_code, n.name AS n_name,
+                       n.preferred_name AS n_pref, n.display_name AS n_dn,
+                       type(r) AS rel_type,
+                       r.clinical_stage AS clinical_stage, r.purpose AS purpose,
+                       r.service_target_name AS service_target_name,
+                       r.priority_level AS priority_level,
+                       r.evidence_id AS evidence_id, r.source_name AS source_name,
+                       r.source_page AS source_page
+                ORDER BY ep.name, n.name
+            """, code=code)
+            plan_map = {}
+            plan_order = []
+            for row in ep_rs:
+                ep_code = row["ep_code"]
+                if ep_code not in plan_map:
+                    plan_map[ep_code] = {
+                        "code": ep_code,
+                        "name": clean_name_from_row(row, 'ep_pref', 'ep_name', 'ep_code'),
+                        "exam_items": [],
+                        "lab_items": [],
+                    }
+                    plan_order.append(ep_code)
+                if not row["n_code"]:
+                    continue
+                entry = {
+                    "name": clean_name_from_row(row, 'n_pref', 'n_name', 'n_code'),
+                    "code": row["n_code"],
+                    "clinical_stage": row["clinical_stage"] or "",
+                    "purpose": row["purpose"] or "",
+                    "service_target_name": row["service_target_name"] or "",
+                    "priority_level": row["priority_level"] or "",
+                    "evidence_id": row["evidence_id"] or "",
+                    "source_name": row["source_name"] or "",
+                    "source_page": row["source_page"] or "",
+                }
+                if row["rel_type"] == "includes_lab_item":
+                    plan_map[ep_code]["lab_items"].append(entry)
+                else:
+                    plan_map[ep_code]["exam_items"].append(entry)
+            exam_plans = [plan_map[c] for c in plan_order]
+        except Exception:
+            pass
+
+        # ===== 专科CDSS诊疗链路：鉴别诊断（DD->has_differential_rule->ClinicalRule->requires_exclusion_exam/lab）=====
+        differentials = []
+        try:
+            dd_rs = sess.run("""
+                MATCH (d:Disease {code: $code})-[:has_differential_diagnosis]->(dd:KGNode)
+                OPTIONAL MATCH (dd)-[:has_differential_rule]->(cr:KGNode)
+                OPTIONAL MATCH (cr)-[:requires_exclusion_exam]->(ex:KGNode)
+                OPTIONAL MATCH (cr)-[:requires_exclusion_lab]->(lb:KGNode)
+                RETURN dd.code AS dd_code, dd.name AS dd_name,
+                       dd.preferred_name AS dd_pref, dd.display_name AS dd_dn,
+                       dd.description AS dd_desc,
+                       cr.code AS cr_code, cr.name AS cr_name,
+                       cr.preferred_name AS cr_pref, cr.display_name AS cr_dn,
+                       cr.rule_logic AS cr_logic, cr.description AS cr_desc,
+                       cr.output_content AS cr_output, cr.usage_boundary AS cr_boundary,
+                       collect(DISTINCT ex.name) AS excl_exam_names,
+                       collect(DISTINCT lb.name) AS excl_lab_names
+                ORDER BY dd.name, cr.name
+            """, code=code)
+            dd_map = {}
+            dd_order = []
+            rule_map = {}
+            for row in dd_rs:
+                dd_code = row["dd_code"]
+                if dd_code not in dd_map:
+                    dd_map[dd_code] = {
+                        "code": dd_code,
+                        "name": clean_name_from_row(row, 'dd_pref', 'dd_name', 'dd_code'),
+                        "description": row["dd_desc"] or "",
+                        "rules": [],
+                    }
+                    dd_order.append(dd_code)
+                if not row["cr_code"]:
+                    continue
+                rk = dd_code + '|' + row["cr_code"]
+                if rk not in rule_map:
+                    rule = {
+                        "code": row["cr_code"],
+                        "name": clean_name_from_row(row, 'cr_pref', 'cr_name', 'cr_code'),
+                        "rule_logic": row["cr_logic"] or row["cr_desc"] or "",
+                        "output_content": row["cr_output"] or "",
+                        "usage_boundary": row["cr_boundary"] or "",
+                        "exclusion_exams": [],
+                        "exclusion_labs": [],
+                    }
+                    rule_map[rk] = rule
+                    dd_map[dd_code]["rules"].append(rule)
+                rule = rule_map[rk]
+                for n in (row["excl_exam_names"] or []):
+                    if n and n not in rule["exclusion_exams"]:
+                        rule["exclusion_exams"].append(n)
+                for n in (row["excl_lab_names"] or []):
+                    if n and n not in rule["exclusion_labs"]:
+                        rule["exclusion_labs"].append(n)
+            for dd_code in dd_order:
+                dd = dd_map[dd_code]
+                # DD 直连的检查/检验实体（不限于排除用途）
+                dd["exams"] = []
+                dd["labs"] = []
+                try:
+                    dd_exam_rs = sess.run("""
+                        MATCH (dd:KGNode {code: $dd_code})-[r]->(e:KGNode)
+                        WHERE e.entityType IN ['ExamItem', 'ExamObservation']
+                        OR type(r) IN ['requires_exclusion_exam', 'has_exam_item_for_differential']
+                        RETURN DISTINCT e.code as code, e.name as name, e.preferred_name as pref,
+                               e.display_name as dn, type(r) as rel_type
+                        ORDER BY e.name LIMIT 40
+                    """, dd_code=dd_code)
+                    seen = set()
+                    for ex in dd_exam_rs:
+                        nm = clean_name_from_row(ex, 'pref', 'name', 'code')
+                        if nm and nm not in seen:
+                            seen.add(nm)
+                            dd["exams"].append({
+                                "name": nm, "code": ex["code"],
+                                "purpose": "排除" if "exclusion" in (ex["rel_type"] or "").lower() else "辅助鉴别"
+                            })
+                except Exception:
+                    pass
+                try:
+                    dd_lab_rs = sess.run("""
+                        MATCH (dd:KGNode {code: $dd_code})-[r]->(l:KGNode)
+                        WHERE l.entityType IN ['LabItem', 'LabSubitem']
+                        OR type(r) IN ['requires_exclusion_lab', 'has_lab_item_for_differential']
+                        RETURN DISTINCT l.code as code, l.name as name, l.preferred_name as pref,
+                               l.display_name as dn, type(r) as rel_type
+                        ORDER BY l.name LIMIT 40
+                    """, dd_code=dd_code)
+                    seen = set()
+                    for lb in dd_lab_rs:
+                        nm = clean_name_from_row(lb, 'pref', 'name', 'code')
+                        if nm and nm not in seen:
+                            seen.add(nm)
+                            dd["labs"].append({
+                                "name": nm, "code": lb["code"],
+                                "purpose": "排除" if "exclusion" in (lb["rel_type"] or "").lower() else "辅助鉴别"
+                            })
+                except Exception:
+                    pass
+                # 图谱异常标记：泛化空壳标题 或 无任何鉴别规则
+                generic = ('以下疾病' in dd["name"]) or ('需要考虑' in dd["name"])
+                dd["anomaly"] = bool(generic or len(dd["rules"]) == 0)
+                differentials.append(dd)
+        except Exception:
+            pass
+
         return {
             "info": info,
             "dimensions": dimensions,
@@ -1089,6 +1397,8 @@ def query_disease_full(code):
             "evidence_count": ev_cnt,
             "guidelines": [e["name"] for e in dimensions.get("Guideline", [])],
             "pathways": pathways,
+            "exam_plans": exam_plans,
+            "differentials": differentials,
         }
 
 
@@ -1352,117 +1662,91 @@ def _build_rs_record(r):
 
 
 def query_disease_recommendations(disease_code):
-    """查询疾病的全部 RecommendationStatement 推荐卡片
-    路径1: DiagnosisCriteria -> has_diagnostic_component -> ClinicalRule -> has_recommendation_statement -> RS
-    路径2: ClinicalPathway -> has_pathway_stage -> has_stage_rule -> ClinicalRule -> has_recommendation_statement -> RS
-    路径3: ClinicalPathway/PathwayStage -> has_recommendation_statement -> RS (直接)
+    """正式CDSS推荐：按 RecommendationStatement.disease_code 属性过滤，只读 recommends_action 链
+    不依赖 Disease -> has_recommendation_statement；
+    不把 has_treatment_plan / stage_has_available_action 当正式推荐。
+    同时返回每条 RS 直连的主证据（derived_from）、主指南（based_on_guideline）。
     """
-    cache_key = f"kg:recommendations:{disease_code}"
+    cache_key = f"kg:recommendations_v2:{disease_code}"
     cached = cache_get(cache_key)
     if cached is not None:
         return cached
 
     d = get_driver()
     recommendations = []
-    seen_codes = set()
 
     with d.session() as sess:
-        # 路径1: 诊断标准 -> 诊断组件(ClinicalRule) -> RS
         rs = sess.run("""
-            MATCH (d:KGNode {code: $code})-[:has_diagnostic_criteria]->(dx:KGNode)
-                  -[:has_diagnostic_component]->(rule:KGNode)
-                  -[:has_recommendation_statement]->(rs:KGNode {entityType:'RecommendationStatement'})
+            MATCH (rs:RecommendationStatement {disease_code: $code})
             OPTIONAL MATCH (rs)-[:recommends_action]->(action:KGNode)
+            OPTIONAL MATCH (rs)-[:derived_from]->(ev:KGNode)
+            OPTIONAL MATCH (rs)-[:based_on_guideline]->(g:KGNode)
             RETURN rs.code AS rs_code, rs.display_name AS rs_display, rs.name AS rs_name,
                    rs.recommendation_class AS rec_class, rs.evidence_level AS ev_level,
                    rs.recommendation_type AS rec_type,
                    rs.statement_text AS stmt_text, rs.statement_summary AS stmt_summary,
                    rs.clinical_review_status AS review_status, rs.formal_cdss_ready AS formal_ready,
                    rs.indication_conditions AS indication, rs.contraindication_conditions AS contra,
-                   rs.primary_guideline_name AS pg_name, rs.primary_guideline_code AS pg_code,
-                   rs.primary_evidence_code AS pe_code,
+                   rs.rule_name AS rule_name, rs.stage_name AS stage_name, rs.pathway_name AS pathway_name,
                    rs.primary_source_name AS primary_source_name,
                    rs.primary_source_page AS primary_source_page,
-                   rs.primary_evidence_summary AS primary_evidence_summary,
-                   rs.primary_evidence_raw_excerpt AS primary_evidence_raw_excerpt,
-                   '' AS pathway_code,
-                   coalesce(action.code, rs.action_code, '') AS action_code,
-                   coalesce(action.display_name, action.preferred_name, action.name, rs.action_name, '') AS action_name,
-                   coalesce(action.entityType, rs.action_entity_type, '') AS action_etype,
-                   rs.rule_name AS rule_name, rs.rule_code AS rule_code,
-                   rs.stage_name AS stage_name, rs.stage_code AS stage_code,
-                   rs.pathway_name AS pathway_name
-            ORDER BY rs.stage_order, rs.name LIMIT 100
+                   collect(DISTINCT {
+                       code: action.code,
+                       name: coalesce(action.display_name, action.preferred_name, action.name, ''),
+                       entityType: coalesce(action.entityType, '')
+                   }) AS actions,
+                   collect(DISTINCT {
+                       code: ev.code,
+                       name: coalesce(ev.display_name, ev.preferred_name, ev.name, ''),
+                       source_name: coalesce(ev.source_name, ''),
+                       source_page: coalesce(toString(ev.source_page), ''),
+                       evidence_level: coalesce(ev.evidence_level, ''),
+                       recommendation_class: coalesce(ev.recommendation_class, ''),
+                       excerpt: left(coalesce(ev.evidence_text, ''), 300)
+                   }) AS evidences,
+                   collect(DISTINCT g.name) AS guidelines
+            ORDER BY rs.name LIMIT 200
         """, code=disease_code)
         for r in rs:
-            if r["rs_code"] not in seen_codes:
-                seen_codes.add(r["rs_code"])
-                recommendations.append(_build_rs_record(r))
-
-        # 路径2: 路径 -> 阶段 -> 规则 -> RS
-        rs2 = sess.run("""
-            MATCH (d:KGNode {code: $code})-[:has_clinical_pathway]->(p:KGNode)
-                  -[:has_pathway_stage]->(s:KGNode)
-                  -[:has_stage_rule]->(rule:KGNode)
-                  -[:has_recommendation_statement]->(rs:KGNode {entityType:'RecommendationStatement'})
-            OPTIONAL MATCH (rs)-[:recommends_action]->(action:KGNode)
-            RETURN rs.code AS rs_code, rs.display_name AS rs_display, rs.name AS rs_name,
-                   rs.recommendation_class AS rec_class, rs.evidence_level AS ev_level,
-                   rs.recommendation_type AS rec_type,
-                   rs.statement_text AS stmt_text, rs.statement_summary AS stmt_summary,
-                   rs.clinical_review_status AS review_status, rs.formal_cdss_ready AS formal_ready,
-                   rs.indication_conditions AS indication, rs.contraindication_conditions AS contra,
-                   rs.primary_guideline_name AS pg_name, rs.primary_guideline_code AS pg_code,
-                   rs.primary_evidence_code AS pe_code,
-                   rs.primary_source_name AS primary_source_name,
-                   rs.primary_source_page AS primary_source_page,
-                   rs.primary_evidence_summary AS primary_evidence_summary,
-                   rs.primary_evidence_raw_excerpt AS primary_evidence_raw_excerpt,
-                   p.code AS pathway_code,
-                   coalesce(action.code, rs.action_code, '') AS action_code,
-                   coalesce(action.display_name, action.preferred_name, action.name, rs.action_name, '') AS action_name,
-                   coalesce(action.entityType, rs.action_entity_type, '') AS action_etype,
-                   rs.rule_name AS rule_name, rs.rule_code AS rule_code,
-                   rs.stage_name AS stage_name, rs.stage_code AS stage_code,
-                   rs.pathway_name AS pathway_name
-            ORDER BY rs.stage_order, rs.name LIMIT 100
-        """, code=disease_code)
-        for r in rs2:
-            if r["rs_code"] not in seen_codes:
-                seen_codes.add(r["rs_code"])
-                recommendations.append(_build_rs_record(r))
-
-        # 路径3: 路径/阶段 -> RS (直接)
-        rs3 = sess.run("""
-            MATCH (d:KGNode {code: $code})-[:has_clinical_pathway]->(p:KGNode)
-                  -[:has_pathway_stage]->(s:KGNode)
-                  -[:has_recommendation_statement]->(rs:KGNode {entityType:'RecommendationStatement'})
-            OPTIONAL MATCH (rs)-[:recommends_action]->(action:KGNode)
-            RETURN rs.code AS rs_code, rs.display_name AS rs_display, rs.name AS rs_name,
-                   rs.recommendation_class AS rec_class, rs.evidence_level AS ev_level,
-                   rs.recommendation_type AS rec_type,
-                   rs.statement_text AS stmt_text, rs.statement_summary AS stmt_summary,
-                   rs.clinical_review_status AS review_status, rs.formal_cdss_ready AS formal_ready,
-                   rs.indication_conditions AS indication, rs.contraindication_conditions AS contra,
-                   rs.primary_guideline_name AS pg_name, rs.primary_guideline_code AS pg_code,
-                   rs.primary_evidence_code AS pe_code,
-                   rs.primary_source_name AS primary_source_name,
-                   rs.primary_source_page AS primary_source_page,
-                   rs.primary_evidence_summary AS primary_evidence_summary,
-                   rs.primary_evidence_raw_excerpt AS primary_evidence_raw_excerpt,
-                   p.code AS pathway_code,
-                   coalesce(action.code, rs.action_code, '') AS action_code,
-                   coalesce(action.display_name, action.preferred_name, action.name, rs.action_name, '') AS action_name,
-                   coalesce(action.entityType, rs.action_entity_type, '') AS action_etype,
-                   rs.rule_name AS rule_name, rs.rule_code AS rule_code,
-                   rs.stage_name AS stage_name, rs.stage_code AS stage_code,
-                   rs.pathway_name AS pathway_name
-            ORDER BY rs.stage_order, rs.name LIMIT 100
-        """, code=disease_code)
-        for r in rs3:
-            if r["rs_code"] not in seen_codes:
-                seen_codes.add(r["rs_code"])
-                recommendations.append(_build_rs_record(r))
+            actions = []
+            seen_a = set()
+            for a in (r["actions"] or []):
+                if a and a.get("code") and a["code"] not in seen_a:
+                    seen_a.add(a["code"])
+                    actions.append(a)
+            evidences = []
+            seen_e = set()
+            for e in (r["evidences"] or []):
+                if e and e.get("code") and e["code"] not in seen_e:
+                    seen_e.add(e["code"])
+                    evidences.append(e)
+            guidelines = [g for g in (r["guidelines"] or []) if g]
+            primary_guideline = guidelines[0] if guidelines else ""
+            recommendations.append({
+                "code": r["rs_code"] or "",
+                "name": clean_name_from_row(r, "rs_display", "rs_name", "rs_code"),
+                "recommendation_class": r["rec_class"] or "",
+                "evidence_level": r["ev_level"] or "",
+                "recommendation_type": r["rec_type"] or "",
+                "statement_text": r["stmt_text"] or "",
+                "statement_summary": r["stmt_summary"] or "",
+                "actions": actions,
+                "action_code": actions[0]["code"] if actions else "",
+                "action_name": actions[0]["name"] if actions else "",
+                "action_entity_type": actions[0]["entityType"] if actions else "",
+                "rule_name": r["rule_name"] or "",
+                "stage_name": r["stage_name"] or "",
+                "pathway_name": r["pathway_name"] or "",
+                "clinical_review_status": r["review_status"] or "",
+                "formal_cdss_ready": r["formal_ready"] or False,
+                "indication_conditions": r["indication"] or "",
+                "contraindication_conditions": r["contra"] or "",
+                "primary_source_name": r["primary_source_name"] or primary_guideline,
+                "primary_source_page": r["primary_source_page"] or "",
+                "primary_guideline_name": primary_guideline,
+                "guidelines": guidelines,
+                "evidences": evidences,
+            })
 
     cache_set(cache_key, recommendations, ttl=300)
     return recommendations

@@ -29,8 +29,8 @@
 | 🧭 图谱探索 | `explore.html` | 三栏布局：疾病树 + 疾病/关系/实体三种视角 + 详情面板 |
 | 🕸️ 网络探索 | `network.html` | 交互式力导向图谱，维度筛选、路径查找、全屏浏览 |
 | 🗺️ 数据覆盖分析 | `heatmap.html` | 92 种专病 × 17 维度热力图矩阵，定位缺失维度 |
-| 🔍 临床诊断模拟 | `diagnosis.html` | 输入病例信息，17 维度加权匹配候选疾病，展示诊疗指南依据 |
-| 🔗 路径编辑 | `engine.html` | 临床路径流程引擎编辑器 |
+| ~~🔍 临床诊断模拟~~ | ~~`diagnosis.html`~~ | ~~已作废~~ 已从导航菜单移除，保留文件仅供历史参考 |
+| ~~🔗 路径编辑~~ | ~~`engine.html`~~ | ~~已作废~~ 已从导航菜单移除，保留文件仅供历史参考 |
 | ✅ 临床审核 | `review.html` | 4 层审核 Tab（疾病/场景/药师/边级），筛选+导出 |
 | 📐 图谱数据字典 | `schema.html` | 实体类型、关系类型、疾病分类统计 |
 | 📘 Schema 标准 | `standard.html` | 专科专病图谱建模标准、字段约束、质量规则 |
@@ -105,6 +105,46 @@ cd /zoesoft/zoekgRedis && ./bin/redis-server redis.conf
 
 # 启动 Web 服务
 cd /zoesoft/zoekgweb && nohup python3 server.py > server.log 2>&1 &
+```
+
+### 部署注意事项（重要）
+
+> **反复踩坑点**：修改 `server.py` 后必须重启服务进程，否则跑的还是旧代码。
+
+不同文件的生效方式不同，务必区分：
+
+| 修改的文件 | 生效方式 | 原因 |
+|------------|----------|------|
+| `server.py`（后端 Python） | **必须重启进程** | Python 代码启动时加载到内存，改文件不会热更新 |
+| 前端 `*.html` / `*.js` / `*.css` | 清 Redis 缓存 + 浏览器强制刷新 | 静态文件由 server.py 提供，带 `Cache-Control: no-cache`，但 Redis 会缓存 API 结果 |
+| Neo4j 数据（节点/关系） | 自动生效（下次查询） | server.py 每次实时查询 Neo4j，无缓存层 |
+| Redis 缓存数据 | 清缓存即可（`FLUSHALL`） | TTL 5min，也可手动清除 |
+
+**一键部署（推荐）**：
+
+```bash
+# 本地执行 deploy.py，自动完成：上传文件 → 清 Redis → 重启 server.py → 验证
+cd kg-test-page
+python deploy.py
+```
+
+`deploy.py` 会自动处理后端重启和缓存清理，**修改 server.py 后务必用 deploy.py 部署，不要只手动上传文件**。
+
+**手动重启 server.py**（仅当不方便跑 deploy.py 时）：
+
+```bash
+# SSH 到服务器
+ssh root@192.168.3.27
+
+# 杀旧进程 + 启新进程
+pkill -f 'python.*server.py'; sleep 2
+cd /zoesoft/zoekgweb && nohup python3 server.py >> server.log 2>&1 &
+
+# 清 Redis 缓存
+/zoesoft/zoekgRedis/bin/redis-cli -h 127.0.0.1 -p 6379 FLUSHALL
+
+# 验证进程
+ps aux | grep 'python.*server.py' | grep -v grep
 ```
 
 ### 环境变量（可选）

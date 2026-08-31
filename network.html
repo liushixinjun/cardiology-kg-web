@@ -101,6 +101,19 @@
 
 /* Dimension checkboxes */
 .nw-dim-list { display: flex; flex-direction: column; gap: 3px; }
+.nw-dim-group { margin-bottom: 6px; }
+.nw-dim-group-title {
+  font-size: 10px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: .03em;
+  margin-bottom: 3px; padding-left: 2px;
+  display: flex; align-items: center; gap: 4px;
+}
+.nw-dim-group-title .grp-toggle {
+  cursor: pointer; font-size: 10px; color: var(--muted);
+  margin-left: auto; font-weight: 400;
+}
+.nw-dim-group-items { display: flex; flex-direction: column; gap: 2px; }
+.nw-dim-group.collapsed .nw-dim-group-items { display: none; }
 .nw-dim-item {
   display: flex; align-items: center; gap: 8px;
   padding: 4px 6px; border-radius: 4px; cursor: pointer;
@@ -503,7 +516,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 <div class="nw-datasource" id="nw-datasource"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260729"></script>
+<script src="./_shared/js/app.js?v=20260831"></script>
 <script>
 /* ================================================================
    网络探索 - 知识图谱交互分析
@@ -546,7 +559,7 @@ function buildDefaultDiseases(diseases) {
   scored.sort(function(a, b) { return b.dimCount - a.dimCount; });
   DEFAULT_DISEASE_NAMES = scored.slice(0, 5).map(function(s) { return s.name; });
 }
-var DEFAULT_VISIBLE_DIMS = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan', 'StandardDiagnosis'];
+var DEFAULT_VISIBLE_DIMS = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan', 'StandardDiagnosis', 'ClinicalRule'];
 var MAX_OTHER_DISEASES = 24;
 
 /* ---------- Init ---------- */
@@ -655,19 +668,50 @@ function initDimFilters() {
 }
 
 function renderDimFilters() {
+  /* V2.0 按临床思维流分组的维度筛选 */
+  var dimGroups = [
+    { name: '定义与基础', icon: '📖', dims: ['Definition'] },
+    { name: '临床表现', icon: '🩺', dims: ['Symptom','Sign'] },
+    { name: '诊断检查', icon: '🔬', dims: ['ExamItem','ExamObservation','LabItem','LabSubitem'] },
+    { name: '诊断与鉴别', icon: '🎯', dims: ['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'] },
+    { name: '治疗方案', icon: '💊', dims: ['TreatmentPlan','Medication','Procedure','Contraindication'] },
+    { name: '临床规则', icon: '⚙️', dims: ['ClinicalRule'] },
+    { name: '预后与预防', icon: '📋', dims: ['Prognosis','FollowUp','Complication','Prevention'] },
+    { name: '病因与机制', icon: '🧬', dims: ['Etiology','Pathophysiology','Epidemiology','RiskFactor'] },
+    { name: '证据与指南', icon: '📚', dims: ['Evidence','Guideline','ThresholdRule'] },
+    { name: '标准主数据', icon: '🏷️', dims: ['StandardDiagnosis'] }
+  ];
   var html = '';
-  DIM_KEYS.forEach(function(k) {
-    var count = getDimCount(k);
-    var color = DIM_COLORS[k] || '#888';
-    html += '<label class="nw-dim-item">';
-    html += '<input type="checkbox" ' + (DIM_FILTERS[k] ? 'checked' : '') +
-            ' onchange="onDimToggle(\'' + k + '\', this.checked)">';
-    html += '<span class="dim-dot" style="background:' + color + '"></span>';
-    html += '<span class="dim-label">' + DIM_NAMES[k] + '</span>';
-    html += '<span class="dim-count">' + count + '</span>';
-    html += '</label>';
+  dimGroups.forEach(function(grp) {
+    var totalVisible = 0;
+    grp.dims.forEach(function(k) { if (DIM_FILTERS[k]) totalVisible++; });
+    html += '<div class="nw-dim-group">';
+    html += '<div class="nw-dim-group-title">' + grp.icon + ' ' + grp.name;
+    html += '<span class="grp-toggle" onclick="toggleDimGroup(this)">▼</span>';
+    html += '</div>';
+    html += '<div class="nw-dim-group-items">';
+    grp.dims.forEach(function(k) {
+      var count = getDimCount(k);
+      var color = DIM_COLORS[k] || '#888';
+      html += '<label class="nw-dim-item">';
+      html += '<input type="checkbox" ' + (DIM_FILTERS[k] ? 'checked' : '') +
+              ' onchange="onDimToggle(\'' + k + '\', this.checked)">';
+      html += '<span class="dim-dot" style="background:' + color + '"></span>';
+      html += '<span class="dim-label">' + DIM_NAMES[k] + '</span>';
+      html += '<span class="dim-count">' + count + '</span>';
+      html += '</label>';
+    });
+    html += '</div></div>';
   });
   document.getElementById('nw-dim-filters').innerHTML = html;
+}
+
+function toggleDimGroup(el) {
+  var group = el.closest('.nw-dim-group');
+  if (group) {
+    group.classList.toggle('collapsed');
+    el.textContent = group.classList.contains('collapsed') ? '▸' : '▼';
+  }
 }
 
 function getDimCount(dimKey) {
@@ -757,10 +801,11 @@ function buildGraphData() {
   };
   pushUniqueNode(nodes, centerNode);
 
-  /* Level 1: Dimension entities */
+  /* Level 1: Dimension entities (每维度最多展示12个，避免节点爆炸) */
+  var MAX_ENTITIES_PER_DIM = 12;
   DIM_KEYS.forEach(function(k, idx) {
     if (!DIM_FILTERS[k]) return;
-    var items = disease.dimensions[k] || [];
+    var items = (disease.dimensions[k] || []).slice(0, MAX_ENTITIES_PER_DIM);
     var color = DIM_COLORS[k] || '#888';
     items.forEach(function(e) {
       var eName = cleanName(e);
@@ -950,6 +995,38 @@ function buildGraphData() {
     });
   });
 
+  /* 跨维度连线：ClinicalRule → Medication/Procedure (规则推荐的治疗措施) */
+  var ruleList = (disease.dimensions['ClinicalRule'] || []).slice(0, MAX_ENTITIES_PER_DIM);
+  var medList = (disease.dimensions['Medication'] || []).slice(0, MAX_ENTITIES_PER_DIM);
+  var procList = (disease.dimensions['Procedure'] || []).slice(0, MAX_ENTITIES_PER_DIM);
+  if (ruleList.length) {
+    var ruleColor = DIM_COLORS['ClinicalRule'] || '#339af0';
+    ruleList.forEach(function(rule) {
+      var ruleName = cleanName(rule);
+      var ruleText = (rule.rule_logic || '') + (rule.output_content || '') + (rule.trigger_condition || '');
+      /* 模糊匹配药物名 */
+      medList.forEach(function(med) {
+        var medName = cleanName(med);
+        if (ruleText.indexOf(medName) !== -1 && ALL_GRAPH_NODES[ruleName] && ALL_GRAPH_NODES[medName]) {
+          pushUniqueLink(links, {
+            source: ruleName, target: medName, value: 'recommends_medication',
+            lineStyle: { color: ruleColor, width: 1, type: 'dashed', opacity: 0.35 }
+          });
+        }
+      });
+      /* 模糊匹配手术名 */
+      procList.forEach(function(proc) {
+        var procName = cleanName(proc);
+        if (ruleText.indexOf(procName) !== -1 && ALL_GRAPH_NODES[ruleName] && ALL_GRAPH_NODES[procName]) {
+          pushUniqueLink(links, {
+            source: ruleName, target: procName, value: 'recommends_procedure',
+            lineStyle: { color: ruleColor, width: 1, type: 'dashed', opacity: 0.35 }
+          });
+        }
+      });
+    });
+  }
+
   /* ClinicalPathway → PathwayStage */
   if (disease.pathways && disease.pathways.length) {
     var pwColor = '#339af0';
@@ -1112,6 +1189,31 @@ function renderGraph() {
     });
   }
 
+  /* 构建图例数据：按维度生成可切换的分类 */
+  var legendDisease = KG_DATA.diseases[CURRENT_DISEASE_CODE];
+  var legendData = [];
+  var legendSelected = {};
+  var categories = [{ name: '疾病' }];
+  legendData.push('疾病');
+  legendSelected['疾病'] = true;
+  DIM_KEYS.forEach(function(k) {
+    if (DIM_FILTERS[k]) {
+      var dimName = DIM_NAMES[k];
+      var hasData = legendDisease && (legendDisease.dimensions[k] || []).length > 0;
+      if (hasData && legendData.indexOf(dimName) === -1) {
+        legendData.push(dimName);
+        legendSelected[dimName] = true;
+        categories.push({ name: dimName });
+      }
+    }
+  });
+  /* ClinicalPathway 有数据时加入图例 */
+  if (legendDisease && legendDisease.pathways && legendDisease.pathways.length && legendData.indexOf('临床路径') === -1) {
+    legendData.push('临床路径');
+    legendSelected['临床路径'] = true;
+    categories.push({ name: '临床路径' });
+  }
+
   GRAPH_CHART.setOption({
     tooltip: {
       trigger: 'item',
@@ -1130,6 +1232,15 @@ function renderGraph() {
         return '<b>' + p.name + '</b>' + (t ? '<br><span style="color:#8b90a0">' + t + '</span>' : '');
       }
     },
+    legend: {
+      show: true,
+      data: legendData,
+      bottom: 10,
+      textStyle: { color: '#8b92a5', fontSize: 10 },
+      inactiveColor: '#444',
+      selected: legendSelected,
+      type: 'scroll'
+    },
     animationDuration: 600,
     animationEasingUpdate: 'quinticInOut',
     series: [{
@@ -1139,6 +1250,7 @@ function renderGraph() {
       links: gd.links,
       roam: true,
       draggable: true,
+      categories: categories,
       label: {
         show: true,
         position: 'right',
@@ -1154,9 +1266,9 @@ function renderGraph() {
         lineStyle: { width: 4 }
       },
       force: {
-        repulsion: 360,
-        gravity: 0.04,
-        edgeLength: [90, 260],
+        repulsion: 320,
+        gravity: 0.05,
+        edgeLength: [70, 220],
         friction: 0.6,
         layoutAnimation: true
       }
@@ -1511,6 +1623,33 @@ function showEntityDetailPanel(name, nd) {
   h += detailRow('关联疾病', assocDiseases.length + ' 种');
   h += detailRow('所属维度', dimLabel);
   h += '</div>';
+
+  /* ClinicalRule 专属字段：触发条件/规则逻辑/输出内容 */
+  if (nd.type === 'ClinicalRule') {
+    var ruleEntity = null;
+    assocDiseases.forEach(function(dc) {
+      if (ruleEntity) return;
+      var items = KG_DATA.diseases[dc].dimensions['ClinicalRule'] || [];
+      items.forEach(function(r) { if (!ruleEntity && cleanName(r) === name) ruleEntity = r; });
+    });
+    if (ruleEntity) {
+      if (ruleEntity.trigger_condition) {
+        h += '<div class="nw-detail-section"><h4>触发条件</h4>';
+        h += '<div style="font-size:12px;color:var(--ink);line-height:1.6;padding:6px 8px;background:var(--bg3);border-radius:6px;border-left:3px solid ' + color + '">' + ruleEntity.trigger_condition + '</div>';
+        h += '</div>';
+      }
+      if (ruleEntity.rule_logic) {
+        h += '<div class="nw-detail-section"><h4>规则逻辑</h4>';
+        h += '<div style="font-size:11px;color:var(--muted);line-height:1.6;padding:6px 8px;background:var(--bg3);border-radius:6px;font-family:Consolas,monospace;white-space:pre-wrap">' + ruleEntity.rule_logic + '</div>';
+        h += '</div>';
+      }
+      if (ruleEntity.output_content) {
+        h += '<div class="nw-detail-section"><h4>输出内容</h4>';
+        h += '<div style="font-size:12px;color:var(--ink);line-height:1.6;padding:6px 8px;background:var(--bg3);border-radius:6px;border-left:3px solid #51cf66">' + ruleEntity.output_content + '</div>';
+        h += '</div>';
+      }
+    }
+  }
 
   /* Show sub_medication / sub_procedure for TreatmentPlan and Medication nodes */
   var subMeds = [], subProcs = [];

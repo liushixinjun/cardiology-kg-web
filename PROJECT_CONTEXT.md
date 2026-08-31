@@ -152,9 +152,21 @@ SFTP 覆盖单个文件即可，不清 Redis、不重启服务。
 
 ---
 
-## 八、已完成功能（截至 2026-07-16）
+## 八、已完成功能（截至 2026-08-16）
 
-### 今日改造内容
+### 2026-08-16 改造内容
+1. **知识总览-鉴别诊断维度修复**（server.py + explore.html）：
+   - `REL_MAP` 中 DifferentialDiagnosis 关系从废弃的 `differentiates_from` 改为 `has_differential_diagnosis`，修复维度数为 0 的问题
+   - 维度二跳新增 ClinicalRule 链路聚合：`(DD)-[:has_differential_rule]->(ClinicalRule)-[:requires_exclusion_exam/lab]->(检查/检验)`，产出 `exclusion_labs`、`differential_rules` 新字段，与旧 DD 直连 `requires_exclusion_exam` 合并去重
+   - explore.html 三处渲染补充：知识总览鉴别详情（排除检验/鉴别规则行）、关系图二跳（`[排检]` 节点）、右侧实体详情面板
+   - 验收：AMI 4 鉴别对象（主动脉夹层含肌钙蛋白/D-二聚体排除检验）、HCM 3 鉴别对象（心肌炎含肌钙蛋白/CRP/ESR），DOM 级 PASS
+
+2. **关系视角图谱异常数据修复**（server.py + explore.html drawGraph）：
+   - 图谱 `has_differential_point` 实际指向 ClinicalRule 规则节点，导致关系图出现"[鉴别]心衰与肺栓塞鉴别规则"这类规则名冒充鉴别要点的节点；server.py 聚合规则后剔除与规则重名的伪要点（AMI/HCM 全部 7 个 DD 均中招）
+   - 标准诊断实体名与疾病名相同（如 AMI 的 STDDX 节点也叫"急性心肌梗死"），`seen` 去重后曾生成"标准诊断分组→疾病中心"回环边；drawGraph 现按同名实体过滤分组/维度/实体三级渲染，分组名与维度名相同时不建自环边
+   - 验收：AMI 关系图 198 节点/236 连线，无 [鉴别] 规则名节点、无自环、无回环边、DD 实体正确挂载 [排除]/[排检] 节点，6/6 断言 PASS
+
+### 历史改造（2026-07-16）
 1. **疾病层级树优化**：
    - 去掉了 DiseaseClassification 中间层（分型节点），改为子疾病通过 `has_classification → maps_to → Disease` 直接挂在父疾病下
    - 子疾病（如 AMI 下的 STEMI/NSTEMI）通过 `▼` 折叠按钮控制，默认展开

@@ -126,6 +126,45 @@
 .cfg-sync-diff{font-size:11px;color:var(--muted);margin-top:2px}
 .cfg-sync-diff .up{color:#51cf66}
 .cfg-sync-diff .down{color:#ff6b6b}
+
+/* ===== 审计报告列表 ===== */
+.audit-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.audit-item{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;transition:border-color .2s;cursor:pointer;position:relative}
+.audit-item:hover{border-color:var(--accent)}
+.audit-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.audit-item-time{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.audit-item-badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.3px}
+.audit-item-badge.healthy{background:rgba(81,207,102,.12);color:#51cf66}
+.audit-item-badge.warning{background:rgba(255,212,59,.12);color:#ffd43b}
+.audit-item-badge.danger{background:rgba(255,107,107,.12);color:#ff6b6b}
+.audit-item-badge.info{background:rgba(79,140,255,.12);color:var(--accent)}
+.audit-item-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.audit-stat-mini{display:flex;flex-direction:column;gap:2px}
+.audit-stat-mini-val{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.audit-stat-mini-label{font-size:10px;color:var(--muted)}
+.audit-item-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--rule)}
+.audit-item-issues{font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.audit-item-issues span{display:flex;align-items:center;gap:3px}
+.audit-item-issues .fixed{color:#51cf66}
+.audit-item-issues .pending{color:#ffd43b}
+.audit-view-btn{font-size:11px;padding:5px 12px;border-radius:5px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-weight:600;transition:all .15s;white-space:nowrap}
+.audit-view-btn:hover{background:var(--accent);color:#fff}
+.audit-detail-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center}
+.audit-detail-overlay.show{display:flex}
+.audit-detail-modal{background:var(--bg2);border:1px solid var(--rule);border-radius:14px;width:90%;max-width:720px;max-height:80vh;overflow-y:auto;padding:28px;position:relative}
+.audit-detail-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--rule);color:var(--muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.audit-detail-close:hover{color:var(--ink);border-color:var(--accent)}
+.audit-detail-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.audit-detail-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.audit-detail-section{margin-bottom:16px}
+.audit-detail-section h4{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.audit-detail-section table{width:100%;border-collapse:collapse;font-size:12px}
+.audit-detail-section th{text-align:left;padding:6px 10px;background:var(--bg3);color:var(--muted);font-weight:600;border:1px solid var(--rule)}
+.audit-detail-section td{padding:6px 10px;border:1px solid var(--rule);color:var(--ink)}
+.audit-detail-section td.num{font-family:'SF Mono','Cascadia Code',monospace;text-align:right}
+.audit-detail-section td.ok{color:#51cf66}
+.audit-detail-section td.warn{color:#ffd43b}
+.audit-detail-section td.bad{color:#ff6b6b}
 </style>
 </head>
 <body>
@@ -147,6 +186,9 @@
     <div class="cfg-nav-title">配置管理</div>
     <div class="cfg-nav-item" data-tab="menu" onclick="switchTab('menu')">
       <span class="nav-icon">📋</span><span class="nav-label">功能菜单</span>
+    </div>
+    <div class="cfg-nav-item" data-tab="audit" onclick="switchTab('audit')">
+      <span class="nav-icon">🔍</span><span class="nav-label">审计报告</span>
     </div>
   </div>
 
@@ -292,10 +334,31 @@
       </div>
     </div>
 
+    <!-- 5. 审计报告 -->
+    <div class="cfg-section" id="tab-audit">
+      <div class="cfg-card">
+        <div class="cfg-card-title">🔍 数据完整性审计报告</div>
+        <div class="cfg-card-desc">每次审计自动记录，点击「查看详情」可查看完整审计内容。最新报告支持在线查看。</div>
+        <div class="cfg-btn-group" style="margin-bottom:16px">
+          <button class="cfg-btn primary" onclick="window.open('/kg-audit-report/kg-audit-report.html', '_blank')">📄 查看最新完整报告</button>
+          <button class="cfg-btn" onclick="renderAuditList()">🔄 刷新列表</button>
+        </div>
+        <div class="audit-list" id="audit-list"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260729"></script>
+<!-- 审计详情弹窗 -->
+<div class="audit-detail-overlay" id="audit-overlay" onclick="if(event.target===this)closeAuditDetail()">
+  <div class="audit-detail-modal" id="audit-modal">
+    <button class="audit-detail-close" onclick="closeAuditDetail()">×</button>
+    <div id="audit-detail-content"></div>
+  </div>
+</div>
+
+<script src="./_shared/js/app.js?v=20260831"></script>
 <script>
 /* ===== 状态 ===== */
 var _prevStats = null;
@@ -317,8 +380,8 @@ var MENU_ITEMS = [
   {id:'explore', label:'图谱探索', icon:'🧭', desc:'疾病浏览与诊疗流程', defaultOn:true},
   {id:'network', label:'网络探索', icon:'🕸️', desc:'关系网络可视化', defaultOn:true},
   {id:'heatmap', label:'专病诊疗框架覆盖分析', icon:'🔬', desc:'专病诊疗框架覆盖与瓶颈', defaultOn:true},
-  {id:'review', label:'临床审核', icon:'✅', desc:'审核推荐陈述', defaultOn:true},
-  {id:'schema', label:'图谱实例检索', icon:'📐', desc:'实体搜索与关联网络浏览', defaultOn:true},
+  {id:'review', label:'临床审核', icon:'✅', desc:'审核推荐方案', defaultOn:true},
+  {id:'schema', label:'图谱数据审核', icon:'📐', desc:'医学专员审核工作台：疾病全链路审核、维度视角、字典对比、影响范围预览', defaultOn:true},
   {id:'standard', label:'图谱架构规范', icon:'📘', desc:'图谱数据结构定义', defaultOn:true},
   {id:'guideline', label:'指南库', icon:'📋', desc:'诊疗指南来源管理', defaultOn:true},
   {id:'terminology', label:'医学术语库', icon:'🧬', desc:'医学术语标准化', defaultOn:true}
@@ -332,6 +395,7 @@ loadData(function(d) {
   _prevStats = s;
   renderDbInfo();
   renderMenuConfig();
+  renderAuditList();
   checkSyncStatus();
   loadSyncLog();
   renderSyncLog();
@@ -641,6 +705,241 @@ function showResult(id, msg, type) {
   el.textContent = msg;
   el.className = 'cfg-result show ' + type;
   if (type === 'ok') setTimeout(function() { el.classList.remove('show'); }, 5000);
+}
+
+/* ===== 审计报告 ===== */
+var AUDIT_REPORTS = [
+  {
+    id: 'audit-20260730',
+    time: '2026-07-30 08:33',
+    schema: 'V2.0',
+    total_nodes: 32762,
+    visual_entity_count: 13287,
+    evidence_count: 19475,
+    total_rels: 137696,
+    disease_count: 132,
+    entity_types: 40,
+    full_coverage: 1,
+    non_standard_types: 0,
+    deprecated_types: 0,
+    missing_entityType: 3,
+    missing_source_type: 11849,
+    missing_schema_version: 2786,
+    duplicate_rels: 58,
+    dangling_entities: 104,
+    dangling_medications: 33,
+    endpoint_violations: 27,
+    recs_without_action: 317,
+    recs_without_evidence: 0,
+    pathways_without_stages: 9,
+    evidence_without_source: 4238,
+    fixed_items: ['非标准实体类型(6→0)', '旧版实体类型(清除)', 'entity_type字段名(修复)', '推荐方案缺证据支撑(修复)', '推荐方案缺指南支撑(修复)'],
+    pending_items: ['317条推荐方案缺执行动作', '104个孤立实体', '33个孤立药品', '11,849节点缺source_type', '2,786节点缺schema_version', '27条关系连接错误', 'Contraindication覆盖率0.8%'],
+    dim_coverage: [
+      {type:'Definition', coverage:100.0, diseases:132, entities:132},
+      {type:'Complication', coverage:98.5, diseases:130, entities:739},
+      {type:'Sign', coverage:97.7, diseases:129, entities:825},
+      {type:'TreatmentPlan', coverage:97.7, diseases:129, entities:305},
+      {type:'ExamItem', coverage:97.7, diseases:129, entities:874},
+      {type:'Symptom', coverage:91.7, diseases:121, entities:979},
+      {type:'Etiology', coverage:88.6, diseases:117, entities:366},
+      {type:'RiskFactor', coverage:88.6, diseases:117, entities:798},
+      {type:'Prognosis', coverage:84.8, diseases:112, entities:183},
+      {type:'DiagnosisCriteria', coverage:81.8, diseases:108, entities:123},
+      {type:'Medication', coverage:81.8, diseases:108, entities:1120},
+      {type:'LabItem', coverage:75.0, diseases:99, entities:389},
+      {type:'Procedure', coverage:68.9, diseases:91, entities:487},
+      {type:'Pathophysiology', coverage:56.8, diseases:75, entities:267},
+      {type:'DifferentialDiagnosis', coverage:43.2, diseases:57, entities:135},
+      {type:'Epidemiology', coverage:23.5, diseases:31, entities:39},
+      {type:'Contraindication', coverage:0.8, diseases:1, entities:10}
+    ],
+    cdss: {pathways:142, stages:455, rules:7910, recs:572, evidence:19475, guidelines:165},
+    report_url: '/kg-audit-report/kg-audit-report.html',
+    status: 'warning'
+  },
+  {
+    id: 'audit-20260729',
+    time: '2026-07-29 22:15',
+    schema: 'V2.0',
+    total_nodes: 32762,
+    visual_entity_count: 13287,
+    evidence_count: 19475,
+    total_rels: 137696,
+    disease_count: 132,
+    entity_types: 40,
+    full_coverage: 1,
+    non_standard_types: 6,
+    deprecated_types: 3,
+    missing_entityType: 3,
+    missing_source_type: 11849,
+    missing_schema_version: 2786,
+    duplicate_rels: 58,
+    dangling_entities: 56,
+    dangling_medications: 33,
+    endpoint_violations: 827,
+    recs_without_action: 317,
+    recs_without_evidence: 5,
+    pathways_without_stages: 9,
+    evidence_without_source: 4238,
+    fixed_items: [],
+    pending_items: ['6个非标准实体类型', '3个旧版实体类型残留', '5条推荐方案缺证据支撑', '827条SourceSection关系连接错误', '56个孤立实体', 'entity_type字段名错误'],
+    dim_coverage: [
+      {type:'Definition', coverage:100.0, diseases:132, entities:132},
+      {type:'Complication', coverage:98.5, diseases:130, entities:739},
+      {type:'Sign', coverage:97.7, diseases:129, entities:825},
+      {type:'TreatmentPlan', coverage:97.7, diseases:129, entities:305},
+      {type:'ExamItem', coverage:0.0, diseases:0, entities:874},
+      {type:'LabItem', coverage:0.0, diseases:0, entities:389}
+    ],
+    cdss: {pathways:142, stages:455, rules:7910, recs:572, evidence:19475, guidelines:165},
+    report_url: null,
+    status: 'danger'
+  }
+];
+
+function renderAuditList() {
+  var list = document.getElementById('audit-list');
+  if (!list) return;
+  if (AUDIT_REPORTS.length === 0) {
+    list.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12px">暂无审计记录</div>';
+    return;
+  }
+  var h = '';
+  AUDIT_REPORTS.forEach(function(r, idx) {
+    var badgeClass = r.status === 'danger' ? 'danger' : (r.status === 'warning' ? 'warning' : 'healthy');
+    var badgeText = r.status === 'danger' ? '问题较多' : (r.status === 'warning' ? '有改进空间' : '健康');
+    var fixedCount = r.fixed_items.length;
+    var pendingCount = r.pending_items.length;
+
+    h += '<div class="audit-item" onclick="showAuditDetail(\'' + r.id + '\')">';
+    h += '<div class="audit-item-header">';
+    h += '<div class="audit-item-time">';
+    h += '<span>🔍 ' + r.time + '</span>';
+    h += '<span class="audit-item-badge ' + badgeClass + '">' + badgeText + '</span>';
+    if (idx === 0) h += '<span class="audit-item-badge info">最新</span>';
+    h += '</div>';
+    h += '<div style="font-size:10px;color:var(--muted)">Schema ' + r.schema + '</div>';
+    h += '</div>';
+
+    h += '<div class="audit-item-stats">';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + r.total_nodes.toLocaleString() + '</div><div class="audit-stat-mini-label">总节点数</div></div>';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + (r.visual_entity_count ? r.visual_entity_count.toLocaleString() : '-') + '</div><div class="audit-stat-mini-label">临床实体</div></div>';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + (r.evidence_count ? r.evidence_count.toLocaleString() : '-') + '</div><div class="audit-stat-mini-label">证据节点</div></div>';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + r.total_rels.toLocaleString() + '</div><div class="audit-stat-mini-label">总关系</div></div>';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + r.disease_count + '</div><div class="audit-stat-mini-label">疾病数</div></div>';
+    h += '<div class="audit-stat-mini"><div class="audit-stat-mini-val">' + r.full_coverage + '</div><div class="audit-stat-mini-label">17维全覆盖</div></div>';
+    h += '</div>';
+
+    h += '<div class="audit-item-footer">';
+    h += '<div class="audit-item-issues">';
+    if (fixedCount > 0) h += '<span class="fixed">✅ 已修复 ' + fixedCount + ' 项</span>';
+    h += '<span class="pending">⚠️ 待处理 ' + pendingCount + ' 项</span>';
+    if (r.non_standard_types > 0) h += '<span class="pending">非标准类型 ' + r.non_standard_types + '</span>';
+    if (r.recs_without_action > 0) h += '<span class="pending">推荐无动作 ' + r.recs_without_action + '</span>';
+    h += '</div>';
+    h += '<button class="audit-view-btn" onclick="event.stopPropagation();showAuditDetail(\'' + r.id + '\')">查看详情</button>';
+    h += '</div>';
+    h += '</div>';
+  });
+  list.innerHTML = h;
+}
+
+function showAuditDetail(id) {
+  var r = null;
+  for (var i = 0; i < AUDIT_REPORTS.length; i++) {
+    if (AUDIT_REPORTS[i].id === id) { r = AUDIT_REPORTS[i]; break; }
+  }
+  if (!r) return;
+
+  var h = '';
+  h += '<div class="audit-detail-title">审计报告 — ' + r.time + '</div>';
+  h += '<div class="audit-detail-sub">Schema ' + r.schema + ' · 总节点 ' + r.total_nodes.toLocaleString() + '（临床实体 ' + (r.visual_entity_count||0).toLocaleString() + ' + 证据节点 ' + (r.evidence_count||0).toLocaleString() + '）· 总关系 ' + r.total_rels.toLocaleString() + '</div>';
+
+  // 核心指标
+  h += '<div class="audit-detail-section">';
+  h += '<h4>核心指标</h4>';
+  h += '<table><thead><tr><th>指标</th><th>数值</th><th>说明</th></tr></thead><tbody>';
+  h += '<tr><td>总节点数</td><td class="num">' + r.total_nodes.toLocaleString() + '</td><td class="muted">= 临床实体 + 证据节点</td></tr>';
+  h += '<tr><td>├ 临床实体</td><td class="num">' + (r.visual_entity_count||0).toLocaleString() + '</td><td class="muted">前端图谱展示用</td></tr>';
+  h += '<tr><td>└ 证据节点</td><td class="num">' + (r.evidence_count||0).toLocaleString() + '</td><td class="muted">证据追溯用</td></tr>';
+  h += '<tr><td>总关系数</td><td class="num">' + r.total_rels.toLocaleString() + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>疾病数</td><td class="num">' + r.disease_count + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>实体类型数</td><td class="num">' + r.entity_types + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>17维度全覆盖疾病</td><td class="num">' + r.full_coverage + '</td><td class="' + (r.full_coverage > 0 ? 'ok' : 'warn') + '">' + (r.full_coverage > 0 ? '有' : '无') + '</td></tr>';
+  h += '<tr><td>非标准实体类型</td><td class="num">' + r.non_standard_types + '</td><td class="' + (r.non_standard_types === 0 ? 'ok' : 'bad') + '">' + (r.non_standard_types === 0 ? '已清除' : '需修复') + '</td></tr>';
+  h += '<tr><td>旧版实体类型</td><td class="num">' + r.deprecated_types + '</td><td class="' + (r.deprecated_types === 0 ? 'ok' : 'bad') + '">' + (r.deprecated_types === 0 ? '已清除' : '需迁移') + '</td></tr>';
+  h += '<tr><td>缺少类型的节点</td><td class="num">' + r.missing_entityType + '</td><td class="' + (r.missing_entityType === 0 ? 'ok' : 'warn') + '">' + (r.missing_entityType === 0 ? '完整' : '需补全') + '</td></tr>';
+  h += '<tr><td>重复关系</td><td class="num">' + r.duplicate_rels + '</td><td class="' + (r.duplicate_rels < 10 ? 'ok' : 'warn') + '">' + (r.duplicate_rels < 10 ? '正常' : '需清理') + '</td></tr>';
+  h += '<tr><td>孤立实体</td><td class="num">' + r.dangling_entities + '</td><td class="' + (r.dangling_entities < 10 ? 'ok' : 'warn') + '">' + (r.dangling_entities < 10 ? '正常' : '需清理') + '</td></tr>';
+  h += '<tr><td>关系连接错误</td><td class="num">' + r.endpoint_violations + '</td><td class="' + (r.endpoint_violations < 10 ? 'ok' : 'warn') + '">' + (r.endpoint_violations < 10 ? '正常' : '需修复') + '</td></tr>';
+  h += '</tbody></table>';
+  h += '</div>';
+
+  // 17维覆盖率
+  h += '<div class="audit-detail-section">';
+  h += '<h4>17维度覆盖率</h4>';
+  h += '<table><thead><tr><th>维度</th><th>覆盖疾病</th><th>实体数</th><th>覆盖率</th></tr></thead><tbody>';
+  r.dim_coverage.forEach(function(d) {
+    var cls = d.coverage >= 90 ? 'ok' : (d.coverage >= 60 ? 'warn' : 'bad');
+    h += '<tr><td>' + d.type + '</td><td class="num">' + d.diseases + '/' + r.disease_count + '</td><td class="num">' + d.entities + '</td><td class="num ' + cls + '">' + d.coverage + '%</td></tr>';
+  });
+  h += '</tbody></table>';
+  h += '</div>';
+
+  // CDSS推荐链
+  h += '<div class="audit-detail-section">';
+  h += '<h4>CDSS推荐链</h4>';
+  h += '<table><thead><tr><th>指标</th><th>数值</th><th>状态</th></tr></thead><tbody>';
+  h += '<tr><td>临床路径</td><td class="num">' + r.cdss.pathways + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>路径阶段</td><td class="num">' + r.cdss.stages + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>临床规则</td><td class="num">' + r.cdss.rules.toLocaleString() + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>推荐方案</td><td class="num">' + r.cdss.recs + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>证据节点</td><td class="num">' + r.cdss.evidence.toLocaleString() + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>指南</td><td class="num">' + r.cdss.guidelines + '</td><td class="ok">-</td></tr>';
+  h += '<tr><td>推荐方案缺证据支撑</td><td class="num">' + r.recs_without_evidence + '</td><td class="' + (r.recs_without_evidence === 0 ? 'ok' : 'bad') + '">' + (r.recs_without_evidence === 0 ? '已修复' : '需修复') + '</td></tr>';
+  h += '<tr><td>推荐方案缺执行动作</td><td class="num">' + r.recs_without_action + '</td><td class="' + (r.recs_without_action === 0 ? 'ok' : 'warn') + '">' + (r.recs_without_action === 0 ? '完整' : '需补全') + '</td></tr>';
+  h += '<tr><td>临床路径缺阶段划分</td><td class="num">' + r.pathways_without_stages + '</td><td class="' + (r.pathways_without_stages === 0 ? 'ok' : 'warn') + '">' + (r.pathways_without_stages === 0 ? '完整' : '需补全') + '</td></tr>';
+  h += '</tbody></table>';
+  h += '</div>';
+
+  // 已修复项
+  if (r.fixed_items.length > 0) {
+    h += '<div class="audit-detail-section">';
+    h += '<h4>✅ 本次已修复问题</h4>';
+    h += '<table><tbody>';
+    r.fixed_items.forEach(function(item) {
+      h += '<tr><td class="ok">' + item + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    h += '</div>';
+  }
+
+  // 待处理项
+  if (r.pending_items.length > 0) {
+    h += '<div class="audit-detail-section">';
+    h += '<h4>⚠️ 待处理问题</h4>';
+    h += '<table><tbody>';
+    r.pending_items.forEach(function(item) {
+      h += '<tr><td class="warn">' + item + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    h += '</div>';
+  }
+
+  // 完整报告链接
+  if (r.report_url) {
+    h += '<div style="margin-top:20px;text-align:center">';
+    h += '<button class="cfg-btn primary" onclick="window.open(\'' + r.report_url + '\', \'_blank\')">📄 查看完整HTML报告</button>';
+    h += '</div>';
+  }
+
+  document.getElementById('audit-detail-content').innerHTML = h;
+  document.getElementById('audit-overlay').classList.add('show');
+}
+
+function closeAuditDetail() {
+  document.getElementById('audit-overlay').classList.remove('show');
 }
 </script>
 </body>

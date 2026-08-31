@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>专科知识图谱 · 心血管内科 - 图谱实例检索</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260729b">
+<title>专科知识图谱 · 心血管内科 - 图谱数据审核</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=20260831b">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -37,6 +37,101 @@
 .si-view-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg3)}
 .si-topbar input,.si-topbar select{padding:8px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none}
 .si-topbar input:focus,.si-topbar select:focus{border-color:var(--accent)}
+
+/* === 主视图切换Tab === */
+.si-main-tabs{display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:16px}
+.si-main-tab{padding:10px 20px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.si-main-tab:hover{color:var(--ink);background:var(--bg3)}
+.si-main-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* === 疾病审核视图 === */
+.si-audit-header{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(81,207,102,.05));border:1px solid var(--rule);border-radius:12px;padding:20px;margin-bottom:16px}
+.si-audit-header h2{font-size:22px;font-weight:800;color:var(--ink);margin:0 0 6px 0}
+.si-audit-header .si-audit-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.si-audit-header .si-audit-meta span{display:flex;align-items:center;gap:4px}
+.si-audit-progress{margin-top:10px;display:flex;align-items:center;gap:8px}
+.si-audit-progress-bar{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.si-audit-progress-fill{height:100%;background:linear-gradient(90deg,#51cf66,#40c057);border-radius:4px;transition:width .3s}
+.si-audit-progress-text{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+
+.si-audit-group{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.si-audit-group-head{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;user-select:none}
+.si-audit-group-head:hover{background:var(--bg3)}
+.si-audit-group-arrow{font-size:9px;color:var(--muted);transition:transform .2s}
+.si-audit-group.open .si-audit-group-arrow{transform:rotate(90deg)}
+.si-audit-group-name{font-size:14px;font-weight:700;color:var(--ink);flex:1}
+.si-audit-group-count{font-size:11px;background:var(--bg3);border-radius:999px;padding:2px 8px;color:var(--muted);font-weight:600}
+.si-audit-group-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600}
+.si-audit-group-badge.verified{background:rgba(81,207,102,.12);color:#40c057}
+.si-audit-group-badge.partial{background:rgba(255,212,59,.15);color:#f59f00}
+.si-audit-group-badge.unverified{background:var(--bg3);color:var(--muted)}
+.si-audit-group-body{display:none;padding:0 16px 12px}
+.si-audit-group.open .si-audit-group-body{display:block}
+
+.si-audit-entity{background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:12px;margin-bottom:8px;transition:border-color .15s}
+.si-audit-entity:hover{border-color:var(--accent)}
+.si-audit-entity-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.si-audit-entity-name{font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;flex:1}
+.si-audit-entity-name:hover{color:var(--accent);text-decoration:underline}
+.si-audit-entity-type{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.si-audit-verify-btns{display:flex;gap:4px;flex-shrink:0}
+.si-audit-vbtn{padding:4px 10px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--muted);transition:all .15s;font-weight:600}
+.si-audit-vbtn:hover{border-color:var(--accent);color:var(--ink)}
+.si-audit-vbtn.ok{background:rgba(81,207,102,.12);color:#40c057;border-color:rgba(81,207,102,.3)}
+.si-audit-vbtn.err{background:rgba(255,107,107,.12);color:#ff6b6b;border-color:rgba(255,107,107,.3)}
+.si-audit-vbtn.doubt{background:rgba(255,212,59,.15);color:#f59f00;border-color:rgba(255,212,59,.3)}
+.si-audit-entity-detail{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.si-audit-entity-source{font-size:11px;color:var(--muted);margin-top:4px;font-style:italic}
+.si-audit-entity-note{margin-top:6px}
+.si-audit-entity-note input{width:100%;padding:5px 8px;background:var(--bg2);border:1px solid var(--rule);border-radius:4px;color:var(--ink);font-size:11px;outline:none}
+.si-audit-entity-note input:focus{border-color:var(--accent)}
+
+/* === 维度视角视图 === */
+.si-dim-center{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(34,184,207,.05));border:2px solid var(--accent);border-radius:12px;padding:18px;margin-bottom:16px;text-align:center}
+.si-dim-center h3{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 8px 0}
+.si-dim-center .si-dim-stats{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.si-dim-center .si-dim-stat{font-size:13px;color:var(--muted)}
+.si-dim-center .si-dim-stat b{font-size:18px;color:var(--accent);font-weight:800}
+.si-dim-disease-list{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.si-dim-disease-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .15s}
+.si-dim-disease-item:last-child{border-bottom:none}
+.si-dim-disease-item:hover{background:var(--bg3)}
+.si-dim-disease-name{font-size:14px;font-weight:600;color:var(--ink);min-width:160px}
+.si-dim-disease-context{font-size:12px;color:var(--muted);flex:1}
+.si-dim-disease-arrow{font-size:14px;color:var(--accent)}
+.si-dim-network-box{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:16px;margin-bottom:16px}
+.si-dim-network-box h4{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 10px 0}
+#si-dim-network{width:100%;height:400px}
+.si-dim-entity-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:16px}
+.si-dim-entity-card{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .15s}
+.si-dim-entity-card:hover{border-color:var(--accent);background:var(--bg3)}
+.si-dim-entity-card.active{border-color:var(--accent);background:rgba(79,140,255,.08)}
+.si-dim-entity-card .name{font-size:13px;font-weight:600;color:var(--ink)}
+.si-dim-entity-card .code{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* === 字典对比视图 === */
+.si-dict-section{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.si-dict-section h3{font-size:14px;font-weight:700;color:var(--ink);padding:12px 16px;margin:0;border-bottom:1px solid var(--rule);background:var(--bg3)}
+.si-dict-table{width:100%;border-collapse:collapse;font-size:13px}
+.si-dict-table th{padding:8px 14px;text-align:left;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;border-bottom:1px solid var(--rule);background:var(--bg3)}
+.si-dict-table td{padding:8px 14px;border-bottom:1px solid var(--rule);color:var(--ink)}
+.si-dict-table tr:last-child td{border-bottom:none}
+.si-dict-status{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.si-dict-status.match{background:rgba(81,207,102,.12);color:#40c057}
+.si-dict-status.partial{background:rgba(255,212,59,.15);color:#f59f00}
+.si-dict-status.mismatch{background:rgba(255,107,107,.12);color:#ff6b6b}
+.si-dict-status.missing{background:var(--bg3);color:var(--muted)}
+.si-dict-summary{display:flex;gap:16px;padding:12px 16px;background:var(--bg3);font-size:13px;color:var(--muted)}
+.si-dict-summary b{color:var(--ink);font-weight:700}
+.si-dict-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px}
+
+/* === 影响范围预览 === */
+.si-impact-panel{background:rgba(255,107,107,.05);border:1px solid rgba(255,107,107,.2);border-radius:10px;padding:16px;margin-top:12px}
+.si-impact-panel h4{font-size:13px;font-weight:700;color:#ff6b6b;margin:0 0 10px 0;display:flex;align-items:center;gap:6px}
+.si-impact-summary{font-size:13px;color:var(--ink);margin-bottom:8px;line-height:1.6}
+.si-impact-list{font-size:12px;color:var(--muted);max-height:200px;overflow-y:auto}
+.si-impact-list-item{padding:4px 0;border-bottom:1px dashed var(--rule)}
+.si-impact-list-item:last-child{border-bottom:none}
 
 
 .si-entity-card{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:18px;margin-bottom:16px}
@@ -202,18 +297,35 @@
 
   <!-- 主区域 -->
   <div class="si-main" id="si-main">
-    <div class="si-topbar">
+    <!-- 主视图切换Tab -->
+    <div class="si-main-tabs" role="tablist">
+      <div class="si-main-tab active" role="tab" aria-selected="true" data-view="search" onclick="siSwitchMainView('search')">🔍 实体检索</div>
+      <div class="si-main-tab" role="tab" aria-selected="false" data-view="audit" onclick="siSwitchMainView('audit')">🫀 疾病审核</div>
+      <div class="si-main-tab" role="tab" aria-selected="false" data-view="dim" onclick="siSwitchMainView('dim')">🌐 维度视角</div>
+      <div class="si-main-tab" role="tab" aria-selected="false" data-view="dict" onclick="siSwitchMainView('dict')">🏷️ 字典对比</div>
+    </div>
+
+    <!-- 实体检索/疾病审核 共用工具栏 -->
+    <div class="si-topbar" id="si-topbar-default">
       <div class="si-cascade">
         <select id="si-sel-specialty" onchange="siCascadeSpecialty()"><option value="">学科...</option></select>
         <select id="si-sel-category" onchange="siCascadeCategory()"><option value="">疾病大类...</option></select>
         <select id="si-sel-disease" onchange="siSelectDisease(this.value)"><option value="">选择疾病...</option></select>
       </div>
-      <div class="si-search-bar" style="display:flex;gap:6px;align-items:center;margin-left:12px">
+      <div class="si-search-bar" id="si-search-bar" style="display:flex;gap:6px;align-items:center;margin-left:12px">
         <input type="text" id="si-filter-input" placeholder="输入名称/编码查询..." style="padding:7px 12px;background:var(--bg3);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none;width:200px" onkeydown="if(event.key==='Enter')siFilterList()">
         <button class="si-btn" onclick="siFilterList()" style="padding:7px 14px;font-size:12px">查询</button>
       </div>
+      <div id="si-dim-bar" style="display:none;gap:8px;align-items:center;margin-left:12px">
+        <select id="si-sel-dim-type" onchange="siSelectDimType(this.value)" style="padding:8px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:13px;min-width:140px">
+          <option value="">选择维度类型...</option>
+        </select>
+        <input type="text" id="si-dim-search" placeholder="搜索该维度下的实体..." style="padding:8px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none;width:240px" oninput="siSearchDimEntity()">
+        <span id="si-dim-count" style="font-size:12px;color:var(--muted)"></span>
+      </div>
     </div>
 
+    <!-- 视图容器：实体检索 -->
     <div id="si-table-view"></div>
     <div id="si-network-view" style="display:none">
       <div class="si-network-box">
@@ -223,6 +335,15 @@
       </div>
     </div>
     <div id="si-search-view" style="display:none"></div>
+
+    <!-- 视图容器：疾病审核 -->
+    <div id="si-audit-view" style="display:none"></div>
+
+    <!-- 视图容器：维度视角 -->
+    <div id="si-dim-view" style="display:none"></div>
+
+    <!-- 视图容器：字典对比 -->
+    <div id="si-dict-view" style="display:none"></div>
   </div>
 </div>
 
@@ -284,7 +405,7 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/app.js?v=20260729"></script>
+<script src="./_shared/js/app.js?v=20260831"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -668,8 +789,18 @@ function siSelectDisease(code){
   SI_STATE.currentCode = code;
   document.getElementById('si-sel-disease').value = code;
   document.getElementById('si-search-input').value = '';
-  // 选择具体疾病后弹窗展示，保持列表上下文
-  siOpenEntityModal(code, 'list');
+  /* 根据当前视图加载对应内容 */
+  var mv = SI_STATE.mainView || 'search';
+  if(mv === 'search'){
+    /* 实体检索视图下选择疾病 → 自动切换到疾病审核 */
+    siSwitchMainView('audit');
+    siLoadAuditView(code);
+  } else if(mv === 'audit'){
+    siLoadAuditView(code);
+  } else if(mv === 'dict'){
+    siLoadDictView(code);
+  }
+  /* dim视图不变，维度视角不强依赖疾病选择 */
 }
 
 function siLoadEntity(code){
@@ -1579,6 +1710,698 @@ function siRenderModalECharts(){
 
   document.getElementById('si-modal-net-info').innerHTML = '节点: <b>'+nodes.length+'</b> | 关联: <b>'+links.length+'</b>';
   setTimeout(function(){if(SI_MODAL_STATE.echartsChart) SI_MODAL_STATE.echartsChart.resize()}, 100);
+}
+
+/* ==========================================================
+   图谱数据审核 — 四大核心视图（主切换/疾病审核/维度视角/字典对比/影响范围）
+   纯 ES5：不使用箭头函数/模板字符串/let/const/解构
+   ========================================================== */
+
+/* ---------- 通用辅助 ---------- */
+function siEsc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function siEscAttr(s){
+  return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+/* 稳健加载单个疾病完整数据（优先用 loadDiseaseData，降级直连 API） */
+function siFetchDisease(code, cb){
+  loadDiseaseData(code, function(d){
+    if(d && d.dimensions){ cb(d); return; }
+    fetch('/api/kg/disease/'+encodeURIComponent(code)+'?v='+Date.now()).then(function(r){return r.json()}).then(function(dd){
+      if(dd && dd.dimensions && typeof filterDeprecatedEntities==='function'){ filterDeprecatedEntities(dd); }
+      cb(dd||null);
+    }).catch(function(){ cb(null); });
+  });
+}
+
+/* ========== 1. 主视图切换 ========== */
+function siSwitchMainView(view){
+  SI_STATE.mainView = view;
+  /* 主Tab高亮 */
+  document.querySelectorAll('.si-main-tab').forEach(function(t){
+    if(t.getAttribute('data-view')===view){ t.classList.add('active'); t.setAttribute('aria-selected','true'); }
+    else { t.classList.remove('active'); t.setAttribute('aria-selected','false'); }
+  });
+  /* 统一工具栏：始终显示 si-topbar-default */
+  document.getElementById('si-topbar-default').style.display = 'flex';
+  /* 搜索栏仅 search 视图显示 */
+  var searchBar = document.getElementById('si-search-bar');
+  var dimBar = document.getElementById('si-dim-bar');
+  searchBar.style.display = (view==='search') ? 'flex' : 'none';
+  dimBar.style.display = (view==='dim') ? 'flex' : 'none';
+  /* 视图容器显隐 */
+  var tableView = document.getElementById('si-table-view');
+  var networkView = document.getElementById('si-network-view');
+  var searchView = document.getElementById('si-search-view');
+  var auditView = document.getElementById('si-audit-view');
+  var dimView = document.getElementById('si-dim-view');
+  var dictView = document.getElementById('si-dict-view');
+  tableView.style.display='none'; networkView.style.display='none'; searchView.style.display='none';
+  auditView.style.display='none'; dimView.style.display='none'; dictView.style.display='none';
+  if(view==='search'){
+    if(SI_STATE.view==='table'){ tableView.style.display='block'; }
+    else if(SI_STATE.view==='network'){ networkView.style.display='block'; }
+    else { searchView.style.display='block'; }
+  } else if(view==='audit'){
+    auditView.style.display='block';
+    /* 已有疾病选中且审核视图为空时自动加载 */
+    if(SI_STATE.currentCode && !auditView.innerHTML.trim()){
+      siLoadAuditView(SI_STATE.currentCode);
+    }
+  } else if(view==='dim'){
+    dimView.style.display='block';
+    if(!SI_DIM_INIT){ siInitDimTypeSelector(); }
+    if(!SI_DIM_CUR_TYPE && !SI_DIM_CUR_CODE){ dimView.innerHTML='<div class="si-empty" style="padding:60px;text-align:center">请在上方选择维度类型，查看该维度下全部实体及其关联疾病</div>'; }
+    if(SI_DIM_CHART){
+      var nc = document.getElementById('si-dim-network');
+      if(nc){ setTimeout(function(){ if(SI_DIM_CHART) SI_DIM_CHART.resize(); }, 120); }
+      else { SI_DIM_CHART.dispose(); SI_DIM_CHART = null; }
+    }
+  } else if(view==='dict'){
+    dictView.style.display='block';
+    /* 已有疾病选中时自动加载字典对比 */
+    if(SI_STATE.currentCode){
+      siLoadDictView(SI_STATE.currentCode);
+    } else if(!dictView.innerHTML.trim()){
+      dictView.innerHTML='<div class="si-empty" style="padding:60px;text-align:center">请先在上方选择疾病，再查看字典对比</div>';
+    }
+  }
+}
+
+/* ========== 2. 疾病审核视图 ========== */
+/* 9分组定义（与 explore.html 知识总览一致） */
+var SI_AUDIT_GROUPS = [
+  {name:'定义与基础', icon:'📖', dims:['Definition']},
+  {name:'临床表现', icon:'🩺', dims:['Symptom','Sign']},
+  {name:'诊断检查', icon:'🔬', dims:['ExamItem','ExamObservation','LabItem','LabSubitem']},
+  {name:'诊断与鉴别', icon:'🔍', dims:['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification']},
+  {name:'治疗方案', icon:'💊', dims:['Medication','Procedure','TreatmentPlan']},
+  {name:'临床规则', icon:'⚙️', dims:['ClinicalRule','ThresholdRule','Contraindication']},
+  {name:'预后与预防', icon:'📊', dims:['Prognosis','FollowUp','Prevention','Complication']},
+  {name:'病因与机制', icon:'🧬', dims:['Etiology','Pathophysiology','Epidemiology','RiskFactor']},
+  {name:'证据链与指南', icon:'📚', dims:['Evidence','Guideline']}
+];
+/* 审核状态当前上下文 */
+var SI_AUDIT_CUR = {code:null, entityCodes:[]};
+
+/* 审核状态存储（localStorage，key: schema_verify_{diseaseCode}） */
+function siAuditGetStatus(diseaseCode){
+  try{
+    var raw = localStorage.getItem('schema_verify_'+diseaseCode);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function siAuditSaveStatus(diseaseCode, entityCode, status){
+  var all = siAuditGetStatus(diseaseCode);
+  var prev = all[entityCode] || {};
+  all[entityCode] = {status:status, note:prev.note||'', timestamp:Date.now()};
+  try{ localStorage.setItem('schema_verify_'+diseaseCode, JSON.stringify(all)); }catch(e){}
+}
+function siAuditSaveNote(diseaseCode, entityCode, note){
+  var all = siAuditGetStatus(diseaseCode);
+  var prev = all[entityCode] || {};
+  all[entityCode] = {status:prev.status||'', note:note, timestamp:Date.now()};
+  try{ localStorage.setItem('schema_verify_'+diseaseCode, JSON.stringify(all)); }catch(e){}
+}
+/* 根据 entityCode 查找审核卡片 DOM（避免 CSS 选择器转义问题） */
+function siFindAuditCard(entityCode){
+  var cards = document.querySelectorAll('.si-audit-entity');
+  for(var i=0;i<cards.length;i++){
+    if(cards[i].getAttribute('data-code')===entityCode) return cards[i];
+  }
+  return null;
+}
+/* 标记审核状态并刷新UI（按钮高亮 + 进度条） */
+function siAuditMark(diseaseCode, entityCode, status){
+  siAuditSaveStatus(diseaseCode, entityCode, status);
+  var card = siFindAuditCard(entityCode);
+  if(card){
+    var btns = card.querySelectorAll('.si-audit-vbtn');
+    btns.forEach(function(b){
+      b.classList.remove('ok','err','doubt');
+      if(b.getAttribute('data-status')===status){ b.classList.add(status); }
+    });
+  }
+  siUpdateAuditProgress(diseaseCode);
+}
+/* 更新审核进度条 */
+function siUpdateAuditProgress(diseaseCode){
+  if(SI_AUDIT_CUR.code !== diseaseCode) return;
+  var all = siAuditGetStatus(diseaseCode);
+  var verified = 0;
+  SI_AUDIT_CUR.entityCodes.forEach(function(c){ if(all[c] && all[c].status) verified++; });
+  var total = SI_AUDIT_CUR.entityCodes.length;
+  var pct = total>0 ? Math.round(verified/total*100) : 0;
+  var fill = document.getElementById('si-audit-progress-fill');
+  var text = document.getElementById('si-audit-progress-text');
+  if(fill) fill.style.width = pct+'%';
+  if(text) text.textContent = verified+'/'+total+' ('+pct+'%)';
+}
+/* 展开/折叠分组 */
+function siAuditToggleGroup(groupIdx){
+  var g = document.getElementById('si-audit-group-'+groupIdx);
+  if(g) g.classList.toggle('open');
+}
+/* 加载疾病审核视图 */
+function siLoadAuditView(code){
+  if(!code) return;
+  SI_STATE.currentCode = code;
+  var view = document.getElementById('si-audit-view');
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载疾病数据中...</div>';
+  siFetchDisease(code, function(d){
+    if(!d){ view.innerHTML = '<div class="si-empty">疾病数据加载失败</div>'; return; }
+    SI_STATE.currentData = d;
+    renderAuditView(d);
+  });
+}
+/* 渲染审核视图 */
+function renderAuditView(diseaseData){
+  var info = diseaseData.info || {};
+  var dims = diseaseData.dimensions || {};
+  var diseaseCode = info.code || SI_STATE.currentCode;
+  var allStatus = siAuditGetStatus(diseaseCode);
+  var view = document.getElementById('si-audit-view');
+  var html = '';
+
+  /* 统计实体总数与核心维度覆盖 */
+  var totalEntities = 0;
+  var entityCodes = [];
+  DIM_KEYS.forEach(function(k){
+    var list = dims[k] || [];
+    list.forEach(function(e){
+      totalEntities++;
+      var ec = e.code || e.name || '';
+      if(ec) entityCodes.push(ec);
+    });
+  });
+  var coveredCore = 0;
+  CORE_DIM_KEYS.forEach(function(k){ if(dims[k] && dims[k].length>0) coveredCore++; });
+  var coverage = CORE_DIM_KEYS.length>0 ? Math.round(coveredCore/CORE_DIM_KEYS.length*100) : 0;
+  var verified = 0;
+  entityCodes.forEach(function(c){ if(allStatus[c] && allStatus[c].status) verified++; });
+  var auditPct = totalEntities>0 ? Math.round(verified/totalEntities*100) : 0;
+
+  SI_AUDIT_CUR = {code:diseaseCode, entityCodes:entityCodes};
+
+  /* 疾病头部卡片 */
+  html += '<div class="si-audit-header">';
+  html += '<h2>'+siEsc(info.name||'')+'</h2>';
+  if(info.name_en) html += '<div style="font-size:13px;color:var(--muted);margin-top:2px">'+siEsc(info.name_en)+'</div>';
+  html += '<div class="si-audit-meta">';
+  if(info.icd_code) html += '<span>🏷️ ICD-10: <b>'+siEsc(info.icd_code)+'</b></span>';
+  html += '<span>🔢 编码: '+siEsc(diseaseCode)+'</span>';
+  html += '<span>📊 核心维度覆盖: <b>'+coveredCore+'/'+CORE_DIM_KEYS.length+' ('+coverage+'%)</b></span>';
+  html += '<span>📦 实体总数: <b>'+totalEntities+'</b></span>';
+  html += '</div>';
+  html += '<div class="si-audit-progress">';
+  html += '<span class="si-audit-progress-text" id="si-audit-progress-text">'+verified+'/'+totalEntities+' ('+auditPct+'%)</span>';
+  html += '<div class="si-audit-progress-bar"><div class="si-audit-progress-fill" id="si-audit-progress-fill" style="width:'+auditPct+'%"></div></div>';
+  html += '<span style="font-size:12px;color:var(--muted)">审核进度</span>';
+  html += '</div>';
+  html += '</div>';
+
+  /* 9 分组 */
+  SI_AUDIT_GROUPS.forEach(function(grp, gIdx){
+    var entities = [];
+    grp.dims.forEach(function(k){
+      var list = dims[k] || [];
+      list.forEach(function(e){ entities.push({entity:e, dim:k}); });
+    });
+    if(entities.length===0) return; /* 空分组不渲染 */
+    /* 分组审核状态统计 */
+    var gVerified = 0;
+    entities.forEach(function(it){
+      var ec = it.entity.code || it.entity.name || '';
+      if(allStatus[ec] && allStatus[ec].status) gVerified++;
+    });
+    var badgeCls = 'unverified', badgeTxt = '未审核';
+    if(gVerified===entities.length){ badgeCls='verified'; badgeTxt='已审核'; }
+    else if(gVerified>0){ badgeCls='partial'; badgeTxt='部分'; }
+
+    html += '<div class="si-audit-group open" id="si-audit-group-'+gIdx+'">';
+    html += '<div class="si-audit-group-head" onclick="siAuditToggleGroup('+gIdx+')">';
+    html += '<span class="si-audit-group-arrow">▶</span>';
+    html += '<span class="si-audit-group-name">'+grp.icon+' '+siEsc(grp.name)+'</span>';
+    html += '<span class="si-audit-group-count">'+entities.length+'</span>';
+    html += '<span class="si-audit-group-badge '+badgeCls+'">'+badgeTxt+' '+gVerified+'/'+entities.length+'</span>';
+    html += '</div>';
+    html += '<div class="si-audit-group-body">';
+    entities.forEach(function(it){
+      html += siRenderAuditEntity(diseaseCode, it.entity, it.dim, allStatus);
+    });
+    html += '</div></div>';
+  });
+
+  /* 第10组：标准主数据 StandardDiagnosis */
+  var stdList = dims.StandardDiagnosis || [];
+  if(stdList.length>0){
+    html += '<div class="si-audit-group open" id="si-audit-group-10">';
+    html += '<div class="si-audit-group-head" onclick="siAuditToggleGroup(10)">';
+    html += '<span class="si-audit-group-arrow">▶</span>';
+    html += '<span class="si-audit-group-name">🏷️ 标准主数据（ICD-10 对比）</span>';
+    html += '<span class="si-audit-group-count">'+stdList.length+'</span>';
+    html += '</div>';
+    html += '<div class="si-audit-group-body">';
+    stdList.forEach(function(e){ html += siRenderAuditEntity(diseaseCode, e, 'StandardDiagnosis', allStatus); });
+    html += '</div></div>';
+  }
+
+  /* 底部影响范围预览入口 */
+  html += '<div class="si-audit-group" id="si-audit-group-impact">';
+  html += '<div class="si-audit-group-head" onclick="siAuditToggleGroupImpact()">';
+  html += '<span class="si-audit-group-arrow">▶</span>';
+  html += '<span class="si-audit-group-name">📊 影响范围预览</span>';
+  html += '</div>';
+  html += '<div class="si-audit-group-body" id="si-audit-impact-body" style="display:none">';
+  html += '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">点击任意实体卡片中的「影响」按钮，可查看该实体关联的疾病与维度分布，辅助评估修改影响。</div>';
+  html += '</div></div>';
+
+  view.innerHTML = html;
+}
+/* 影响范围分组折叠 */
+function siAuditToggleGroupImpact(){
+  var body = document.getElementById('si-audit-impact-body');
+  var grp = document.getElementById('si-audit-group-impact');
+  if(body){ body.style.display = body.style.display==='none'?'block':'none'; }
+  if(grp){ grp.classList.toggle('open'); }
+}
+/* 渲染单个审核实体卡片 */
+function siRenderAuditEntity(diseaseCode, e, dimKey, allStatus){
+  var ec = e.code || e.name || '';
+  var st = allStatus[ec] && allStatus[ec].status;
+  var note = (allStatus[ec] && allStatus[ec].note) || '';
+  var dimCn = DIM_NAMES[dimKey] || (TYPE_MAP[dimKey]?TYPE_MAP[dimKey].cn:dimKey);
+  var dimColor = DIM_COLORS[dimKey] || (TYPE_MAP[dimKey]?TYPE_MAP[dimKey].color:'#888');
+  var displayName = cleanName(e);
+  var html = '<div class="si-audit-entity" data-code="'+siEsc(ec)+'">';
+  html += '<div class="si-audit-entity-top">';
+  html += '<span class="si-audit-entity-name" onclick="siAuditOpenEntity(\''+siEscAttr(ec)+'\')">'+siEsc(displayName)+'</span>';
+  html += '<span class="si-audit-entity-type" style="background:'+dimColor+'22;color:'+dimColor+';border:1px solid '+dimColor+'44">'+siEsc(dimCn)+'</span>';
+  html += '<div class="si-audit-verify-btns">';
+  html += '<button class="si-audit-vbtn'+(st==='ok'?' ok':'')+'" data-status="ok" onclick="siAuditMark(\''+siEscAttr(diseaseCode)+'\',\''+siEscAttr(ec)+'\',\'ok\')">✓ 正确</button>';
+  html += '<button class="si-audit-vbtn'+(st==='err'?' err':'')+'" data-status="err" onclick="siAuditMark(\''+siEscAttr(diseaseCode)+'\',\''+siEscAttr(ec)+'\',\'err\')">✗ 错误</button>';
+  html += '<button class="si-audit-vbtn'+(st==='doubt'?' doubt':'')+'" data-status="doubt" onclick="siAuditMark(\''+siEscAttr(diseaseCode)+'\',\''+siEscAttr(ec)+'\',\'doubt\')">? 存疑</button>';
+  html += '<button class="si-audit-vbtn" onclick="siShowImpact(\''+siEscAttr(ec)+'\')" style="margin-left:4px">影响</button>';
+  html += '</div></div>';
+  /* 详情描述 */
+  var desc = e.description || e.definition_text || e.original_text || '';
+  if(desc){
+    var descShort = desc.length>120 ? desc.substring(0,120)+'...' : desc;
+    html += '<div class="si-audit-entity-detail">'+siEsc(descShort)+'</div>';
+  }
+  /* 来源信息 */
+  var srcParts = [];
+  if(e.source_name) srcParts.push('来源: '+e.source_name);
+  if(e.primary_source_name) srcParts.push('来源: '+e.primary_source_name);
+  if(e.source_section_path) srcParts.push('章节: '+e.source_section_path);
+  if(e.evidence_id) srcParts.push('证据ID: '+e.evidence_id);
+  if(e.standard_code) srcParts.push('标准编码: '+e.standard_code);
+  if(e.coding_system) srcParts.push('体系: '+e.coding_system);
+  if(srcParts.length>0){
+    html += '<div class="si-audit-entity-source">'+siEsc(srcParts.join(' | '))+'</div>';
+  }
+  /* 备注 */
+  html += '<div class="si-audit-entity-note"><input type="text" value="'+siEsc(note)+'" placeholder="审核备注..." onchange="siAuditSaveNote(\''+siEscAttr(diseaseCode)+'\',\''+siEscAttr(ec)+'\',this.value)"></div>';
+  html += '</div>';
+  return html;
+}
+/* 审核视图中点击实体 → 打开详情弹窗 */
+function siAuditOpenEntity(code){
+  siOpenEntityModal(code, 'list');
+}
+
+/* ========== 3. 维度视角视图 ========== */
+var SI_DIM_INIT = false;
+var SI_DIM_ENTITIES = [];
+var SI_DIM_CUR_TYPE = '';
+var SI_DIM_CHART = null;
+var SI_DIM_DETAIL_CODE = null;
+
+function siInitDimTypeSelector(){
+  if(SI_DIM_INIT) return;
+  var sel = document.getElementById('si-sel-dim-type');
+  if(!sel) return;
+  var html = '<option value="">选择维度类型...</option>';
+  DIM_KEYS.forEach(function(k){
+    var t = TYPE_MAP[k];
+    var cn = DIM_NAMES[k] || (t?t.cn:k);
+    var icon = t ? t.icon : '';
+    html += '<option value="'+k+'">'+icon+' '+siEsc(cn)+' ('+k+')</option>';
+  });
+  sel.innerHTML = html;
+  SI_DIM_INIT = true;
+}
+function siSelectDimType(type){
+  SI_DIM_CUR_TYPE = type || '';
+  var cntEl = document.getElementById('si-dim-count');
+  if(!type){
+    SI_DIM_ENTITIES = [];
+    var v = document.getElementById('si-dim-view');
+    if(v) v.innerHTML = '<div class="si-empty" style="padding:60px;text-align:center">请选择维度类型</div>';
+    if(cntEl) cntEl.textContent = '';
+    return;
+  }
+  var view = document.getElementById('si-dim-view');
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载 '+siEsc(type)+' 实体中...</div>';
+  fetch('/api/kg/entities?type='+encodeURIComponent(type)+'&limit=500').then(function(r){return r.json()}).then(function(data){
+    SI_DIM_ENTITIES = (data && data.items) || [];
+    siRenderDimEntityList();
+  }).catch(function(e){
+    siNotify('加载实体失败: '+e.message,'err');
+    view.innerHTML = '<div class="si-empty">加载失败</div>';
+  });
+}
+function siRenderDimEntityList(filter){
+  if(SI_DIM_CHART){ SI_DIM_CHART.dispose(); SI_DIM_CHART = null; }
+  var view = document.getElementById('si-dim-view');
+  var q;
+  if(filter!==undefined){ q = filter; }
+  else { var sb = document.getElementById('si-dim-search'); q = sb ? sb.value : ''; }
+  q = (q||'').toLowerCase();
+  var list = SI_DIM_ENTITIES;
+  if(q){
+    list = list.filter(function(e){
+      return (e.name||'').toLowerCase().indexOf(q)!==-1 || (e.code||'').toLowerCase().indexOf(q)!==-1 || (e.name_en||'').toLowerCase().indexOf(q)!==-1;
+    });
+  }
+  var cntEl = document.getElementById('si-dim-count');
+  if(cntEl) cntEl.textContent = '共 '+list.length+' 个实体';
+  var html = '';
+  if(list.length===0){
+    html = '<div class="si-empty" style="padding:40px;text-align:center">未找到匹配的实体</div>';
+  } else {
+    html += '<div class="si-dim-entity-list">';
+    list.forEach(function(e){
+      var cls = (SI_DIM_DETAIL_CODE && e.code===SI_DIM_DETAIL_CODE) ? ' active' : '';
+      html += '<div class="si-dim-entity-card'+cls+'" data-code="'+siEsc(e.code||'')+'" onclick="siSelectDimEntity(\''+siEscAttr(e.code||'')+'\')">';
+      html += '<div class="name">'+siEsc(cleanName(e))+'</div>';
+      html += '<div class="code">'+siEsc(e.code||'')+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  view.innerHTML = html;
+}
+function siSearchDimEntity(){
+  var q = document.getElementById('si-dim-search').value;
+  siRenderDimEntityList(q);
+}
+function siSelectDimEntity(code){
+  if(!code) return;
+  SI_DIM_DETAIL_CODE = code;
+  var view = document.getElementById('si-dim-view');
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载关联数据中...</div>';
+  fetch('/api/kg/subgraph?code='+encodeURIComponent(code)+'&limit=200').then(function(r){return r.json()}).then(function(data){
+    if(data.error){ siNotify(data.error,'err'); siRenderDimEntityList(); return; }
+    siRenderDimDetail(data);
+  }).catch(function(e){
+    siNotify('加载失败: '+e.message,'err');
+    siRenderDimEntityList();
+  });
+}
+function siRenderDimDetail(data){
+  var c = data.center || {};
+  var neighbors = data.neighbors || [];
+  var t = TYPE_MAP[c.entityType] || {cn:c.entityType||'', color:'#888', icon:'📌'};
+  var diseases = [];
+  var others = [];
+  neighbors.forEach(function(n){
+    if(n.entityType==='Disease'){ diseases.push(n); }
+    else { others.push(n); }
+  });
+  var html = '';
+  html += '<div style="margin-bottom:12px"><button class="si-btn" onclick="siRenderDimEntityList()">← 返回实体列表</button></div>';
+  /* 中心实体卡片 */
+  html += '<div class="si-dim-center">';
+  html += '<h3>'+siEsc(cleanName(c))+'</h3>';
+  html += '<div style="font-size:12px;color:var(--muted)">'+(t.icon||'')+' '+siEsc(t.cn)+' | '+siEsc(c.code||'')+'</div>';
+  if(c.description){
+    var ds = c.description.length>160 ? c.description.substring(0,160)+'...' : c.description;
+    html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5">'+siEsc(ds)+'</div>';
+  }
+  html += '<div class="si-dim-stats">';
+  html += '<div class="si-dim-stat">关联疾病 <b>'+diseases.length+'</b></div>';
+  html += '<div class="si-dim-stat">关联实体 <b>'+others.length+'</b></div>';
+  html += '</div></div>';
+  /* 关联疾病列表 */
+  if(diseases.length>0){
+    html += '<div class="si-dim-disease-list">';
+    diseases.forEach(function(d){
+      var group = (SI_STATE.codeGroupMap||{})[d.code] || '';
+      html += '<div class="si-dim-disease-item" onclick="siDimOpenDisease(\''+siEscAttr(d.code||'')+'\')">';
+      html += '<div class="si-dim-disease-name">'+siEsc(d.name||'')+'</div>';
+      html += '<div class="si-dim-disease-context">'+(group?'大类: '+siEsc(group):'点击进入审核')+'</div>';
+      html += '<div class="si-dim-disease-arrow">→</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="si-empty" style="padding:24px;text-align:center">该实体未关联任何疾病</div>';
+  }
+  /* 网络图 */
+  html += '<div class="si-dim-network-box">';
+  html += '<h4>关联网络图（中心实体 → 关联疾病/实体）</h4>';
+  html += '<div id="si-dim-network"></div>';
+  html += '</div>';
+  document.getElementById('si-dim-view').innerHTML = html;
+  siRenderDimNetwork(c, diseases, others);
+}
+function siRenderDimNetwork(center, diseases, others){
+  if(SI_DIM_CHART){ SI_DIM_CHART.dispose(); SI_DIM_CHART = null; }
+  var container = document.getElementById('si-dim-network');
+  if(!container) return;
+  SI_DIM_CHART = echarts.init(container, null, {renderer:'canvas'});
+  var categories = [{name:'当前实体'},{name:'关联疾病'},{name:'其他实体'}];
+  var nodes = [];
+  var links = [];
+  var ct = TYPE_MAP[center.entityType] || {color:'#4f8cff'};
+  var centerId = center.code || 'center';
+  nodes.push({
+    id:centerId, name:cleanName(center), symbolSize:50, category:0,
+    itemStyle:{color:ct.color, shadowBlur:20, shadowColor:'rgba(0,0,0,0.4)'},
+    label:{show:true, fontSize:13, fontWeight:'bold', color:'#fff'}
+  });
+  var diseaseIds = {};
+  diseases.forEach(function(d){
+    var did = d.code || ('d_'+d.name);
+    if(diseaseIds[did]) return;
+    diseaseIds[did] = true;
+    nodes.push({id:did, name:d.name, symbolSize:30, category:1, itemStyle:{color:'#ff6b6b', opacity:0.85}, label:{show:true, fontSize:10, color:'#e8eaf0'}});
+    links.push({source:centerId, target:did, lineStyle:{color:'#ff6b6b', width:2, opacity:0.5, curveness:0.1}});
+  });
+  var seen = {};
+  var otherCnt = 0;
+  others.forEach(function(o){
+    if(otherCnt>=80) return;
+    var oid = o.code || ('o_'+o.name);
+    if(seen[oid]) return;
+    seen[oid] = true; otherCnt++;
+    var ot = TYPE_MAP[o.entityType] || {color:'#888'};
+    nodes.push({id:oid, name:cleanName(o), symbolSize:16, category:2, itemStyle:{color:ot.color, opacity:0.7}, label:{show:true, fontSize:8, color:'#c0c8d8'}});
+    links.push({source:centerId, target:oid, lineStyle:{color:'#555', width:1, opacity:0.4, curveness:0.12}});
+  });
+  SI_DIM_CHART.setOption({
+    tooltip:{trigger:'item', backgroundColor:'#1a1d27', borderColor:'#2e3348', textStyle:{color:'#e8eaf0', fontSize:12},
+      formatter:function(p){
+        if(p.dataType==='edge') return siEsc(p.data.source)+' → '+siEsc(p.data.target);
+        var ci = p.data.category;
+        var cn = (categories[ci]||{}).name || '';
+        return '<b>'+siEsc(p.name)+'</b><br><span style="color:#8b90a0">'+siEsc(cn)+'</span>';
+      }},
+    legend:{data:categories.map(function(c){return c.name}), textStyle:{color:'#8b90a0', fontSize:11}, top:0},
+    animationDuration:800, animationEasingUpdate:'quinticInOut',
+    series:[{
+      type:'graph', layout:'force', data:nodes, links:links, categories:categories,
+      roam:true, draggable:true,
+      label:{show:true, position:'right', fontSize:9, color:'#e8eaf0'},
+      lineStyle:{curveness:0.12, opacity:0.5},
+      emphasis:{focus:'adjacency', lineStyle:{width:3}},
+      force:{repulsion:200, gravity:0.08, edgeLength:[60,160], friction:0.6, layoutAnimation:true}
+    }]
+  }, true);
+  SI_DIM_CHART.off('click');
+  SI_DIM_CHART.on('click', function(params){
+    if(params.dataType!=='node') return;
+    if(params.data.category===1){
+      /* 关联疾病节点 → 进入疾病审核 */
+      siDimOpenDisease(params.data.id);
+    } else if(params.data.category===0){
+      siOpenEntityModal(center.code, 'list');
+    }
+  });
+  setTimeout(function(){ if(SI_DIM_CHART) SI_DIM_CHART.resize(); }, 120);
+}
+function siDimOpenDisease(code){
+  if(!code) return;
+  SI_STATE.currentCode = code;
+  var sel = document.getElementById('si-sel-disease');
+  if(sel){ sel.value = code; }
+  siSwitchMainView('audit');
+  siLoadAuditView(code);
+}
+
+/* ========== 4. 字典对比视图 ========== */
+var SI_DICT_CUR_CODE = null;
+
+function siLoadDictView(code){
+  if(!code) return;
+  SI_DICT_CUR_CODE = code;
+  SI_STATE.currentCode = code;
+  var view = document.getElementById('si-dict-view');
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载疾病数据中...</div>';
+  siFetchDisease(code, function(d){
+    if(!d){ view.innerHTML = '<div class="si-empty">疾病数据加载失败</div>'; return; }
+    renderDictView(d);
+  });
+}
+function siNameMatch(graphName, stdName){
+  if(!stdName) return 'missing';
+  var g = String(graphName||'').toLowerCase().replace(/\s+/g,'');
+  var s = String(stdName).toLowerCase().replace(/\s+/g,'');
+  if(!s) return 'missing';
+  if(g===s) return 'match';
+  if(g && (g.indexOf(s)!==-1 || s.indexOf(g)!==-1)) return 'partial';
+  /* 字符重叠度 */
+  var gMap = {}; var common = 0;
+  for(var i=0;i<g.length;i++){ gMap[g[i]] = (gMap[g[i]]||0)+1; }
+  for(var j=0;j<s.length;j++){ if(gMap[s[j]]>0){ common++; gMap[s[j]]--; } }
+  var maxLen = Math.max(g.length, s.length);
+  if(maxLen>0 && common/maxLen>=0.6) return 'partial';
+  return 'mismatch';
+}
+function siDictStat(label, cnt, cls){
+  return '<div style="background:var(--bg3);border-radius:8px;padding:10px 16px;text-align:center">'+
+    '<div class="si-dict-status '+cls+'" style="margin-bottom:4px">'+label+'</div>'+
+    '<div style="font-size:20px;font-weight:800;color:var(--ink)">'+cnt+'</div></div>';
+}
+function renderDictView(diseaseData){
+  var info = diseaseData.info || {};
+  var dims = diseaseData.dimensions || {};
+  var stdList = dims.StandardDiagnosis || [];
+  var view = document.getElementById('si-dict-view');
+  var html = '';
+  /* 头部 */
+  html += '<div class="si-dict-section"><h3>🏷️ 字典对比 — '+siEsc(info.name||'')+'</h3>';
+  html += '<div style="padding:16px">';
+  html += '<div style="font-size:13px;color:var(--muted);margin-bottom:12px">';
+  html += '疾病编码: <b>'+siEsc(info.code||'')+'</b> | 图谱ICD-10: <b>'+siEsc(info.icd_code||'无')+'</b>';
+  html += '</div>';
+  if(stdList.length===0){
+    html += '<div class="si-empty" style="padding:24px;text-align:center">该疾病暂无标准诊断（StandardDiagnosis）实体，无法进行字典对比</div>';
+    html += '</div></div>';
+    view.innerHTML = html;
+    return;
+  }
+  /* 统计 */
+  var matchCnt=0, partialCnt=0, mismatchCnt=0, missingCnt=0;
+  stdList.forEach(function(s){
+    var stdName = s.standard_name || s.name || cleanName(s);
+    var st = siNameMatch(info.name, stdName);
+    if(st==='match')matchCnt++; else if(st==='partial')partialCnt++; else if(st==='mismatch')mismatchCnt++; else missingCnt++;
+  });
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">';
+  html += siDictStat('完全匹配', matchCnt, 'match');
+  html += siDictStat('部分匹配', partialCnt, 'partial');
+  html += siDictStat('不匹配', mismatchCnt, 'mismatch');
+  html += siDictStat('缺失', missingCnt, 'missing');
+  html += '</div>';
+  html += '</div></div>';
+  /* 明细表 */
+  html += '<div class="si-dict-section"><h3>对比明细（'+stdList.length+' 条标准诊断）</h3>';
+  html += '<table class="si-dict-table"><thead><tr>';
+  html += '<th>状态</th><th>图谱疾病名称</th><th>ICD-10 标准名称</th><th>标准编码</th><th>编码体系</th>';
+  html += '</tr></thead><tbody>';
+  stdList.forEach(function(s){
+    var stdName = s.standard_name || s.name || cleanName(s);
+    var st = siNameMatch(info.name, stdName);
+    var stMap = {match:'✓ 匹配', partial:'◐ 部分', mismatch:'✗ 不匹配', missing:'— 缺失'};
+    var stdCode = s.standard_code || s.icd_code || '';
+    var codingSys = s.coding_system || 'ICD-10';
+    html += '<tr>';
+    html += '<td><span class="si-dict-status '+st+'">'+stMap[st]+'</span></td>';
+    html += '<td>'+siEsc(info.name||'')+'</td>';
+    html += '<td>'+siEsc(stdName)+'</td>';
+    html += '<td>'+siEsc(stdCode)+'</td>';
+    html += '<td>'+siEsc(codingSys)+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  view.innerHTML = html;
+}
+
+/* ========== 5. 影响范围预览 ========== */
+function siShowImpact(code){
+  if(!code) return;
+  /* 优先在审核卡片下方内联展示 */
+  var card = siFindAuditCard(code);
+  if(card){
+    var exist = card.querySelector('.si-impact-panel');
+    if(exist){
+      exist.style.display = exist.style.display==='none' ? 'block' : 'none';
+      return;
+    }
+    var panel = document.createElement('div');
+    panel.className = 'si-impact-panel';
+    panel.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted)">分析影响范围中...</div>';
+    card.appendChild(panel);
+    siRenderImpactPanel(code, panel);
+    return;
+  }
+  /* 降级：渲染到审核底部影响范围容器 */
+  var box = document.getElementById('si-audit-impact-body');
+  if(box){
+    box.style.display = 'block';
+    var grp = document.getElementById('si-audit-group-impact');
+    if(grp) grp.classList.add('open');
+    siRenderImpactPanel(code, box);
+    return;
+  }
+  siNotify('未找到影响范围展示容器','err');
+}
+function siRenderImpactPanel(code, container, data){
+  var el = (typeof container==='string') ? document.getElementById(container) : container;
+  if(!el) return;
+  var render = function(d){
+    var center = (d && d.center) || {};
+    var neighbors = (d && d.neighbors) || [];
+    var diseases = [];
+    var dimCount = {};
+    neighbors.forEach(function(n){
+      if(n.entityType==='Disease'){ diseases.push(n); }
+      else { dimCount[n.entityType] = (dimCount[n.entityType]||0)+1; }
+    });
+    var html = '<h4>⚠️ 影响范围预览</h4>';
+    html += '<div class="si-impact-summary">';
+    html += '实体 <b>'+siEsc(cleanName(center))+'</b> 关联 <b>'+neighbors.length+'</b> 个节点，其中疾病 <b>'+diseases.length+'</b> 个。';
+    html += '</div>';
+    if(diseases.length>0){
+      html += '<div style="font-size:12px;font-weight:600;color:var(--ink);margin:8px 0 4px">受影响疾病：</div>';
+      html += '<div class="si-impact-list">';
+      diseases.forEach(function(dd){
+        html += '<div class="si-impact-list-item">'+siEsc(dd.name||'')+' <span style="color:var(--accent);cursor:pointer" onclick="siDimOpenDisease(\''+siEscAttr(dd.code||'')+'\')">→ 审核</span></div>';
+      });
+      html += '</div>';
+    }
+    var dk = Object.keys(dimCount);
+    if(dk.length>0){
+      html += '<div style="font-size:12px;font-weight:600;color:var(--ink);margin:8px 0 4px">关联维度分布：</div>';
+      html += '<div class="si-impact-list">';
+      dk.forEach(function(k){
+        var cn = DIM_NAMES[k] || (TYPE_MAP[k]?TYPE_MAP[k].cn:k);
+        html += '<div class="si-impact-list-item">'+siEsc(cn)+': '+dimCount[k]+'</div>';
+      });
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  };
+  if(data){ render(data); return; }
+  fetch('/api/kg/subgraph?code='+encodeURIComponent(code)+'&limit=200').then(function(r){return r.json()}).then(function(d){
+    if(d && d.error){ el.innerHTML = '<div class="si-empty">'+siEsc(d.error)+'</div>'; return; }
+    render(d);
+  }).catch(function(e){
+    el.innerHTML = '<div class="si-empty">影响范围加载失败</div>';
+  });
 }
 </script>
 </body>
