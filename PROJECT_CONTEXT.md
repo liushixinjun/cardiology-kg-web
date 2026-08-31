@@ -152,7 +152,32 @@ SFTP 覆盖单个文件即可，不清 Redis、不重启服务。
 
 ---
 
-## 八、已完成功能（截至 2026-08-16）
+## 八、已完成功能（截至 2026-08-31）
+
+### 2026-08-31 改造内容：Schema V3.2 图谱探索四 tab 升级（git: 115c161 + 后续补丁）
+1. **公共映射层 `_shared/js/schema-map.js`（新增，所有页面可引用）**：
+   - 诊断角色六值→三档双兼容（旧值 broad_diagnosis/clinical_subtype/independent_disease + V3.0 新值 suspected_parent/specific_subtype/standalone_diagnosis），数据迁移后页面不再失效
+   - 关系类型中文映射（60+ 关系，对齐 server.py REL_MAP）、字典/医嘱/审核状态推导（字典状态由 cdss_dict_id 推导，审核状态覆盖全库 10 种取值）、来源格式化、连线样式规范
+   - 禁止页面写裸值比较（如 `role==='broad_diagnosis'`），统一调 SCHEMA.roleGroup()/isTopDisease() 等
+2. **诊疗链路 tab**（explore.html）：
+   - 顶部新增 5 指标状态摘要条：标准诊断映射/资料覆盖/证据支撑/字典映射率/正式推荐链
+   - 推荐卡补禁忌标识：has_contraindication 关系实体链（红色徽章 + 禁忌标签列表）
+   - 诊断角色徽章新旧值双兼容（原 10 处硬编码全部改走公共映射层）
+3. **知识总览 tab**（explore.html）：
+   - 维度卡头部加字典映射统计（可医嘱类维度显示"字典 x/y"）；实体标签加状态徽标（字典●○/证据📄n）
+   - 右侧详情面板新增"数据就绪状态"区块：资料来源/证据支撑/字典映射/医嘱状态/审核状态五项
+   - 删除全部"Schema V2.x"旧标注，更新为 V3.2 口径（治疗方案下钻与正式推荐双轨说明）
+4. **关系视角 tab**：连线加中文关系名标签（悬停显示）；鉴别二跳语义线（需排除检查/检验）常显橙色虚线标签；临床规则→药物/手术连线显示"推荐动作"
+5. **实体视角 tab**：表格 4 列扩为 8 列（实体名称/维度/关联疾病/证据/字典/医嘱/来源/编码）
+6. **server.py 四接口增量**：
+   - query_disease_full 维度查询（直连+多跳两处）：补 cdss_dict_id/clinical_review_status/evidence_count
+   - query_disease_recommendations：补 has_contraindication 禁忌实体链（缓存 key 升级 v3）
+   - query_diseases_summary：补 cdss_dict_id/evidence_count/来源字段
+   - query_entity_detail：补 entityType/cdss_dict_id/审核状态/来源/证据计数
+   - 新增 SourceSection 资料覆盖统计（二跳聚合，AMI=59 章节）
+   - 诊断角色查询双兼容（原 2 处旧值分支）
+   - **坑**：此 Neo4j 版本不支持 `size((n)-[:rel]-())` 模式表达式，必须用 `COUNT { (n)-[:rel]-() }` 子查询，且在 f-string 中大括号需双写转义
+7. **验收记录**：schema-map.js 单测 60/60 通过（角色 43 + 审核状态 17）；部署后线上验证 25/25 PASS（文件字节一致 + 4 API 新字段 + 静态资源）；浏览器 DOM 级验证：摘要条 5 卡、禁忌徽章 3 处、字典统计 4 项、实体表 8 列 198 行、详情面板五项状态、审核状态中文化无英文原始键，console 无报错
 
 ### 2026-08-16 改造内容
 1. **知识总览-鉴别诊断维度修复**（server.py + explore.html）：

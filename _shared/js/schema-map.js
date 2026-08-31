@@ -160,8 +160,17 @@ var SCHEMA = (function () {
     return { key: 'pending_dict', label: '待字典确认' };
   }
 
-  /* ---- 审核状态（推荐陈述类从 clinical_review_status，其余为知识展示） ---- */
+  /* ---- 审核状态（clinical_review_status 全库取值，2026-08-31 实测 10 种） ---- */
   var REVIEW_STATUS = {
+    not_applicable: { label: '不适用', cls: 'muted' },
+    not_required: { label: '无需审核', cls: 'muted' },
+    clinical_ready: { label: '临床就绪', cls: 'ok' },
+    clinical_batch_signed_off: { label: '批次已签核', cls: 'ok' },
+    textbook_verified: { label: '教材已验证', cls: 'ok' },
+    review_ready: { label: '待复核', cls: 'warn' },
+    pending_clinical_review: { label: '待临床审核', cls: 'warn' },
+    pending_clinical_use_effect_review: { label: '待使用效果审核', cls: 'warn' },
+    blocked: { label: '已阻断', cls: 'bad' },
     pending_review: { label: '待审核', cls: 'warn' },
     approved: { label: '已通过', cls: 'ok' },
     need_evidence: { label: '待补证据', cls: 'warn' },
@@ -175,7 +184,9 @@ var SCHEMA = (function () {
 
   function reviewStatus(node) {
     if (!node) return { label: '—', cls: 'muted' };
-    var rs = node.clinical_review_status || node.review_status || '';
+    var raw = node.clinical_review_status || node.review_status || '';
+    /* 库中存在数组型取值（如 ['not_applicable','not_required']，6 节点），取首个 */
+    var rs = Array.isArray(raw) ? (raw[0] || '') : raw;
     if (rs && REVIEW_STATUS[rs]) return REVIEW_STATUS[rs];
     if (rs) return { label: rs, cls: 'warn' };
     return { label: '仅知识展示', cls: 'muted' };
