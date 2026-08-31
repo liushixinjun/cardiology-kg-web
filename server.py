@@ -453,7 +453,11 @@ def query_diseases_summary():
                     MATCH (d:Disease {{code: $code}})-[:{rel}]->(n)
                     WHERE (n.status IS NULL OR n.status <> 'deprecated')
                     RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
-                       n.display_name as dn, n.name_en as name_en, n.aliases as aliases, n.status as status
+                       n.display_name as dn, n.name_en as name_en, n.aliases as aliases, n.status as status,
+                       n.cdss_dict_id as cdss_dict_id,
+                       n.source_section_path as section_path, n.book_page_start as book_start,
+                       n.pdf_page_start as pdf_start,
+                       COUNT {{ (n)-[:supported_by_evidence]-() }} as evidence_count
                     ORDER BY n.name LIMIT 30
                 """, code=code)
                 items = []
@@ -466,7 +470,7 @@ def query_diseases_summary():
                         continue
                     seen.add(name)
                     aliases = [a for a in (r["aliases"] or []) if a != name]
-                    items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases, "status": r.get("status")})
+                    items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases, "status": r.get("status"), "cdss_dict_id": r["cdss_dict_id"] or "", "evidence_count": r["evidence_count"] or 0, "source_section_path": r["section_path"] or "", "book_page_start": r["book_start"] or "", "pdf_page_start": r["pdf_start"] or ""})
                 dims[dim] = items
             result[code] = {"info": d_info, "dimensions": dims}
 
@@ -492,10 +496,16 @@ def query_disease_full(code):
         std_dx_map = _load_standard_diagnosis_map(sess, [code])
         std = std_dx_map.get(code, {})
 
-        # 加载分型元信息
+        # 加载分型元信息（诊断角色新旧值双兼容：V2.x 旧值 + Schema V3.0 新值）
+        _role = info_r.get("diagnostic_role") or ""
+        _role_group = {
+            "broad_diagnosis": "broad", "suspected_parent": "broad",
+            "clinical_subtype": "subtype", "specific_subtype": "subtype",
+            "independent_disease": "independent", "standalone_diagnosis": "independent",
+        }.get(_role, "")
         parent_code = None
         subtype_codes = []
-        if info_r.get("diagnostic_role") == "clinical_subtype":
+        if _role_group == "subtype":
             parent_rs = sess.run("""
                 MATCH (parent:Disease)-[:has_clinical_subtype]->(sub:Disease {code: $code})
                 WHERE """ + _active_node_filter('parent') + """
@@ -503,7 +513,7 @@ def query_disease_full(code):
             """, code=code)
             for pr in parent_rs:
                 parent_code = pr['parent_code']
-        elif info_r.get("diagnostic_role") in ["broad_diagnosis", "independent_disease"]:
+        elif _role_group in ("broad", "independent"):
             sub_rs = sess.run("""
                 MATCH (parent:Disease {code: $code})-[:has_clinical_subtype]->(sub:Disease)
                 WHERE """ + _active_node_filter('sub') + """
@@ -547,7 +557,10 @@ def query_disease_full(code):
                        n.book_page_start as book_start, n.book_page_end as book_end,
                        n.text_anchor as text_anchor,
                        n.definition_text as definition_text, n.original_text as original_text,
-                       n.description as description
+                       n.description as description,
+                       n.cdss_dict_id as cdss_dict_id,
+                       n.clinical_review_status as review_status,
+                       COUNT {{ (n)-[:supported_by_evidence]-() }} as evidence_count
                 ORDER BY n.name LIMIT 200
             """, code=code)
             items = []
@@ -576,6 +589,9 @@ def query_disease_full(code):
                     "definition_text": r["definition_text"] or "",
                     "original_text": r["original_text"] or "",
                     "description": r["description"] or "",
+                    "cdss_dict_id": r["cdss_dict_id"] or "",
+                    "clinical_review_status": r["review_status"] or "",
+                    "evidence_count": r["evidence_count"] or 0,
                 }
 
                 # Medication 二跳 — has_specific_medication
@@ -630,7 +646,10 @@ def query_disease_full(code):
                        n.book_page_start as book_start, n.book_page_end as book_end,
                        n.text_anchor as text_anchor,
                        n.definition_text as definition_text, n.original_text as original_text,
-                       n.description as description
+                       n.description as description,
+                       n.cdss_dict_id as cdss_dict_id,
+                       n.clinical_review_status as review_status,
+                       COUNT {{ (n)-[:supported_by_evidence]-() }} as evidence_count
                 ORDER BY n.name LIMIT 30
             """, code=code)
             items = []
@@ -659,6 +678,9 @@ def query_disease_full(code):
                     "definition_text": r["definition_text"] or "",
                     "original_text": r["original_text"] or "",
                     "description": r["description"] or "",
+                    "cdss_dict_id": r["cdss_dict_id"] or "",
+                    "clinical_review_status": r["review_status"] or "",
+                    "evidence_count": r["evidence_count"] or 0,
                 }
 
                 # Definition 二跳 — DefinitionComponent
@@ -1390,6 +1412,28 @@ def query_disease_full(code):
         except Exception:
             pass
 
+        # 资料覆盖：SourceSection 经"章节→实体"二跳关联到该疾病（Schema V3.2 资料追溯）
+        source_section_count = 0
+        source_sections = []
+        try:
+            ss_rs = sess.run("""
+                MATCH (d:Disease {code: $code})-[]->(e:KGNode), (ss:KGNode {entityType:'SourceSection'})-[]->(e)
+                RETURN DISTINCT ss.code AS ss_code, ss.source_name AS source_name,
+                       ss.source_section_path AS path, ss.chapter_title AS chapter_title
+                ORDER BY source_name, path
+            """, code=code)
+            for row in ss_rs:
+                if row["ss_code"]:
+                    source_section_count += 1
+                    source_sections.append({
+                        "code": row["ss_code"],
+                        "source_name": row["source_name"] or "",
+                        "source_section_path": row["path"] or "",
+                        "chapter_title": row["chapter_title"] or "",
+                    })
+        except Exception:
+            pass
+
         return {
             "info": info,
             "dimensions": dimensions,
@@ -1399,6 +1443,8 @@ def query_disease_full(code):
             "pathways": pathways,
             "exam_plans": exam_plans,
             "differentials": differentials,
+            "source_section_count": source_section_count,
+            "source_sections": source_sections,
         }
 
 
@@ -1533,7 +1579,12 @@ def query_entity_detail(code):
             RETURN n.name as name, n.code as code, n.name_en as name_en,
                    n.aliases as aliases, n.preferred_name as pref,
                    n.display_name as dn, n.status as status,
-                   n.maps_to_disease_code as maps_to_disease_code, labels(n) as labels
+                   n.maps_to_disease_code as maps_to_disease_code, labels(n) as labels,
+                   n.entityType as entityType, n.cdss_dict_id as cdss_dict_id,
+                   n.clinical_review_status as review_status,
+                   n.source_section_path as source_section_path, n.source_name as source_name,
+                   n.book_page_start as book_page_start, n.pdf_page_start as pdf_page_start,
+                   COUNT { (n)-[:supported_by_evidence]-() } as evidence_count
         """, code=code).single()
         if not r:
             return {"error": "Entity not found or deprecated", "code": code}
@@ -1570,6 +1621,14 @@ def query_entity_detail(code):
             "status": r.get("status") or "",
             "maps_to_disease_code": r.get("maps_to_disease_code") or "",
             "labels": r["labels"] or [],
+            "entityType": r.get("entityType") or "",
+            "cdss_dict_id": r.get("cdss_dict_id") or "",
+            "clinical_review_status": r.get("review_status") or "",
+            "source_section_path": r.get("source_section_path") or "",
+            "source_name": r.get("source_name") or "",
+            "book_page_start": r.get("book_page_start") or "",
+            "pdf_page_start": r.get("pdf_page_start") or "",
+            "evidence_count": r.get("evidence_count") or 0,
             "diseases": disease_list,
             "cross_diseases": cross_list
         }
@@ -1667,7 +1726,7 @@ def query_disease_recommendations(disease_code):
     不把 has_treatment_plan / stage_has_available_action 当正式推荐。
     同时返回每条 RS 直连的主证据（derived_from）、主指南（based_on_guideline）。
     """
-    cache_key = f"kg:recommendations_v2:{disease_code}"
+    cache_key = f"kg:recommendations_v3:{disease_code}"
     cached = cache_get(cache_key)
     if cached is not None:
         return cached
@@ -1681,6 +1740,7 @@ def query_disease_recommendations(disease_code):
             OPTIONAL MATCH (rs)-[:recommends_action]->(action:KGNode)
             OPTIONAL MATCH (rs)-[:derived_from]->(ev:KGNode)
             OPTIONAL MATCH (rs)-[:based_on_guideline]->(g:KGNode)
+            OPTIONAL MATCH (rs)-[:has_contraindication]->(contra:KGNode)
             RETURN rs.code AS rs_code, rs.display_name AS rs_display, rs.name AS rs_name,
                    rs.recommendation_class AS rec_class, rs.evidence_level AS ev_level,
                    rs.recommendation_type AS rec_type,
@@ -1704,6 +1764,10 @@ def query_disease_recommendations(disease_code):
                        recommendation_class: coalesce(ev.recommendation_class, ''),
                        excerpt: left(coalesce(ev.evidence_text, ''), 300)
                    }) AS evidences,
+                   collect(DISTINCT {
+                       code: contra.code,
+                       name: coalesce(contra.display_name, contra.preferred_name, contra.name, '')
+                   }) AS contraindications,
                    collect(DISTINCT g.name) AS guidelines
             ORDER BY rs.name LIMIT 200
         """, code=disease_code)
@@ -1722,6 +1786,13 @@ def query_disease_recommendations(disease_code):
                     evidences.append(e)
             guidelines = [g for g in (r["guidelines"] or []) if g]
             primary_guideline = guidelines[0] if guidelines else ""
+            contraindications = []
+            seen_c = set()
+            for c in (r["contraindications"] or []):
+                if c and c.get("code") and c["code"] not in seen_c:
+                    seen_c.add(c["code"])
+                    if c.get("name"):
+                        contraindications.append(c)
             recommendations.append({
                 "code": r["rs_code"] or "",
                 "name": clean_name_from_row(r, "rs_display", "rs_name", "rs_code"),
@@ -1741,6 +1812,7 @@ def query_disease_recommendations(disease_code):
                 "formal_cdss_ready": r["formal_ready"] or False,
                 "indication_conditions": r["indication"] or "",
                 "contraindication_conditions": r["contra"] or "",
+                "contraindications": contraindications,
                 "primary_source_name": r["primary_source_name"] or primary_guideline,
                 "primary_source_page": r["primary_source_page"] or "",
                 "primary_guideline_name": primary_guideline,

@@ -188,6 +188,61 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .cdss-rec-source .page { font-size: 10px; color: var(--accent); background: rgba(79,140,255,.1); padding: 0 5px; border-radius: 4px; margin-left: 2px; }
 .cdss-rec-evidence { font-size: 12px; color: var(--ink); background: rgba(79,140,255,.06); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; line-height: 1.6; }
 
+/* ===== Schema V3.2 状态摘要条（5指标） ===== */
+.cdss-sum-bar { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 14px 0; }
+.cdss-sum-card {
+  flex: 1; min-width: 130px; display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 10px; cursor: default;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(139,146,165,.18);
+}
+.cdss-sum-card.ok { border-color: rgba(81,207,102,.35); background: rgba(81,207,102,.06); }
+.cdss-sum-card.warn { border-color: rgba(250,173,20,.35); background: rgba(250,173,20,.06); }
+.cdss-sum-card.bad { border-color: rgba(250,82,82,.35); background: rgba(250,82,82,.06); }
+.cdss-sum-icon { font-size: 18px; line-height: 1; }
+.cdss-sum-value { font-size: 15px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+.cdss-sum-card.ok .cdss-sum-value { color: #51cf66; }
+.cdss-sum-card.warn .cdss-sum-value { color: #fab005; }
+.cdss-sum-card.bad .cdss-sum-value { color: #fa5252; }
+.cdss-sum-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ===== 推荐卡禁忌标识（has_contraindication） ===== */
+.cdss-rec-contra {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  background: #ffe3e3; color: #c92a2a;
+}
+.cdss-rec-contra-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.cdss-contra-tag {
+  font-size: 10px; padding: 1px 7px; border-radius: 4px;
+  background: rgba(250,82,82,.08); color: #e03131; border: 1px solid rgba(250,82,82,.2);
+}
+.cdss-contra-tag.more { color: var(--muted); border-color: rgba(139,146,165,.25); background: rgba(139,146,165,.06); }
+
+/* ===== 实体状态徽标（schema-map.js 渲染） ===== */
+.sm-badge {
+  display: inline-block; font-size: 9px; font-weight: 700; padding: 0 4px;
+  border-radius: 4px; margin-left: 3px; vertical-align: middle; line-height: 1.6;
+}
+.sm-badge.ok { color: #37b24d; }
+.sm-badge.warn { color: #f08c00; }
+.sm-badge.ev { color: #4dabf7; background: rgba(77,171,247,.12); }
+
+/* 维度卡字典统计 */
+.ex-card-dict { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+.ex-card-dict.full { color: #37b24d; background: rgba(55,178,77,.1); }
+.ex-card-dict.part { color: #f08c00; background: rgba(240,140,0,.1); }
+
+/* 状态徽章（详情面板/实体表） */
+.st-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 8px; white-space: nowrap; }
+.st-badge.ok { background: rgba(81,207,102,.12); color: #37b24d; }
+.st-badge.warn { background: rgba(250,173,20,.14); color: #e8590c; }
+.st-badge.muted { background: rgba(139,146,165,.12); color: var(--muted); }
+.gap-flag { font-size: 10px; color: #f08c00; font-style: italic; }
+.ex-row-sub { font-size: 9px; color: var(--muted); margin-top: 2px; word-break: break-all; }
+
+/* 实体视角表格状态列 */
+.ex-table td.ex-st { white-space: nowrap; font-size: 11px; }
+.ex-table td.ex-src { font-size: 10px; color: var(--muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .cdss-empty { text-align: center; padding: 40px; color: var(--muted); }
 .cdss-loading { text-align: center; padding: 40px; color: var(--muted); }
 
@@ -304,6 +359,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
+<script src="./_shared/js/schema-map.js?v=20260831"></script>
 <script src="./_shared/js/app.js?v=20260831b"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
@@ -379,11 +435,11 @@ function renderDiseaseTree(tree){
   }
 }
 function collectTopDiseases(nodes){
-  // 只收集诊断层级中的顶层可点击疾病（宽口径/独立疾病），不直接平铺具体分型
+  // 只收集诊断层级中的顶层可点击疾病（疑似/独立诊断），不直接平铺具体分型；新旧角色值双兼容
   var result=[];
   function walk(nlist){
     nlist.forEach(function(n){
-      if(n.type==='Disease' && (n.diagnostic_role==='broad_diagnosis' || n.diagnostic_role==='independent_disease')){
+      if(n.type==='Disease' && SCHEMA.isTopDisease(n.diagnostic_role)){
         result.push(n);
       } else if(n.children){
         walk(n.children);
@@ -394,10 +450,7 @@ function collectTopDiseases(nodes){
   return result;
 }
 function dxRoleBadge(role){
-  if(role==='broad_diagnosis') return '<span class="dx-role-badge broad">疑似诊断</span>';
-  if(role==='clinical_subtype') return '<span class="dx-role-badge subtype">具体分型</span>';
-  if(role==='independent_disease') return '<span class="dx-role-badge independent">独立诊断</span>';
-  return '';
+  return SCHEMA.roleBadge(role);
 }
 function diseaseNodeHTML(node, level, includeCov){
   var cov=getCoverage(node.code);
@@ -406,7 +459,7 @@ function diseaseNodeHTML(node, level, includeCov){
   var icd=node.icd_code || '';
   var metaItems=[];
   if(icd) metaItems.push('<span class="icd-code">'+(node.coding_system?node.coding_system.split('（')[0]+' ':'')+icd+'</span>');
-  if(role==='broad_diagnosis' && node.subtype_count>0) metaItems.push('<span class="subtype-count">分型 '+node.subtype_count+'</span>');
+  if(SCHEMA.isBroad(role) && node.subtype_count>0) metaItems.push('<span class="subtype-count">分型 '+node.subtype_count+'</span>');
   var html='<div class="ex-disease level-'+level+(hasChildren?' has-children':'')+'" data-code="'+node.code+'" onclick="selectDisease(\''+node.code+'\')">';
   html+='<div class="name-block"><div class="name-row"><span class="name" title="'+(node.icd_name||node.name)+'">'+node.name+'</span>'+dxRoleBadge(role)+'</div>';
   if(metaItems.length){
@@ -577,6 +630,51 @@ function chainPrioClass(v) {
   if (s.indexOf('低') >= 0 || s.indexOf('可选') >= 0 || s === 'low' || s === 'optional' || s === 'p3') return 'low';
   return '';
 }
+/* 状态摘要条：5 指标回答"有什么、依据是什么、能不能进CDSS"（Schema V3.2） */
+function buildStatusSummaryBar(d, recs) {
+  var dims = d.dimensions || {};
+  var stdDx = dims.StandardDiagnosis || [];
+  /* 字典映射率：五类可医嘱/字典实体按 cdss_dict_id 推导 */
+  var dictTypes = ['Medication', 'Procedure', 'ExamItem', 'LabItem', 'StandardDiagnosis'];
+  var dictTotal = 0, dictMatched = 0;
+  var dictTypeStats = [];
+  dictTypes.forEach(function(t) {
+    var list = dims[t] || [];
+    if (!list.length) return;
+    var m = list.filter(function(e) { return e.cdss_dict_id; }).length;
+    dictTotal += list.length;
+    dictMatched += m;
+    dictTypeStats.push(DIM_NAMES[t] + ' ' + m + '/' + list.length);
+  });
+  var dictRate = dictTotal ? Math.round(dictMatched / dictTotal * 100) : null;
+  var ssCount = d.source_section_count || 0;
+  var contraCount = (recs || []).filter(function(r) {
+    return (r.contraindications && r.contraindications.length) || (r.contraindication_conditions && r.contraindication_conditions !== 'N/A');
+  }).length;
+
+  function card(icon, label, value, cls, tip) {
+    return '<div class="cdss-sum-card ' + (cls || '') + '" title="' + escAttr(tip || '') + '">' +
+      '<span class="cdss-sum-icon">' + icon + '</span>' +
+      '<div class="cdss-sum-body"><div class="cdss-sum-value">' + value + '</div>' +
+      '<div class="cdss-sum-label">' + label + '</div></div></div>';
+  }
+  var h = '<div class="cdss-sum-bar">';
+  h += card('🏷️', '标准诊断映射', stdDx.length ? '已绑定' : '未绑定', stdDx.length ? 'ok' : 'bad',
+    stdDx.length ? 'StandardDiagnosis ' + stdDx.length + ' 条（ICD-10 字典）' : '该疾病未挂接 StandardDiagnosis 标准诊断');
+  h += card('📖', '资料覆盖', ssCount ? ssCount + ' 章节' : '待补',
+    ssCount ? 'ok' : 'warn',
+    ssCount ? 'SourceSection 来源章节 ' + ssCount + ' 个（提取比例等 V3.2 台账字段待解析侧补录）' : '无 SourceSection 来源章节记录（V3.2 资料追溯字段未入库）');
+  h += card('📄', '证据支撑', (d.evidence_count || 0) + ' 条', (d.evidence_count > 0) ? 'ok' : 'warn',
+    '该疾病关联证据节点 ' + (d.evidence_count || 0) + ' 条（Evidence 池，正式推荐仅取直连主证据）');
+  h += card('🗂️', '字典映射率', dictRate === null ? '无实体' : dictRate + '%',
+    dictRate === null ? 'warn' : (dictRate >= 60 ? 'ok' : 'warn'),
+    dictTypeStats.length ? '按 cdss_dict_id 推导：' + dictTypeStats.join('；') + (dictRate !== null && dictRate < 60 ? '（低于 60%，映射率低本身即审核重点）' : '') : '无可医嘱类实体，无需字典映射');
+  h += card('✅', '正式推荐链', recs.length ? recs.length + ' 条' : '无',
+    recs.length ? 'ok' : 'bad',
+    recs.length ? 'RecommendationStatement→recommends_action 正式推荐 ' + recs.length + ' 条，其中 ' + contraCount + ' 条带禁忌条件' : '该疾病无 RecommendationStatement 正式推荐（不把治疗方案冒充推荐）');
+  h += '</div>';
+  return h;
+}
 /* 专科CDSS诊疗链路主渲染：6段式（疑似/分型→首诊检查检验→鉴别诊断→治疗方案→正式推荐→证据） */
 function renderCDSSChain(d, recs) {
   var ws = document.getElementById('workspace');
@@ -586,9 +684,7 @@ function renderCDSSChain(d, recs) {
     var h = '<div class="cdss-pathway chain-wrap">';
 
     /* 疾病头部 */
-    var roleTag = info.diagnostic_role === 'broad_diagnosis' ? '<span class="dx-role-badge broad">疑似诊断</span>' :
-                   info.diagnostic_role === 'clinical_subtype' ? '<span class="dx-role-badge subtype">具体分型</span>' :
-                   info.diagnostic_role === 'independent_disease' ? '<span class="dx-role-badge independent">独立诊断</span>' : '';
+    var roleTag = SCHEMA.roleBadge(info.diagnostic_role);
     h += '<div class="cdss-pathway-head">';
     h += '<h2>' + escAttr(info.name) + ' ' + roleTag + '</h2>';
     h += '<div class="cdss-meta">';
@@ -597,6 +693,9 @@ function renderCDSSChain(d, recs) {
     h += '<span>推荐 ' + recs.length + ' 条</span>';
     h += '<span>鉴别 ' + (d.differentials || []).length + ' 项</span>';
     h += '</div></div>';
+
+    /* ===== 状态摘要条：5 指标（Schema V3.2 数据就绪度） ===== */
+    h += buildStatusSummaryBar(d, recs);
 
     /* ===== 段1：疑似疾病/具体分型 ===== */
     h += '<div class="chain-step">';
@@ -625,7 +724,7 @@ function renderCDSSChain(d, recs) {
       });
       h += '</div>';
     }
-    if (info.diagnostic_role === 'clinical_subtype' && info.parent) {
+    if (SCHEMA.isSubtype(info.diagnostic_role) && info.parent) {
       var parent = KG_DATA.diseases[info.parent];
       var parentName = parent && parent.info ? parent.info.name : info.parent;
       h += '<div style="margin-top:12px;font-size:11px;color:var(--muted)">所属疑似诊断：<span class="ex-tag" style="cursor:pointer" onclick="selectDisease(\'' + info.parent + '\')">' + escAttr(parentName) + '</span></div>';
@@ -813,6 +912,8 @@ function renderCDSSChain(d, recs) {
 }
 function chainRecCard(rec) {
   var isBlock = rec.recommendation_type === 'block';
+  var contras = rec.contraindications || [];
+  var contraText = rec.contraindication_conditions && rec.contraindication_conditions !== 'N/A' ? rec.contraindication_conditions : '';
   var h = '<div class="cdss-rec" onclick="showRecommendationDetail(\'' + escAttr(rec.code) + '\')">';
   h += '<div class="cdss-rec-head">';
   h += '<span class="cdss-rec-badge ' + (isBlock ? 'block' : 'recommend') + '">' + (isBlock ? '\u{1F6AB} 阻断' : '\u2705 推荐') + '</span>';
@@ -822,7 +923,18 @@ function chainRecCard(rec) {
   if (rec.evidence_level && rec.evidence_level !== '未结构化') {
     h += '<span class="cdss-rec-ev">' + escAttr(rec.evidence_level) + '</span>';
   }
+  if (contras.length || contraText) {
+    var contraTip = contras.length
+      ? contras.map(function(c) { return c.name; }).join('、')
+      : contraText;
+    h += '<span class="cdss-rec-contra" title="' + escAttr('禁忌：' + contraTip) + '">\u26D4 禁忌 ' + (contras.length || '有') + '</span>';
+  }
   h += '</div>';
+  if (contras.length) {
+    h += '<div class="cdss-rec-contra-list">' + contras.slice(0, 4).map(function(c) {
+      return '<span class="cdss-contra-tag">' + escAttr(c.name) + '</span>';
+    }).join('') + (contras.length > 4 ? '<span class="cdss-contra-tag more">+' + (contras.length - 4) + '</span>' : '') + '</div>';
+  }
   if (rec.statement_text || rec.statement_summary) {
     h += '<div class="cdss-rec-text">' + escAttr(rec.statement_text || rec.statement_summary) + '</div>';
   }
@@ -894,11 +1006,8 @@ function renderDiseaseView(code){
   var info=d.info,cv=getCoverage(code);
   var h='';
 
-  // 疾病头部信息（V2.0：标准诊断名、ICD-10、diagnostic_role、分型入口）
-  var roleTag='';
-  if(info.diagnostic_role==='broad_diagnosis') roleTag='<span class="dx-role-badge broad">疑似诊断</span>';
-  else if(info.diagnostic_role==='clinical_subtype') roleTag='<span class="dx-role-badge subtype">具体分型</span>';
-  else if(info.diagnostic_role==='independent_disease') roleTag='<span class="dx-role-badge independent">独立诊断</span>';
+  // 疾病头部信息（Schema V3.2：标准诊断名、ICD-10、diagnostic_role 新旧值双兼容、分型入口）
+  var roleTag=SCHEMA.roleBadge(info.diagnostic_role);
 
   h+='<div class="ex-head"><h1>'+info.name+' '+roleTag+'</h1>';
   h+='<div class="ex-meta">';
@@ -911,19 +1020,18 @@ function renderDiseaseView(code){
   h+='</div>';
 
   // 覆盖率统计说明面板
-  var roleText = info.diagnostic_role==='broad_diagnosis' ? '疑似/宽泛诊断' :
-                 info.diagnostic_role==='clinical_subtype' ? '具体分型' : '独立诊断';
+  var roleText = SCHEMA.roleLongLabel(info.diagnostic_role);
   h+='<div class="cov-note" id="cov-note-panel">';
   h+='<h4>覆盖率统计说明</h4>';
   h+='<ul>';
   h+='<li>覆盖率 = 有数据的维度数 / 17 核心临床维度 × 100%</li>';
   h+='<li>17 核心维度：<span class="cov-tag core">症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理</span></li>';
-  h+='<li>检查项目/检验项目通过辅助检查方案中转查询（Schema V2.x）</li>';
-  h+='<li>药物/手术通过治疗方案中转查询（Schema V2.x）</li>';
-  h+='<li>当前疾病类型：<span class="cov-tag '+(info.diagnostic_role==='broad_diagnosis'?'broad':info.diagnostic_role==='clinical_subtype'?'sub':'indep')+'">'+roleText+'</span></li>';
+  h+='<li>检查项目/检验项目通过检查方案中转查询（includes_exam_item / includes_lab_item）</li>';
+  h+='<li>药物/手术通过治疗方案中转查询（includes_medication / includes_procedure）；正式 CDSS 医嘱推荐仅读 RecommendationStatement→recommends_action</li>';
+  h+='<li>当前疾病类型：<span class="cov-tag '+SCHEMA.roleClass(info.diagnostic_role)+'">'+roleText+'</span></li>';
   h+='<li>疑似/宽泛诊断：合并其所有分型的维度数据统计</li>';
   h+='<li>具体分型：自身维度 + 从父疾病继承的维度</li>';
-  h+='<li>覆盖率反映知识完整性，不等于 CDSS 可上线率</li>';
+  h+='<li>覆盖率反映知识完整性，不等于 CDSS 可上线率（上线另看证据链、字典映射与审核状态）</li>';
   h+='</ul>';
   h+='</div>';
 
@@ -941,7 +1049,7 @@ function renderDiseaseView(code){
     h+='</div></div>';
   }
   // 若是具体分型，提示所属宽口径疾病
-  if(info.diagnostic_role==='clinical_subtype' && info.parent){
+  if(SCHEMA.isSubtype(info.diagnostic_role) && info.parent){
     var parent=KG_DATA.diseases[info.parent];
     var parentName=parent?parent.info.name:info.parent;
     h+='<div class="ex-parent-hint" style="margin-top:10px;font-size:11px;color:var(--muted)">所属疑似诊断：<span class="ex-tag" style="cursor:pointer" onclick="selectDisease(\''+info.parent+'\')">'+parentName+'</span></div>';
@@ -1032,6 +1140,13 @@ function renderDiseaseView(code){
       var cls = it.length ? 'ok' : 'zz';
       h+='<div class="ex-card"><div class="ex-card-head">';
       h+='<span class="ex-card-title">'+DIM_NAMES[k]+'</span>';
+      /* 字典映射统计：可医嘱类维度按 cdss_dict_id 推导（点绿=已匹配，圈灰=待注册） */
+      var dictNote = '';
+      if (SCHEMA.ORDERABLE_TYPES.indexOf(k) >= 0) {
+        var dm = it.filter(function(e){return e.cdss_dict_id}).length;
+        dictNote = '<span class="ex-card-dict'+(dm===it.length?' full':' part')+'" title="字典映射：已匹配 '+dm+' / '+it.length+'（cdss_dict_id 推导）">字典 '+dm+'/'+it.length+'</span>';
+      }
+      h+=dictNote;
       h+='<span class="ex-card-count '+cls+'">'+it.length+'</span>';
       h+='</div>';
       h+='<div class="ex-card-body">';
@@ -1309,7 +1424,7 @@ function renderDiseaseView(code){
           h+='<div class="ex-drill-list">';
           it.forEach(function(e) {
             h+='<div class="ex-drill-item">';
-            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+SCHEMA.statusBadges(e, k)+'</span>';
             /* 匹配子节点：按code或名称关联 */
             var matched = childMap[e.code||''] || [];
             if (matched.length) {
@@ -1342,7 +1457,7 @@ function renderDiseaseView(code){
         } else {
           h+='<div class="ex-tags">';
           it.forEach(function(e) {
-            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+SCHEMA.statusBadges(e, k)+'</span>';
           });
           h+='</div>';
         }
@@ -1505,7 +1620,7 @@ function renderGraphView(code){
   var d=KG_DATA.diseases[code];
   var h='<div class="ex-graph-box"><div class="ex-graph-toolbar">';
   h+='<div><div class="ex-graph-title">'+d.info.name+' 关系网络</div>';
-  h+='<div class="ex-graph-note">定义 / 临床表现 / 诊断检查 / 治疗方案 / 预后随访 / 病因机制 / 风险诊断 / 临床规则 / 证据指南</div></div>';
+  h+='<div class="ex-graph-note">维度→实体连线悬停显示中文关系名（如 症状→<b>有症状</b>、鉴别→<b>需鉴别诊断</b>、检查→<b>含检查项目</b>）；<span style="color:#d8b4fe">紫色标签</span>=鉴别语义线，<span style="color:#8ce99a">绿色标签</span>=正式推荐（recommends_action），<span style="color:#e8590c">橙色虚线</span>=排除检查/检验</div></div>';
   h+='</div><div id="explore-graph" style="width:100%;height:700px"></div></div>';
   document.getElementById('workspace').innerHTML=h;
   setTimeout(function(){drawGraph(code)},200);
@@ -1552,11 +1667,14 @@ function drawGraph(code){
       var dn=DIM_NAMES[k];
       if(!seen[dn]){nodes.push({name:dn, symbolSize:Math.min(16+it.length,36), itemStyle:{color:grp.color+'bb'}, label:{fontSize:9,fontWeight:'bold',color:'#e8eaf0'},category:grp.name});seen[dn]=1;}
       if(dn!==grp.name) links.push({source:grp.name, target:dn, lineStyle:{color:grp.color+'88',width:1.5,opacity:.5}}); // 分组名与维度名相同（标准诊断）时不建自环边
+      var relCN=SCHEMA.relationLabel(SCHEMA.DIM_REL[k]||'');  /* 维度→实体的中文关系名，如 症状=有症状 */
       it.slice(0,8).forEach(function(e){
         var eName=cleanName(e);
         if(eName===d.info.name) return;
         if(!seen[eName]){nodes.push({name:eName, symbolSize:11, itemStyle:{color:grp.color+'99'}, label:{fontSize:8,color:'#b0b8c8'},category:grp.name});seen[eName]=1;}
-        links.push({source:dn, target:eName, lineStyle:{color:grp.color+'55',width:1,opacity:.4}});
+        links.push({source:dn, target:eName, lineStyle:{color:grp.color+'55',width:1,opacity:.4},
+          label:{show:false, formatter:relCN, fontSize:9, color:'#c8d0e0', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3},
+          emphasis:{label:{show:true}}});
         // DiagnosisCriteria 二跳：sub_component
         if(k==='DiagnosisCriteria' && e.sub_component && e.sub_component.length){
           e.sub_component.slice(0,8).forEach(function(sc){
@@ -1565,22 +1683,23 @@ function drawGraph(code){
             links.push({source:eName, target:scName, lineStyle:{color:'#ffd43b44',width:1,opacity:.3}});
           });
         }
-        // DifferentialDiagnosis 二跳：differential_points / exclusion_exams / exclusion_labs
+        // DifferentialDiagnosis 二跳：differential_points / exclusion_exams / exclusion_labs（语义线常显标签）
         if(k==='DifferentialDiagnosis'){
+          var semLabel=function(txt){return {show:true, formatter:txt, fontSize:8, color:'#d8b4fe', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3};};
           (e.differential_points||[]).slice(0,3).forEach(function(dp){
             var dn2='[鉴别]'+cleanName(dp);
             if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}});
+            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}, label:semLabel('鉴别要点')});
           });
           (e.exclusion_exams||[]).slice(0,3).forEach(function(ex){
             var dn2='[排除]'+cleanName(ex);
             if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}});
+            links.push({source:eName, target:dn2, lineStyle:{color:'#e8590c44',width:1.5,opacity:.45,type:'dashed'}, label:semLabel('需排除检查')});
           });
           (e.exclusion_labs||[]).slice(0,3).forEach(function(lb){
             var dn2='[排检]'+cleanName(lb);
             if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#748ffc66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#748ffc33',width:1,opacity:.3}});
+            links.push({source:eName, target:dn2, lineStyle:{color:'#e8590c44',width:1.5,opacity:.45,type:'dashed'}, label:semLabel('需排除检验')});
           });
         }
       });
@@ -1612,13 +1731,15 @@ function drawGraph(code){
       medList.forEach(function(med){
         var medName=cleanName(med);
         if(ruleText.indexOf(medName)!==-1 && seen[ruleName] && seen[medName]){
-          links.push({source:ruleName, target:medName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'}});
+          links.push({source:ruleName, target:medName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'},
+            label:{show:true, formatter:'推荐动作', fontSize:8, color:'#8ce99a', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3}});
         }
       });
       procList.forEach(function(proc){
         var procName=cleanName(proc);
         if(ruleText.indexOf(procName)!==-1 && seen[ruleName] && seen[procName]){
-          links.push({source:ruleName, target:procName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'}});
+          links.push({source:ruleName, target:procName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'},
+            label:{show:true, formatter:'推荐动作', fontSize:8, color:'#8ce99a', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3}});
         }
       });
     });
@@ -1717,7 +1838,9 @@ function buildEntityIndexAsync(){
       var dims=data[dc].dimensions;
       DIM_KEYS.forEach(function(k){
         (dims[k]||[]).forEach(function(e){
-          ALL_ENTITIES.push({name:e.name,code:e.code||'',dim:k,dimName:DIM_NAMES[k],disease:data[dc].info.name,diseaseCode:dc});
+          ALL_ENTITIES.push({name:e.name,code:e.code||'',dim:k,dimName:DIM_NAMES[k],disease:data[dc].info.name,diseaseCode:dc,
+            cdss_dict_id:e.cdss_dict_id||'',evidence_count:e.evidence_count||0,
+            source_section_path:e.source_section_path||'',book_page_start:e.book_page_start||'',pdf_page_start:e.pdf_page_start||''});
         });
       });
     });
@@ -1725,8 +1848,11 @@ function buildEntityIndexAsync(){
     if(CURRENT_VIEW==='entity') filterEntities();
   }).catch(function(e){console.error('Entity index load failed:',e);});
 }
-function renderEntityView(){var dc=CURRENT_DISEASE||'';var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select><select id="entity-disease" onchange="filterEntities()"><option value="">全部疾病</option>'+Object.keys(KG_DATA.diseases).map(function(code){return '<option value="'+code+'"'+(code===dc?' selected':'')+'>'+KG_DATA.diseases[code].info.name+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
-function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var diseaseCode=(document.getElementById('entity-disease')?document.getElementById('entity-disease').value:'');var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim)&&(!diseaseCode||e.diseaseCode===diseaseCode);}).slice(0,500);var html=rows.map(function(e){return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
+function renderEntityView(){var dc=CURRENT_DISEASE||'';var h='<div class="ex-head"><h1>实体视角</h1><div class="ex-meta">全局检索图谱实体，并反查关联疾病与所属知识维度；点击行查看来源/字典/医嘱/审核完整状态</div></div><div class="ex-entity-tools"><input id="entity-q" placeholder="搜索实体名称、编码、疾病名称..." oninput="filterEntities()"><select id="entity-dim" onchange="filterEntities()"><option value="">全部维度</option>'+DIM_KEYS.map(function(k){return '<option value="'+k+'">'+DIM_NAMES[k]+'</option>'}).join('')+'</select><select id="entity-disease" onchange="filterEntities()"><option value="">全部疾病</option>'+Object.keys(KG_DATA.diseases).map(function(code){return '<option value="'+code+'"'+(code===dc?' selected':'')+'>'+KG_DATA.diseases[code].info.name+'</option>'}).join('')+'</select></div><div class="ex-table-wrap"><table class="ex-table"><thead><tr><th>实体名称</th><th>维度</th><th>关联疾病</th><th>证据</th><th>字典</th><th>医嘱</th><th>来源</th><th>编码</th></tr></thead><tbody id="entity-tbody"></tbody></table></div>';document.getElementById('workspace').innerHTML=h;filterEntities();}
+function filterEntities(){var q=(document.getElementById('entity-q')?document.getElementById('entity-q').value.toLowerCase():'');var dim=document.getElementById('entity-dim')?document.getElementById('entity-dim').value:'';var diseaseCode=(document.getElementById('entity-disease')?document.getElementById('entity-disease').value:'');var rows=ALL_ENTITIES.filter(function(e){var s=(e.name+e.code+e.disease+e.dimName).toLowerCase();return (!q||s.indexOf(q)!==-1)&&(!dim||e.dim===dim)&&(!diseaseCode||e.diseaseCode===diseaseCode);}).slice(0,500);var html=rows.map(function(e){
+  var ds=SCHEMA.dictStatus(e),os=SCHEMA.orderStatus(e,e.dim);
+  var srcTxt=SCHEMA.sourceText(e);
+  return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-st">'+(e.evidence_count>0?e.evidence_count:'<span class="gap-flag">待补</span>')+'</td><td class="ex-st"><span class="st-badge '+(ds.key==='matched'?'ok':(ds.key==='none'?'muted':'warn'))+'">'+(ds.key==='none'?'—':ds.label)+'</span></td><td class="ex-st"><span class="st-badge '+(os.key==='ok'?'ok':(os.key==='n/a'?'muted':'warn'))+'">'+os.label+'</span></td><td class="ex-src" title="'+escAttr(srcTxt)+'">'+(srcTxt?escAttr(srcTxt):'<span class="gap-flag">待补</span>')+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
 function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['覆盖率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}
 function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+cleanName(e)+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
 function getCDSSReady(code) {
@@ -1749,6 +1875,16 @@ function showEntityDetail(dc,k,ec){
   [['实体类型',DIM_NAMES[k]+' / '+k],['关联疾病',d.info.name],['疾病编码',d.info.code],['同维度实体数',it.length+' 个'],['疾病证据数',(d.evidence_count||0)+' 条']].forEach(function(r){
     h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';
   });
+  /* Schema V3.2 状态五项：来源 / 证据 / 字典 / 医嘱 / 审核 */
+  var ds=SCHEMA.dictStatus(en), os=SCHEMA.orderStatus(en,k), rv=SCHEMA.reviewStatus(en);
+  var srcTxt=SCHEMA.sourceText(en);
+  h+='<div class="ex-side-section"><h4>数据就绪状态</h4>';
+  h+='<div class="ex-row"><div class="ex-row-label">资料来源</div><div class="ex-row-value">'+(srcTxt?escAttr(srcTxt):'<span class="gap-flag">待补</span>')+'</div></div>';
+  h+='<div class="ex-row"><div class="ex-row-label">证据支撑</div><div class="ex-row-value">'+(en.evidence_count>0?en.evidence_count+' 条（supported_by_evidence）':'<span class="gap-flag">暂无直连证据</span>')+'</div></div>';
+  h+='<div class="ex-row"><div class="ex-row-label">字典映射</div><div class="ex-row-value"><span class="st-badge '+(ds.key==='matched'?'ok':'warn')+'">'+ds.label+'</span>'+(en.cdss_dict_id?'<div class="ex-row-sub">'+escAttr(en.cdss_dict_id)+'</div>':'')+'</div></div>';
+  h+='<div class="ex-row"><div class="ex-row-label">医嘱状态</div><div class="ex-row-value"><span class="st-badge '+(os.key==='ok'?'ok':(os.key==='n/a'?'muted':'warn'))+'">'+os.label+'</span></div></div>';
+  h+='<div class="ex-row"><div class="ex-row-label">审核状态</div><div class="ex-row-value"><span class="st-badge '+rv.cls+'">'+rv.label+'</span></div></div>';
+  h+='</div>';
   var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});
   if(rs.length){
     h+='<div class="ex-side-section"><h4>关联关系</h4>';
