@@ -152,7 +152,17 @@ SFTP 覆盖单个文件即可，不清 Redis、不重启服务。
 
 ---
 
-## 八、已完成功能（截至 2026-08-31）
+## 八、已完成功能（截至 2026-09-03）
+
+### 2026-09-03 改造内容：风险分层评分详情面板（git: a9c1310）
+1. **server.py `query_entity_detail` 新增 `risk_detail` 数据块**（仅 entityType=RiskStratification 返回，其他类型为 null）：
+   - `risk_factors`：has_risk_factor 出边参数（GRACE 9 项：年龄/收缩压/静息心率/血肌酐/ST段偏移/心梗史/心衰史/心肌损伤标志物/是否行血运重建；全库 6/95 节点有参数）
+   - `threshold_sentences`：`_extract_risk_threshold_sentences()` 从 evidence_text 提取含高危/中危/低危且带数值的句子（如《内科学》p.275 "GRACE＞140高危院内死亡＞3%；109~140中危1%~3%；≤108低危＜1%"），按评分名关键词优先排序（PDF 双栏噪声句靠后），上限 10 条
+   - `criteria_evidence`：含"评分细则"或"项目+得分"表格的证据（如 NSTE-ACS CN 2024 p.5 表3 GRACE 细则），原文截断 1000 字
+   - `inference_status` 透出（78/95 为 risk_framework_only_wait_guideline_or_textbook_detail）
+2. **schema-map.js**：新增 `SCHEMA.inferenceStatus()` 细则状态中文映射（已含评分参数/框架已建·细则待补/未标注）
+3. **explore.html `showEntityDetail`**：RiskStratification 实体详情面板新增"评分详情"区块（数据就绪状态之后，异步填充）：细则状态徽章 + 评分参数 chips + 阈值引文（高危红色高亮+来源标注）+ 计分细则来源（可展开原文）；`toggleRiskText()` 展开/收起
+4. **验收**：本地 API 测试 4 项 PASS（GRACE 9参数/阈值句含140高危/细则含 NSTE-ACS p.5/框架节点参数0/Medication null/JSON 可序列化）；线上验证 19 项 PASS（API 结构 + 页面代码 + JS 级 DOM 渲染：中文徽章/参数 chips/阈值高亮/来源标注/展开按钮）；资源版本 v=20260903
 
 ### 2026-08-31 改造内容：Schema V3.2 图谱探索四 tab 升级（git: 115c161 + 后续补丁）
 1. **公共映射层 `_shared/js/schema-map.js`（新增，所有页面可引用）**：
