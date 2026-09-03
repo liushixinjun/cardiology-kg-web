@@ -238,6 +238,12 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .st-badge.bad { background: rgba(250,82,82,.14); color: #fa5252; }
 .st-badge.muted { background: rgba(139,146,165,.12); color: var(--muted); }
 .gap-flag { font-size: 10px; color: #f08c00; font-style: italic; }
+.ex-risk-chips{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 8px}
+.ex-risk-quote{font-size:12px;color:var(--ink);line-height:1.6;background:rgba(116,143,252,.06);border-left:2px solid var(--accent);padding:6px 8px;margin:5px 0;border-radius:0 6px 6px 0}
+.ex-risk-hl{color:#fa5252;font-weight:800}
+.ex-risk-src{font-size:10px;color:var(--muted);margin-top:3px}
+.ex-risk-toggle{display:inline-block;font-size:10px;color:var(--accent);cursor:pointer;margin-left:8px;white-space:nowrap}
+.ex-risk-fulltext{font-size:11px;color:var(--fg2);line-height:1.6;background:rgba(0,0,0,.18);padding:6px 8px;margin-top:5px;border-radius:6px;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto}
 .ex-row-sub { font-size: 9px; color: var(--muted); margin-top: 2px; word-break: break-all; }
 
 /* 实体视角表格状态列 */
@@ -360,7 +366,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/schema-map.js?v=20260831"></script>
+<script src="./_shared/js/schema-map.js?v=20260903"></script>
 <script src="./_shared/js/app.js?v=20260831b"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
@@ -1867,6 +1873,45 @@ function getCDSSReady(code) {
 }
 function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList.toggle('open');}
+  /* RiskStratification 评分详情：参数 / 预警阈值 / 计分细则（数据来自 /api/kg/entity 的 risk_detail） */
+  function renderRiskScoreDetail(rd){
+    var h='<h4>评分详情</h4>';
+    var inf=SCHEMA.inferenceStatus(rd.inference_status);
+    h+='<div class="ex-row"><div class="ex-row-label">细则状态</div><div class="ex-row-value"><span class="st-badge '+inf.cls+'">'+inf.label+'</span></div></div>';
+    if(rd.risk_factors&&rd.risk_factors.length){
+      h+='<div class="ex-small-item"><b>评分参数（'+rd.risk_factors.length+' 项）</b></div>';
+      h+='<div class="ex-risk-chips">';
+      rd.risk_factors.forEach(function(f){h+='<span class="ex-cm-tag ex-cm-tag-info" style="margin:2px 0;margin-left:0">'+escAttr(f.name)+'</span>';});
+      h+='</div>';
+    }else{
+      h+='<div class="ex-small-item"><b>评分参数</b>　<span class="gap-flag">待结构化补录</span></div>';
+    }
+    if(rd.threshold_sentences&&rd.threshold_sentences.length){
+      h+='<div class="ex-small-item"><b>预警阈值（'+rd.threshold_sentences.length+' 条，摘自证据原文）</b></div>';
+      rd.threshold_sentences.forEach(function(t){
+        var txt=escAttr(t.text).replace(/(极高危|高危|中危|低危)/g,'<b class="ex-risk-hl">$1</b>');
+        h+='<div class="ex-risk-quote">'+txt+'<div class="ex-risk-src">['+escAttr(t.source||'待补来源')+']</div></div>';
+      });
+    }else{
+      h+='<div class="ex-small-item"><b>预警阈值</b>　<span class="gap-flag">证据中暂未含阈值表述</span></div>';
+    }
+    if(rd.criteria_evidence&&rd.criteria_evidence.length){
+      h+='<div class="ex-small-item"><b>计分细则来源（'+rd.criteria_evidence.length+'）</b></div>';
+      rd.criteria_evidence.forEach(function(c){
+        h+='<div class="ex-risk-quote"><b>'+escAttr(c.source||c.name)+'</b><span class="ex-risk-toggle" onclick="toggleRiskText(this)">展开原文 ▾</span>'+
+           '<div class="ex-risk-fulltext" style="display:none">'+escAttr(c.text)+'</div></div>';
+      });
+    }else{
+      h+='<div class="ex-small-item"><b>计分细则</b>　<span class="gap-flag">待补</span></div>';
+    }
+    return h;
+  }
+  function toggleRiskText(el){
+    var t=el.nextElementSibling;
+    if(!t)return;
+    if(t.style.display==='none'){t.style.display='block';el.textContent='收起原文 ▴';}
+    else{t.style.display='none';el.textContent='展开原文 ▾';}
+  }
 function showEntityDetail(dc,k,ec){
   var d=KG_DATA.diseases[dc],it=d.dimensions[k]||[];
   var en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];
@@ -1885,8 +1930,12 @@ function showEntityDetail(dc,k,ec){
   h+='<div class="ex-row"><div class="ex-row-label">字典映射</div><div class="ex-row-value"><span class="st-badge '+(ds.key==='matched'?'ok':'warn')+'">'+ds.label+'</span>'+(en.cdss_dict_id?'<div class="ex-row-sub">'+escAttr(en.cdss_dict_id)+'</div>':'')+'</div></div>';
   h+='<div class="ex-row"><div class="ex-row-label">医嘱状态</div><div class="ex-row-value"><span class="st-badge '+(os.key==='ok'?'ok':(os.key==='n/a'?'muted':'warn'))+'">'+os.label+'</span></div></div>';
   h+='<div class="ex-row"><div class="ex-row-label">审核状态</div><div class="ex-row-value"><span class="st-badge '+rv.cls+'">'+rv.label+'</span></div></div>';
-  h+='</div>';
-  var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});
+      h+='</div>';
+      /* RiskStratification: 评分参数/预警阈值/计分细则（异步填充） */
+      if(k==='RiskStratification'||en.entityType==='RiskStratification'){
+        h+='<div id="risk-score-detail" class="ex-side-section"><div class="ex-api-loading">加载评分参数与预警阈值...</div></div>';
+      }
+      var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});
   if(rs.length){
     h+='<div class="ex-side-section"><h4>关联关系</h4>';
     rs.forEach(function(r){h+='<div class="ex-small-item">'+r.rel+' → '+r.name+'</div>';});
@@ -2045,6 +2094,11 @@ function showEntityDetail(dc,k,ec){
       }
       var el=document.getElementById('entity-api-detail');
       if(el)el.innerHTML=apiH;
+      /* RiskStratification: 填充评分详情（参数/阈值/细则） */
+      if(data.entityType==='RiskStratification'&&data.risk_detail){
+        var rEl=document.getElementById('risk-score-detail');
+        if(rEl)rEl.innerHTML=renderRiskScoreDetail(data.risk_detail);
+      }
     }).catch(function(){var el=document.getElementById('entity-api-detail');if(el)el.style.display='none';});
   }
 }

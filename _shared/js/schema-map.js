@@ -192,6 +192,17 @@ var SCHEMA = (function () {
     return { label: '仅知识展示', cls: 'muted' };
   }
 
+  /* ---- 细则状态（RiskStratification.inference_status，2026-09-02 实测 3 种取值） ---- */
+  var INFERENCE_STATUS = {
+    has_risk_components: { label: '已含评分参数', cls: 'ok' },
+    risk_framework_only_wait_guideline_or_textbook_detail: { label: '框架已建·细则待补', cls: 'warn' }
+  };
+  function inferenceStatus(status) {
+    if (!status) return { label: '未标注', cls: 'muted' };
+    if (INFERENCE_STATUS[status]) return INFERENCE_STATUS[status];
+    return { label: status, cls: 'warn' };
+  }
+
   /* ---- 来源信息格式化：章节路径 + 页码（book_page 优先，其次 pdf_page） ---- */
   function sourceText(node) {
     if (!node) return '';
@@ -242,6 +253,7 @@ var SCHEMA = (function () {
     LINE_STYLES: LINE_STYLES, lineStyle: lineStyle,
     FIELD_LABELS: FIELD_LABELS,
     dictStatus: dictStatus, orderStatus: orderStatus, reviewStatus: reviewStatus,
+    inferenceStatus: inferenceStatus,
     sourceText: sourceText, gapTags: gapTags, statusBadges: statusBadges,
     ORDERABLE_TYPES: ORDERABLE_TYPES
   };

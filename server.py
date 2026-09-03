@@ -1569,6 +1569,25 @@ def query_guidelines():
         return {"guidelines": guidelines, "total": len(guidelines)}
 
 
+def _extract_risk_threshold_sentences(text, limit=8):
+    """从证据原文提取风险分层阈值句：含 高危/中危/低危 且带数值范围或分值比较"""
+    import re
+    segs = re.split(r"[。；;\n]", text or "")
+    out = []
+    for seg in segs:
+        seg = seg.strip()
+        if len(seg) < 6:
+            continue
+        if not re.search(r"(极高危|高危|中危|低危)", seg):
+            continue
+        if not re.search(r"[＞≥>≤＜<~～]\s*\d+|\d+\s*[~～]\s*\d+", seg):
+            continue
+        out.append(seg[:220])
+        if len(out) >= limit:
+            break
+    return out
+
+
 def query_entity_detail(code):
     """查询单个实体的详细信息（别名、英文名、关联疾病）"""
     d = get_driver()
@@ -1584,6 +1603,7 @@ def query_entity_detail(code):
                    n.clinical_review_status as review_status,
                    n.source_section_path as source_section_path, n.source_name as source_name,
                    n.book_page_start as book_page_start, n.pdf_page_start as pdf_page_start,
+                   n.inference_status as inference_status,
                    COUNT { (n)-[:supported_by_evidence]-() } as evidence_count
         """, code=code).single()
         if not r:
@@ -1611,6 +1631,54 @@ def query_entity_detail(code):
         """, name=name, code=code)
         cross_list = [dict(rd) for rd in cross_diseases]
 
+        # RiskStratification 专属：评分参数（has_risk_factor）+ 证据阈值句 + 计分细则证据
+        risk_detail = None
+        if (r.get("entityType") or "") == "RiskStratification":
+            # 评分名关键词（去掉 评分/风险分层/分级 后缀），阈值句按相关性排序用
+            import re as _re
+            kw = _re.sub(r"(风险分层|评分|分级|分层)$", "", (r["name"] or "")).strip()
+            rf_rows = sess.run("""
+                MATCH (n:KGNode {code: $code})-[rel:has_risk_factor]->(m:KGNode)
+                WHERE (m.status IS NULL OR m.status <> 'deprecated')
+                RETURN coalesce(m.preferred_name, m.display_name, m.name, m.code) AS name,
+                       m.code AS code, rel.source AS source
+                ORDER BY name
+            """, code=code)
+            risk_factors = [dict(x) for x in rf_rows]
+
+            threshold_sentences = []
+            seen_sent = set()
+            criteria_evidence = []
+            ev_rows = sess.run("""
+                MATCH (n:KGNode {code: $code})-[:supported_by_evidence]->(ev:KGNode)
+                RETURN ev.code AS code,
+                       coalesce(ev.display_name, ev.preferred_name, ev.name, ev.code) AS name,
+                       ev.source_name AS source_name, ev.source_page AS source_page,
+                       ev.evidence_text AS evidence_text
+            """, code=code)
+            for row in ev_rows:
+                txt = (row["evidence_text"] or "").strip()
+                src = row["source_name"] or ""
+                if row["source_page"]:
+                    src += " p.%s" % row["source_page"]
+                for seg in _extract_risk_threshold_sentences(txt):
+                    if seg not in seen_sent:
+                        seen_sent.add(seg)
+                        threshold_sentences.append({"text": seg, "source": src})
+                if txt and ("评分细则" in txt or ("项目" in txt and "得分" in txt)):
+                    criteria_evidence.append({
+                        "code": row["code"], "name": row["name"],
+                        "source": src, "text": txt[:1000]
+                    })
+            # 含评分名关键词的阈值句排前面（PDF 双栏混排噪声句靠后），稳定排序保持原顺序
+            threshold_sentences.sort(key=lambda t: 0 if (kw and kw in t["text"]) else 1)
+            risk_detail = {
+                "risk_factors": risk_factors,
+                "threshold_sentences": threshold_sentences[:10],
+                "criteria_evidence": criteria_evidence[:5],
+                "inference_status": r.get("inference_status") or ""
+            }
+
         aliases = [a for a in (r["aliases"] or []) if a != name]
 
         return {
@@ -1630,7 +1698,8 @@ def query_entity_detail(code):
             "pdf_page_start": r.get("pdf_page_start") or "",
             "evidence_count": r.get("evidence_count") or 0,
             "diseases": disease_list,
-            "cross_diseases": cross_list
+            "cross_diseases": cross_list,
+            "risk_detail": risk_detail
         }
 
 
