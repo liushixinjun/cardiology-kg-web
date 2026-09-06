@@ -152,7 +152,16 @@ SFTP 覆盖单个文件即可，不清 Redis、不重启服务。
 
 ---
 
-## 八、已完成功能（截至 2026-09-03）
+## 八、已完成功能（截至 2026-09-06）
+
+### 2026-09-06 改造内容：图谱架构规范页升级 Schema V4.0（git: 004f506）
+1. **standard.html 对齐 Schema V4.0**（设计原则：简单易懂）：
+   - 架构升级：五层改六层，新增第 5 层"专科应用结构层"（AssessmentScale/NursingCarePlan/SpecialtyCarePathway/QualityControlRule），证据治理层顺延为第 6 层
+   - 事实纠错：关系总数 138,153→139,696（与全库审计一致）；硬闸门 35→28 条；实体类型 42→63、关系类型 89→122（V4.0 口径）
+   - 新增章节：证据三粒度模型（Guideline/SourceSection/Evidence 及必填字段）、禁止新增项（旧诊断角色值/旧细分推荐关系/新造关系名）、CDSS 导入与展示边界
+   - 清除 V3.0 残留：推荐链表格、字段示例、JSON 示例共 9 处（仅保留 2 处历史沿革说明"V3.0 引入，V4.0 沿用"和 1 处反例示范）
+2. **核心计数动态化**：节点/关系总数改为页面加载时从 `/api/kg/stats` 拉取（kg_node_count/total_relationships），API 不可用时保留静态兜底数字；共 9 处 span 挂 js-nodes/js-rels 钩子
+3. **验收**：本地 node 脚本校验标签配平 PASS、33 个锚点全部可解析、29 处折叠结构配对正常；部署后线上比对 158,787 字符完全一致、V4.0×34、六层架构/证据模型/动态计数/版本戳 v=20260906 全部就位；API 实测 32,229 节点/139,696 关系与页面一致
 
 ### 2026-09-03 改造内容：风险分层评分详情面板（git: a9c1310）
 1. **server.py `query_entity_detail` 新增 `risk_detail` 数据块**（仅 entityType=RiskStratification 返回，其他类型为 null）：
