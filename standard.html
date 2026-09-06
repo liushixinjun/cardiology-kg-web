@@ -191,10 +191,13 @@
 .std-arch-dia-l4 .num{background:rgba(81,207,102,.15);color:var(--green)}
 .std-arch-dia-l5{background:rgba(255,159,67,.07);border-color:rgba(255,159,67,.3)}
 .std-arch-dia-l5 .num{background:rgba(255,159,67,.15);color:#ff9f43}
+.std-arch-dia-l4b{background:rgba(155,109,255,.07);border-color:rgba(155,109,255,.3)}
+.std-arch-dia-l4b .num{background:rgba(155,109,255,.15);color:#9b6dff}
 .t-l1{background:rgba(139,144,160,.12);color:#8b90a0}
 .t-l2{background:rgba(79,140,255,.12);color:var(--accent)}
 .t-l3{background:rgba(255,146,43,.12);color:#ff922b}
 .t-l4{background:rgba(81,207,102,.12);color:var(--green)}
+.t-l4b{background:rgba(155,109,255,.12);color:#9b6dff}
 .t-l5{background:rgba(255,159,67,.12);color:#ff9f43}
 @media(max-width:1100px){.std-arch-dia-row{grid-template-columns:1fr}}
 
@@ -273,7 +276,7 @@
   <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
     <div>
       <h1>📘 图谱架构规范</h1>
-      <div class="subtitle">专科知识图谱产品需求与架构规范 · 面向医生端 CDSS 应用<span class="std-badge std-badge-ver">V3.0</span><span class="std-badge std-badge-new">产品PRD口径</span></div>
+      <div class="subtitle">专科知识图谱产品需求与架构规范 · 面向医生端 CDSS 应用<span class="std-badge std-badge-ver">V4.0</span><span class="std-badge std-badge-new">产品PRD口径</span></div>
     </div>
     <span class="std-toggle-all" onclick="toggleAllCollapse(this)" style="padding:6px 16px;font-size:12px;white-space:nowrap"><span class="arrow">▸</span> 展开全部折叠内容</span>
   </div>
@@ -311,6 +314,9 @@
       <a class="std-anchor" href="#cdss">正式CDSS推荐链</a>
       <a class="std-anchor" href="#adjudication">推荐陈述字段</a>
       <a class="std-anchor" href="#quality">数据质量硬闸门</a>
+      <a class="std-anchor" href="#evidence-model">证据模型</a>
+      <a class="std-anchor" href="#forbidden">当前禁止新增项</a>
+      <a class="std-anchor" href="#import-boundary">CDSS导入与展示边界</a>
       <div class="std-side-part">附录 · 患者案例</div>
       <a class="std-anchor" href="#patient-scenario">全周期总览</a>
       <div class="std-toc-sub">
@@ -328,14 +334,14 @@
       <section class="std-section" id="guide">
         <h2>阅读指引</h2>
         <div class="std-section-desc">
-          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 32,229 节点、138,153 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
+          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 <span class="js-nodes">32,229</span> 节点、<span class="js-rels">139,696</span> 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
           本章首先介绍三元组、术语速查与业务全景三个基础模块，理解后即可阅读后续全部章节。
         </div>
 
         <h3 id="guide-triple">三元组：图谱最小的知识单元</h3>
         <div class="std-section-desc">图谱中所有医学知识均以「节点 -[关系]-> 节点」的三元组存储：节点带属性，关系带方向与类型编码。以下四组三元组全部取自当前库真实数据，均可直接用 Cypher 复核。</div>
         <div class="std-concept">
-          <div class="std-concept-label">真实三元组（急性心肌梗死 · 当前库 32,229 节点 / 138,153 关系）</div>
+          <div class="std-concept-label">真实三元组（急性心肌梗死 · 当前库 <span class="js-nodes">32,229</span> 节点 / <span class="js-rels">139,696</span> 关系）</div>
 
           <div class="std-tri-group">
             <span class="std-tri-tag">① 医学事实</span>
@@ -368,7 +374,7 @@
           </div>
 
           <div class="std-tri-group">
-            <span class="std-tri-tag">④ 正式推荐（V3.0 推荐链）</span>
+            <span class="std-tri-tag">④ 正式推荐（V4.0 推荐链）</span>
             <div class="std-chain">
               <span class="std-chain-node entity">ST段抬高型心肌梗死</span>
               <span class="std-chain-arrow">-[有正式推荐 has_recommendation_statement]-></span>
@@ -390,7 +396,7 @@
 
           <div class="std-concept-text" style="margin-top:14px">
             <strong>节点</strong>：知识条目，携带 code、entityType、name 等属性，涵盖疾病、症状、药品、检查项目、证据、推荐陈述等类型；<strong>关系</strong>：节点间带方向的医学关联，编码统一小写下划线（<code>has_symptom</code>、<code>recommends_action</code>），同一编码全局语义唯一；<strong>属性</strong>：节点或关系上的字段，如上例疾病节点的 code 与 aliases，推荐陈述的 trigger_condition 与 primary_evidence_code。<br><br>
-            整个图谱即由 32,229 个节点、138,153 条此类三元组关系连接构成（其中涉及证据的关系 91,136 条，Evidence 节点 18,924 个）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2章）；数据如何生产与质量控制（第3章）</strong>。
+            整个图谱即由 <span class="js-nodes">32,229</span> 个节点、<span class="js-rels">139,696</span> 条此类三元组关系连接构成（其中涉及证据的关系 91,136 条，Evidence 节点 18,924 个）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2章）；数据如何生产与质量控制（第3章）</strong>。
           </div>
         </div>
 
@@ -404,7 +410,7 @@
           </div>
           <div class="std-term">
             <div class="std-term-name">关系<span class="std-term-en">Relationship</span></div>
-            <div class="std-term-def">节点之间带方向的医学关联，同一编码全局语义唯一。当前库 138,153 条。</div>
+            <div class="std-term-def">节点之间带方向的医学关联，同一编码全局语义唯一。当前库 <span class="js-rels">139,696</span> 条。</div>
             <div class="std-term-eg"><span class="eg-label">真实示例</span>has_symptom = 有症状</div>
           </div>
           <div class="std-term">
@@ -454,7 +460,7 @@
           <tr><td class="name">专病路径管理</td><td class="require">分型确认后入径，按阶段推进</td><td class="example">STEMI路径6阶段：疑诊->诊断->再灌注->抗栓->并发症->二级预防</td></tr>
           <tr><td class="name">证据溯源</td><td class="require">推荐直连主证据与主依据指南</td><td class="example">2018 STEMI院前溶栓共识 + 4th Universal Definition of MI</td></tr>
         </tbody></table></div>
-        <div class="std-note">全库 32,229 节点 / 138,153 关系。其中核心节点：Evidence 18,924、ClinicalRule 7,792、RecommendationStatement 572、PathwayStage 455（其余为疾病、症状、药品、检查等临床实体）。诊断角色分布：独立诊断 76 种、具体分型 46 种、待分型 10 种。</div>
+        <div class="std-note">全库 <span class="js-nodes">32,229</span> 节点 / <span class="js-rels">139,696</span> 关系。其中核心节点：Evidence 18,924、ClinicalRule 7,792、RecommendationStatement 572、PathwayStage 455（其余为疾病、症状、药品、检查等临床实体）。诊断角色分布：独立诊断 76 种、具体分型 46 种、待分型 10 种。</div>
 
 
       </section>
@@ -476,11 +482,11 @@
       <!-- 2. 总体架构 -->
       <section class="std-section" id="architecture">
         <h2>总体架构</h2>
-        <div class="std-section-desc">全图划分为五层，每层回答一个临床问题。下图为本规范的总体架构；随后各节定义层间边界与建模判定规则。</div>
+        <div class="std-section-desc">全图划分为六层，每层回答一个临床问题。V4.0 新增第 5 层「专科应用结构层」，把评估评分、护理、路径、质控四类应用模板纳入图谱。下图为本规范的总体架构；随后各节定义层间边界与建模判定规则。</div>
 
         <div class="std-arch-diagram" id="arch-diagram">
-          <div class="std-arch-dia-title">专科知识图谱总体架构：五层结构（V3.0）</div>
-          <div class="std-arch-dia-sub">五层是同一张 Neo4j 图谱的逻辑分层，不是五套系统；医生端、维护端、治理端按层和场景过滤显示</div>
+          <div class="std-arch-dia-title">专科知识图谱总体架构：六层结构（V4.0）</div>
+          <div class="std-arch-dia-sub">六层是同一张 Neo4j 图谱的逻辑分层，不是六套系统；医生端、维护端、治理端按层和场景过滤显示</div>
           <div class="std-arch-pipeline">
             <span class="std-arch-pipe-node">&#128214; 教材 / 指南</span><span class="std-arch-pipe-arrow">-&gt;</span>
             <span class="std-arch-pipe-node">&#9881;&#65039; 结构化提取</span><span class="std-arch-pipe-arrow">-&gt;</span>
@@ -509,12 +515,17 @@
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>发病12h内且PCI可及 -&gt; 推荐急诊 PCI（I类）</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l5"><span class="num">5</span><div><div class="lname">&#128218; 证据治理层</div><div class="lq">指南原文与页码</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l4b"><span class="num">5</span><div><div class="lname">&#128203; 专科应用结构层</div><div class="lq">评估评分 · 护理 · 路径 · 质控模板（V4.0 新增）</div></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控</div><div class="std-arch-dia-types"><span class="t-l4b">AssessmentScale</span><span class="t-l4b">NursingCarePlan</span><span class="t-l4b">SpecialtyCarePathway</span><span class="t-l4b">QualityControlRule</span></div></div>
+            <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>GRACE 评分量表 · STEMI 护理计划 · 再灌注路径阶段 · 再灌注质控点</div></div>
+          </div>
+          <div class="std-arch-dia-row">
+            <div class="std-arch-dia-layer std-arch-dia-l5"><span class="num">6</span><div><div class="lname">&#128218; 证据治理层</div><div class="lq">指南原文与页码</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">推荐依据是哪份指南哪一页</div><div class="std-arch-dia-types"><span class="t-l5">Guideline</span><span class="t-l5">SourceSection</span><span class="t-l5">Evidence</span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>2025 ACS 指南再灌注章节原文</div></div>
           </div>
           <div class="std-arch-dia-cross">
-            <div style="font-weight:700;color:var(--ink);margin-bottom:10px">一次查询贯通五层（以急性心肌梗死为例）</div>
+            <div style="font-weight:700;color:var(--ink);margin-bottom:10px">一次查询贯通六层（以急性心肌梗死为例）</div>
             <div class="std-chain" style="margin:0">
               <span class="std-chain-node entity">冠心病<span style="opacity:.55">（目录）</span></span>
               <span class="std-chain-arrow">-&gt;</span>
@@ -523,6 +534,8 @@
               <span class="std-chain-node entity">胸痛 · 心电图 · 肌钙蛋白<span style="opacity:.55">（知识）</span></span>
               <span class="std-chain-arrow">-&gt;</span>
               <span class="std-chain-node action">推荐急诊 PCI<span style="opacity:.55">（决策）</span></span>
+              <span class="std-chain-arrow">-&gt;</span>
+              <span class="std-chain-node entity" style="background:rgba(155,109,255,.1);color:#9b6dff;border-color:rgba(155,109,255,.28)">GRACE 评分 · STEMI 路径<span style="opacity:.55">（应用结构）</span></span>
               <span class="std-chain-arrow">-&gt;</span>
               <span class="std-chain-node evidence">2025 ACS 指南原文<span style="opacity:.55">（证据）</span></span>
             </div>
@@ -553,8 +566,8 @@
             → NSTE-ACS侵入策略（治疗方案）
         </div></div>
 
-        <div class="std-sub-head" id="arch-role" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">诊断角色（diagnostic_role，V3.0 新口径）</span><span class="std-badge std-badge-new">V3.0</span></div>
-        <div class="std-sub-body"><div class="std-section-desc">Disease 节点用 diagnostic_role 字段声明它在临床流程中的角色，CDSS 据此决定"什么时候显示、能不能回写病历、何时提示入径"。V3.0 起使用以下三个标准值（旧值 broad_diagnosis / clinical_subtype / independent_disease 仅作历史兼容读取）。</div>
+        <div class="std-sub-head" id="arch-role" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">诊断角色（diagnostic_role，V4.0 口径）</span><span class="std-badge std-badge-new">V3.2 引入 · V4.0 沿用</span></div>
+        <div class="std-sub-body"><div class="std-section-desc">Disease 节点用 diagnostic_role 字段声明它在临床流程中的角色，CDSS 据此决定"什么时候显示、能不能回写病历、何时提示入径"。使用以下三个标准值（旧值 broad_diagnosis / clinical_subtype / independent_disease 仅作历史兼容读取）。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>值</th><th>中文含义</th><th>使用场景</th><th>AMI 示例</th><th>心肌病示例</th></tr></thead><tbody>
           <tr><td class="code">suspected_parent</td><td class="name">疑似/待分型诊断</td><td class="require">医生早期只能判断大方向，可先回写为疑似诊断，后续需继续分型；疑似疾病推荐排序只返回此类节点</td><td class="example">急性心肌梗死</td><td class="example">心肌病</td></tr>
           <tr><td class="code">specific_subtype</td><td class="name">具体分型诊断</td><td class="require">诊断证据充分，可进入出院诊断/明确诊断；专病路径入径以此为准</td><td class="example">急性ST段抬高型心肌梗死（STEMI）</td><td class="example">肥厚型心肌病</td></tr>
@@ -642,9 +655,10 @@
 
       <!-- 3. 实体类型 -->
       <section class="std-section" id="nodes">
-        <h2>标准实体类型<span class="std-badge std-badge-ver">~50种</span></h2>
+        <h2>标准实体类型<span class="std-badge std-badge-ver">63种</span><span class="std-badge std-badge-new">V4.0 新增23种</span></h2>
         <div class="std-section-desc">
-          以下是全部约50种标准实体类型的详细说明。每种类型都有一个 <strong>entityType 编码</strong>（供系统使用）和一个 <strong>中文名称</strong>（供医生端展示）。
+          以下是全部 63 种标准实体类型的详细说明（Schema V4.0）。每种类型都有一个 <strong>entityType 编码</strong>（供系统使用）和一个 <strong>中文名称</strong>（供医生端展示）。
+          V4.0 新增评估评分、护理、路径、质控四大族（共 23 种），支持把评分算分、护理闭环、路径任务、质控规则建成可计算结构。
           所有示例统一使用急性心肌梗死（AMI）。<br>
           如需了解 entityType 字段本身的含义和重要性，请先阅读上方 <a href="#entity-type" style="color:var(--accent);text-decoration:none;font-weight:600">entityType：节点的类型标识</a> 章节。
         </div>
@@ -715,13 +729,57 @@
           <tr><td>8</td><td class="name">患者状态</td><td class="code">PatientState</td><td class="require">复杂条件或路径状态</td><td class="example">急性期、出血高风险</td></tr>
           <tr><td>9</td><td class="name">临床事件</td><td class="code">ClinicalEvent</td><td class="require">路径流转、结局或复发事件</td><td class="example">再梗死、心源性休克</td></tr>
         </tbody></table></div></div>
-        <div class="std-note">所有节点统一标记为知识节点，用 entityType 字段区分具体类型。每个节点都有全局唯一的编码。</div>
+
+        <div class="std-sub-head" id="nodes-assess" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">评估评分（可计算风险分层）</span><span class="std-badge std-badge-new">V4.0 · 5种</span></div>
+        <div class="std-sub-body"><div class="std-section-desc">五类实体缺一不可，串起来才能让 CDSS 真正"算分"。只有 RiskStratification 名称、没有这五类实体落地的评分，不得发布为可计算评分。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td>1</td><td class="name">评估量表/评分表</td><td class="code">AssessmentScale</td><td class="require">量表名称、适用病种、适用分型、适用阶段、版本和来源</td><td class="example">GRACE 缺血风险评估量表</td></tr>
+          <tr><td>2</td><td class="name">评估评分项</td><td class="code">AssessmentItem</td><td class="require">评分项目、取数来源、单位、缺失处理和取值类型</td><td class="example">年龄、心率、收缩压、肌酐等 9 项</td></tr>
+          <tr><td>3</td><td class="name">计分规则</td><td class="code">AssessmentScoreRule</td><td class="require">单项计分、汇总算法、计算条件和排除条件</td><td class="example">年龄 ≥80 岁记 3 分</td></tr>
+          <tr><td>4</td><td class="name">评分结果等级</td><td class="code">AssessmentResultLevel</td><td class="require">等级名称、分数区间、阈值条件、临床解释和风险颜色</td><td class="example">高危：&gt;140 分（红）</td></tr>
+          <tr><td>5</td><td class="name">结果动作规则</td><td class="code">AssessmentActionRule</td><td class="require">不同等级对应的补查、提醒、质控、安全锁、路径或随访动作</td><td class="example">高危 → 提示 24h 内介入</td></tr>
+        </tbody></table></div>
+        <div class="std-example"><strong>五类实体怎么串起来算分（GRACE）：</strong>AssessmentScale（量表） -[includes_assessment_item]-&gt; AssessmentItem（9 个评分项） -[has_score_rule]-&gt; AssessmentScoreRule（单项计分）；量表 -[has_result_level]-&gt; AssessmentResultLevel（分数区间与颜色）；等级 -[triggers_assessment_action]-&gt; AssessmentActionRule（等级对应动作）。患者数据只对接评分项，系统按计分规则汇总，落在哪个等级就触发哪个动作。</div></div>
+
+        <div class="std-sub-head" id="nodes-nursing" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">护理知识</span><span class="std-badge std-badge-new">V4.0 · 10种</span></div>
+        <div class="std-sub-body"><div class="std-section-desc">护理知识必须能形成「评估 → 诊断 → 计划 → 措施 → 结局」闭环，每个护理对象必须绑定疾病、适用阶段和证据来源。优先使用院内护理规范，NANDA-I/NIC/NOC 只作为有来源时的候选映射。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td>1</td><td class="name">护理评估维度</td><td class="code">NursingAssessment</td><td class="require">绑定疾病、分型、路径阶段和评估来源</td><td class="example">胸痛评估</td></tr>
+          <tr><td>2</td><td class="name">护理评估条目</td><td class="code">NursingAssessmentItem</td><td class="require">评估项、取值方式、分值和异常判断</td><td class="example">疼痛评分 0-10 分</td></tr>
+          <tr><td>3</td><td class="name">护理诊断</td><td class="code">NursingDiagnosis</td><td class="require">优先院内护理诊断规范</td><td class="example">疼痛（急性胸痛）</td></tr>
+          <tr><td>4</td><td class="name">护理措施</td><td class="code">NursingIntervention</td><td class="require">优先院内护理措施或专科护理规范</td><td class="example">绝对卧床、心电监护</td></tr>
+          <tr><td>5</td><td class="name">护理结局</td><td class="code">NursingOutcome</td><td class="require">优先护理敏感质量指标或院内结局指标</td><td class="example">胸痛缓解、再灌注后稳定</td></tr>
+          <tr><td>6</td><td class="name">护理计划</td><td class="code">NursingCarePlan</td><td class="require">承接评估、诊断、措施和结局四要素</td><td class="example">AMI 急性期护理计划</td></tr>
+          <tr><td>7</td><td class="name">护理分级</td><td class="code">NursingGrade</td><td class="require">绑定 WS/T 431-2023 条款</td><td class="example">特级护理（再灌注期）</td></tr>
+          <tr><td>8</td><td class="name">护理禁忌</td><td class="code">NursingContraindication</td><td class="require">约束护理操作；不与医生端治疗禁忌混用</td><td class="example">溶栓后避免动静脉穿刺</td></tr>
+          <tr><td>9</td><td class="name">护理记录条目</td><td class="code">NursingRecordItem</td><td class="require">支撑护理文书结构化记录和交接</td><td class="example">再灌注后 30 分钟评估记录</td></tr>
+          <tr><td>10</td><td class="name">护理医嘱核对规则</td><td class="code">NursingOrderCheckRule</td><td class="require">必须指向药品、手术或护理措施，不得指向自由文本</td><td class="example">溶栓药滴速核对</td></tr>
+        </tbody></table></div></div>
+
+        <div class="std-sub-head" id="nodes-pathway" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">诊疗路径</span><span class="std-badge std-badge-new">V4.0 · 6种</span></div>
+        <div class="std-sub-body"><div class="std-section-desc">专科诊疗路径（CDSS 决策链路）和住院临床路径（国家版/院内标准）必须分实体维护；路径阶段必须能下钻到路径任务，任务必须指向具体动作、评估表或护理措施，不得只保存任务标题。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td>1</td><td class="name">专科诊疗路径</td><td class="code">SpecialtyCarePathway</td><td class="require">面向专科 CDSS 的诊疗决策链路，覆盖门急诊、住院、外院转入和复诊</td><td class="example">AMI 急诊诊疗路径</td></tr>
+          <tr><td>2</td><td class="name">住院临床路径</td><td class="code">InpatientClinicalPathway</td><td class="require">面向住院阶段的国家版或院内标准临床路径</td><td class="example">AMI 住院临床路径（国家版）</td></tr>
+          <tr><td>3</td><td class="name">路径阶段</td><td class="code">PathwayStage</td><td class="require">入径、评估、检查、治疗、术后/治疗后、出院或离院阶段</td><td class="example">再灌注决策阶段</td></tr>
+          <tr><td>4</td><td class="name">路径任务</td><td class="code">PathwayTask</td><td class="require">指向具体检查、检验、评估、治疗、护理、质控动作</td><td class="example">90 分钟内完成心电图</td></tr>
+          <tr><td>5</td><td class="name">路径变异原因</td><td class="code">PathwayVariationReason</td><td class="require">病情变化、禁忌证、患者拒绝、资源不可及等</td><td class="example">PCI 不可及转溶栓</td></tr>
+          <tr><td>6</td><td class="name">路径结束及就诊转换条件</td><td class="code">PathwayExitCriteria</td><td class="require">按类型独立维护完成、提前出径、出院、就诊结束、随访入口；出径不等于出院</td><td class="example">成功再灌注且无并发症</td></tr>
+        </tbody></table></div></div>
+
+        <div class="std-sub-head" id="nodes-qc" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">质量控制</span><span class="std-badge std-badge-new">V4.0 · 2种</span></div>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td>1</td><td class="name">质控点</td><td class="code">QualityControlPoint</td><td class="require">某病种、分型、诊疗阶段或路径节点需要控制的质量要点</td><td class="example">D2B 时间 ≤90 分钟</td></tr>
+          <tr><td>2</td><td class="name">质控规则</td><td class="code">QualityControlRule</td><td class="require">必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td><td class="example">D2B 超时 → 提示升级介入</td></tr>
+        </tbody></table></div></div>
+
+        <div class="std-note">所有节点统一标记为知识节点，用 entityType 字段区分具体类型。每个节点都有全局唯一的编码。旧类型 ClinicalPathway 在 V4.0 拆分为 SpecialtyCarePathway（专科诊疗路径）与 InpatientClinicalPathway（住院临床路径）两类，新批次不再使用旧名。</div>
       </section>
 
       <!-- 4. 关系类型 -->
       <section class="std-section" id="relations">
-        <h2>标准关系<span class="std-badge std-badge-ver">~60种</span></h2>
-        <div class="std-section-desc">关系表示"谁连接到谁"。中文关系名方便理解，编码供系统使用。</div>
+        <h2>标准关系<span class="std-badge std-badge-ver">122种</span><span class="std-badge std-badge-new">V4.0 扩充</span></h2>
+        <div class="std-section-desc">关系表示"谁连接到谁"。中文关系名方便理解，编码供系统使用。以下分组列出高频核心关系；V4.0 为评估评分、护理、路径、质控新增了配套关系（如 includes_assessment_item、has_score_rule、has_nursing_care_plan、has_pathway_task、has_quality_control_point），完整清单见《专科知识图谱Schema标准》第4章关系表。</div>
 
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">疾病目录、分型和标准诊断</span><span class="std-badge std-badge-ver">7种</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>起点</th><th>中文关系</th><th>关系类型编码</th><th>终点</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
@@ -769,7 +827,7 @@
           <tr><td>16</td><td class="code">Disease</td><td class="name">有风险分层</td><td class="rel">has_risk_stratification</td><td class="code">RiskStratification</td><td class="require">评分项另行结构化</td><td class="example">AMI → GRACE 评分</td></tr>
         </tbody></table></div></div>
 
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">治疗和正式 CDSS 推荐</span><span class="std-badge std-badge-ver">18种</span><span class="std-badge std-badge-new">V3.0 推荐链</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">治疗和正式 CDSS 推荐</span><span class="std-badge std-badge-ver">18种</span><span class="std-badge std-badge-new">V4.0 推荐链</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>起点</th><th>中文关系</th><th>关系类型编码</th><th>终点</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
           <tr><td>1</td><td class="code">Disease</td><td class="name">有治疗方案</td><td class="rel">has_treatment_plan</td><td class="code">TreatmentPlan</td><td class="require">仅表示知识方案，不等于当前推荐</td><td class="example">AMI → 再灌注方案</td></tr>
           <tr><td>2</td><td class="code">TreatmentPlan</td><td class="name">包含药品</td><td class="rel">includes_medication</td><td class="code">Medication</td><td class="require">类别必须继续连接具体药品</td><td class="example">抗血小板方案 → 阿司匹林</td></tr>
@@ -782,12 +840,12 @@
           <tr><td>9</td><td class="code">ClinicalPathway</td><td class="name">包含阶段</td><td class="rel">has_pathway_stage</td><td class="code">PathwayStage</td><td class="require">阶段顺序由路径维护</td><td class="example">AMI 路径 → 再灌注决策阶段</td></tr>
           <tr><td>10</td><td class="code">PathwayStage</td><td class="name">有阶段规则</td><td class="rel">has_stage_rule</td><td class="code">ClinicalRule</td><td class="require">结构化触发条件</td><td class="example">再灌注阶段 → PCI 可及规则</td></tr>
           <tr><td>11</td><td class="code">PathwayStage</td><td class="name">有可选动作</td><td class="rel">stage_has_available_action</td><td class="code">标准动作</td><td class="require">只表示该阶段可能使用的动作菜单</td><td class="example">再灌注阶段 → PCI、溶栓</td></tr>
-          <tr><td>12</td><td class="code">Disease</td><td class="name">有正式推荐陈述</td><td class="rel">has_recommendation_statement</td><td class="code">RecommendationStatement</td><td class="require">V3.0 正式推荐链入口：疾病 → 推荐陈述 → 动作 → 证据</td><td class="example">STEMI → STEMI 直接 PCI 推荐陈述</td></tr>
-          <tr><td>13</td><td class="code">ClinicalRule</td><td class="name">触发推荐陈述</td><td class="rel">triggers_recommendation</td><td class="code">RecommendationStatement</td><td class="require">V3.0 规则触发推荐；规则命中后由推荐陈述承载展示与审核</td><td class="example">STEMI 再灌注规则 → STEMI 直接 PCI 推荐陈述</td></tr>
-          <tr><td>14</td><td class="code">RecommendationStatement</td><td class="name">正式推荐具体项目</td><td class="rel">recommends_action</td><td class="code">具体执行项目</td><td class="require">V3.0 统一动作关系：可执行/可开立项目 Medication、Procedure、ExamItem、LabItem、TreatmentItem、FollowUp；旧细分关系 recommends_medication/procedure/exam_item 仅兼容读取</td><td class="example">推荐急诊 PCI → 经皮冠状动脉介入治疗</td></tr>
+          <tr><td>12</td><td class="code">Disease</td><td class="name">有正式推荐陈述</td><td class="rel">has_recommendation_statement</td><td class="code">RecommendationStatement</td><td class="require">正式推荐链入口：疾病 → 推荐陈述 → 动作 → 证据</td><td class="example">STEMI → STEMI 直接 PCI 推荐陈述</td></tr>
+          <tr><td>13</td><td class="code">ClinicalRule</td><td class="name">触发推荐陈述</td><td class="rel">triggers_recommendation</td><td class="code">RecommendationStatement</td><td class="require">规则触发推荐；规则命中后由推荐陈述承载展示与审核</td><td class="example">STEMI 再灌注规则 → STEMI 直接 PCI 推荐陈述</td></tr>
+          <tr><td>14</td><td class="code">RecommendationStatement</td><td class="name">正式推荐具体项目</td><td class="rel">recommends_action</td><td class="code">具体执行项目</td><td class="require">统一动作关系：可执行/可开立项目 Medication、Procedure、ExamItem、LabItem、TreatmentItem、FollowUp；旧细分关系 recommends_medication/procedure/exam_item 仅兼容读取</td><td class="example">推荐急诊 PCI → 经皮冠状动脉介入治疗</td></tr>
           <tr><td>15</td><td class="code">RecommendationStatement</td><td class="name">推荐临床评估</td><td class="rel">recommends_assessment</td><td class="code">临床评估目标</td><td class="require">评估目标：DiagnosisCriteria、DifferentialDiagnosis、RiskStratification、RiskFactor、Complication、ExamObservation、LabSubitem、Etiology；不是医嘱项目</td><td class="example">AMI 诊断推荐 → AMI 诊断标准</td></tr>
-          <tr><td>16</td><td class="code">RecommendationStatement</td><td class="name">服务于鉴别诊断</td><td class="rel">targets_differential_diagnosis</td><td class="code">DifferentialDiagnosis</td><td class="require">V3.0 推荐陈述标明服务的鉴别对象（如主动脉夹层排除推荐）</td><td class="example">主动脉夹层排除推荐 → 主动脉夹层</td></tr>
-          <tr><td>17</td><td class="code">RecommendationStatement</td><td class="name">有禁忌/排除条件</td><td class="rel">has_contraindication</td><td class="code">Contraindication</td><td class="require">V3.0 推荐的禁忌或排除条件，阻断执行时显示原因</td><td class="example">溶栓治疗 → 未排除主动脉夹层禁用</td></tr>
+          <tr><td>16</td><td class="code">RecommendationStatement</td><td class="name">服务于鉴别诊断</td><td class="rel">targets_differential_diagnosis</td><td class="code">DifferentialDiagnosis</td><td class="require">推荐陈述标明服务的鉴别对象（如主动脉夹层排除推荐）</td><td class="example">主动脉夹层排除推荐 → 主动脉夹层</td></tr>
+          <tr><td>17</td><td class="code">RecommendationStatement</td><td class="name">有禁忌/排除条件</td><td class="rel">has_contraindication</td><td class="code">Contraindication</td><td class="require">推荐的禁忌或排除条件，阻断执行时显示原因</td><td class="example">溶栓治疗 → 未排除主动脉夹层禁用</td></tr>
           <tr><td>18</td><td class="code">RecommendationStatement 等</td><td class="name">阻断具体项目</td><td class="rel">blocks_action</td><td class="code">具体执行项目</td><td class="require">现库部署口径：起点可为 RecommendationStatement、Contraindication 或 ClinicalRule；终点同 recommends_action</td><td class="example">活动性出血 → 阻断溶栓</td></tr>
         </tbody></table></div></div>
         <div class="std-note warn">
@@ -806,7 +864,7 @@
         </tbody></table></div></div>
         <div class="std-note">证据连接遵循"就近一次"原则：证据优先连接最精确的事实、规则或推荐，同时连接来源文档。疾病页面需要汇总证据时通过查询聚合，不把同一证据重复连接到疾病、方案、规则和推荐四层。</div>
         <div class="std-note warn">
-          <strong>主证据口径（V3.0，2026-08-18 修正）：</strong>主证据不是靠额外新关系名区分，而是靠推荐陈述的 <code>primary_evidence_code</code> 字段指向主 Evidence；支持证据仍通过 <code>supported_by_evidence</code> 或 <code>derived_from</code> 关联。主指南同理优先读取 <code>primary_guideline_code</code>，并通过 <code>uses_primary_guideline</code> 或 <code>based_on_guideline</code> 下钻查看指南实体。现库 572 条推荐陈述中 568 条已按此口径落地。
+          <strong>主证据口径（V3.0 引入，V4.0 沿用）：</strong>主证据不是靠额外新关系名区分，而是靠推荐陈述的 <code>primary_evidence_code</code> 字段指向主 Evidence；支持证据仍通过 <code>supported_by_evidence</code> 或 <code>derived_from</code> 关联。主指南同理优先读取 <code>primary_guideline_code</code>，并通过 <code>uses_primary_guideline</code> 或 <code>based_on_guideline</code> 下钻查看指南实体。现库 572 条推荐陈述中 568 条已按此口径落地。
         </div>
       </section>
 
@@ -833,7 +891,7 @@
             <tr><td>4</td><td class="code">aliases</td><td class="name">别名</td><td class="require">字符串数组；没有别名时为 []；中文简称、英文缩写、旧称放入数组</td><td class="example">["AMI","急性心梗"]</td></tr>
             <tr><td>5</td><td class="code">source_type</td><td class="name">来源类型</td><td class="require">只允许：authoritative_textbook、guideline、consensus、clinical_pathway、cdss_standard_dict、external_authority、governed_composite</td><td class="example">cdss_standard_dict</td></tr>
             <tr><td>6</td><td class="code">batch_id</td><td class="name">批次编号</td><td class="require">能追溯到批次台账和目录</td><td class="example">BATCH-CARD-CAD-20260719-001</td></tr>
-            <tr><td>7</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">使用 V主版本.次版本</td><td class="example">V3.0</td></tr>
+            <tr><td>7</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">使用 V主版本.次版本</td><td class="example">V4.0</td></tr>
             <tr><td>8</td><td class="code">clinical_use_status</td><td class="name">临床使用状态</td><td class="require">draft、review_ready、clinical_ready、blocked</td><td class="example">clinical_ready</td></tr>
           </tbody></table></div>
         </div>
@@ -846,7 +904,7 @@
             <tr><td>3</td><td class="code">relationType</td><td class="name">关系类型</td><td class="require">必须来自本标准关系表</td><td class="example">has_clinical_subtype</td></tr>
             <tr><td>4</td><td class="code">target_code</td><td class="name">终点实体编码</td><td class="require">必须引用真实节点 code</td><td class="example">DIS-CARD-CAD-STEMI</td></tr>
             <tr><td>5</td><td class="code">batch_id</td><td class="name">批次编号</td><td class="require">与产生该关系的批次一致</td><td class="example">BATCH-CARD-CAD-20260719-001</td></tr>
-            <tr><td>6</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">固定为当前生成版本</td><td class="example">V3.0</td></tr>
+            <tr><td>6</td><td class="code">schema_version</td><td class="name">Schema 版本</td><td class="require">固定为当前生成版本</td><td class="example">V4.0</td></tr>
             <tr><td>7</td><td class="code">review_status</td><td class="name">自动审核状态</td><td class="require">pending、passed、failed</td><td class="example">passed</td></tr>
             <tr><td>8</td><td class="code">clinical_review_status</td><td class="name">临床使用状态</td><td class="require">pending、clinical_ready、blocked、not_required</td><td class="example">not_required</td></tr>
           </tbody></table></div>
@@ -855,7 +913,7 @@
         <div class="std-panel" id="ftab-disease">
           <h3 id="fields-disease">临床疾病字段</h3>
           <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>字段</th><th>中文名称</th><th>格式要求</th><th>AMI 示例</th></tr></thead><tbody>
-            <tr><td>1</td><td class="code">diagnostic_role</td><td class="name">诊断层级角色</td><td class="require">V3.0 标准值：suspected_parent 疑似/待分型诊断、specific_subtype 具体分型诊断、standalone_diagnosis 独立诊断（旧值 broad_diagnosis/clinical_subtype/independent_disease 仅历史兼容读取，新批次不得使用）</td><td class="example">suspected_parent</td></tr>
+            <tr><td>1</td><td class="code">diagnostic_role</td><td class="name">诊断层级角色</td><td class="require">标准值（V3.2 引入，V4.0 沿用）：suspected_parent 疑似/待分型诊断、specific_subtype 具体分型诊断、standalone_diagnosis 独立诊断（旧值 broad_diagnosis/clinical_subtype/independent_disease 仅历史兼容读取，新批次不得使用）</td><td class="example">suspected_parent</td></tr>
             <tr><td>2</td><td class="code">is_diagnosable</td><td class="name">是否可作为诊断</td><td class="require">布尔；Disease 通常为 true</td><td class="example">true</td></tr>
             <tr><td>3</td><td class="code">is_emr_writable</td><td class="name">是否允许写入病历</td><td class="require">布尔；只有连接有效标准诊断且通过审核时为 true</td><td class="example">true</td></tr>
             <tr><td>4</td><td class="code">classification_tags</td><td class="name">临床分类标签</td><td class="require">字符串数组；仅用于轻量展示或检索，不替代疾病分型关系</td><td class="example">["急性冠脉综合征"]</td></tr>
@@ -899,7 +957,7 @@
             <tr><td>3</td><td class="name">名称字段</td><td class="require">医生可读中文标准名优先；英文缩写放 aliases</td><td class="example">AMI诊断明细：肌钙蛋白升高</td><td class="example">name="肌钙蛋白升高及动态变化"</td></tr>
             <tr><td>4</td><td class="name">别名字段</td><td class="require">必须是数组；英文缩写、中文简称、旧称都放数组</td><td class="example">aliases="AMI,急性心梗"</td><td class="example">aliases=["AMI","急性心梗"]</td></tr>
             <tr><td>5</td><td class="name">状态字段</td><td class="require">必须使用固定枚举值；不能自由写自然语言</td><td class="example">clinical_review_status="可用"</td><td class="example">clinical_review_status="clinical_ready"</td></tr>
-            <tr><td>6</td><td class="name">版本字段</td><td class="require">必须写 Schema 版本，不写脚本版本</td><td class="example">schema_version="脚本V3"</td><td class="example">schema_version="V3.0"</td></tr>
+            <tr><td>6</td><td class="name">版本字段</td><td class="require">必须写 Schema 版本，不写脚本版本</td><td class="example">schema_version="脚本V3"</td><td class="example">schema_version="V4.0"</td></tr>
             <tr><td>7</td><td class="name">时间字段</td><td class="require">使用 YYYY-MM-DD HH:mm:ss；不能只写年月</td><td class="example">2026-07</td><td class="example">2026-07-19 00:19:13</td></tr>
             <tr><td>8</td><td class="name">证据文本字段</td><td class="require">evidence_text 必须保存原文摘录；中文翻译可另存，不得覆盖原文</td><td class="example">只保存改写总结，不保留原文</td><td class="example">evidence_text="Primary PCI is recommended..."</td></tr>
             <tr><td>9</td><td class="name">SOURCE 字段</td><td class="require">保存原始资料名称而非处理过程；无法定位时写"待补充权威来源"</td><td class="example">SOURCE="图谱V3.0导出"</td><td class="example">SOURCE="内科学（第9版）"</td></tr>
@@ -968,7 +1026,7 @@
   <span class="field">"exclusion_condition"</span>: <span class="value">"活动性出血、主动脉夹层、既往颅内出血"</span>,
   <span class="field">"recommendation_class"</span>: <span class="value">"I"</span>,
   <span class="field">"evidence_level"</span>: <span class="value">"A"</span>,
-  <span class="field">"primary_evidence_code"</span>: <span class="value">"EV-CARD-GUIDE-REPERFUSION"</span>,  <span class="comment">// 主证据（V3.0口径：字段标识）</span>
+  <span class="field">"primary_evidence_code"</span>: <span class="value">"EV-CARD-GUIDE-REPERFUSION"</span>,  <span class="comment">// 主证据由该字段标识，不靠新关系名区分</span>
   <span class="field">"primary_guideline_code"</span>: <span class="value">"GL-CARD-GUIDE-2023"</span>,
   <span class="field">"cdss_use_status"</span>: <span class="value">"formal_recommendation"</span>
 }</div>
@@ -1092,89 +1150,141 @@
 
       <!-- 8. 推荐陈述字段 -->
       <section class="std-section" id="adjudication">
-        <h2>推荐陈述字段<span class="std-badge std-badge-new">V3.0</span></h2>
-        <div class="std-section-desc">推荐陈述是正式推荐的展示和审核主体。V3.0 起主证据、主依据指南和冲突状态直接保存在推荐陈述节点字段上，不再单独建裁决实体（现库裁决实体为 0，572 条推荐陈述按本表口径落地）。</div>
+        <h2>推荐陈述字段<span class="std-badge std-badge-new">V4.0</span></h2>
+        <div class="std-section-desc">推荐陈述是正式推荐的展示和审核主体。主证据、主依据指南和冲突状态直接保存在推荐陈述节点字段上，不单独建裁决实体（现库裁决实体为 0，572 条推荐陈述按本表口径落地）。<strong>注意：触发条件不再保存在推荐陈述上，只保存在入向 ClinicalRule → triggers_recommendation → RecommendationStatement 的可执行规则中</strong>。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>字段</th><th>中文名称</th><th>格式要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="code">clinical_scene</td><td class="name">临床场景</td><td class="require">急诊、门诊、住院、围手术期、随访</td><td class="example">急诊</td></tr>
-          <tr><td>2</td><td class="code">applicable_population</td><td class="name">适用人群</td><td class="require">明确人群描述</td><td class="example">STEMI 发病 12 小时内</td></tr>
-          <tr><td>3</td><td class="code">trigger_condition</td><td class="name">触发条件</td><td class="require">结构化条件或原文摘要</td><td class="example">持续 ST 段抬高</td></tr>
-          <tr><td>4</td><td class="code">exclusion_condition</td><td class="name">排除条件</td><td class="require">禁忌或不适用条件</td><td class="example">未排除主动脉夹层</td></tr>
-          <tr><td>5</td><td class="code">recommendation_text</td><td class="name">推荐文字</td><td class="require">面向医生的中文推荐</td><td class="example">首选直接 PCI</td></tr>
-          <tr><td>6</td><td class="code">recommendation_class</td><td class="name">推荐等级</td><td class="require">原文等级，教材无等级写 N/A；现库 572/572 落地</td><td class="example">I</td></tr>
-          <tr><td>7</td><td class="code">evidence_level</td><td class="name">证据等级</td><td class="require">原文等级，教材无等级写 N/A；现库 572/572 落地</td><td class="example">A</td></tr>
-          <tr><td>8</td><td class="code">primary_source_name</td><td class="name">主依据来源</td><td class="require">指南或教材名称</td><td class="example">2025 ACS 指南</td></tr>
-          <tr><td>9</td><td class="code">primary_evidence_code</td><td class="name">主证据编码</td><td class="require">V3.0 主证据身份由该字段标识，指向主 Evidence 节点，不靠新关系名；现库覆盖 568/572</td><td class="example">EVD-CARD-DEEP-2E78…</td></tr>
-          <tr><td>10</td><td class="code">primary_guideline_code</td><td class="name">主依据指南编码</td><td class="require">现库治理字段：指向主 Guideline，可通过 uses_primary_guideline 或 based_on_guideline 下钻；现库覆盖 568/572</td><td class="example">SRC-DOC-CF62…</td></tr>
-          <tr><td>11</td><td class="code">clinical_review_status</td><td class="name">临床使用状态</td><td class="require">formal_cdss_ready、review_required、blocked；现库 572/572 落地</td><td class="example">formal_cdss_ready</td></tr>
-          <tr><td>12</td><td class="code">conflict_status</td><td class="name">冲突状态</td><td class="require">现库治理字段：无冲突、有冲突已处理、冲突待裁决；现库覆盖 565/572</td><td class="example">无冲突</td></tr>
-          <tr><td>13</td><td class="code">cdss_use_status</td><td class="name">CDSS 使用状态</td><td class="require">现库治理字段：正式推荐、仅知识展示、冲突待裁决、证据不足、已过时保留；现库覆盖 560/572</td><td class="example">正式推荐</td></tr>
+          <tr><td>1</td><td class="code">clinical_scene</td><td class="name">临床场景</td><td class="require">急诊、门诊、住院、围手术期、随访；现库 572/572 落地</td><td class="example">急诊</td></tr>
+          <tr><td>2</td><td class="code">clinical_stage</td><td class="name">诊疗阶段</td><td class="require">与医生当前阶段及动作关系一致</td><td class="example">再灌注决策</td></tr>
+          <tr><td>3</td><td class="code">purpose</td><td class="name">推荐目的</td><td class="require">确诊、分型、排除、风险分层、治疗或治疗安全</td><td class="example">治疗</td></tr>
+          <tr><td>4</td><td class="code">applicable_disease_codes</td><td class="name">适用疾病</td><td class="require">Disease.code 非空数组，分型分别声明</td><td class="example">DIS-CARD-CAD-AMI-STEMI</td></tr>
+          <tr><td>5</td><td class="code">applicable_population</td><td class="name">适用人群</td><td class="require">明确人群描述</td><td class="example">STEMI 发病 12 小时内</td></tr>
+          <tr><td>6</td><td class="code">recommendation_text</td><td class="name">推荐文字</td><td class="require">面向医生的中文推荐</td><td class="example">首选直接 PCI</td></tr>
+          <tr><td>7</td><td class="code">recommendation_type</td><td class="name">推荐类型</td><td class="require">recommend、consider、do_not_recommend、block</td><td class="example">recommend</td></tr>
+          <tr><td>8</td><td class="code">recommendation_class</td><td class="name">推荐等级</td><td class="require">原文等级，教材无等级写 N/A；不得写"未结构化"等混合值；现库 572/572 落地</td><td class="example">I</td></tr>
+          <tr><td>9</td><td class="code">evidence_level</td><td class="name">证据等级</td><td class="require">原文等级，教材无等级写 N/A；现库 572/572 落地</td><td class="example">A</td></tr>
+          <tr><td>10</td><td class="code">primary_source_name</td><td class="name">主依据来源</td><td class="require">指南或教材名称</td><td class="example">2025 ACS 指南</td></tr>
+          <tr><td>11</td><td class="code">primary_evidence_code</td><td class="name">主证据唯一引用</td><td class="require">指向 Evidence.code；旧 ID 仅输入归一；现库覆盖 568/572</td><td class="example">EVD-AMI-PCI-001</td></tr>
+          <tr><td>12</td><td class="code">primary_guideline_code</td><td class="name">主依据文献</td><td class="require">指向 Guideline.code，必须与主证据 document_code 一致；现库覆盖 568/572</td><td class="example">GLD-CARD-ACS-2025</td></tr>
+          <tr><td>13</td><td class="code">clinical_review_status</td><td class="name">临床审核状态</td><td class="require">pending、approved、blocked；现库 572/572 落地</td><td class="example">approved</td></tr>
+          <tr><td>14</td><td class="code">safety_review_status</td><td class="name">安全审核状态</td><td class="require">pending、reviewed、blocked</td><td class="example">reviewed</td></tr>
+          <tr><td>15</td><td class="code">safety_policy</td><td class="name">动作级安全策略</td><td class="require">固定 JSON 结构：硬停规则、需确认规则、并行补齐规则、复查规则及缺项处理方式</td><td class="example">见下方示例</td></tr>
+          <tr><td>16</td><td class="code">formal_cdss_ready</td><td class="name">正式发布派生状态</td><td class="require">布尔；仅全部发布硬规则通过后为 true，不替代临床审核</td><td class="example">true</td></tr>
+          <tr><td>17</td><td class="code">conflict_status / cdss_use_status</td><td class="name">冲突状态 / CDSS 使用状态</td><td class="require">治理字段：无冲突、有冲突已处理、冲突待裁决 / 正式推荐、仅知识展示、冲突待裁决、证据不足、已过时保留；现库覆盖 565/572 与 560/572</td><td class="example">无冲突 / 正式推荐</td></tr>
         </tbody></table></div>
-        <div class="std-note warn">后续指南升级时，不覆盖旧证据；用来源年份、版本、适用范围和冲突状态做裁决。新指南发布时只更新受影响的推荐、证据和冲突状态，不重建稳定的疾病骨架。AI 工具只能提取候选内容和证据，不能代替人工做最终裁决。</div>
+        <div class="std-example">safety_policy 示例：<br>
+{ "exclusion_reviewed": true, "hard_stop_rule_codes": [], "required_confirmation_rule_codes": [],<br>
+&nbsp;&nbsp;"parallel_requirement_rule_codes": [], "recheck_rule_codes": [],<br>
+&nbsp;&nbsp;"unknown_handling": { "hard_stop": "block", "required_confirmation": "review", "parallel_requirement": "allow_with_prompt", "recheck": "review" } }</div>
+        <div class="std-note warn">空规则数组只有在 exclusion_reviewed=true 且 safety_review_status=reviewed 时才表示"已审查且无适用规则"，不得用空值冒充已审查。后续指南升级时不覆盖旧证据，用来源年份、版本、适用范围和冲突状态做裁决；新指南发布时只更新受影响的推荐、证据和冲突状态，不重建稳定的疾病骨架。AI 工具只能提取候选内容和证据，不能代替人工做最终裁决。</div>
       </section>
 
       <!-- 硬闸门 -->
       <section class="std-section" id="quality">
-        <h2>数据质量硬闸门<span class="std-badge std-badge-ver">35条</span></h2>
-        <div class="std-section-desc">以下任一项不通过，批次不得标记"正式 CDSS 可用"。按分组折叠展示。</div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">节点与字段（4条）</span></div>
+        <h2>数据质量硬闸门<span class="std-badge std-badge-ver">28条</span><span class="std-badge std-badge-new">V4.0</span></h2>
+        <div class="std-section-desc">入库前和入库后都必须检查。以下任一项不通过，批次不得标记"正式 CDSS 可用"。按分组折叠展示，编号与《专科知识图谱Schema标准》V4.0 第12章一致。</div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">节点与命名（5条）</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>1</td><td class="require">节点缺失 KGNode 标签或 code / entityType / name 字段</td></tr>
-          <tr><td>9</td><td class="require">标准名使用英文缩写或别名未归入 aliases 数组</td></tr>
-          <tr><td>27</td><td class="require">标准手术仍使用旧版简写字段名</td></tr>
-          <tr><td>28</td><td class="require">多个节点指向同一系统字典编号</td></tr>
+          <tr><td>1</td><td class="require">所有临床业务节点必须有 entityType、code、name</td></tr>
+          <tr><td>2</td><td class="require">需要回填 CDSS 的实体必须绑定有效标准字典</td></tr>
+          <tr><td>13</td><td class="require">药品、手术、检查、检验、症状、体征不得使用口语名或缩写作主名称</td></tr>
+          <tr><td>14</td><td class="require">多症状、多药品、多检查合并短语必须拆分</td></tr>
+          <tr><td>15</td><td class="require">source 字段不得写项目版本或校验过程，必须写具体来源名称</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">疾病结构（5条）</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">疾病与诊断（6条）</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>2</td><td class="require">疾病大类被标记为可诊断或保存 ICD 编码</td></tr>
-          <tr><td>3</td><td class="require">宽口径疾病无大类归属 / 分型无父级 / 层级成环 / 同名重复</td></tr>
-          <tr><td>4</td><td class="require">新增已停用的旧版实体类型或旧版关系</td></tr>
-          <tr><td>21</td><td class="require">同一医学概念重复建立实体</td></tr>
-          <tr><td>22</td><td class="require">方案嵌套方案 / 句子片段误建为方案</td></tr>
+          <tr><td>3</td><td class="require">疾病三层关系不得断链</td></tr>
+          <tr><td>4</td><td class="require">疑似诊断必须有具体分型入口或明确独立诊断身份</td></tr>
+          <tr><td>5</td><td class="require">具体分型诊断必须有标准诊断</td></tr>
+          <tr><td>6</td><td class="require">诊断标准必须有下钻明细</td></tr>
+          <tr><td>7</td><td class="require">鉴别诊断必须有对象和鉴别规则</td></tr>
+          <tr><td>17</td><td class="require">鉴别诊断必须能说明"鉴别谁、为什么鉴别、用什么检查检验鉴别、结果如何解释、依据来自哪里"</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">诊断与编码（4条）</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">检查检验与治疗（4条）</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>5</td><td class="require">可诊断疾病无有效标准诊断记录</td></tr>
-          <tr><td>10</td><td class="require">诊断标准无下钻明细或明细无证据支撑</td></tr>
-          <tr><td>11</td><td class="require">鉴别诊断仅有名称、无鉴别要点 / 排除检查 / 规则</td></tr>
-          <tr><td>24</td><td class="require">宽泛策略词误标为手术实体</td></tr>
+          <tr><td>8</td><td class="require">检查项目必须能下钻到检查发现，若来源不覆盖则记录缺口</td></tr>
+          <tr><td>9</td><td class="require">检验项目必须能下钻到检验细项，若来源不覆盖则记录缺口</td></tr>
+          <tr><td>10</td><td class="require">治疗方案必须下钻到药品、手术或治疗项目</td></tr>
+          <tr><td>18</td><td class="require">治疗方案必须区分"方案标题"和"可执行动作"；方案标题不能直接替代医嘱动作</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">证据与来源（3条）</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">正式推荐与证据（6条）</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>6</td><td class="require">标准主数据无有效字典记录或未完成二次校验</td></tr>
-          <tr><td>25</td><td class="require">空壳证据批量复制到上级方案节点</td></tr>
-          <tr><td>31</td><td class="require">字典改名 / 合并 / 删除后未进入待审队列</td></tr>
+          <tr><td>11</td><td class="require">正式推荐必须有推荐陈述、动作、禁忌或排除条件、主证据</td></tr>
+          <tr><td>12</td><td class="require">证据必须能追溯到具体来源名称、章节或页码</td></tr>
+          <tr><td>16</td><td class="require">检查、检验、药品、手术、治疗项目进入正式推荐时，关系必须有诊疗阶段、推荐目的、服务对象和优先级</td></tr>
+          <tr><td>26</td><td class="require">Evidence 不得以"第N/A页原文证据"等模板名作为正式证据主名称；缺页码时必须给出段落位置或缺口原因</td></tr>
+          <tr><td>27</td><td class="require">RecommendationStatement 发布前必须补齐临床场景、触发条件、推荐来源、规则来源、主证据和主指南；字段缺失只能进入待审核</td></tr>
+          <tr><td>28</td><td class="require">ClinicalRule 到 RecommendationStatement 的新关系必须使用 triggers_recommendation；旧 has_recommendation_statement 仅进入兼容迁移清单</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">检查检验（3条）</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">评估评分·护理·路径·质控（6条）</span><span class="std-badge std-badge-new">V4.0 新增</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>7</td><td class="require">症状与体征混用 / 检查项目与发现混用 / 检验项目与细项混用</td></tr>
-          <tr><td>8</td><td class="require">检验细项无所属项目 / 检查发现无所属项目</td></tr>
-          <tr><td>35</td><td class="require">标准路径未跑通或旧版直连关系仍作为主路径</td></tr>
+          <tr><td>19</td><td class="require">评估评分必须落地五类实体和关系（AssessmentScale、AssessmentItem、AssessmentScoreRule、AssessmentResultLevel、AssessmentActionRule）；只有 RiskStratification 名称不得发布为可计算评分</td></tr>
+          <tr><td>20</td><td class="require">护理知识必须能形成评估、诊断、计划、措施、结局闭环，且每个护理对象必须绑定疾病、适用阶段和证据来源</td></tr>
+          <tr><td>21</td><td class="require">护理医嘱核对规则必须指向 Medication、Procedure 或 NursingIntervention，不得指向自由文本</td></tr>
+          <tr><td>22</td><td class="require">专科诊疗路径和住院临床路径必须分实体维护，路径阶段必须能下钻到 PathwayTask</td></tr>
+          <tr><td>23</td><td class="require">路径任务必须指向具体动作、评估表或护理措施，不得只保存任务标题</td></tr>
+          <tr><td>24</td><td class="require">质控规则必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">治疗与推荐（7条）</span></div>
+        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">数据边界（1条）</span><span class="std-badge std-badge-new">V4.0 新增</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>12</td><td class="require">治疗方案无场景 / 触发条件 / 动作 / 禁忌 / 证据</td></tr>
-          <tr><td>13</td><td class="require">正式推荐缺少完整链路（疾病 → 推荐陈述 → 动作 → 证据）</td></tr>
-          <tr><td>14</td><td class="require">正式推荐缺少主证据 / 主指南 / 推荐等级 / 冲突状态</td></tr>
-          <tr><td>20</td><td class="require">疾病大类挂方案 / 方案连接错误类型 / 方案自动继承到子分型</td></tr>
-          <tr><td>23</td><td class="require">标准手术无对应临床动作引用</td></tr>
-          <tr><td>26</td><td class="require">方案仅包含药品和手术、遗漏治疗项目</td></tr>
-          <tr><td>29</td><td class="require">临床规则仅有标题、无说明 / 场景 / 目标 / 证据</td></tr>
+          <tr><td>25</td><td class="require">患者当次评估结果、路径执行记录、护理执行记录和质控缺陷记录不得写成 Neo4j 静态图谱节点（运行时数据由 CDSS 服务管理）</td></tr>
         </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">人群限制（2条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>15</td><td class="require">人群限制缺来源标记或非字典值无证据支撑</td></tr>
-          <tr><td>16</td><td class="require">空值被解释为不限制 / 无年龄范围 / 生成默认限制</td></tr>
-        </tbody></table></div></div>
-        <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">系统治理（7条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>17</td><td class="require">关系端点不存在 / 类型不合法 / 同语义重复</td></tr>
-          <tr><td>18</td><td class="require">写库前无回滚清单或复核阻断项不为零</td></tr>
-          <tr><td>19</td><td class="require">页面把目录或证据池当作当前推荐展示</td></tr>
-          <tr><td>30</td><td class="require">一般知识关系自动转为诊断权重或概率</td></tr>
-          <tr><td>32</td><td class="require">导入只保留旧系统节点、丢弃专科图谱结构</td></tr>
-          <tr><td>33</td><td class="require">内部管理字段当作临床属性展示给医生</td></tr>
-          <tr><td>34</td><td class="require">冗余节点未进入清理闭环</td></tr>
-        </tbody></table></div></div>
+        <div class="std-note">V4 批次审计入口：<code>scripts/audit_graph_instance.py --schema V4</code>；旧批次显式 <code>--schema legacy</code>。机器注册表为 schema_docs/图谱结构注册表.json，由脚本从 Schema 文档编译生成，不人工维护第二套白名单。</div>
+      </section>
+
+      <!-- 证据模型 -->
+      <section class="std-section" id="evidence-model">
+        <h2>证据模型<span class="std-badge std-badge-new">V4.0</span></h2>
+        <div class="std-section-desc">证据分三个粒度，各司其职。医生端不直接展示证据池，只在具体推荐或知识卡片中展示"主依据、页码、推荐等级、证据等级、原文摘要"。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>对象</th><th>中文解释</th><th>粒度</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td class="code">Guideline</td><td class="name">指南/教材/共识/说明书</td><td class="require">文件级：整份文献</td><td class="example">《内科学（第10版）》</td></tr>
+          <tr><td class="code">SourceSection</td><td class="name">来源章节</td><td class="require">章节级：章节或页码范围；同一文件同一章节不因疾病或批次重复建节点</td><td class="example">STEMI 治疗章节</td></tr>
+          <tr><td class="code">Evidence</td><td class="name">证据片段</td><td class="require">片段级：可支撑一个知识点或推荐的一段原文摘要</td><td class="example">"FMC 后 90 分钟内完成再灌注"</td></tr>
+        </tbody></table></div>
+        <h3>证据必填字段</h3>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>字段</th><th>中文名称</th><th>格式要求</th><th>AMI 示例</th></tr></thead><tbody>
+          <tr><td class="code">source_name / source_type / source_year</td><td class="name">来源名称/类型/年份</td><td class="require">具体文献名称；textbook、guideline、consensus、drug_label、authority_web、clinical_pathway、nursing_standard、quality_standard；四位年份或空</td><td class="example">《内科学（第10版）》 / textbook / 2024</td></tr>
+          <tr><td class="code">document_code / locator</td><td class="name">所属文献 / 结构化位置</td><td class="require">document_code 指向 Guideline.code；locator 为结构化位置对象（页码、段落、字符区间），必须有值</td><td class="example">GLD-XXX / p.253-255</td></tr>
+          <tr><td class="code">section_title / page_start / page_end</td><td class="name">章节与页码</td><td class="require">原文章节名；数字或空</td><td class="example">治疗 / 253 / 255</td></tr>
+          <tr><td class="code">evidence_text</td><td class="name">证据原文摘要</td><td class="require">保留原文含义，不得改写为模型结论；必须有值</td><td class="example">FMC 后 90 分钟内完成 PCI</td></tr>
+          <tr><td class="code">recommendation_class / evidence_level / language</td><td class="name">推荐等级/证据等级/语言</td><td class="require">有则原样保存，无则 N/A；zh 或 en</td><td class="example">I / A / zh</td></tr>
+        </tbody></table></div>
+        <div class="std-note warn"><strong>主证据唯一引用：</strong>全项目主证据唯一字段为 <code>primary_evidence_code</code>（引用 Evidence.code）；旧 primary_evidence_id 只允许输入端按历史 ID 映射归一，两字段同时提供且指向不同证据时阻断，禁止任取其一。Evidence 不得以"第N/A页原文证据"等模板名作为主名称（硬闸门 26）。</div>
+      </section>
+
+      <!-- 禁止新增项 -->
+      <section class="std-section" id="forbidden">
+        <h2>当前禁止新增项<span class="std-badge std-badge-new">V4.0 · 11项</span></h2>
+        <div class="std-section-desc">以下内容在新批次中禁止产出。逐条对照检查，违反任一条即阻断入库。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">序号</th><th>禁止项</th><th>说明</th></tr></thead><tbody>
+          <tr><td>1</td><td class="require">DiseaseClassification</td><td class="require">已停用；迁移为 Disease 或 DiseaseSubcategory</td></tr>
+          <tr><td>2</td><td class="require">Exam、LabTest、ExamIndicator</td><td class="require">已停用；改用 ExamItem、LabItem、ExamObservation</td></tr>
+          <tr><td>3</td><td class="require">只有标题、没有下钻明细的诊断标准</td><td class="require">对应硬闸门 6</td></tr>
+          <tr><td>4</td><td class="require">只有标题、没有具体动作的治疗方案</td><td class="require">对应硬闸门 10</td></tr>
+          <tr><td>5</td><td class="require">只有缩写的药品、手术、检查、检验实体</td><td class="require">缩写放 aliases，主名称用标准全称</td></tr>
+          <tr><td>6</td><td class="require">把批次、哈希、路径、脚本版本、审核状态渲染为业务节点</td><td class="require">这些是属性，不是节点</td></tr>
+          <tr><td>7</td><td class="require">直接写旧 Oracle 字典修名、合并、删除</td><td class="require">字典变更必须进入待审队列</td></tr>
+          <tr><td>8</td><td class="require">用大模型常识替代来源证据</td><td class="require">AI 只产候选，证据必须能回到原文</td></tr>
+          <tr><td>9</td><td class="require">旧泛化关系 RECOMMEND_CHECK、RECOMMEND_LAB_CHECK、HAS_DRUG、RECOMMEND_OPERATION、RECOMMEND_TREATMENT</td><td class="require">改用正式推荐链关系</td></tr>
+          <tr><td>10</td><td class="require">患者运行时记录节点：AssessmentResult、PathwayExecutionRecord、NursingExecutionRecord、QualityDefectRecord</td><td class="require">运行时数据不进静态图谱（对应硬闸门 25）</td></tr>
+          <tr><td>11</td><td class="require">把 CCC 作为 V4.0 护理核心必填标准</td><td class="require">未取得完整码表和授权前，只作为候选映射来源记录</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <!-- CDSS 导入与展示边界 -->
+      <section class="std-section" id="import-boundary">
+        <h2>CDSS 导入与展示边界<span class="std-badge std-badge-new">V4.0</span></h2>
+        <div class="std-section-desc">图谱全量导入 CDSS，但医生端只看到该看的。三层边界：业务实体必须导入；治理字段默认不展示；历史对象按清理计划过滤。</div>
+        <h3>哪些字段不给医生看</h3>
+        <div class="std-section-desc">batch_id、scope_type、scope_target、source_roots、parser_version、extraction_version、import_batch、migration_status、repair_status、merge_status 等为内部治理字段。它们是节点属性，不是实体；导入程序不得用 <code>keys(n)</code> 把属性名渲染成图谱节点。</div>
+        <h3>需要过滤的历史对象</h3>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>对象</th><th>处理方式</th></tr></thead><tbody>
+          <tr><td class="code">DiseaseClassification</td><td class="require">停用，不再新增；已迁移后清理</td></tr>
+          <tr><td class="code">Exam / LabTest / ExamIndicator</td><td class="require">停用，分别改用 ExamItem / LabItem / ExamObservation</td></tr>
+          <tr><td class="code">纯过程节点、审核过程节点</td><td class="require">不进入普通 CDSS 维护页</td></tr>
+          <tr><td class="code">历史兼容节点</td><td class="require">列入当月清理范围处理</td></tr>
+        </tbody></table></div>
+        <h3>静态知识与运行时数据的边界</h3>
+        <div class="std-note danger"><strong>图谱只存"静态知识"：</strong>患者当次评估结果、路径执行记录、护理执行记录、质控缺陷记录属于"运行时数据"，由 CDSS 运行时服务管理，不得写成 Neo4j 静态图谱节点（对应硬闸门 25 与禁止新增项 10）。图谱提供模板和规则，患者实例数据在业务系统流转。</div>
       </section>
 
       <div class="std-part-divider"><span class="std-part-num">附录</span><span class="std-part-title">患者全周期应用案例 · 从问诊到治疗的全链路推理</span><span class="std-part-line"></span></div>
@@ -1522,7 +1632,7 @@
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=20260903"></script>
+<script src="./_shared/js/app.js?v=20260906"></script>
 <script>
 loadData(function(){injectDimCount();renderNav('standard');});
 
@@ -1617,7 +1727,7 @@ var jsonExamples = {
     "aliases": ["AMI", "急性心梗"],
     "source_type": "guideline",
     "batch_id": "BATCH-CARD-CAD-20260719-001",
-    "schema_version": "V3.0",
+    "schema_version": "V4.0",
     "clinical_use_status": "clinical_ready",
     "diagnostic_role": "suspected_parent",
     "is_diagnosable": true,
@@ -1630,7 +1740,7 @@ var jsonExamples = {
     "relationType": "has_clinical_subtype",
     "target_code": "DIS-CARD-CAD-STEMI",
     "batch_id": "BATCH-CARD-CAD-20260719-001",
-    "schema_version": "V3.0",
+    "schema_version": "V4.0",
     "review_status": "passed",
     "clinical_review_status": "not_required"
   }
@@ -1671,6 +1781,20 @@ function copyJsonExample() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeJsonModal();
 });
+
+/* 核心计数动态化：页面加载时从 API 拉取实时节点/关系总数，替换静态数字（静态值为兜底） */
+(function() {
+  fetch('/api/kg/stats').then(function(r) { return r.json(); }).then(function(s) {
+    var nodes = Number(s.kg_node_count || s.total_nodes || 0);
+    var rels = Number(s.total_relationships || 0);
+    if (nodes > 0) {
+      document.querySelectorAll('.js-nodes').forEach(function(el) { el.textContent = nodes.toLocaleString(); });
+    }
+    if (rels > 0) {
+      document.querySelectorAll('.js-rels').forEach(function(el) { el.textContent = rels.toLocaleString(); });
+    }
+  }).catch(function() { /* API 不可用时保留静态数字 */ });
+})();
 </script>
 </body>
 </html>
