@@ -176,7 +176,8 @@
 .std-arch-dia-mid{background:var(--bg4);border-radius:10px;padding:12px 18px;display:flex;flex-direction:column;justify-content:center}
 .std-arch-dia-q{font-size:14px;font-weight:700;color:var(--ink);line-height:1.5}
 .std-arch-dia-types{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-.std-arch-dia-types span{font-size:11.5px;padding:3px 9px;border-radius:5px;font-weight:600;font-family:'SF Mono','Cascadia Code','Consolas',monospace;white-space:nowrap}
+.std-arch-dia-types span{font-size:12px;padding:3px 10px;border-radius:5px;font-weight:700;white-space:nowrap}
+.std-arch-dia-types span i{font-style:normal;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:10.5px;font-weight:600;opacity:.7;margin-left:5px}
 .std-arch-dia-eg{background:var(--bg4);border-radius:10px;padding:12px 18px;display:flex;align-items:center}
 .std-arch-dia-eg-in{font-size:13px;color:var(--muted);line-height:1.7}
 .std-arch-dia-eg-in strong{color:var(--ink)}
@@ -496,32 +497,32 @@
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l1"><span class="num">1</span><div><div class="lname">&#128193; 目录层</div><div class="lq">页面导航与疾病分组</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">属于哪个专科、哪个疾病大类</div><div class="std-arch-dia-types"><span class="t-l1">Specialty</span><span class="t-l1">DiseaseCategory</span><span class="t-l1">DiseaseSubcategory</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">属于哪个专科、哪个疾病大类</div><div class="std-arch-dia-types"><span class="t-l1">专科 <i>Specialty</i></span><span class="t-l1">疾病大类 <i>DiseaseCategory</i></span><span class="t-l1">疾病亚类 <i>DiseaseSubcategory</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>心血管内科 -&gt; 冠心病</div></div>
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l2"><span class="num">2</span><div><div class="lname">&#129658; 临床诊断层</div><div class="lq">疑似 / 待分型 / 具体分型</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">患者可能或确定患什么病</div><div class="std-arch-dia-types"><span class="t-l2">Disease</span><span class="t-l2">StandardDiagnosis</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">患者可能或确定患什么病</div><div class="std-arch-dia-types"><span class="t-l2">疾病 <i>Disease</i></span><span class="t-l2">标准诊断 <i>StandardDiagnosis</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>急性心肌梗死（疑似）-&gt; STEMI（分型）-&gt; I21.900</div></div>
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l3"><span class="num">3</span><div><div class="lname">&#128214; 医学知识层</div><div class="lq">疾病知识与检查治疗</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病是什么、有何表现、如何检查治疗</div><div class="std-arch-dia-types"><span class="t-l3">Definition</span><span class="t-l3">Symptom</span><span class="t-l3">Sign</span><span class="t-l3">ExamItem</span><span class="t-l3">LabItem</span><span class="t-l3">Medication</span><span class="t-l3">Procedure</span><span class="t-l3">TreatmentPlan</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病是什么、有何表现、如何检查治疗</div><div class="std-arch-dia-types"><span class="t-l3">疾病定义 <i>Definition</i></span><span class="t-l3">症状 <i>Symptom</i></span><span class="t-l3">体征 <i>Sign</i></span><span class="t-l3">检查项目 <i>ExamItem</i></span><span class="t-l3">检验项目 <i>LabItem</i></span><span class="t-l3">药品 <i>Medication</i></span><span class="t-l3">手术/操作 <i>Procedure</i></span><span class="t-l3">治疗方案 <i>TreatmentPlan</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>胸痛 · 心电图 · 肌钙蛋白 · 阿司匹林</div></div>
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l4"><span class="num">4</span><div><div class="lname">&#129504; CDSS决策层</div><div class="lq">正式推荐链</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">当前患者何时触发、推荐什么、为什么</div><div class="std-arch-dia-types"><span class="t-l4">ClinicalPathway</span><span class="t-l4">ClinicalRule</span><span class="t-l4">RecommendationStatement</span><span class="t-l4">Contraindication</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">当前患者何时触发、推荐什么、为什么</div><div class="std-arch-dia-types"><span class="t-l4">临床路径 <i>ClinicalPathway</i></span><span class="t-l4">临床规则 <i>ClinicalRule</i></span><span class="t-l4">推荐陈述 <i>RecommendationStatement</i></span><span class="t-l4">禁忌 <i>Contraindication</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>发病12h内且PCI可及 -&gt; 推荐急诊 PCI（I类）</div></div>
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l4b"><span class="num">5</span><div><div class="lname">&#128203; 专科应用结构层</div><div class="lq">评估评分 · 护理 · 路径 · 质控模板</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控</div><div class="std-arch-dia-types"><span class="t-l4b">AssessmentScale</span><span class="t-l4b">NursingCarePlan</span><span class="t-l4b">SpecialtyCarePathway</span><span class="t-l4b">QualityControlRule</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控</div><div class="std-arch-dia-types"><span class="t-l4b">评估量表 <i>AssessmentScale</i></span><span class="t-l4b">护理计划 <i>NursingCarePlan</i></span><span class="t-l4b">专科路径 <i>SpecialtyCarePathway</i></span><span class="t-l4b">质控规则 <i>QualityControlRule</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>GRACE 评分量表 · STEMI 护理计划 · 再灌注路径阶段 · 再灌注质控点</div></div>
           </div>
           <div class="std-arch-dia-row">
             <div class="std-arch-dia-layer std-arch-dia-l5"><span class="num">6</span><div><div class="lname">&#128218; 证据治理层</div><div class="lq">指南原文与页码</div></div></div>
-            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">推荐依据是哪份指南哪一页</div><div class="std-arch-dia-types"><span class="t-l5">Guideline</span><span class="t-l5">SourceSection</span><span class="t-l5">Evidence</span></div></div>
+            <div class="std-arch-dia-mid"><div class="std-arch-dia-q">推荐依据是哪份指南哪一页</div><div class="std-arch-dia-types"><span class="t-l5">指南/教材 <i>Guideline</i></span><span class="t-l5">来源章节 <i>SourceSection</i></span><span class="t-l5">证据片段 <i>Evidence</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>2025 ACS 指南再灌注章节原文</div></div>
           </div>
           <div class="std-arch-dia-cross">
