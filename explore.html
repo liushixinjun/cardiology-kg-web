@@ -11,7 +11,31 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-layout{display:grid;grid-template-columns:300px 1fr 360px;height:calc(100vh - 48px);overflow:hidden}
 .ex-left{background:var(--bg2);border-right:1px solid var(--rule);display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .ex-main{overflow-y:auto;overflow-x:hidden;padding:22px;background:var(--bg)}
-.ex-right{background:var(--bg2);border-left:1px solid var(--rule);overflow-y:auto;overflow-x:hidden;padding:18px}
+.ex-right{background:var(--bg2);border-left:1px solid var(--rule);overflow-y:auto;overflow-x:hidden;padding:18px;display:flex;flex-direction:column}
+/* 右侧详情栏按需显示：仅剩占位提示时收起，内容区占满全宽 */
+.ex-layout{transition:grid-template-columns .25s ease}
+.ex-layout.no-detail{grid-template-columns:300px 1fr}
+.ex-layout.no-detail .ex-right{display:none}
+.panel-close{display:none;align-self:flex-end;flex-shrink:0;background:var(--bg3);border:1px solid var(--rule);color:var(--muted);border-radius:6px;width:24px;height:24px;font-size:12px;line-height:1;cursor:pointer;padding:0}
+.ex-layout:not(.no-detail) .panel-close{display:block}
+.panel-close:hover{color:var(--accent);border-color:var(--accent)}
+#detail-panel{flex:1}
+/* 知识总览多栏瀑布流：按内容区实际宽度自适应列数（容器查询，不支持时退回单列） */
+.ex-main{container-type:inline-size}
+.ex-know-cols{column-count:1}
+@container (min-width:1280px){.ex-know-cols{column-count:2}}
+@container (min-width:2000px){.ex-know-cols{column-count:3}}
+.ex-know-cols .ex-clinical-group{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid}
+/* 风险分层卡片：评分参数 / 风险层级 / 分层策略 */
+.ex-risk-factors{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0}
+.ex-risk-factor{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);color:var(--ink)}
+.ex-risk-level{display:flex;align-items:baseline;gap:7px;font-size:11px;padding:4px 8px;border-radius:5px;background:var(--bg3);margin-bottom:4px;flex-wrap:wrap}
+.ex-risk-lv-name{font-weight:700}
+.ex-risk-lv-name.hi{color:#ff6b6b}.ex-risk-lv-name.mid{color:#ffd43b}.ex-risk-lv-name.lo{color:#51cf66}
+.ex-risk-lv-text{color:var(--muted);font-size:10px}
+.ex-risk-quote-sm{font-size:11px;line-height:1.55;color:var(--fg2);background:var(--bg3);border-left:2px solid var(--accent);padding:6px 9px;border-radius:0 5px 5px 0;margin-bottom:4px}
+.ex-risk-quote-sm b{color:var(--ink)}
+.ex-risk-note{margin-top:6px;padding:6px 9px;border-radius:5px;background:rgba(255,212,99,.06);border:1px dashed rgba(255,212,99,.25);color:var(--muted);font-size:10.5px;line-height:1.5}
 .ex-view-mode{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule)}
 .ex-view-mode label{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:6px;background:var(--bg3);flex:1;transition:all .15s}
 .ex-view-mode label:hover{color:var(--ink)}
@@ -344,7 +368,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 </head>
 <body>
 <div class="nav"></div>
-<div class="ex-layout">
+<div class="ex-layout no-detail">
   <aside class="ex-left">
     <div class="ex-view-mode" id="view-mode">
       <label class="active"><input type="radio" name="view-mode" value="disease" checked> 疾病</label>
@@ -597,7 +621,8 @@ function selectDisease(code){
       var sel=document.getElementById('entity-disease');
       if(sel){sel.value=code;filterEntities();}
     }
-    showDiseaseSummary(code);
+    // 切换疾病时收起右侧详情栏（旧详情属于前一疾病，主区占满全宽）
+    closeDetailPanel();
   });
 }
 function switchView(view){CURRENT_VIEW=view;document.querySelectorAll('.ex-tab').forEach(function(t){t.classList.toggle('active',t.dataset.view===view)});renderCurrent();}
@@ -1063,6 +1088,8 @@ function renderDiseaseView(code){
   }
   h+='</div>';
 
+  // 多栏瀑布流容器：主区宽度自适应列数（容器查询），减少纵向滚动
+  h+='<div class="ex-know-cols">';
   // V2.0 三层架构分组展示 — 按临床思维流重组
   var groups = [
     // 1.定义
@@ -1349,6 +1376,88 @@ function renderDiseaseView(code){
             h+='</div>';
           });
         }
+      } else if (k === 'RiskStratification') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无风险分层</div>';
+        } else {
+          h+='<div class="ex-drill-list">';
+          it.forEach(function(e) {
+            var sub=e.risk_sub||null;
+            var inf=SCHEMA.inferenceStatus(e.inference_status);
+            var hasSub=sub&&((sub.factors&&sub.factors.length)||(sub.levels&&sub.levels.length)||(sub.recommendations&&sub.recommendations.length)||(sub.strategy_texts&&sub.strategy_texts.length));
+            h+='<div class="ex-drill-item">';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            h+='<span class="st-badge '+inf.cls+'" style="margin-left:6px">'+inf.label+'</span>';
+            if (sub && sub.factors && sub.factors.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 评估参数（'+sub.factors.length+' 项）</div>';
+              h+='<div class="ex-sub-list"><div class="ex-risk-factors">';
+              sub.factors.forEach(function(f){ h+='<span class="ex-risk-factor">'+escAttr(f.name)+'</span>'; });
+              h+='</div></div>';
+            }
+            if (sub && sub.levels && sub.levels.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 风险层级与分数区间（'+sub.levels.length+'）</div>';
+              h+='<div class="ex-sub-list">';
+              sub.levels.forEach(function(lv) {
+                var sev=(lv.name.indexOf('极高危')>=0||lv.name.indexOf('高危')>=0)?'hi':(lv.name.indexOf('中')>=0?'mid':'lo');
+                h+='<div class="ex-risk-level"><span class="ex-risk-lv-name '+sev+'">'+escAttr(lv.name)+'</span>'+(lv.text?'<span class="ex-risk-lv-text">'+escAttr(lv.text)+'</span>':'')+'</div>';
+              });
+              h+='</div>';
+            }
+            if (sub && sub.strategy_texts && sub.strategy_texts.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 分层处置策略（'+sub.strategy_texts.length+'，摘自证据原文）</div>';
+              h+='<div class="ex-sub-list">';
+              sub.strategy_texts.forEach(function(t) {
+                h+='<div class="ex-risk-quote-sm">'+escAttr(t).replace(/(极高危|高危|中危|低危)/g,'<b class="ex-risk-hl">$1</b>')+'</div>';
+              });
+              h+='</div>';
+            }
+            if (sub && sub.recommendations && sub.recommendations.length) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 治疗推荐关联（'+sub.recommendations.length+'）</div>';
+              h+='<div class="ex-sub-list">';
+              sub.recommendations.forEach(function(rec) {
+                var nm=rec.code?'<span class="ex-tag" onclick="showRecommendationDetail(\''+escAttr(rec.code)+'\')">'+escAttr(rec.name)+'</span>':'<b>'+escAttr(rec.name)+'</b>';
+                h+='<div class="ex-risk-level">'+nm+(rec.pathway?'<span class="ex-risk-lv-text">📍'+escAttr(rec.pathway)+'</span>':'')+'</div>';
+                if (rec.summary) h+='<div class="ex-risk-lv-text" style="padding:0 8px 4px">'+escAttr(rec.summary)+'</div>';
+              });
+              h+='</div>';
+            }
+            if (!hasSub) {
+              if (e.original_text) {
+                h+='<div class="ex-risk-quote-sm" style="margin-top:5px">'+escAttr(e.original_text).replace(/(极高危|高危|中危|低危)/g,'<b class="ex-risk-hl">$1</b>')+'</div>';
+              } else {
+                h+='<div class="ex-risk-note">评分细则待补'+(inf.cls==='warn'&&e.inference_status?'（'+inf.label+'）':'')+'，评估参数与分数层级待结构化补录</div>';
+              }
+            }
+            h+='</div>';
+          });
+          /* 护理侧风险评估量表（Disease→护理评估→量表，护理批次候选）：条目分值 + 分数对应等级 */
+          if (d.nursing_scales && d.nursing_scales.length) {
+            h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)" style="margin-top:6px">🧑‍⚕️ 护理风险评估量表（'+d.nursing_scales.length+'，护理批次候选）</div>';
+            h+='<div class="ex-sub-list">';
+            d.nursing_scales.forEach(function(sc) {
+              h+='<div class="ex-risk-quote-sm"><b>'+escAttr(sc.name)+'</b>';
+              if (sc.rule) h+='<div>总分规则：'+escAttr(sc.rule)+'</div>';
+              if (sc.items && sc.items.length) {
+                h+='<div class="ex-risk-factors">';
+                sc.items.forEach(function(i2) {
+                  var opt=(i2.options||[]).map(function(o){return o.value+' '+o.score+'分';}).join(' / ');
+                  h+='<span class="ex-risk-factor">'+escAttr(i2.name)+(opt?'：'+escAttr(opt):'')+'</span>';
+                });
+                h+='</div>';
+              }
+              if (sc.levels && sc.levels.length) {
+                sc.levels.forEach(function(lv) {
+                  var sev=lv.name.indexOf('高')>=0?'hi':(lv.name.indexOf('中')>=0?'mid':'lo');
+                  h+='<div class="ex-risk-level"><span class="ex-risk-lv-name '+sev+'">'+escAttr(lv.name)+'</span>'+(lv.rule?'<span class="ex-risk-lv-text">'+escAttr(lv.rule)+'</span>':'')+'</div>';
+                });
+              }
+              h+='</div>';
+            });
+            h+='<div class="ex-risk-note">说明：风险分层↔护理的直连关系本批次尚未建立（待补）；上表量表经 护理评估 uses_assessment_scale 关联，条目分值与风险等级为院内候选版，待临床审核。</div>';
+            h+='</div>';
+          }
+          h+='</div>';
+        }
       } else if (k === 'Procedure') {
         if (it.length === 0) {
           h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无手术操作</div>';
@@ -1534,6 +1643,9 @@ function renderDiseaseView(code){
     h+='</div></div>';
   }
 
+  // 关闭多栏瀑布流容器
+  h+='</div>';
+
   ws.innerHTML = h;
   }catch(e){
     console.error('renderDiseaseView error:',e);
@@ -1542,12 +1654,11 @@ function renderDiseaseView(code){
 }
 
 function showRecommendationDetail(rsCode) {
-  var panel = document.getElementById('detail-panel');
-  panel.innerHTML = '<div class="ex-api-loading">加载推荐详情...</div>';
+  setDetailPanel('<div class="ex-api-loading">加载推荐详情...</div>');
   fetch('/api/cdss/recommendation/' + encodeURIComponent(rsCode) + '?v=' + Date.now())
     .then(function(r) { return r.json(); })
     .then(function(detail) {
-      if (detail.error) { panel.innerHTML = '<div class="ex-side-empty">' + detail.error + '</div>'; return; }
+      if (detail.error) { setDetailPanel('<div class="ex-side-empty">' + detail.error + '</div>'); return; }
       var h = '<div class="ex-side-title">' + cleanName(detail) + '</div>';
       h += '<div class="ex-side-code">' + (detail.code || '') + '</div>';
       // 基本信息
@@ -1648,10 +1759,10 @@ function showRecommendationDetail(rsCode) {
         h += '<div style="font-size:11px;line-height:1.4;color:#c92a2a">' + detail.contraindication_conditions + '</div>';
         h += '</div>';
       }
-      panel.innerHTML = h;
+      setDetailPanel(h);
     })
     .catch(function() {
-      panel.innerHTML = '<div class="ex-side-empty">加载推荐详情失败</div>';
+      setDetailPanel('<div class="ex-side-empty">加载推荐详情失败</div>');
     });
 }
 
@@ -1894,8 +2005,8 @@ function filterEntities(){var q=(document.getElementById('entity-q')?document.ge
   var ds=SCHEMA.dictStatus(e),os=SCHEMA.orderStatus(e,e.dim);
   var srcTxt=SCHEMA.sourceText(e);
   return '<tr onclick="showEntityDetail(\''+e.diseaseCode+'\',\''+e.dim+'\',\''+e.code+'\')"><td><div class="ex-ename">'+e.name+'</div></td><td><span class="ex-dim-badge">'+e.dimName+'</span></td><td>'+e.disease+'</td><td class="ex-st">'+(e.evidence_count>0?e.evidence_count:'<span class="gap-flag">待补</span>')+'</td><td class="ex-st"><span class="st-badge '+(ds.key==='matched'?'ok':(ds.key==='none'?'muted':'warn'))+'">'+(ds.key==='none'?'—':ds.label)+'</span></td><td class="ex-st"><span class="st-badge '+(os.key==='ok'?'ok':(os.key==='n/a'?'muted':'warn'))+'">'+os.label+'</span></td><td class="ex-src" title="'+escAttr(srcTxt)+'">'+(srcTxt?escAttr(srcTxt):'<span class="gap-flag">待补</span>')+'</td><td class="ex-ecode">'+(e.code||'-')+'</td></tr>';}).join('');if(!html)html='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">没有匹配实体</td></tr>';document.getElementById('entity-tbody').innerHTML=html;}
-function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['覆盖率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});document.getElementById('detail-panel').innerHTML=h;}
-function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+cleanName(e)+'</div>';});h+='</div>';document.getElementById('detail-panel').innerHTML=h;}
+function showDiseaseSummary(code){var d=KG_DATA.diseases[code],info=d.info,p=parseParentCode(info.parent),h='<div class="ex-side-title">'+info.name+'</div><div class="ex-side-code">'+info.code+'</div>';[['疾病大类',p.group],['疾病亚类',p.sub||'未标注'],['覆盖率',Math.round(getCoverage(code))+'%'],['证据数',(d.evidence_count||0)+' 条'],['关系数',(d.relations_summary?d.relations_summary.length:0)+' 条']].forEach(function(r){h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';});setDetailPanel(h);}
+function showDimensionDetail(code,k){var d=KG_DATA.diseases[code],it=d.dimensions[k]||[],h='<div class="ex-side-title">'+DIM_NAMES[k]+'</div><div class="ex-side-code">'+k+' · '+d.info.name+'</div><div class="ex-row"><div class="ex-row-label">实体数量</div><div class="ex-row-value">'+it.length+'</div></div><div class="ex-side-section"><h4>实体列表</h4>';it.slice(0,40).forEach(function(e){h+='<div class="ex-small-item">'+cleanName(e)+'</div>';});h+='</div>';setDetailPanel(h);}
 function getCDSSReady(code) {
   var cdss = CDSS_DISEASES_MAP[code];
   if (!cdss) return {cls: 'low', label: '未就绪'};
@@ -1907,6 +2018,21 @@ function getCDSSReady(code) {
 }
 function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList.toggle('open');}
+  /* 右侧详情栏按需展开：写入内容时展开，关闭按钮/切换疾病时收起，主区自动占满全宽 */
+  function setDetailPanel(html){
+    var panel=document.getElementById('detail-panel');
+    var layout=document.querySelector('.ex-layout');
+    if(layout)layout.classList.remove('no-detail');
+    if(!panel)return;
+    panel.innerHTML='<button class="panel-close" onclick="closeDetailPanel()" title="收起详情栏">✕</button>'+html;
+  }
+  function closeDetailPanel(){
+    var panel=document.getElementById('detail-panel');
+    var layout=document.querySelector('.ex-layout');
+    if(layout)layout.classList.add('no-detail');
+    if(!panel)return;
+    panel.innerHTML='<div class="ex-side-empty">点击实体、推荐或图谱节点<br>这里显示属性、关系和证据信息</div>';
+  }
   /* RiskStratification 评分详情：参数 / 预警阈值 / 计分细则（数据来自 /api/kg/entity 的 risk_detail） */
   function renderRiskScoreDetail(rd){
     var h='<h4>评分详情</h4>';
@@ -1981,11 +2107,9 @@ function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList
   }
   /* 护理子实体详情（量表/措施/结局/条目等非维度直挂实体，按编码直查 /api/kg/entity） */
   function showSubEntityDetail(code){
-    var panel=document.getElementById('detail-panel');
-    if(!panel)return;
-    panel.innerHTML='<div class="ex-side-title">实体详情</div><div class="ex-api-loading">加载实体详情...</div>';
+    setDetailPanel('<div class="ex-side-title">实体详情</div><div class="ex-api-loading">加载实体详情...</div>');
     fetch('/api/kg/entity/'+encodeURIComponent(code)+'?v='+Date.now()).then(function(r){return r.json()}).then(function(data){
-      if(data.error){panel.innerHTML='<div class="ex-side-title">未找到实体</div><div class="ex-side-code">'+code+'</div>';return;}
+      if(data.error){setDetailPanel('<div class="ex-side-title">未找到实体</div><div class="ex-side-code">'+code+'</div>');return;}
       var h='<div class="ex-side-title">'+(data.name||code)+'</div><div class="ex-side-code">'+(data.code||'')+'</div>';
       var rv=SCHEMA.reviewStatus(data);
       h+='<div class="ex-row"><div class="ex-row-label">实体类型</div><div class="ex-row-value">'+SCHEMA.typeName(data.entityType)+' / '+(data.entityType||'')+'</div></div>';
@@ -2025,9 +2149,9 @@ function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList
       if(data.nursing_detail){
         h+='<div class="ex-side-section">'+renderNursingDetail(data.nursing_detail)+'</div>';
       }
-      panel.innerHTML=h;
+      setDetailPanel(h);
     }).catch(function(){
-      panel.innerHTML='<div class="ex-side-title">加载失败</div><div class="ex-side-code">'+code+'</div>';
+      setDetailPanel('<div class="ex-side-title">加载失败</div><div class="ex-side-code">'+code+'</div>');
     });
   }
 function showEntityDetail(dc,k,ec){
@@ -2043,7 +2167,6 @@ function showEntityDetail(dc,k,ec){
   var it=d.dimensions[k]||[];
   var en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];
   if(!en)return;
-  var panel=document.getElementById('detail-panel');
   var h='<div class="ex-side-title">'+cleanName(en)+'</div><div class="ex-side-code">'+(en.code||'无编码')+'</div>';
   [['实体类型',DIM_NAMES[k]+' / '+k],['关联疾病',d.info.name],['疾病编码',d.info.code],['同维度实体数',it.length+' 个'],['疾病证据数',(d.evidence_count||0)+' 条']].forEach(function(r){
     h+='<div class="ex-row"><div class="ex-row-label">'+r[0]+'</div><div class="ex-row-value">'+r[1]+'</div></div>';
@@ -2211,7 +2334,7 @@ function showEntityDetail(dc,k,ec){
   if(en.code){
     h+='<div id="entity-api-detail" class="ex-side-section"><div class="ex-api-loading">加载实体元数据...</div></div>';
   }
-  panel.innerHTML=h;
+  setDetailPanel(h);
   // 调用 /api/kg/entity/<code> 获取额外详情
   if(en.code){
     fetch('/api/kg/entity/'+encodeURIComponent(en.code)).then(function(r){return r.json()}).then(function(data){

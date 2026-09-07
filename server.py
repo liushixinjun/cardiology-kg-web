@@ -656,6 +656,7 @@ def query_disease_full(code):
                        n.cdss_dict_id as cdss_dict_id,
                        n.clinical_review_status as review_status,
                        n.execution_status as execution_status,
+                       n.inference_status as inference_status,
                        n.applicable_stage as applicable_stage,
                        n.assessment_method as assessment_method,
                        n.care_context as care_context,
@@ -691,6 +692,7 @@ def query_disease_full(code):
                     "cdss_dict_id": r["cdss_dict_id"] or "",
                     "clinical_review_status": r["review_status"] or "",
                     "execution_status": r["execution_status"] or "",
+                    "inference_status": r["inference_status"] or "",
                     "applicable_stage": r["applicable_stage"] or "",
                     "assessment_method": r["assessment_method"] or "",
                     "care_context": r["care_context"] or "",
@@ -858,6 +860,86 @@ def query_disease_full(code):
                                 item["nursing_sub"].append({"label": sub_label, "rel": sub_rel, "items": sub_items})
                         except Exception:
                             pass
+
+                # RiskStratification 二跳（风险分层结构：评分参数 / 风险层级 / 分层策略 / 相关推荐）
+                if dim == "RiskStratification" and r["ncode"]:
+                    item["risk_sub"] = {}
+                    # 评分参数（评估表单组件，has_risk_factor）
+                    try:
+                        rf_rows = sess.run("""
+                            MATCH (rs:KGNode {code: $rcode})-[:has_risk_factor]->(rf:KGNode)
+                            WHERE (rf.status IS NULL OR rf.status <> 'deprecated')
+                            RETURN DISTINCT rf.code AS code, rf.name AS name, rf.preferred_name AS pref
+                            ORDER BY name LIMIT 20
+                        """, rcode=r["ncode"])
+                        item["risk_sub"]["factors"] = [
+                            {"name": clean_name_from_row(x, 'pref', 'name', 'code'), "code": x["code"]}
+                            for x in rf_rows
+                        ]
+                    except Exception:
+                        item["risk_sub"]["factors"] = []
+                    # 风险层级节点（同名前缀层级节点，如 GRACE评分高危（>140分））
+                    try:
+                        lv_rows = sess.run("""
+                            MATCH (lv:RiskStratification)
+                            WHERE lv.name STARTS WITH $bname AND lv.name <> $bname
+                              AND lv.name CONTAINS '危' AND (lv.name CONTAINS '（' OR lv.name CONTAINS '(')
+                              AND (lv.status IS NULL OR lv.status <> 'deprecated')
+                            RETURN DISTINCT lv.code AS code, lv.name AS name, lv.original_text AS ot
+                            LIMIT 10
+                        """, bname=name)
+                        _sev = {'极高危': 0, '高危': 1, '中高危': 2, '中危': 3, '中低危': 4, '低危': 5}
+                        def _sev_key(nm):
+                            for _k, _v in _sev.items():
+                                if _k in nm:
+                                    return _v
+                            return 9
+                        lvs = [{"name": x["name"], "code": x["code"], "text": (x["ot"] or "")[:120]} for x in lv_rows]
+                        lvs.sort(key=lambda x: _sev_key(x["name"]))
+                        item["risk_sub"]["levels"] = lvs
+                    except Exception:
+                        item["risk_sub"]["levels"] = []
+                    # 相关推荐（RecommendationStatement -recommends_action/recommends_assessment-> 本评分，同一陈述去重合并关系）
+                    try:
+                        rec_rows = sess.run("""
+                            MATCH (rec:RecommendationStatement)-[rel]->(rs:KGNode {code: $rcode})
+                            WHERE type(rel) IN ['recommends_action', 'recommends_assessment']
+                              AND (rec.status IS NULL OR rec.status <> 'deprecated')
+                            WITH rec, collect(DISTINCT type(rel)) AS rels
+                            RETURN rec.code AS code, rec.name AS name,
+                                   rec.statement_summary AS summary, rec.action_name AS action,
+                                   rec.pathway_name AS pathway, rec.recommendation_class AS cls, rels
+                            ORDER BY name LIMIT 10
+                        """, rcode=r["ncode"])
+                        item["risk_sub"]["recommendations"] = [
+                            {
+                                "name": x["name"], "code": x["code"],
+                                "summary": x["summary"] or "", "action": x["action"] or "",
+                                "pathway": x["pathway"] or "", "cls": x["cls"] or "",
+                                "rels": [t for t in x["rels"] if t],
+                            } for x in rec_rows
+                        ]
+                    except Exception:
+                        item["risk_sub"]["recommendations"] = []
+                    # 分层策略证据摘录（疾病→评分关系上的 evidence_text，含 分数区间→处置策略 表）
+                    try:
+                        item["risk_sub"]["strategy_texts"] = []
+                        st_seen = set()
+                        st_rows = sess.run("""
+                            MATCH (:Disease)-[rel:has_risk_stratification]->(rs:KGNode {code: $rcode})
+                            WHERE rel.evidence_text IS NOT NULL AND rel.evidence_text CONTAINS '危'
+                            RETURN DISTINCT rel.evidence_text AS et
+                            LIMIT 8
+                        """, rcode=r["ncode"])
+                        for x in st_rows:
+                            t = (x["et"] or "").strip()
+                            if t and t not in st_seen:
+                                st_seen.add(t)
+                                item["risk_sub"]["strategy_texts"].append(t[:240])
+                    except Exception:
+                        item["risk_sub"]["strategy_texts"] = []
+                    if not any(item["risk_sub"].values()):
+                        del item["risk_sub"]
 
                 # DiagnosisCriteria 二跳 - 增强版：含 rule_logic + actions + evidence
                 if dim == "DiagnosisCriteria" and r["ncode"]:
@@ -1491,6 +1573,60 @@ def query_disease_full(code):
         except Exception:
             pass
 
+        # 护理风险评估量表（Disease→护理评估→量表：条目分值/风险等级/总分规则，Schema V4.0 护理批次候选）
+        nursing_scales = []
+        try:
+            sc_rows = sess.run("""
+                MATCH (d:Disease {code: $code})-[:has_nursing_assessment]->(na:KGNode)-[:uses_assessment_scale]->(sc:AssessmentScale)
+                WHERE (sc.status IS NULL OR sc.status <> 'deprecated')
+                RETURN DISTINCT sc.code AS code, sc.name AS name
+                ORDER BY name LIMIT 5
+            """, code=code)
+            for sc in sc_rows:
+                sc_item = {"name": sc["name"] or "", "code": sc["code"], "items": [], "levels": [], "rule": ""}
+                try:
+                    it_rows = sess.run("""
+                        MATCH (:AssessmentScale {code: $scode})-[:includes_assessment_item]->(it:KGNode)
+                        WHERE (it.status IS NULL OR it.status <> 'deprecated')
+                        RETURN DISTINCT it.name AS name, it.score_options AS so
+                        ORDER BY name LIMIT 12
+                    """, scode=sc["code"])
+                    for it in it_rows:
+                        opts = []
+                        try:
+                            opts = json.loads(it["so"]) if it["so"] else []
+                        except Exception:
+                            opts = []
+                        sc_item["items"].append({"name": it["name"] or "", "options": opts})
+                except Exception:
+                    pass
+                try:
+                    lv_rows = sess.run("""
+                        MATCH (:AssessmentScale {code: $scode})-[:has_result_level]->(lv:KGNode)
+                        WHERE (lv.status IS NULL OR lv.status <> 'deprecated')
+                        RETURN DISTINCT lv.name AS name, lv.rule_text AS rt
+                        LIMIT 8
+                    """, scode=sc["code"])
+                    lv_order = [('极高危', 0), ('中高', 1), ('高危', 1), ('高风险', 1),
+                                ('中风险', 2), ('中危', 2), ('低风险', 3), ('低危', 3), ('无风险', 4), ('无', 4)]
+                    lvs = [{"name": lv["name"] or "", "rule": lv["rt"] or ""} for lv in lv_rows]
+                    lvs.sort(key=lambda x: next((v for k, v in lv_order if k in x["name"]), 9))
+                    sc_item["levels"] = lvs
+                except Exception:
+                    pass
+                try:
+                    tr = sess.run("""
+                        MATCH (:AssessmentScale {code: $scode})-[:has_total_score_rule]->(tr:KGNode)
+                        RETURN tr.rule_text AS rt LIMIT 1
+                    """, scode=sc["code"]).single()
+                    if tr and tr["rt"]:
+                        sc_item["rule"] = tr["rt"]
+                except Exception:
+                    pass
+                nursing_scales.append(sc_item)
+        except Exception:
+            pass
+
         return {
             "info": info,
             "dimensions": dimensions,
@@ -1502,6 +1638,7 @@ def query_disease_full(code):
             "differentials": differentials,
             "source_section_count": source_section_count,
             "source_sections": source_sections,
+            "nursing_scales": nursing_scales,
         }
 
 
