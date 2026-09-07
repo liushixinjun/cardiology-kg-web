@@ -866,7 +866,7 @@ function showAuditDetail(id) {
   h += '<tr><td>总关系数</td><td class="num">' + r.total_rels.toLocaleString() + '</td><td class="ok">-</td></tr>';
   h += '<tr><td>疾病数</td><td class="num">' + r.disease_count + '</td><td class="ok">-</td></tr>';
   h += '<tr><td>实体类型数</td><td class="num">' + r.entity_types + '</td><td class="ok">-</td></tr>';
-  h += '<tr><td>17维度全覆盖疾病</td><td class="num">' + r.full_coverage + '</td><td class="' + (r.full_coverage > 0 ? 'ok' : 'warn') + '">' + (r.full_coverage > 0 ? '有' : '无') + '</td></tr>';
+  h += '<tr><td>核心维度全覆盖疾病</td><td class="num">' + r.full_coverage + '</td><td class="' + (r.full_coverage > 0 ? 'ok' : 'warn') + '">' + (r.full_coverage > 0 ? '有' : '无') + '</td></tr>';
   h += '<tr><td>非标准实体类型</td><td class="num">' + r.non_standard_types + '</td><td class="' + (r.non_standard_types === 0 ? 'ok' : 'bad') + '">' + (r.non_standard_types === 0 ? '已清除' : '需修复') + '</td></tr>';
   h += '<tr><td>旧版实体类型</td><td class="num">' + r.deprecated_types + '</td><td class="' + (r.deprecated_types === 0 ? 'ok' : 'bad') + '">' + (r.deprecated_types === 0 ? '已清除' : '需迁移') + '</td></tr>';
   h += '<tr><td>缺少类型的节点</td><td class="num">' + r.missing_entityType + '</td><td class="' + (r.missing_entityType === 0 ? 'ok' : 'warn') + '">' + (r.missing_entityType === 0 ? '完整' : '需补全') + '</td></tr>';
@@ -876,9 +876,9 @@ function showAuditDetail(id) {
   h += '</tbody></table>';
   h += '</div>';
 
-  // 17维覆盖率
+  // 核心维度覆盖率
   h += '<div class="audit-detail-section">';
-  h += '<h4>17维度覆盖率</h4>';
+  h += '<h4>核心维度覆盖率</h4>';
   h += '<table><thead><tr><th>维度</th><th>覆盖疾病</th><th>实体数</th><th>覆盖率</th></tr></thead><tbody>';
   r.dim_coverage.forEach(function(d) {
     var cls = d.coverage >= 90 ? 'ok' : (d.coverage >= 60 ? 'warn' : 'bad');

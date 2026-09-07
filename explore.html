@@ -349,7 +349,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
     <div class="ex-view-mode" id="view-mode">
       <label class="active"><input type="radio" name="view-mode" value="disease" checked> 疾病</label>
       <label><input type="radio" name="view-mode" value="category"> 疾病大类</label>
-      <span class="cov-help" onclick="event.stopPropagation();toggleHelpPanel(this)">?<div class="cov-help-panel"><h4>诊断角色与覆盖率说明</h4><div class="cov-help-item"><span class="cov-help-key indep">独立诊断</span><span class="cov-help-val">可独立确诊的疾病，如"心脏骤停"。自身17维度独立统计覆盖率</span></div><div class="cov-help-item"><span class="cov-help-key broad">疑似诊断</span><span class="cov-help-val">宽口径/待分型疾病，如"急性心肌梗死"。覆盖率 = 自身维度 ∪ 所有分型的维度合集</span></div><div class="cov-help-item"><span class="cov-help-key sub">具体分型</span><span class="cov-help-val">疑似诊断下的子分型，如"STEMI"。覆盖率 = 自身维度 + 从父疾病继承的维度</span></div><div class="cov-help-item"><span class="cov-help-key">覆盖率计算</span><span class="cov-help-val">有数据的维度数 ÷ 17 核心临床维度 × 100%。17维度 = 症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理</span></div><div class="cov-help-item"><span class="cov-help-key">疾病视图</span><span class="cov-help-val">平铺显示所有独立/疑似诊断疾病，按覆盖率降序排列</span></div><div class="cov-help-item"><span class="cov-help-key">疾病大类视图</span><span class="cov-help-val">树形展示 学科→大类→疾病→分型 的完整层级结构</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病覆盖率；本页可查看单个疾病的维度明细和诊疗链路</span></div></div></span>
+      <span class="cov-help" onclick="event.stopPropagation();toggleHelpPanel(this)">?<div class="cov-help-panel"><h4>诊断角色与覆盖率说明</h4><div class="cov-help-item"><span class="cov-help-key indep">独立诊断</span><span class="cov-help-val">可独立确诊的疾病，如"心脏骤停"。自身20维度独立统计覆盖率</span></div><div class="cov-help-item"><span class="cov-help-key broad">疑似诊断</span><span class="cov-help-val">宽口径/待分型疾病，如"急性心肌梗死"。覆盖率 = 自身维度 ∪ 所有分型的维度合集</span></div><div class="cov-help-item"><span class="cov-help-key sub">具体分型</span><span class="cov-help-val">疑似诊断下的子分型，如"STEMI"。覆盖率 = 自身维度 + 从父疾病继承的维度</span></div><div class="cov-help-item"><span class="cov-help-key">覆盖率计算</span><span class="cov-help-val">有数据的维度数 ÷ 20 核心临床维度 × 100%。20维度 = 17基础维度（症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理）+ 3护理维度（护理计划·护理评估·护理诊断，候选批次）</span></div><div class="cov-help-item"><span class="cov-help-key">疾病视图</span><span class="cov-help-val">平铺显示所有独立/疑似诊断疾病，按覆盖率降序排列</span></div><div class="cov-help-item"><span class="cov-help-key">疾病大类视图</span><span class="cov-help-val">树形展示 学科→大类→疾病→分型 的完整层级结构</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病覆盖率；本页可查看单个疾病的维度明细和诊疗链路</span></div></div></span>
     </div>
     <div class="ex-search"><input id="disease-search" placeholder="搜索疾病名称或编码..."></div>
     <div class="ex-tree" id="disease-tree"></div>
@@ -1031,8 +1031,8 @@ function renderDiseaseView(code){
   h+='<div class="cov-note" id="cov-note-panel">';
   h+='<h4>覆盖率统计说明</h4>';
   h+='<ul>';
-  h+='<li>覆盖率 = 有数据的维度数 / 17 核心临床维度 × 100%</li>';
-  h+='<li>17 核心维度：<span class="cov-tag core">症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理</span></li>';
+  h+='<li>覆盖率 = 有数据的维度数 / 20 核心临床维度 × 100%</li>';
+  h+='<li>20 核心维度：<span class="cov-tag core">症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理·护理计划·护理评估·护理诊断</span>（护理3维度为20260906候选批次，待临床审核）</li>';
   h+='<li>检查项目/检验项目通过检查方案中转查询（includes_exam_item / includes_lab_item）</li>';
   h+='<li>药物/手术通过治疗方案中转查询（includes_medication / includes_procedure）；正式 CDSS 医嘱推荐仅读 RecommendationStatement→recommends_action</li>';
   h+='<li>当前疾病类型：<span class="cov-tag '+SCHEMA.roleClass(info.diagnostic_role)+'">'+roleText+'</span></li>';

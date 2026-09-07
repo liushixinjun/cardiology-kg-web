@@ -1973,7 +1973,7 @@ function drawRadar(canvasId, match) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // 绘制17个轴（排除DifferentialDiagnosis的特殊显示，但保留结构）
+  // 绘制全维度轴（DIM_KEYS，排除DifferentialDiagnosis的特殊显示，但保留结构）
   // 为避免过于拥挤，只显示有数据的维度 + 4个核心维度作为骨架
   var displayDims = DIM_KEYS;
   var n = displayDims.length;
