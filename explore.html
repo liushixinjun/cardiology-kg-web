@@ -366,8 +366,8 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/schema-map.js?v=20260906"></script>
-<script src="./_shared/js/app.js?v=20260906b"></script>
+<script src="./_shared/js/schema-map.js?v=20260907"></script>
+<script src="./_shared/js/app.js?v=20260907"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
 var CURRENT_DISEASE = null;
@@ -1095,6 +1095,12 @@ function renderDiseaseView(code){
       dims: ['TreatmentPlan','Medication','Procedure','Contraindication'],
       desc: '治疗策略、药物、手术操作和禁忌条件'
     },
+    // 5.5 护理支持（Schema V4.0 护理批次）
+    {
+      name: '护理支持', icon: '🧑‍⚕️', layer: 'knowledge',
+      dims: ['NursingCarePlan','NursingAssessment','NursingDiagnosis'],
+      desc: '护理计划、护理评估和护理诊断（批次候选数据，待临床审核）'
+    },
     // 6.临床规则（紧邻诊断与治疗，逻辑连贯）
     {
       name: '临床规则', icon: '⚙️', layer: 'knowledge',
@@ -1314,6 +1320,32 @@ function renderDiseaseView(code){
               });
               h+='</div>';
             }
+            h+='</div>';
+          });
+        }
+      } else if (k === 'NursingCarePlan' || k === 'NursingAssessment' || k === 'NursingDiagnosis') {
+        if (it.length === 0) {
+          h+='<div style="padding:12px;text-align:center;color:var(--muted);font-size:11px;font-style:italic">暂无'+DIM_NAMES[k]+'</div>';
+        } else {
+          it.forEach(function(e) {
+            var rv = SCHEMA.reviewStatus(e);
+            h+='<div style="margin-bottom:8px;padding:8px 10px;background:rgba(12,166,120,.05);border:1px solid rgba(12,166,120,.18);border-radius:6px">';
+            h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
+            h+='<span class="st-badge '+rv.cls+'" style="margin-left:6px">'+rv.label+'</span>';
+            if (e.applicable_stage) h+='<span style="color:var(--muted);font-size:10px;margin-left:6px">'+e.applicable_stage+'</span>';
+            var subs = e.nursing_sub || [];
+            subs.forEach(function(g) {
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ '+g.label+'（'+g.items.length+'）</div>';
+              h+='<div class="ex-sub-list">';
+              g.items.forEach(function(si) {
+                var subText = (si.text && si.text !== si.name) ? '<span style="color:var(--muted);font-size:11px"> — '+si.text+'</span>' : '';
+                var nm = si.code
+                  ? '<span class="ex-tag" onclick="showSubEntityDetail(\''+escAttr(si.code)+'\')">'+cleanName(si)+'</span>'
+                  : '<b>'+cleanName(si)+'</b>';
+                h+='<div class="ex-sub-item-single">'+nm+subText+'</div>';
+              });
+              h+='</div>';
+            });
             h+='</div>';
           });
         }
@@ -1847,6 +1879,7 @@ function buildEntityIndexAsync(){
         (dims[k]||[]).forEach(function(e){
           ALL_ENTITIES.push({name:e.name,code:e.code||'',dim:k,dimName:DIM_NAMES[k],disease:data[dc].info.name,diseaseCode:dc,
             cdss_dict_id:e.cdss_dict_id||'',evidence_count:e.evidence_count||0,
+            clinical_review_status:e.clinical_review_status||'',execution_status:e.execution_status||'',
             source_section_path:e.source_section_path||'',book_page_start:e.book_page_start||'',pdf_page_start:e.pdf_page_start||''});
         });
       });
@@ -1912,8 +1945,101 @@ function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList
     if(t.style.display==='none'){t.style.display='block';el.textContent='收起原文 ▴';}
     else{t.style.display='none';el.textContent='展开原文 ▾';}
   }
+  /* 护理批次结构详情：子结构分组 / 量表条目与等级 / 质控规则指向（数据来自 /api/kg/entity 的 nursing_detail） */
+  function renderNursingDetail(nd){
+    if(!nd)return '';
+    var h='<h4>护理结构详情</h4>';
+    (nd.groups||[]).forEach(function(g){
+      h+='<div class="ex-small-item" style="font-weight:700;margin-top:4px">'+g.label+'（'+g.items.length+'）</div>';
+      g.items.forEach(function(it){
+        h+='<div class="ex-sub-detail">';
+        h+='<div class="ex-sub-detail-title">'+cleanName(it)+'</div>';
+        if(it.text&&it.text!==it.name)h+='<div class="ex-sub-detail-row">'+it.text+'</div>';
+        if(it.score_options&&it.score_options.length){
+          var opts=it.score_options.map(function(o){return o.value+'('+o.score+'分)';}).join(' / ');
+          h+='<div class="ex-sub-detail-row">评分选项：'+opts+'</div>';
+        }
+        if(it.calculation_expression)h+='<div class="ex-sub-detail-row">计算公式：'+it.calculation_expression+'</div>';
+        h+='</div>';
+      });
+    });
+    if(nd.qc_rules&&nd.qc_rules.length){
+      h+='<div class="ex-small-item" style="font-weight:700;margin-top:6px">质控规则指向（'+nd.qc_rules.length+'）</div>';
+      nd.qc_rules.forEach(function(q){
+        h+='<div class="ex-sub-detail">';
+        h+='<div class="ex-sub-detail-title">'+(q.name||'')+'</div>';
+        if(q.rule_text)h+='<div class="ex-sub-detail-row">'+q.rule_text+'</div>';
+        var m=[];
+        if(q.severity)m.push('严重度：'+q.severity);
+        if(q.trigger_event)m.push('触发事件：'+q.trigger_event);
+        if(m.length)h+='<div class="ex-sub-detail-row">'+m.join(' · ')+'</div>';
+        h+='</div>';
+      });
+    }
+    return h;
+  }
+  /* 护理子实体详情（量表/措施/结局/条目等非维度直挂实体，按编码直查 /api/kg/entity） */
+  function showSubEntityDetail(code){
+    var panel=document.getElementById('detail-panel');
+    if(!panel)return;
+    panel.innerHTML='<div class="ex-side-title">实体详情</div><div class="ex-api-loading">加载实体详情...</div>';
+    fetch('/api/kg/entity/'+encodeURIComponent(code)+'?v='+Date.now()).then(function(r){return r.json()}).then(function(data){
+      if(data.error){panel.innerHTML='<div class="ex-side-title">未找到实体</div><div class="ex-side-code">'+code+'</div>';return;}
+      var h='<div class="ex-side-title">'+(data.name||code)+'</div><div class="ex-side-code">'+(data.code||'')+'</div>';
+      var rv=SCHEMA.reviewStatus(data);
+      h+='<div class="ex-row"><div class="ex-row-label">实体类型</div><div class="ex-row-value">'+SCHEMA.typeName(data.entityType)+' / '+(data.entityType||'')+'</div></div>';
+      h+='<div class="ex-row"><div class="ex-row-label">执行状态</div><div class="ex-row-value"><span class="st-badge '+rv.cls+'">'+rv.label+'</span>'+(data.execution_status?' <span style="color:var(--muted);font-size:10px">'+data.execution_status+'</span>':'')+'</div></div>';
+      h+='<div class="ex-row"><div class="ex-row-label">证据支撑</div><div class="ex-row-value">'+(data.evidence_count>0?data.evidence_count+' 条（supported_by_evidence）':'<span class="gap-flag">暂无直连证据</span>')+'</div></div>';
+      var flds=[['applicable_stage','适用阶段'],['applicable_population','适用人群'],['assessment_method','评估方式'],['care_context','护理场景'],
+                ['intervention_text','措施内容'],['outcome_definition','结局定义'],['observation_method','观察方式'],
+                ['recording_time_policy','记录时机'],['rule_text','规则原文'],['scoring_status','评分状态'],
+                ['terminology_mapping_status','术语映射'],['local_term_source_code','本地术语来源'],['abnormal_condition_text','异常条件'],
+                ['severity','严重度'],['trigger_event','触发事件'],['handling_strategy','处理策略'],['data_quality_note','数据质量提示']];
+      var hasFld=flds.some(function(f){return data[f[0]]});
+      if(hasFld){
+        h+='<div class="ex-side-section"><h4>实体属性</h4>';
+        flds.forEach(function(f){
+          var v=data[f[0]];
+          if(v){
+            if(Array.isArray(v))v=v.join('、');
+            h+='<div class="ex-row"><div class="ex-row-label">'+f[1]+'</div><div class="ex-row-value">'+v+'</div></div>';
+          }
+        });
+        h+='</div>';
+      }
+      if(data.parents&&data.parents.length){
+        h+='<div class="ex-side-section"><h4>上级挂接</h4>';
+        data.parents.forEach(function(p){
+          h+='<div class="ex-small-item">'+(p.name||p.code||'')+' <span style="color:var(--muted);font-size:10px">← '+SCHEMA.relationLabel(p.rel_type)+' · '+SCHEMA.typeName(p.entityType)+'</span></div>';
+        });
+        h+='</div>';
+      }
+      if(data.diseases&&data.diseases.length){
+        h+='<div class="ex-side-section"><h4>关联疾病</h4>';
+        data.diseases.forEach(function(d2){
+          h+='<div class="ex-small-item">'+d2.disease_name+' <span style="color:var(--muted);font-size:10px">'+SCHEMA.relationLabel(d2.rel_type)+'</span></div>';
+        });
+        h+='</div>';
+      }
+      if(data.nursing_detail){
+        h+='<div class="ex-side-section">'+renderNursingDetail(data.nursing_detail)+'</div>';
+      }
+      panel.innerHTML=h;
+    }).catch(function(){
+      panel.innerHTML='<div class="ex-side-title">加载失败</div><div class="ex-side-code">'+code+'</div>';
+    });
+  }
 function showEntityDetail(dc,k,ec){
-  var d=KG_DATA.diseases[dc],it=d.dimensions[k]||[];
+  var d=KG_DATA.diseases[dc];
+  if(!d)return;
+  /* 实体视角点击未加载疾病时按需拉取完整数据（失败则静默返回，避免死循环） */
+  if(!d._loaded){
+    if(d._loading)return;
+    d._loading=true;
+    loadDiseaseData(dc,function(){showEntityDetail(dc,k,ec)});
+    return;
+  }
+  var it=d.dimensions[k]||[];
   var en=it.find(function(e){return (e.code||'')===ec})||it.find(function(e){return e.name===ec})||it[0];
   if(!en)return;
   var panel=document.getElementById('detail-panel');
@@ -1934,6 +2060,10 @@ function showEntityDetail(dc,k,ec){
       /* RiskStratification: 评分参数/预警阈值/计分细则（异步填充） */
       if(k==='RiskStratification'||en.entityType==='RiskStratification'){
         h+='<div id="risk-score-detail" class="ex-side-section"><div class="ex-api-loading">加载评分参数与预警阈值...</div></div>';
+      }
+      /* 护理批次：子结构/量表/质控规则（异步填充） */
+      if(k==='NursingCarePlan'||k==='NursingAssessment'||k==='NursingDiagnosis'){
+        h+='<div id="nursing-detail" class="ex-side-section"><div class="ex-api-loading">加载护理结构详情...</div></div>';
       }
       var rs=(d.relations_summary||[]).filter(function(r){return r.name===en.name});
   if(rs.length){
@@ -2098,6 +2228,11 @@ function showEntityDetail(dc,k,ec){
       if(data.entityType==='RiskStratification'&&data.risk_detail){
         var rEl=document.getElementById('risk-score-detail');
         if(rEl)rEl.innerHTML=renderRiskScoreDetail(data.risk_detail);
+      }
+      /* 护理批次：填充护理结构详情（四件套/量表条目与等级/质控规则） */
+      if((k==='NursingCarePlan'||k==='NursingAssessment'||k==='NursingDiagnosis')&&data.nursing_detail){
+        var nEl=document.getElementById('nursing-detail');
+        if(nEl)nEl.innerHTML=renderNursingDetail(data.nursing_detail);
       }
     }).catch(function(){var el=document.getElementById('entity-api-detail');if(el)el.style.display='none';});
   }

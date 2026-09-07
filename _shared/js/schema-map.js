@@ -71,7 +71,21 @@ var SCHEMA = (function () {
     requires_pre_treatment_exam: '治疗前需检查', requires_pre_treatment_lab: '治疗前需检验',
     /* 路径 */
     has_clinical_pathway: '有临床路径', has_pathway_stage: '有路径阶段',
-    has_stage_rule: '阶段含规则', next_pathway_stage: '下一阶段'
+    has_stage_rule: '阶段含规则', next_pathway_stage: '下一阶段',
+    /* 护理（Schema V4.0） */
+    has_nursing_care_plan: '有护理计划', has_nursing_assessment: '有护理评估',
+    has_nursing_assessment_item: '含护理评估条目', has_nursing_diagnosis: '有护理诊断',
+    has_nursing_intervention: '有护理措施', targets_nursing_outcome: '目标护理结局',
+    achieves_nursing_outcome: '达成护理结局', records_nursing_item: '记录护理条目',
+    determines_nursing_grade: '判定护理分级', uses_assessment_scale: '使用评估量表',
+    plan_uses_assessment: '计划用评估', plan_has_nursing_diagnosis: '计划含护理诊断',
+    plan_targets_outcome: '计划目标结局', includes_nursing_intervention: '含护理措施',
+    restricts_nursing_intervention: '限制护理措施', checks_target: '核对对象',
+    /* 评估评分与质控（Schema V4.0） */
+    includes_assessment_item: '含评分条目', has_score_rule: '有计分规则',
+    has_total_score_rule: '有总分规则', has_result_level: '有结果等级',
+    determines_result_level: '判定结果等级', level_supported_by_evidence: '等级有证据',
+    has_quality_control_point: '有质控点', has_quality_control_rule: '有质控规则'
   };
 
   function relationLabel(relType) { return RELATION_LABELS[relType] || relType || ''; }
@@ -90,7 +104,11 @@ var SCHEMA = (function () {
     Medication: 'includes_medication', Procedure: 'includes_procedure',
     ExamObservation: 'exam_item_has_observation', LabSubitem: 'lab_item_has_subitem',
     ThresholdRule: 'has_threshold_rule', StandardDiagnosis: 'maps_to_standard_diagnosis',
-    Contraindication: 'has_contraindication', ClinicalRule: 'has_stage_rule'
+    Contraindication: 'has_contraindication', ClinicalRule: 'has_stage_rule',
+    /* 护理与评估评分（Schema V4.0） */
+    NursingCarePlan: 'has_nursing_care_plan', NursingAssessment: 'has_nursing_assessment',
+    NursingDiagnosis: 'has_nursing_diagnosis', NursingIntervention: 'has_nursing_intervention',
+    AssessmentScale: 'has_nursing_assessment', NursingRecordItem: 'records_nursing_item'
   };
 
   /* ---- 关系连线样式（全站统一规范） ---- */
@@ -127,7 +145,12 @@ var SCHEMA = (function () {
     applicable_population: '适用人群', primary_evidence_code: '主证据编码',
     primary_guideline_code: '主指南编码', rule_logic: '规则逻辑',
     usage_boundary: '用途边界', trigger_condition: '触发条件',
-    mapping_status: '字典映射状态'
+    mapping_status: '字典映射状态',
+    /* 护理与评估评分（Schema V4.0） */
+    applicable_stage: '适用阶段', assessment_method: '评估方式',
+    calculation_expression: '计算公式', rule_text: '规则原文',
+    applicable_disease_codes: '适用疾病编码', execution_status: '执行状态',
+    reused_action_code: '复用动作编码'
   };
 
   /* ---- 字典状态推导：mapping_status 入库后优先，现库从 cdss_dict_id 推导 ---- */
@@ -179,12 +202,16 @@ var SCHEMA = (function () {
     cleaned: { label: '已清理', cls: 'muted' },
     /* 兼容库中既有取值 */
     passed: { label: '已通过', cls: 'ok' },
-    pending: { label: '待审核', cls: 'warn' }
+    pending: { label: '待审核', cls: 'warn' },
+    /* Schema V4.0 候选批次（execution_status，护理批次实测全库 83 节点且必伴随 pending） */
+    candidate: { label: '待临床审核', cls: 'warn' }
   };
 
   function reviewStatus(node) {
     if (!node) return { label: '—', cls: 'muted' };
-    var raw = node.clinical_review_status || node.review_status || '';
+    /* execution_status=candidate 更精确（批次治理位），优先于笼统的 clinical_review_status=pending */
+    if (node.execution_status === 'candidate') return REVIEW_STATUS.candidate;
+    var raw = node.clinical_review_status || node.review_status || node.execution_status || '';
     /* 库中存在数组型取值（如 ['not_applicable','not_required']，6 节点），取首个 */
     var rs = Array.isArray(raw) ? (raw[0] || '') : raw;
     if (rs && REVIEW_STATUS[rs]) return REVIEW_STATUS[rs];
@@ -245,6 +272,32 @@ var SCHEMA = (function () {
     return h;
   }
 
+  /* ---- 实体类型中文名（Schema V4.0 全量；旧类型页面已有各自实现，此处以 V4.0 新增为主） ---- */
+  var TYPE_NAMES = {
+    /* 护理（V4.0） */
+    NursingAssessment: '护理评估', NursingAssessmentItem: '护理评估条目',
+    NursingDiagnosis: '护理诊断', NursingIntervention: '护理措施',
+    NursingOutcome: '护理结局', NursingCarePlan: '护理计划',
+    NursingGrade: '护理分级', NursingContraindication: '护理禁忌',
+    NursingRecordItem: '护理记录条目', NursingOrderCheckRule: '护理医嘱核对规则',
+    /* 评估评分（V4.0） */
+    AssessmentScale: '评估量表', AssessmentItem: '评分条目',
+    AssessmentScoreRule: '计分规则', AssessmentResultLevel: '结果等级',
+    AssessmentActionRule: '评估动作规则',
+    /* 路径与质控（V4.0） */
+    SpecialtyCarePathway: '专科路径', InpatientClinicalPathway: '住院路径',
+    PathwayStage: '路径阶段', PathwayTask: '路径任务',
+    QualityControlPoint: '质控点', QualityControlRule: '质控规则',
+    /* 常用旧类型（供详情页统一展示） */
+    Disease: '疾病', StandardDiagnosis: '标准诊断', Symptom: '症状', Sign: '体征',
+    ExamItem: '检查项目', LabItem: '检验项目', Medication: '药品',
+    Procedure: '手术/操作', TreatmentPlan: '治疗方案', ClinicalRule: '临床规则',
+    RecommendationStatement: '推荐陈述', Contraindication: '禁忌',
+    Evidence: '证据', SourceSection: '来源章节', Guideline: '指南/教材',
+    DifferentialDiagnosis: '鉴别诊断', RiskStratification: '风险分层'
+  };
+  function typeName(t) { return TYPE_NAMES[t] || t || ''; }
+
   return {
     roleGroup: roleGroup, roleLabel: roleLabel, roleClass: roleClass,
     roleLongLabel: roleLongLabel, roleBadge: roleBadge,
@@ -252,6 +305,7 @@ var SCHEMA = (function () {
     RELATION_LABELS: RELATION_LABELS, relationLabel: relationLabel, DIM_REL: DIM_REL,
     LINE_STYLES: LINE_STYLES, lineStyle: lineStyle,
     FIELD_LABELS: FIELD_LABELS,
+    TYPE_NAMES: TYPE_NAMES, typeName: typeName,
     dictStatus: dictStatus, orderStatus: orderStatus, reviewStatus: reviewStatus,
     inferenceStatus: inferenceStatus,
     sourceText: sourceText, gapTags: gapTags, statusBadges: statusBadges,

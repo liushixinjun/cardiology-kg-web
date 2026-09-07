@@ -69,7 +69,7 @@ SHELL_NAMES = {
     "一般治疗", "药物治疗", "定期随访",
 }
 
-# ============ 维度关系映射（17核心 + 2直接扩展） ============
+# ============ 维度关系映射（17核心 + 2直接扩展 + 3护理直连） ============
 REL_MAP = {
     "Symptom": "has_symptom",
     "Sign": "has_sign",
@@ -88,6 +88,10 @@ REL_MAP = {
     "Guideline": "based_on_guideline",
     "Prevention": "has_prevention",
     "Definition": "has_definition",
+    # 护理直连维度（Schema V4.0 护理批次 20260906，Disease 一跳）
+    "NursingCarePlan": "has_nursing_care_plan",
+    "NursingAssessment": "has_nursing_assessment",
+    "NursingDiagnosis": "has_nursing_diagnosis",
 }
 
 # Schema V2.x 多跳维度（原一跳直连关系已迁移）
@@ -455,6 +459,8 @@ def query_diseases_summary():
                     RETURN DISTINCT n.code as ncode, n.name as name, n.preferred_name as pref,
                        n.display_name as dn, n.name_en as name_en, n.aliases as aliases, n.status as status,
                        n.cdss_dict_id as cdss_dict_id,
+                       n.clinical_review_status as clinical_review_status,
+                       n.execution_status as execution_status,
                        n.source_section_path as section_path, n.book_page_start as book_start,
                        n.pdf_page_start as pdf_start,
                        COUNT {{ (n)-[:supported_by_evidence]-() }} as evidence_count
@@ -470,7 +476,7 @@ def query_diseases_summary():
                         continue
                     seen.add(name)
                     aliases = [a for a in (r["aliases"] or []) if a != name]
-                    items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases, "status": r.get("status"), "cdss_dict_id": r["cdss_dict_id"] or "", "evidence_count": r["evidence_count"] or 0, "source_section_path": r["section_path"] or "", "book_page_start": r["book_start"] or "", "pdf_page_start": r["pdf_start"] or ""})
+                    items.append({"name": name, "code": r["ncode"], "name_en": r["name_en"] or "", "aliases": aliases, "status": r.get("status"), "cdss_dict_id": r["cdss_dict_id"] or "", "clinical_review_status": r["clinical_review_status"] or "", "execution_status": r["execution_status"] or "", "evidence_count": r["evidence_count"] or 0, "source_section_path": r["section_path"] or "", "book_page_start": r["book_start"] or "", "pdf_page_start": r["pdf_start"] or ""})
                 dims[dim] = items
             result[code] = {"info": d_info, "dimensions": dims}
 
@@ -649,6 +655,10 @@ def query_disease_full(code):
                        n.description as description,
                        n.cdss_dict_id as cdss_dict_id,
                        n.clinical_review_status as review_status,
+                       n.execution_status as execution_status,
+                       n.applicable_stage as applicable_stage,
+                       n.assessment_method as assessment_method,
+                       n.care_context as care_context,
                        COUNT {{ (n)-[:supported_by_evidence]-() }} as evidence_count
                 ORDER BY n.name LIMIT 30
             """, code=code)
@@ -680,6 +690,10 @@ def query_disease_full(code):
                     "description": r["description"] or "",
                     "cdss_dict_id": r["cdss_dict_id"] or "",
                     "clinical_review_status": r["review_status"] or "",
+                    "execution_status": r["execution_status"] or "",
+                    "applicable_stage": r["applicable_stage"] or "",
+                    "assessment_method": r["assessment_method"] or "",
+                    "care_context": r["care_context"] or "",
                     "evidence_count": r["evidence_count"] or 0,
                 }
 
@@ -801,6 +815,49 @@ def query_disease_full(code):
                             })
                     except Exception:
                         pass
+
+                # 护理维度二跳（Schema V4.0 护理批次：护理计划四件套 / 评估条目 / 措施 / 结局 / 量表）
+                if dim in ("NursingCarePlan", "NursingAssessment", "NursingDiagnosis") and r["ncode"]:
+                    if dim == "NursingCarePlan":
+                        sub_specs = [
+                            ("护理诊断", "plan_has_nursing_diagnosis"),
+                            ("护理措施", "includes_nursing_intervention"),
+                            ("护理结局", "plan_targets_outcome"),
+                            ("护理评估", "plan_uses_assessment"),
+                        ]
+                    elif dim == "NursingAssessment":
+                        sub_specs = [
+                            ("评估条目", "has_nursing_assessment_item"),
+                            ("记录条目", "records_nursing_item"),
+                            ("评估量表", "uses_assessment_scale"),
+                        ]
+                    else:
+                        sub_specs = [
+                            ("护理措施", "has_nursing_intervention"),
+                            ("护理结局", "targets_nursing_outcome"),
+                        ]
+                    item["nursing_sub"] = []
+                    for sub_label, sub_rel in sub_specs:
+                        try:
+                            sub_rows = sess.run(f"""
+                                MATCH (n:KGNode {{code: $ncode}})-[:{sub_rel}]->(m:KGNode)
+                                WHERE (m.status IS NULL OR m.status <> 'deprecated')
+                                RETURN DISTINCT m.code AS code, m.name AS name, m.preferred_name AS pref,
+                                       coalesce(m.intervention_text, m.outcome_definition, m.assessment_method,
+                                                m.observation_method, m.rule_text, '') AS text
+                                ORDER BY name LIMIT 20
+                            """, ncode=r["ncode"])
+                            sub_items = []
+                            for sr in sub_rows:
+                                sub_items.append({
+                                    "name": clean_name_from_row(sr, 'pref', 'name', 'code'),
+                                    "code": sr["code"],
+                                    "text": sr["text"] or "",
+                                })
+                            if sub_items:
+                                item["nursing_sub"].append({"label": sub_label, "rel": sub_rel, "items": sub_items})
+                        except Exception:
+                            pass
 
                 # DiagnosisCriteria 二跳 - 增强版：含 rule_logic + actions + evidence
                 if dim == "DiagnosisCriteria" and r["ncode"]:
@@ -1601,9 +1658,28 @@ def query_entity_detail(code):
                    n.maps_to_disease_code as maps_to_disease_code, labels(n) as labels,
                    n.entityType as entityType, n.cdss_dict_id as cdss_dict_id,
                    n.clinical_review_status as review_status,
+                   n.execution_status as execution_status,
                    n.source_section_path as source_section_path, n.source_name as source_name,
                    n.book_page_start as book_page_start, n.pdf_page_start as pdf_page_start,
                    n.inference_status as inference_status,
+                   n.applicable_stage as applicable_stage,
+                   n.applicable_disease_codes as applicable_disease_codes,
+                   n.assessment_method as assessment_method,
+                   n.care_context as care_context,
+                   n.intervention_text as intervention_text,
+                   n.outcome_definition as outcome_definition,
+                   n.observation_method as observation_method,
+                   n.recording_time_policy as recording_time_policy,
+                   n.rule_text as rule_text,
+                   n.applicable_population as applicable_population,
+                   n.scoring_status as scoring_status,
+                   n.terminology_mapping_status as terminology_mapping_status,
+                   n.local_term_source_code as local_term_source_code,
+                   n.abnormal_condition_text as abnormal_condition_text,
+                   n.severity as severity,
+                   n.trigger_event as trigger_event,
+                   n.handling_strategy as handling_strategy,
+                   n.data_quality_note as data_quality_note,
                    COUNT { (n)-[:supported_by_evidence]-() } as evidence_count
         """, code=code).single()
         if not r:
@@ -1630,6 +1706,17 @@ def query_entity_detail(code):
             ORDER BY d.name LIMIT 10
         """, name=name, code=code)
         cross_list = [dict(rd) for rd in cross_diseases]
+
+        # 反向挂接（非疾病父实体，如护理评估→量表、护理计划→护理诊断；护理子实体溯源用）
+        parent_rows = sess.run("""
+            MATCH (p:KGNode)-[rel]->(n:KGNode {code: $code})
+            WHERE (p.status IS NULL OR p.status <> 'deprecated')
+              AND NOT p:Disease AND NOT p:Evidence
+            RETURN DISTINCT p.code AS code, p.name AS name, p.entityType AS entityType,
+                   type(rel) AS rel_type
+            ORDER BY name LIMIT 10
+        """, code=code)
+        parent_list = [dict(x) for x in parent_rows]
 
         # RiskStratification 专属：评分参数（has_risk_factor）+ 证据阈值句 + 计分细则证据
         risk_detail = None
@@ -1679,6 +1766,85 @@ def query_entity_detail(code):
                 "inference_status": r.get("inference_status") or ""
             }
 
+        # 护理批次专属（Schema V4.0）：子结构 / 量表条目与等级 / 质控规则指向
+        nursing_detail = None
+        _et = r.get("entityType") or ""
+        nursing_sub_specs = []
+        if _et == "NursingCarePlan":
+            nursing_sub_specs = [
+                ("护理诊断", "plan_has_nursing_diagnosis"),
+                ("护理措施", "includes_nursing_intervention"),
+                ("护理结局", "plan_targets_outcome"),
+                ("护理评估", "plan_uses_assessment"),
+            ]
+        elif _et == "NursingAssessment":
+            nursing_sub_specs = [
+                ("评估条目", "has_nursing_assessment_item"),
+                ("记录条目", "records_nursing_item"),
+                ("评估量表", "uses_assessment_scale"),
+            ]
+        elif _et == "NursingDiagnosis":
+            nursing_sub_specs = [
+                ("护理措施", "has_nursing_intervention"),
+                ("护理结局", "targets_nursing_outcome"),
+            ]
+        elif _et == "NursingIntervention":
+            nursing_sub_specs = [
+                ("记录条目", "records_nursing_item"),
+                ("达成护理结局", "achieves_nursing_outcome"),
+            ]
+        elif _et == "NursingContraindication":
+            nursing_sub_specs = [("限制的护理措施", "restricts_nursing_intervention")]
+        elif _et == "AssessmentScale":
+            nursing_sub_specs = [
+                ("量表条目", "includes_assessment_item"),
+                ("结果等级", "has_result_level"),
+                ("总分规则", "has_total_score_rule"),
+            ]
+        elif _et == "QualityControlRule":
+            nursing_sub_specs = [("核对对象", "checks_target")]
+
+        if nursing_sub_specs:
+            nursing_detail = {"groups": []}
+            for sub_label, sub_rel in nursing_sub_specs:
+                try:
+                    sub_rows = sess.run(f"""
+                        MATCH (n:KGNode {{code: $code}})-[:{sub_rel}]->(m:KGNode)
+                        WHERE (m.status IS NULL OR m.status <> 'deprecated')
+                        RETURN DISTINCT m.code AS code, m.name AS name, m.preferred_name AS pref,
+                               coalesce(m.intervention_text, m.outcome_definition, m.assessment_method,
+                                        m.observation_method, m.rule_text, '') AS text,
+                               m.score_options AS score_options,
+                               m.calculation_expression AS calculation_expression,
+                               m.entityType AS entityType
+                        ORDER BY name LIMIT 30
+                    """, code=code)
+                    sub_items = []
+                    for sr in sub_rows:
+                        sub_items.append({
+                            "name": clean_name_from_row(sr, 'pref', 'name', 'code'),
+                            "code": sr["code"],
+                            "text": sr["text"] or "",
+                            "score_options": sr["score_options"] or "",
+                            "calculation_expression": sr["calculation_expression"] or "",
+                            "entityType": sr["entityType"] or "",
+                        })
+                    if sub_items:
+                        nursing_detail["groups"].append({"label": sub_label, "rel": sub_rel, "items": sub_items})
+                except Exception:
+                    pass
+            # 质控规则指向（反向：QualityControlRule -checks_target-> 本实体）
+            qc_rows = sess.run("""
+                MATCH (q:QualityControlRule)-[:checks_target]->(n:KGNode {code: $code})
+                WHERE (q.status IS NULL OR q.status <> 'deprecated')
+                RETURN DISTINCT q.code AS code, q.name AS name, q.rule_text AS rule_text,
+                       q.severity AS severity, q.trigger_event AS trigger_event
+                ORDER BY q.name LIMIT 10
+            """, code=code)
+            nursing_detail["qc_rules"] = [dict(x) for x in qc_rows]
+            if not nursing_detail["groups"] and not nursing_detail["qc_rules"]:
+                nursing_detail = None
+
         aliases = [a for a in (r["aliases"] or []) if a != name]
 
         return {
@@ -1692,14 +1858,36 @@ def query_entity_detail(code):
             "entityType": r.get("entityType") or "",
             "cdss_dict_id": r.get("cdss_dict_id") or "",
             "clinical_review_status": r.get("review_status") or "",
+            "execution_status": r.get("execution_status") or "",
             "source_section_path": r.get("source_section_path") or "",
             "source_name": r.get("source_name") or "",
             "book_page_start": r.get("book_page_start") or "",
             "pdf_page_start": r.get("pdf_page_start") or "",
             "evidence_count": r.get("evidence_count") or 0,
+            # 护理批次字段（Schema V4.0，非护理实体为空串）
+            "applicable_stage": r.get("applicable_stage") or "",
+            "applicable_disease_codes": r.get("applicable_disease_codes") or "",
+            "assessment_method": r.get("assessment_method") or "",
+            "care_context": r.get("care_context") or "",
+            "intervention_text": r.get("intervention_text") or "",
+            "outcome_definition": r.get("outcome_definition") or "",
+            "observation_method": r.get("observation_method") or "",
+            "recording_time_policy": r.get("recording_time_policy") or "",
+            "rule_text": r.get("rule_text") or "",
+            "applicable_population": r.get("applicable_population") or "",
+            "scoring_status": r.get("scoring_status") or "",
+            "terminology_mapping_status": r.get("terminology_mapping_status") or "",
+            "local_term_source_code": r.get("local_term_source_code") or "",
+            "abnormal_condition_text": r.get("abnormal_condition_text") or "",
+            "severity": r.get("severity") or "",
+            "trigger_event": r.get("trigger_event") or "",
+            "handling_strategy": r.get("handling_strategy") or "",
+            "data_quality_note": r.get("data_quality_note") or "",
             "diseases": disease_list,
             "cross_diseases": cross_list,
-            "risk_detail": risk_detail
+            "parents": parent_list,
+            "risk_detail": risk_detail,
+            "nursing_detail": nursing_detail
         }
 
 
