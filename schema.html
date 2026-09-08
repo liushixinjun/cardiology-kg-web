@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 图谱数据审核</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260907b">
+<link rel="stylesheet" href="./_shared/css/style.css?v=20260908b">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -405,7 +405,7 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/app.js?v=20260907"></script>
+<script src="./_shared/js/app.js?v=20260908"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -2311,7 +2311,7 @@ function renderDictView(diseaseData){
   /* 明细表 */
   html += '<div class="si-dict-section"><h3>对比明细（'+stdList.length+' 条标准诊断）</h3>';
   html += '<table class="si-dict-table"><thead><tr>';
-  html += '<th>状态</th><th>图谱疾病名称</th><th>ICD-10 标准名称</th><th>标准编码</th><th>编码体系</th>';
+  html += '<th>状态</th><th>图谱疾病名称</th><th>ICD-10 标准名称</th><th>标准编码</th><th>编码体系</th><th>映射类型</th>';
   html += '</tr></thead><tbody>';
   stdList.forEach(function(s){
     var stdName = s.standard_name || s.name || cleanName(s);
@@ -2319,12 +2319,15 @@ function renderDictView(diseaseData){
     var stMap = {match:'✓ 匹配', partial:'◐ 部分', mismatch:'✗ 不匹配', missing:'— 缺失'};
     var stdCode = s.standard_code || s.icd_code || '';
     var codingSys = s.coding_system || 'ICD-10';
+    var mtMap = {'broader_fallback':'宽口径回退', 'exact':'精确映射', '语义等价':'语义等价'};
+    var mt = s.mapping_type ? (mtMap[s.mapping_type] || s.mapping_type) : '—';
     html += '<tr>';
     html += '<td><span class="si-dict-status '+st+'">'+stMap[st]+'</span></td>';
     html += '<td>'+siEsc(info.name||'')+'</td>';
     html += '<td>'+siEsc(stdName)+'</td>';
     html += '<td>'+siEsc(stdCode)+'</td>';
     html += '<td>'+siEsc(codingSys)+'</td>';
+    html += '<td>'+siEsc(mt)+'</td>';
     html += '</tr>';
   });
   html += '</tbody></table></div>';

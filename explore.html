@@ -20,21 +20,29 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-layout:not(.no-detail) .panel-close{display:block}
 .panel-close:hover{color:var(--accent);border-color:var(--accent)}
 #detail-panel{flex:1}
-/* 知识总览多栏瀑布流：按内容区实际宽度自适应列数（容器查询，不支持时退回单列） */
-.ex-main{container-type:inline-size}
-.ex-know-cols{column-count:1}
-@container (min-width:1280px){.ex-know-cols{column-count:2}}
-@container (min-width:2000px){.ex-know-cols{column-count:3}}
-.ex-know-cols .ex-clinical-group{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid}
-/* 风险分层卡片：评分参数 / 风险层级 / 分层策略 */
+/* 知识总览吸顶分组导航：点击直达模块，免长页下拉 */
+.ex-know-nav{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;margin:-22px -22px 14px;background:var(--bg);border-bottom:1px solid var(--rule)}
+.ex-know-chip{font-size:11px;padding:4px 11px;border-radius:999px;background:var(--bg3);border:1px solid var(--rule);color:var(--fg2);cursor:pointer;white-space:nowrap;transition:all .15s}
+.ex-know-chip:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+.ex-clinical-group{scroll-margin-top:54px}
+/* 评分/量表迷你表格：条目分值与风险层级统一表格化呈现 */
+.ex-mini-table{width:100%;border-collapse:collapse;font-size:11px;margin:3px 0 6px}
+.ex-mini-table th{text-align:left;color:var(--muted);font-weight:700;padding:3px 7px;border-bottom:1px solid var(--rule);white-space:nowrap;font-size:10px}
+.ex-mini-table td{padding:4px 7px;border-bottom:1px solid rgba(255,255,255,.045);color:var(--fg2);line-height:1.5;vertical-align:top}
+.ex-mini-table tr:last-child td{border-bottom:none}
+.ex-mini-table td.lv{font-weight:700;white-space:nowrap}
+.ex-mini-table td.lv.hi{color:#ff6b6b}.ex-mini-table td.lv.mid{color:#ffd43b}.ex-mini-table td.lv.lo{color:#51cf66}
+.ex-mini-table td.num{font-family:'SF Mono','Cascadia Code','Consolas',monospace;white-space:nowrap;color:var(--ink)}
 .ex-risk-factors{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0}
 .ex-risk-factor{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);color:var(--ink)}
-.ex-risk-level{display:flex;align-items:baseline;gap:7px;font-size:11px;padding:4px 8px;border-radius:5px;background:var(--bg3);margin-bottom:4px;flex-wrap:wrap}
-.ex-risk-lv-name{font-weight:700}
-.ex-risk-lv-name.hi{color:#ff6b6b}.ex-risk-lv-name.mid{color:#ffd43b}.ex-risk-lv-name.lo{color:#51cf66}
-.ex-risk-lv-text{color:var(--muted);font-size:10px}
+.ex-risk-scale{margin-bottom:8px;padding:8px 10px;background:rgba(12,166,120,.05);border:1px solid rgba(12,166,120,.15);border-radius:6px}
+.ex-risk-scale-name{font-weight:700;font-size:12px;color:#0ca678;margin-bottom:2px}
+.ex-risk-scale-rule{font-size:10.5px;color:var(--muted);margin-bottom:4px}
 .ex-risk-quote-sm{font-size:11px;line-height:1.55;color:var(--fg2);background:var(--bg3);border-left:2px solid var(--accent);padding:6px 9px;border-radius:0 5px 5px 0;margin-bottom:4px}
-.ex-risk-quote-sm b{color:var(--ink)}
+.ex-risk-hl{color:#fa5252;font-weight:800}
+.ex-rec-mini{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:3px 0}
+.ex-rec-pw{font-size:10px;color:var(--muted);background:var(--bg3);padding:1px 7px;border-radius:4px;white-space:nowrap}
+.ex-rec-sum{font-size:10.5px;color:var(--muted);line-height:1.5;margin-bottom:3px}
 .ex-risk-note{margin-top:6px;padding:6px 9px;border-radius:5px;background:rgba(255,212,99,.06);border:1px dashed rgba(255,212,99,.25);color:var(--muted);font-size:10.5px;line-height:1.5}
 .ex-view-mode{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule)}
 .ex-view-mode label{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:6px;background:var(--bg3);flex:1;transition:all .15s}
@@ -89,7 +97,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-clinical-group{margin-bottom:16px}
 .ex-clinical-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px;padding:6px 0;border-bottom:2px solid var(--accent);display:flex;align-items:center;gap:6px}
 .ex-clinical-title .icon{font-size:14px}
-.ex-clinical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.ex-clinical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .ex-graph-box{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:14px}.ex-graph-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.ex-graph-title{font-size:14px;font-weight:800;color:var(--ink)}.ex-graph-note{font-size:12px;color:var(--muted)}#explore-graph{width:100%;height:700px}
 .ex-entity-tools{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:14px}.ex-entity-tools input,.ex-entity-tools select{padding:10px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}.ex-entity-tools input:focus,.ex-entity-tools select:focus{border-color:var(--accent)}
 .ex-table-wrap{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:auto;max-height:640px}.ex-table{width:100%;border-collapse:collapse;font-size:12px}.ex-table th{position:sticky;top:0;background:var(--bg3);padding:10px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.ex-table td{padding:9px 12px;border-top:1px solid var(--rule);vertical-align:top}.ex-table tr{cursor:pointer}.ex-table tr:hover td{background:rgba(79,140,255,.06)}.ex-ename{font-weight:700;color:var(--ink)}.ex-ecode{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px}.ex-dim-badge{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.1);color:var(--accent);white-space:nowrap}
@@ -390,8 +398,8 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/schema-map.js?v=20260907"></script>
-<script src="./_shared/js/app.js?v=20260907"></script>
+<script src="./_shared/js/schema-map.js?v=20260908"></script>
+<script src="./_shared/js/app.js?v=20260908"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
 var CURRENT_DISEASE = null;
@@ -739,7 +747,8 @@ function renderCDSSChain(d, recs) {
       h += '<div class="chain-tags">';
       stdDx.forEach(function(e) {
         var icdTag = e.standard_code ? ' <span class="icd-code">' + escAttr(e.standard_code) + '</span>' : '';
-        h += '<span class="ex-tag" onclick="showEntityDetail(\'' + code + '\',\'StandardDiagnosis\',\'' + escAttr(e.code || e.name) + '\')">' + cleanName(e) + icdTag + '</span>';
+        var mtTag = e.mapping_type === 'broader_fallback' ? ' <span style="background:var(--bg3);color:var(--muted);padding:1px 6px;border-radius:4px;font-size:10px">宽口径回退</span>' : '';
+        h += '<span class="ex-tag" onclick="showEntityDetail(\'' + code + '\',\'StandardDiagnosis\',\'' + escAttr(e.code || e.name) + '\')">' + cleanName(e) + icdTag + mtTag + '</span>';
       });
       h += '</div>';
     } else {
@@ -1088,8 +1097,6 @@ function renderDiseaseView(code){
   }
   h+='</div>';
 
-  // 多栏瀑布流容器：主区宽度自适应列数（容器查询），减少纵向滚动
-  h+='<div class="ex-know-cols">';
   // V2.0 三层架构分组展示 — 按临床思维流重组
   var groups = [
     // 1.定义
@@ -1160,7 +1167,14 @@ function renderDiseaseView(code){
     }
   ];
 
-  groups.forEach(function(grp) {
+  // 吸顶分组导航：模块直达（无数据分组渲染后由 pruneKnowNav 自动隐藏）
+  h+='<div class="ex-know-nav" id="know-nav">';
+  groups.forEach(function(grp,gi){
+    h+='<span class="ex-know-chip" data-g="gk-'+gi+'" onclick="jumpKnowGroup(\'gk-'+gi+'\')">'+grp.icon+' '+grp.name+'</span>';
+  });
+  h+='</div>';
+
+  groups.forEach(function(grp,gi) {
     // 检查该组是否有数据（ExamObservation/LabSubitem 不独立计数，已嵌套在父卡片中）
     var hasData = grp.dims.some(function(k) {
       if (k === 'ExamObservation' || k === 'LabSubitem') return false;
@@ -1168,7 +1182,7 @@ function renderDiseaseView(code){
     });
     if (!hasData) return;
 
-    h+='<div class="ex-clinical-group">';
+    h+='<div class="ex-clinical-group" id="gk-'+gi+'">';
     h+='<div class="ex-clinical-title"><span class="icon">'+grp.icon+'</span>'+grp.name+'<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">'+grp.desc+'</span></div>';
     h+='<div class="ex-clinical-grid">';
 
@@ -1388,20 +1402,25 @@ function renderDiseaseView(code){
             h+='<div class="ex-drill-item">';
             h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
             h+='<span class="st-badge '+inf.cls+'" style="margin-left:6px">'+inf.label+'</span>';
+            /* 风险层级表首屏直出：分数区间即点即见（用户核心诉求） */
+            if (sub && sub.levels && sub.levels.length) {
+              h+='<table class="ex-mini-table"><tr><th>风险层级</th><th>分数区间</th><th>说明</th></tr>';
+              sub.levels.forEach(function(lv) {
+                var nm=lv.name||'';
+                if(e.name&&nm.indexOf(e.name)===0&&nm.length>e.name.length)nm=nm.substring(e.name.length);
+                var rm=nm.match(/^(.*?)\s*[(（](.*?)[)）]\s*$/);
+                var lvName=(rm?rm[1]:nm)||nm;
+                var range=rm?rm[2]:'';
+                var sev=(lvName.indexOf('极高危')>=0||lvName.indexOf('高危')>=0)?'hi':(lvName.indexOf('中')>=0?'mid':'lo');
+                h+='<tr><td class="lv '+sev+'">'+escAttr(lvName)+'</td><td class="num">'+escAttr(range||'—')+'</td><td>'+escAttr(lv.text||'')+'</td></tr>';
+              });
+              h+='</table>';
+            }
             if (sub && sub.factors && sub.factors.length) {
               h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 评估参数（'+sub.factors.length+' 项）</div>';
               h+='<div class="ex-sub-list"><div class="ex-risk-factors">';
               sub.factors.forEach(function(f){ h+='<span class="ex-risk-factor">'+escAttr(f.name)+'</span>'; });
               h+='</div></div>';
-            }
-            if (sub && sub.levels && sub.levels.length) {
-              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 风险层级与分数区间（'+sub.levels.length+'）</div>';
-              h+='<div class="ex-sub-list">';
-              sub.levels.forEach(function(lv) {
-                var sev=(lv.name.indexOf('极高危')>=0||lv.name.indexOf('高危')>=0)?'hi':(lv.name.indexOf('中')>=0?'mid':'lo');
-                h+='<div class="ex-risk-level"><span class="ex-risk-lv-name '+sev+'">'+escAttr(lv.name)+'</span>'+(lv.text?'<span class="ex-risk-lv-text">'+escAttr(lv.text)+'</span>':'')+'</div>';
-              });
-              h+='</div>';
             }
             if (sub && sub.strategy_texts && sub.strategy_texts.length) {
               h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 分层处置策略（'+sub.strategy_texts.length+'，摘自证据原文）</div>';
@@ -1416,8 +1435,8 @@ function renderDiseaseView(code){
               h+='<div class="ex-sub-list">';
               sub.recommendations.forEach(function(rec) {
                 var nm=rec.code?'<span class="ex-tag" onclick="showRecommendationDetail(\''+escAttr(rec.code)+'\')">'+escAttr(rec.name)+'</span>':'<b>'+escAttr(rec.name)+'</b>';
-                h+='<div class="ex-risk-level">'+nm+(rec.pathway?'<span class="ex-risk-lv-text">📍'+escAttr(rec.pathway)+'</span>':'')+'</div>';
-                if (rec.summary) h+='<div class="ex-risk-lv-text" style="padding:0 8px 4px">'+escAttr(rec.summary)+'</div>';
+                h+='<div class="ex-rec-mini">'+nm+(rec.pathway?'<span class="ex-rec-pw">'+escAttr(rec.pathway)+'</span>':'')+'</div>';
+                if (rec.summary) h+='<div class="ex-rec-sum">'+escAttr(rec.summary)+'</div>';
               });
               h+='</div>';
             }
@@ -1430,26 +1449,29 @@ function renderDiseaseView(code){
             }
             h+='</div>';
           });
-          /* 护理侧风险评估量表（Disease→护理评估→量表，护理批次候选）：条目分值 + 分数对应等级 */
+          /* 护理侧风险评估量表（Disease→护理评估→量表，护理批次候选）：条目分值表 + 分数等级表 */
           if (d.nursing_scales && d.nursing_scales.length) {
-            h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)" style="margin-top:6px">🧑‍⚕️ 护理风险评估量表（'+d.nursing_scales.length+'，护理批次候选）</div>';
+            h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)" style="margin-top:6px">🧑‍⚕️ 护理风险评估量表（'+d.nursing_scales.length+'，院内候选）</div>';
             h+='<div class="ex-sub-list">';
             d.nursing_scales.forEach(function(sc) {
-              h+='<div class="ex-risk-quote-sm"><b>'+escAttr(sc.name)+'</b>';
-              if (sc.rule) h+='<div>总分规则：'+escAttr(sc.rule)+'</div>';
+              h+='<div class="ex-risk-scale">';
+              h+='<div class="ex-risk-scale-name">'+escAttr(sc.name)+'</div>';
+              if (sc.rule) h+='<div class="ex-risk-scale-rule">总分规则：'+escAttr(sc.rule)+'</div>';
               if (sc.items && sc.items.length) {
-                h+='<div class="ex-risk-factors">';
+                h+='<table class="ex-mini-table"><tr><th>评估条目</th><th>选项与分值</th></tr>';
                 sc.items.forEach(function(i2) {
                   var opt=(i2.options||[]).map(function(o){return o.value+' '+o.score+'分';}).join(' / ');
-                  h+='<span class="ex-risk-factor">'+escAttr(i2.name)+(opt?'：'+escAttr(opt):'')+'</span>';
+                  h+='<tr><td class="lv">'+escAttr(i2.name)+'</td><td>'+escAttr(opt||'待补分值')+'</td></tr>';
                 });
-                h+='</div>';
+                h+='</table>';
               }
               if (sc.levels && sc.levels.length) {
+                h+='<table class="ex-mini-table"><tr><th>风险等级</th><th>分数区间</th></tr>';
                 sc.levels.forEach(function(lv) {
                   var sev=lv.name.indexOf('高')>=0?'hi':(lv.name.indexOf('中')>=0?'mid':'lo');
-                  h+='<div class="ex-risk-level"><span class="ex-risk-lv-name '+sev+'">'+escAttr(lv.name)+'</span>'+(lv.rule?'<span class="ex-risk-lv-text">'+escAttr(lv.rule)+'</span>':'')+'</div>';
+                  h+='<tr><td class="lv '+sev+'">'+escAttr(lv.name)+'</td><td class="num">'+escAttr(lv.rule||'待补')+'</td></tr>';
                 });
+                h+='</table>';
               }
               h+='</div>';
             });
@@ -1643,10 +1665,8 @@ function renderDiseaseView(code){
     h+='</div></div>';
   }
 
-  // 关闭多栏瀑布流容器
-  h+='</div>';
-
   ws.innerHTML = h;
+  pruneKnowNav();
   }catch(e){
     console.error('renderDiseaseView error:',e);
     ws.innerHTML='<div class="ex-empty">渲染知识总览时出错: '+e.message+'<br>请刷新页面重试</div>';
@@ -2018,6 +2038,17 @@ function getCDSSReady(code) {
 }
 function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function toggleSubList(el){var list=el.nextElementSibling;if(list)list.classList.toggle('open');}
+  /* 知识总览：吸顶导航直达模块 + 无数据分组导航芯片自动隐藏 */
+  function jumpKnowGroup(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function pruneKnowNav(){
+    document.querySelectorAll('.ex-know-chip').forEach(function(ch){
+      if(!document.getElementById(ch.getAttribute('data-g'))) ch.remove();
+    });
+  }
   /* 右侧详情栏按需展开：写入内容时展开，关闭按钮/切换疾病时收起，主区自动占满全宽 */
   function setDetailPanel(html){
     var panel=document.getElementById('detail-panel');

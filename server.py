@@ -187,46 +187,76 @@ def _active_node_filter(label):
     return "({n}.status IS NULL OR {n}.status IN ['active','draft'])".format(n=label)
 
 
+# 标准诊断映射类型优先级：名称完全匹配 > exact > 语义等价/未标记 > broader_fallback（宽口径回退，不作首选）
+_MT_PRIORITY = {'exact': 0, '语义等价': 1, None: 2, 'broader_fallback': 3}
+
+
 def _load_standard_diagnosis_map(tx, disease_codes):
     """批量加载 Disease -> 有效 StandardDiagnosis 映射。
-    每个 disease_code 返回首选标准诊断：name, standard_code, std_uuid
-    如果无有效映射，返回空 dict。
+    返回 {disease_code: {name, standard_code, std_uuid, coding_system, mapping_type, is_emr_writable, all: [...]}}。
+    首选规则（确定性，不按节点号任意取第一个）：
+    1. 标准诊断名与 Disease.name 完全一致；
+    2. mapping_type 优先级 exact > 语义等价/未标记 > broader_fallback；
+    3. 同级按 standard_code 升序。
+    all 数组始终返回该疾病的全部有效映射（多映射不丢数据）。
     """
     if not disease_codes:
         return {}
     rows = tx.run("""
-        MATCH (d:Disease)-[:has_standard_diagnosis]->(s:StandardDiagnosis)
+        MATCH (d:Disease)-[r:has_standard_diagnosis]->(s:StandardDiagnosis)
         WHERE d.code IN $codes AND s.valid_flag = 1
           AND """ + _active_node_filter('d') + """ AND """ + _active_node_filter('s') + """
-        RETURN d.code AS d_code, s.name AS std_name, s.standard_code AS std_code,
-               s.code AS std_uuid, s.coding_system AS coding_system
-        ORDER BY d.code, s.code
+        RETURN d.code AS d_code, d.name AS d_name, s.name AS std_name, s.standard_code AS std_code,
+               s.code AS std_uuid, s.coding_system AS coding_system,
+               r.mapping_type AS mapping_type, r.is_emr_writable AS is_emr_writable
+        ORDER BY d.code, s.standard_code
     """, codes=list(disease_codes))
-    result = {}
+    grouped = {}
     for r in rows:
-        d_code = r['d_code']
-        if d_code not in result:
-            result[d_code] = {
-                'name': r['std_name'],
-                'standard_code': r['std_code'],
-                'std_uuid': r['std_uuid'],
-                'coding_system': r['coding_system']
-            }
+        grouped.setdefault(r['d_code'], []).append(r)
+    result = {}
+    for d_code, recs in grouped.items():
+        d_name = (recs[0]['d_name'] or '').strip()
+        def _pref_key(r):
+            exact_name = 0 if d_name and (r['std_name'] or '').strip() == d_name else 1
+            return (exact_name, _MT_PRIORITY.get(r['mapping_type'], 2), r['std_code'] or '')
+        recs_sorted = sorted(recs, key=_pref_key)
+        top = recs_sorted[0]
+        result[d_code] = {
+            'name': top['std_name'],
+            'standard_code': top['std_code'],
+            'std_uuid': top['std_uuid'],
+            'coding_system': top['coding_system'],
+            'mapping_type': top['mapping_type'],
+            'is_emr_writable': top['is_emr_writable'],
+            'all': [
+                {
+                    'name': r['std_name'], 'standard_code': r['std_code'], 'std_uuid': r['std_uuid'],
+                    'coding_system': r['coding_system'], 'mapping_type': r['mapping_type'],
+                    'is_emr_writable': r['is_emr_writable'],
+                } for r in recs_sorted
+            ],
+        }
     return result
 
 
 def _build_disease_node_v2(disease_code, disease_name, std_dx_map, role=None, subtype_count=0):
-    """构建 V2.0 疾病节点，优先使用标准诊断信息"""
+    """构建 V2.0 疾病节点。
+    疾病名始终用 Disease 自身名称（display_name > preferred_name > name > code，由调用方传入清洗后名称），
+    StandardDiagnosis 仅用于 ICD 编码与标准诊断映射信息，不覆盖疾病名。
+    """
     std = std_dx_map.get(disease_code, {})
     node = {
         'code': disease_code,
         'type': 'Disease',
         'diagnostic_role': role or '',
-        'name': std.get('name') or disease_name or disease_code,
+        'name': disease_name or disease_code,
         'icd_code': std.get('standard_code') or '',
         'icd_name': std.get('name') or '',
         'std_uuid': std.get('std_uuid') or '',
         'coding_system': std.get('coding_system') or '',
+        'std_mapping_type': std.get('mapping_type') or '',
+        'std_diagnoses': std.get('all') or [],
         'subtype_count': subtype_count,
         'children': []
     }
@@ -261,6 +291,7 @@ def query_disease_tree():
               AND cat.code STARTS WITH 'CAT-'
               AND dis.diagnostic_role IN ['broad_diagnosis', 'independent_disease']
             RETURN cat.code AS cat_code, dis.code AS dis_code, dis.name AS dis_name,
+                   dis.display_name AS dis_dn, dis.preferred_name AS dis_pref,
                    dis.diagnostic_role AS dis_role, dis.is_diagnosable AS is_diagnosable
             ORDER BY cat.name, dis.name
         """))
@@ -272,6 +303,7 @@ def query_disease_tree():
               AND parent.diagnostic_role IN ['broad_diagnosis']
               AND sub.diagnostic_role IN ['clinical_subtype']
             RETURN parent.code AS parent_code, sub.code AS sub_code, sub.name AS sub_name,
+                   sub.display_name AS sub_dn, sub.preferred_name AS sub_pref,
                    sub.diagnostic_role AS sub_role
             ORDER BY parent.code, sub.name
         """))
@@ -308,7 +340,9 @@ def query_disease_tree():
             if dis_code in broad_map:
                 continue
             node = _build_disease_node_v2(
-                dis_code, r['dis_name'], std_dx_map,
+                dis_code,
+                clean_name_from_row({'dn': r['dis_dn'], 'pref': r['dis_pref'], 'name': r['dis_name'], 'code': r['dis_code']}),
+                std_dx_map,
                 role=r['dis_role'], subtype_count=0)
             broad_map[dis_code] = node
             cat_broad_order.append((cat_code, dis_code))
@@ -321,7 +355,7 @@ def query_disease_tree():
                 continue
             subtype_map.setdefault(parent_code, []).append({
                 'code': sub_code,
-                'name': r['sub_name'],
+                'name': clean_name_from_row({'dn': r['sub_dn'], 'pref': r['sub_pref'], 'name': r['sub_name'], 'code': r['sub_code']}),
                 'role': r['sub_role']
             })
 
@@ -378,7 +412,8 @@ def query_disease_list():
         results = sess.run("""
             MATCH (d:Disease)
             WHERE """ + _active_node_filter('d') + """
-            RETURN d.code as code, d.name as name, d.diagnostic_role as diagnostic_role,
+            RETURN d.code as code, d.name as name, d.preferred_name as pref, d.display_name as dn,
+                   d.diagnostic_role as diagnostic_role,
                    d.diagnosis_level as diagnosis_level, d.is_diagnosable as is_diagnosable,
                    d.parentCode as parent
             ORDER BY d.code
@@ -425,12 +460,15 @@ def query_disease_list():
         for d in disease_list:
             d["dim_counts"] = dim_counts.get(d["code"], {})
             std = std_dx_map.get(d["code"], {})
-            d["name"] = std.get("name") or d["name"] or d["code"]
+            # 疾病名始终用 Disease 自身名称（display_name > preferred_name > name），标准诊断不覆盖
+            d["name"] = clean_name_from_row(d) or d["code"]
             d["raw_name"] = d["name"]
             d["icd_code"] = std.get("standard_code") or ""
             d["icd_name"] = std.get("name") or ""
             d["std_uuid"] = std.get("std_uuid") or ""
             d["coding_system"] = std.get("coding_system") or ""
+            d["std_mapping_type"] = std.get("mapping_type") or ""
+            d["std_diagnoses"] = std.get("all") or []
 
         cache_set('kg:disease_list', disease_list)
         return disease_list
@@ -491,6 +529,7 @@ def query_disease_full(code):
         info_r = sess.run("""
             MATCH (d:Disease {code: $code})
             RETURN d.code as code, d.name as name, d.parentCode as parent,
+                   d.preferred_name as pref, d.display_name as dn,
                    d.description as desc, d.name_en as name_en,
                    d.diagnostic_role as diagnostic_role, d.diagnosis_level as diagnosis_level,
                    d.is_diagnosable as is_diagnosable
@@ -529,12 +568,15 @@ def query_disease_full(code):
 
         info = {
             "code": info_r["code"],
-            "name": std.get("name") or info_r["name"] or code,
+            # 疾病名始终用 Disease 自身名称（display_name > preferred_name > name），标准诊断不覆盖
+            "name": clean_name_from_row(info_r) or code,
             "raw_name": info_r["name"] or "",
             "icd_code": std.get("standard_code") or "",
             "icd_name": std.get("name") or "",
             "std_uuid": std.get("std_uuid") or "",
             "coding_system": std.get("coding_system") or "",
+            "std_mapping_type": std.get("mapping_type") or "",
+            "std_diagnoses": std.get("all") or [],
             "diagnostic_role": info_r.get("diagnostic_role") or "",
             "diagnosis_level": info_r.get("diagnosis_level") or "",
             "is_diagnosable": info_r.get("is_diagnosable"),
@@ -1133,12 +1175,13 @@ def query_disease_full(code):
         std_dx_items = []
         try:
             std_dx_rs = sess.run("""
-                MATCH (d:Disease {code: $code})-[:has_standard_diagnosis]->(s:StandardDiagnosis)
+                MATCH (d:Disease {code: $code})-[r:has_standard_diagnosis]->(s:StandardDiagnosis)
                 WHERE s.valid_flag = 1 OR s.valid_flag = '1'
                 RETURN s.code AS code, s.name AS name, s.standard_code AS standard_code,
                        s.coding_system AS coding_system, s.coding_system_version AS coding_ver,
                        s.cdss_dict_id AS cdss_uuid, s.valid_flag AS valid_flag,
-                       s.source_table AS source_table, s.source_version AS source_ver
+                       s.source_table AS source_table, s.source_version AS source_ver,
+                       r.mapping_type AS mapping_type, r.is_emr_writable AS is_emr_writable
                 ORDER BY s.standard_code
             """, code=code)
             for sr in std_dx_rs:
@@ -1152,6 +1195,8 @@ def query_disease_full(code):
                     "valid_flag": sr["valid_flag"] or "",
                     "source_table": sr["source_table"] or "",
                     "source_version": sr["source_ver"] or "",
+                    "mapping_type": sr["mapping_type"] or "",
+                    "is_emr_writable": sr["is_emr_writable"],
                 })
         except Exception:
             pass
