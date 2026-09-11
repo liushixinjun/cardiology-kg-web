@@ -388,7 +388,7 @@ function exportDecisions() {
       rows.push({
         review_level: 'pharmacist', review_id: p.review_id, batch_id: p.batch_id,
         disease_code: p.disease_code, disease_name: p.disease_name,
-        scenario_type: '', relation_type: p.relation_type, target_type: 'Medication',
+        scenario_type: '', relation_type: p.relation_type, target_type: 'Drug',
         relation_id: p.relation_id || '', target_code: p.target_code, target_name: p.target_name,
         review_decision: d.pharmacist_decision || '', overall_risk_level: '',
         reviewer_name: '', reviewer_role: '', reviewed_at: '', expert_comment: d.pharmacist_comment || ''

@@ -559,7 +559,7 @@ function buildDefaultDiseases(diseases) {
   scored.sort(function(a, b) { return b.dimCount - a.dimCount; });
   DEFAULT_DISEASE_NAMES = scored.slice(0, 5).map(function(s) { return s.name; });
 }
-var DEFAULT_VISIBLE_DIMS = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan', 'StandardDiagnosis', 'ClinicalRule'];
+var DEFAULT_VISIBLE_DIMS = ['Symptom', 'ExamItem', 'LabItem', 'Drug', 'Procedure', 'RiskFactor', 'Complication', 'DiagnosisCriteria', 'TreatmentPlan', 'StandardDiagnosis', 'ClinicalRule'];
 var MAX_OTHER_DISEASES = 24;
 
 /* ---------- Init ---------- */
@@ -674,7 +674,7 @@ function renderDimFilters() {
     { name: '临床表现', icon: '🩺', dims: ['Symptom','Sign'] },
     { name: '诊断检查', icon: '🔬', dims: ['ExamItem','ExamObservation','LabItem','LabSubitem'] },
     { name: '诊断与鉴别', icon: '🎯', dims: ['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'] },
-    { name: '治疗方案', icon: '💊', dims: ['TreatmentPlan','Medication','Procedure','Contraindication'] },
+    { name: '治疗方案', icon: '💊', dims: ['TreatmentPlan','Drug','Procedure','Contraindication'] },
     { name: '临床规则', icon: '⚙️', dims: ['ClinicalRule'] },
     { name: '预后与预防', icon: '📋', dims: ['Prognosis','FollowUp','Complication','Prevention'] },
     { name: '病因与机制', icon: '🧬', dims: ['Etiology','Pathophysiology','Epidemiology','RiskFactor'] },
@@ -830,19 +830,19 @@ function buildGraphData() {
         lineStyle: { color: color, width: 2, type: 'dashed', opacity: 0.6 }
       });
 
-      /* 1.5-hop: TreatmentPlan → sub_medication / sub_procedure / sub_evidence */
-      if (k === 'TreatmentPlan' && (e.sub_medication || e.sub_procedure || e.sub_evidence)) {
+      /* 1.5-hop: TreatmentPlan → sub_drug / sub_procedure / sub_evidence（V4.1：药品统一 Drug） */
+      if (k === 'TreatmentPlan' && (e.sub_drug || e.sub_procedure || e.sub_evidence)) {
         var subColor = '#ff922b';
-        (e.sub_medication || []).forEach(function(sm) {
+        (e.sub_drug || []).forEach(function(sm) {
           var smName = cleanName(sm);
           pushUniqueNode(nodes, {
-            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
-            category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
+            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Drug',
+            category: DIM_KEYS.indexOf('Drug') + 1, dimKey: 'Drug', level: 1.5,
             symbolSize: 26, itemStyle: { color: subColor },
             label: { show: true, fontSize: 9, color: '#e8eaf0' }
           });
           pushUniqueLink(links, {
-            source: eName, target: smName, value: 'includes_medication',
+            source: eName, target: smName, value: 'includes_drug',
             lineStyle: { color: subColor, width: 1.5, type: 'dotted', opacity: 0.7 }
           });
         });
@@ -858,17 +858,19 @@ function buildGraphData() {
             source: eName, target: spName, value: 'includes_procedure',
             lineStyle: { color: '#f06595', width: 1.5, type: 'dotted', opacity: 0.7 }
           });
-          /* 2-hop: Procedure → StandardProcedure */
+          /* 2-hop: Procedure → 标准手术编码（V4.1：读 Procedure.standard_code 自身字段） */
           (sp.std_procedures || []).forEach(function(spd) {
-            var spdName = cleanName(spd);
+            if (!spd.standard_code) return;
+            var spdName = spd.coding_system ? (spd.standard_code + '·' + spd.coding_system) : spd.standard_code;
+            if (spdName === spName) return;
             pushUniqueNode(nodes, {
-              name: spdName, code: spd.code || '', nodeType: 'entity-sub', type: 'StandardProcedure',
-              category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'StandardProcedure', level: 2,
+              name: spdName, code: spd.code || '', nodeType: 'entity-sub', type: 'Procedure',
+              category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 2,
               symbolSize: 20, itemStyle: { color: '#cc5de8', opacity: 0.75 },
               label: { show: true, fontSize: 8, color: '#b0b8c8' }
             });
             pushUniqueLink(links, {
-              source: spName, target: spdName, value: 'has_standard_procedure',
+              source: spName, target: spdName, value: '标准手术编码',
               lineStyle: { color: '#cc5de8', width: 1, type: 'dotted', opacity: 0.5 }
             });
           });
@@ -893,37 +895,39 @@ function buildGraphData() {
         });
       }
 
-      /* 1.5-hop: Medication类别 → sub_medication (具体药物) */
-      if (k === 'Medication' && e.sub_medication) {
+      /* 1.5-hop: Drug药品类别 → sub_drug (具体药品，V4.1 has_specific_drug) */
+      if (k === 'Drug' && e.sub_drug) {
         var medSubColor = '#ff922b';
-        (e.sub_medication || []).forEach(function(sm) {
+        (e.sub_drug || []).forEach(function(sm) {
           var smName = cleanName(sm);
           pushUniqueNode(nodes, {
-            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Medication',
-            category: DIM_KEYS.indexOf('Medication') + 1, dimKey: 'Medication', level: 1.5,
+            name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Drug',
+            category: DIM_KEYS.indexOf('Drug') + 1, dimKey: 'Drug', level: 1.5,
             symbolSize: 22, itemStyle: { color: medSubColor, opacity: 0.75 },
             label: { show: true, fontSize: 8, color: '#b0b8c8' }
           });
           pushUniqueLink(links, {
-            source: eName, target: smName, value: 'has_specific_medication',
+            source: eName, target: smName, value: 'has_specific_drug',
             lineStyle: { color: medSubColor, width: 1, type: 'dotted', opacity: 0.5 }
           });
         });
       }
 
-      /* 1.5-hop: Procedure → std_procedures (标准手术编码) */
+      /* 1.5-hop: Procedure → 标准手术编码（V4.1：读 Procedure.standard_code 自身字段） */
       if (k === 'Procedure' && e.std_procedures && e.std_procedures.length) {
         var spSubColor = '#cc5de8';
         e.std_procedures.forEach(function(sp) {
-          var spName = cleanName(sp);
+          if (!sp.standard_code) return;
+          var spCodeName = sp.coding_system ? (sp.standard_code + '·' + sp.coding_system) : sp.standard_code;
+          if (spCodeName === eName) return;
           pushUniqueNode(nodes, {
-            name: spName, code: sp.code || '', nodeType: 'entity-sub', type: 'StandardProcedure',
-            category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'StandardProcedure', level: 1.5,
+            name: spCodeName, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
+            category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 1.5,
             symbolSize: 22, itemStyle: { color: spSubColor, opacity: 0.75 },
             label: { show: true, fontSize: 8, color: '#b0b8c8' }
           });
           pushUniqueLink(links, {
-            source: eName, target: spName, value: 'has_standard_procedure',
+            source: eName, target: spCodeName, value: '标准手术编码',
             lineStyle: { color: spSubColor, width: 1, type: 'dotted', opacity: 0.5 }
           });
         });
@@ -996,21 +1000,21 @@ function buildGraphData() {
     });
   });
 
-  /* 跨维度连线：ClinicalRule → Medication/Procedure (规则推荐的治疗措施) */
+  /* 跨维度连线：ClinicalRule → Drug/Procedure (规则推荐的治疗措施，V4.1 统一 recommends_action) */
   var ruleList = (disease.dimensions['ClinicalRule'] || []).slice(0, MAX_ENTITIES_PER_DIM);
-  var medList = (disease.dimensions['Medication'] || []).slice(0, MAX_ENTITIES_PER_DIM);
+  var medList = (disease.dimensions['Drug'] || []).slice(0, MAX_ENTITIES_PER_DIM);
   var procList = (disease.dimensions['Procedure'] || []).slice(0, MAX_ENTITIES_PER_DIM);
   if (ruleList.length) {
     var ruleColor = DIM_COLORS['ClinicalRule'] || '#339af0';
     ruleList.forEach(function(rule) {
       var ruleName = cleanName(rule);
       var ruleText = (rule.rule_logic || '') + (rule.output_content || '') + (rule.trigger_condition || '');
-      /* 模糊匹配药物名 */
+      /* 模糊匹配药品名 */
       medList.forEach(function(med) {
         var medName = cleanName(med);
         if (ruleText.indexOf(medName) !== -1 && ALL_GRAPH_NODES[ruleName] && ALL_GRAPH_NODES[medName]) {
           pushUniqueLink(links, {
-            source: ruleName, target: medName, value: 'recommends_medication',
+            source: ruleName, target: medName, value: 'recommends_action',
             lineStyle: { color: ruleColor, width: 1, type: 'dashed', opacity: 0.35 }
           });
         }
@@ -1020,7 +1024,7 @@ function buildGraphData() {
         var procName = cleanName(proc);
         if (ruleText.indexOf(procName) !== -1 && ALL_GRAPH_NODES[ruleName] && ALL_GRAPH_NODES[procName]) {
           pushUniqueLink(links, {
-            source: ruleName, target: procName, value: 'recommends_procedure',
+            source: ruleName, target: procName, value: 'recommends_action',
             lineStyle: { color: ruleColor, width: 1, type: 'dashed', opacity: 0.35 }
           });
         }
@@ -1028,19 +1032,19 @@ function buildGraphData() {
     });
   }
 
-  /* ClinicalPathway → PathwayStage */
+  /* SpecialtyCarePathway → PathwayStage（V4.1：专科诊疗路径） */
   if (disease.pathways && disease.pathways.length) {
     var pwColor = '#339af0';
     disease.pathways.forEach(function(pw) {
-      var pwName = cleanName(pw) || '临床路径';
+      var pwName = cleanName(pw) || '专科诊疗路径';
       pushUniqueNode(nodes, {
-        name: pwName, code: pw.code || '', nodeType: 'entity', type: 'ClinicalPathway',
+        name: pwName, code: pw.code || '', nodeType: 'entity', type: 'SpecialtyCarePathway',
         category: 0, level: 1,
         symbolSize: 40, itemStyle: { color: pwColor },
         label: { show: true, fontSize: 11, fontWeight: 'bold', color: '#fff' }
       });
       pushUniqueLink(links, {
-        source: disease.info.name, target: pwName, value: 'has_clinical_pathway',
+        source: disease.info.name, target: pwName, value: 'has_specialty_care_pathway',
         lineStyle: { color: pwColor, width: 2, opacity: 0.6 }
       });
       (pw.stages || []).forEach(function(stg) {
@@ -1052,7 +1056,7 @@ function buildGraphData() {
           label: { show: true, fontSize: 9, color: '#e8eaf0' }
         });
         pushUniqueLink(links, {
-          source: pwName, target: stgName, value: 'has_pathway_stage',
+          source: pwName, target: stgName, value: 'includes_pathway_stage',
           lineStyle: { color: pwColor, width: 1.5, type: 'dotted', opacity: 0.5 }
         });
       });
@@ -1208,7 +1212,7 @@ function renderGraph() {
       }
     }
   });
-  /* ClinicalPathway 有数据时加入图例 */
+  /* 专科诊疗路径有数据时加入图例 */
   if (legendDisease && legendDisease.pathways && legendDisease.pathways.length && legendData.indexOf('临床路径') === -1) {
     legendData.push('临床路径');
     legendSelected['临床路径'] = true;
@@ -1414,7 +1418,7 @@ function overviewCard(num, label) {
 }
 
 function getStarterEntities(d, limit) {
-  var preferredDims = ['Symptom', 'ExamItem', 'LabItem', 'Medication', 'Procedure', 'RiskFactor', 'Complication', 'StandardDiagnosis'];
+  var preferredDims = ['Symptom', 'ExamItem', 'LabItem', 'Drug', 'Procedure', 'RiskFactor', 'Complication', 'StandardDiagnosis'];
   var result = [];
   preferredDims.forEach(function(k) {
     if (result.length >= limit) return;
@@ -1652,24 +1656,24 @@ function showEntityDetailPanel(name, nd) {
     }
   }
 
-  /* Show sub_medication / sub_procedure for TreatmentPlan and Medication nodes */
+  /* Show sub_drug / sub_procedure for TreatmentPlan and Drug nodes（V4.1） */
   var subMeds = [], subProcs = [];
   assocDiseases.forEach(function(dc) {
     var d = KG_DATA.diseases[dc];
     (d.dimensions.TreatmentPlan || []).forEach(function(tp) {
       if (tp.name === name) {
-        (tp.sub_medication || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
+        (tp.sub_drug || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
         (tp.sub_procedure || []).forEach(function(p) { if (!subProcs.some(function(x){return x.name===p.name})) subProcs.push(p); });
       }
     });
-    (d.dimensions.Medication || []).forEach(function(med) {
+    (d.dimensions.Drug || []).forEach(function(med) {
       if (med.name === name) {
-        (med.sub_medication || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
+        (med.sub_drug || []).forEach(function(m) { if (!subMeds.some(function(x){return x.name===m.name})) subMeds.push(m); });
       }
     });
   });
   if (subMeds.length > 0) {
-    h += '<div class="nw-detail-section"><h4>包含药物</h4>';
+    h += '<div class="nw-detail-section"><h4>包含药品</h4>';
     h += '<div class="nw-related-list">';
     subMeds.forEach(function(m) {
       h += '<div class="nw-related-item"><span class="ri-dot" style="background:#ff922b"></span><span>' + m.name + '</span></div>';

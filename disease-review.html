@@ -299,8 +299,9 @@ var DR = (function () {
 
   /* ---------- 中文映射表 ---------- */
   var RELATION_LABELS = {
-    treated_by_medication: '药物治疗',
-    includes_medication: '治疗药物',
+    treated_by_medication: '药物治疗（旧）',
+    includes_medication: '治疗药物（旧）',
+    includes_drug: '治疗药品',
     includes_procedure: '治疗手术',
     treated_by_procedure: '手术治疗',
     has_symptom: '症状表现',
@@ -315,7 +316,8 @@ var DR = (function () {
     has_risk_factor: '危险因素',
     has_complication: '并发症',
     has_differential: '鉴别诊断',
-    has_follow_up: '随访方案',
+    has_followup: '随访方案',
+    has_follow_up: '随访方案（旧）',
     has_prognosis: '预后',
     has_treatment_plan: '治疗方案',
     has_diagnostic_criteria: '诊断标准',
@@ -326,7 +328,8 @@ var DR = (function () {
   };
 
   var TARGET_TYPE_LABELS = {
-    Medication: '药物',
+    Drug: '药品',
+    Medication: '药品（旧）',
     Procedure: '手术/操作',
     Symptom: '症状',
     Sign: '体征',

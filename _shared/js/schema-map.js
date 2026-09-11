@@ -1,6 +1,7 @@
-/* === Schema V3.2 公共展示映射层 ===
+/* === Schema V4.1 公共展示映射层 ===
  * 所有页面的字段中文名、关系中文标签、诊断角色、字典/医嘱/审核状态推导统一走本文件。
  * 禁止在页面里写裸值比较（如 role==='broad_diagnosis'），必须调用 SCHEMA.roleGroup()。
+ * 药品实体 V4.1 起统一为 Drug（旧 Medicitation 命名已废弃）。
  */
 var SCHEMA = (function () {
   'use strict';
@@ -38,40 +39,49 @@ var SCHEMA = (function () {
 
   /* ---- 关系类型中文映射（对齐 server.py REL_MAP / MULTI_HOP_DIMS / V3.1 新关系 / 推荐链） ---- */
   var RELATION_LABELS = {
-    /* 疾病知识维度关系 */
+    /* 疾病知识维度关系（V4.1：has_complication/has_followup 为现行口径，旧名保留兼容） */
     has_symptom: '有症状', has_sign: '有体征', has_risk_factor: '有危险因素',
-    may_cause_complication: '可能有并发症', has_differential_diagnosis: '需鉴别诊断',
-    has_risk_stratification: '有风险分层', has_prognosis: '有预后', has_follow_up: '有随访',
+    has_complication: '有并发症', may_cause_complication: '可能有并发症（旧）',
+    has_differential_diagnosis: '需鉴别诊断',
+    has_risk_stratification: '有风险分层', has_prognosis: '有预后',
+    has_followup: '有随访', has_follow_up: '有随访（旧）',
     has_treatment_plan: '有治疗方案', has_diagnostic_criteria: '有诊断标准',
     has_etiology: '有病因', has_epidemiology: '有流行病学', has_pathophysiology: '有病理生理',
     has_prevention: '有预防措施', has_definition: '有定义',
     supported_by_evidence: '有证据支撑', based_on_guideline: '依据指南',
-    /* 检查检验（ExamPlan 中转） */
-    has_exam_plan: '有检查方案', includes_exam_item: '含检查项目', includes_lab_item: '含检验项目',
-    exam_item_has_observation: '检查可见', lab_item_has_subitem: '检验含细项', has_threshold_rule: '有阈值规则',
-    /* 治疗（TreatmentPlan 中转） */
-    includes_medication: '含药物', includes_procedure: '含手术操作', includes_treatment_item: '含治疗项目',
-    has_specific_medication: '含具体药品',
+    /* 检查检验（ExamPlan 中转，plan_type=exam/lab/mixed） */
+    has_exam_plan: '有检查方案', has_lab_plan: '有检验方案',
+    includes_exam_item: '含检查项目', includes_lab_item: '含检验项目',
+    exam_item_has_observation: '检查可见', lab_item_has_subitem: '检验含细项',
+    lab_item_has_observation: '检验可见', uses_lab_sample: '用检验标本', has_threshold_rule: '有阈值规则',
+    /* 治疗（TreatmentPlan 中转，Schema V4.1 药品统一 Drug） */
+    includes_drug: '含药品', includes_procedure: '含手术操作', includes_treatment_item: '含治疗项目',
+    has_specific_drug: '含具体药品', interacts_with: '药物相互作用',
     /* 结构与字典 */
     has_clinical_subtype: '有临床分型', has_category: '属疾病大类', has_subcategory: '属疾病亚类',
     belongs_to_category: '属疾病大类', belongs_to_subcategory: '属疾病亚类',
     maps_to_standard_diagnosis: '映射标准诊断', maps_to_standard_procedure: '映射标准手术',
     has_definition_component: '含定义明细', has_diagnostic_component: '含诊断明细',
     has_differential_rule: '有鉴别规则',
-    /* 推荐链（Schema V3.0/V3.1） */
+    /* 推荐链（Schema V4.1：triggers_recommendation 唯一触发口径） */
     has_recommendation_statement: '有推荐陈述', triggers_recommendation: '触发推荐',
-    recommends_action: '推荐动作', recommends_medication: '推荐药物', recommends_procedure: '推荐手术',
-    recommends_exam_item: '推荐检查', recommends_lab_item: '推荐检验',
-    has_recommended_action: '关联可选动作', blocks_action: '阻断动作',
+    recommends_action: '推荐动作', blocks_action: '阻断动作',
     has_contraindication: '有禁忌', has_alternative_action: '有替代动作',
     derived_from: '来源证据', uses_primary_guideline: '主依据指南',
+    has_evidence: '包含证据', has_alias: '受控别名',
+    uses_source_section: '使用来源章节', has_source_section: '包含来源章节',
     /* 鉴别与治疗安全（V3.1 新关系） */
     requires_exclusion_exam: '需排除检查', requires_exclusion_lab: '需排除检验',
     targets_differential_diagnosis: '指向鉴别诊断', blocked_by_differential: '被鉴别阻断',
     requires_pre_treatment_exam: '治疗前需检查', requires_pre_treatment_lab: '治疗前需检验',
-    /* 路径 */
+    /* 路径（Schema V4.1：专科路径与住院路径分实体） */
+    has_specialty_care_pathway: '有专科诊疗路径', has_inpatient_clinical_pathway: '有住院临床路径',
+    includes_pathway_stage: '含路径阶段', includes_pathway_task: '含路径任务',
+    pathway_task_uses_action: '任务绑定动作', depends_on_task: '依赖前置任务',
+    next_pathway_stage: '下一阶段', maps_to_pathway_task: '路径任务映射',
+    has_variation_reason: '有变异原因', has_exit_criteria: '有出径/出院条件',
     has_clinical_pathway: '有临床路径', has_pathway_stage: '有路径阶段',
-    has_stage_rule: '阶段含规则', next_pathway_stage: '下一阶段',
+    has_stage_rule: '阶段含规则',
     /* 护理（Schema V4.0） */
     has_nursing_care_plan: '有护理计划', has_nursing_assessment: '有护理评估',
     has_nursing_assessment_item: '含护理评估条目', has_nursing_diagnosis: '有护理诊断',
@@ -81,27 +91,32 @@ var SCHEMA = (function () {
     plan_uses_assessment: '计划用评估', plan_has_nursing_diagnosis: '计划含护理诊断',
     plan_targets_outcome: '计划目标结局', includes_nursing_intervention: '含护理措施',
     restricts_nursing_intervention: '限制护理措施', checks_target: '核对对象',
-    /* 评估评分与质控（Schema V4.0） */
-    includes_assessment_item: '含评分条目', has_score_rule: '有计分规则',
-    has_total_score_rule: '有总分规则', has_result_level: '有结果等级',
-    determines_result_level: '判定结果等级', level_supported_by_evidence: '等级有证据',
-    has_quality_control_point: '有质控点', has_quality_control_rule: '有质控规则'
+    /* 评估评分与质控（Schema V4.1） */
+    has_assessment_scale: '有适用量表', includes_assessment_item: '含评分条目',
+    has_score_rule: '有计分规则', has_total_score_rule: '有总分规则',
+    has_result_level: '有结果等级', determines_result_level: '判定结果等级',
+    supports_risk_stratification: '支撑风险分层', triggers_assessment_action: '触发结果动作',
+    assessment_supported_by_evidence: '评估有证据', level_supported_by_evidence: '等级有证据',
+    has_quality_control_point: '有质控点', has_quality_control_rule: '有质控规则',
+    checks_required_exam: '检查必需检查', checks_required_lab: '检查必需检验',
+    checks_contraindication: '检查禁忌', checks_assessment_level: '检查评估等级',
+    checks_pathway_task: '检查路径任务', quality_rule_supported_by_evidence: '质控有证据'
   };
 
   function relationLabel(relType) { return RELATION_LABELS[relType] || relType || ''; }
 
-  /* ---- 维度 → 关系编码映射（与 server.py 查询口径一致，连线标签用） ---- */
+  /* ---- 维度 → 关系编码映射（与 server.py 查询口径一致，连线标签用；V4.1 断链关系已切换） ---- */
   var DIM_REL = {
     Symptom: 'has_symptom', Sign: 'has_sign', RiskFactor: 'has_risk_factor',
-    Complication: 'may_cause_complication', DifferentialDiagnosis: 'has_differential_diagnosis',
+    Complication: 'has_complication', DifferentialDiagnosis: 'has_differential_diagnosis',
     RiskStratification: 'has_risk_stratification', Prognosis: 'has_prognosis',
-    FollowUp: 'has_follow_up', TreatmentPlan: 'has_treatment_plan',
+    FollowUp: 'has_followup', TreatmentPlan: 'has_treatment_plan',
     DiagnosisCriteria: 'has_diagnostic_criteria', Etiology: 'has_etiology',
     Epidemiology: 'has_epidemiology', Pathophysiology: 'has_pathophysiology',
     Prevention: 'has_prevention', Definition: 'has_definition',
     Evidence: 'supported_by_evidence', Guideline: 'based_on_guideline',
     ExamItem: 'includes_exam_item', LabItem: 'includes_lab_item',
-    Medication: 'includes_medication', Procedure: 'includes_procedure',
+    Drug: 'includes_drug', Procedure: 'includes_procedure',
     ExamObservation: 'exam_item_has_observation', LabSubitem: 'lab_item_has_subitem',
     ThresholdRule: 'has_threshold_rule', StandardDiagnosis: 'maps_to_standard_diagnosis',
     Contraindication: 'has_contraindication', ClinicalRule: 'has_stage_rule',
@@ -168,8 +183,8 @@ var SCHEMA = (function () {
       : { key: 'pending', label: '待注册' };
   }
 
-  /* 可医嘱实体类型（能落到医嘱/申请单的动作类） */
-  var ORDERABLE_TYPES = ['Medication', 'Procedure', 'TreatmentItem', 'LabItem', 'ExamItem'];
+  /* 可医嘱实体类型（能落到医嘱/申请单的动作类；V4.1 药品统一 Drug） */
+  var ORDERABLE_TYPES = ['Drug', 'Procedure', 'TreatmentItem', 'LabItem', 'ExamItem'];
 
   /* ---- 医嘱状态推导：字典已匹配且类型可医嘱 → 可医嘱 ---- */
   function orderStatus(node, entityType) {
@@ -272,25 +287,29 @@ var SCHEMA = (function () {
     return h;
   }
 
-  /* ---- 实体类型中文名（Schema V4.0 全量；旧类型页面已有各自实现，此处以 V4.0 新增为主） ---- */
+  /* ---- 实体类型中文名（Schema V4.1 全量核心；旧类型页面已有各自实现，此处以公共复用为主） ---- */
   var TYPE_NAMES = {
-    /* 护理（V4.0） */
+    /* 护理十件套（V4.1） */
     NursingAssessment: '护理评估', NursingAssessmentItem: '护理评估条目',
     NursingDiagnosis: '护理诊断', NursingIntervention: '护理措施',
     NursingOutcome: '护理结局', NursingCarePlan: '护理计划',
     NursingGrade: '护理分级', NursingContraindication: '护理禁忌',
     NursingRecordItem: '护理记录条目', NursingOrderCheckRule: '护理医嘱核对规则',
-    /* 评估评分（V4.0） */
-    AssessmentScale: '评估量表', AssessmentItem: '评分条目',
-    AssessmentScoreRule: '计分规则', AssessmentResultLevel: '结果等级',
-    AssessmentActionRule: '评估动作规则',
-    /* 路径与质控（V4.0） */
-    SpecialtyCarePathway: '专科路径', InpatientClinicalPathway: '住院路径',
+    /* 评估五件套（V4.1） */
+    AssessmentScale: '评估量表', AssessmentItem: '评估评分项',
+    AssessmentScoreRule: '计分规则', AssessmentResultLevel: '评分结果等级',
+    AssessmentActionRule: '结果动作规则',
+    /* 路径与质控（V4.1） */
+    SpecialtyCarePathway: '专科诊疗路径', InpatientClinicalPathway: '住院临床路径',
     PathwayStage: '路径阶段', PathwayTask: '路径任务',
+    PathwayVariationReason: '路径变异原因', PathwayExitCriteria: '出径/出院条件',
     QualityControlPoint: '质控点', QualityControlRule: '质控规则',
-    /* 常用旧类型（供详情页统一展示） */
+    /* 证据治理与术语（V4.1，命名以库中实测为准） */
+    MedicalTermAlias: '受控医学别名', VitalSignItem: '生命体征项',
+    LabSample: '检验标本', ExamPlan: '检查检验方案',
+    /* 常用旧类型（供详情页统一展示；V4.1 药品统一 Drug） */
     Disease: '疾病', StandardDiagnosis: '标准诊断', Symptom: '症状', Sign: '体征',
-    ExamItem: '检查项目', LabItem: '检验项目', Medication: '药品',
+    ExamItem: '检查项目', LabItem: '检验项目', Drug: '药品', Medication: '药品（旧）',
     Procedure: '手术/操作', TreatmentPlan: '治疗方案', ClinicalRule: '临床规则',
     RecommendationStatement: '推荐陈述', Contraindication: '禁忌',
     Evidence: '证据', SourceSection: '来源章节', Guideline: '指南/教材',

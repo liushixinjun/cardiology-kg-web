@@ -40,8 +40,8 @@ function getDimCount(code) {
 function getMedCount(code) {
   if (!KG_DATA || !KG_DATA.diseases[code]) return 0;
   var d = KG_DATA.diseases[code];
-  if (d._loaded && d.dimensions && d.dimensions.Medication) return d.dimensions.Medication.length;
-  if (d.dim_counts && d.dim_counts.Medication) return d.dim_counts.Medication;
+  if (d._loaded && d.dimensions && d.dimensions.Drug) return d.dimensions.Drug.length;
+  if (d.dim_counts && d.dim_counts.Drug) return d.dim_counts.Drug;
   return 0;
 }
 

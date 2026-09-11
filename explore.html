@@ -675,7 +675,7 @@ function buildStatusSummaryBar(d, recs) {
   var dims = d.dimensions || {};
   var stdDx = dims.StandardDiagnosis || [];
   /* 字典映射率：五类可医嘱/字典实体按 cdss_dict_id 推导 */
-  var dictTypes = ['Medication', 'Procedure', 'ExamItem', 'LabItem', 'StandardDiagnosis'];
+  var dictTypes = ['Drug', 'Procedure', 'ExamItem', 'LabItem', 'StandardDiagnosis'];
   var dictTotal = 0, dictMatched = 0;
   var dictTypeStats = [];
   dictTypes.forEach(function(t) {
@@ -867,7 +867,7 @@ function renderCDSSChain(d, recs) {
     h += '<div class="chain-step-body">';
     if (tps.length) {
       tps.forEach(function(tp) {
-        var meds = tp.sub_medication || [], procs = tp.sub_procedure || [], tis = tp.sub_treatment_item || [];
+        var meds = tp.sub_drug || [], procs = tp.sub_procedure || [], tis = tp.sub_treatment_item || [];
         h += '<div class="chain-plan-card">';
         h += '<div class="chain-plan-name">💊 ' + cleanName(tp) + ' <span style="font-weight:400;color:var(--muted);font-size:11px;margin-left:6px">药品 ' + meds.length + ' · 手术 ' + procs.length + ' · 治疗项目 ' + tis.length + '</span></div>';
         if (tis.length) {
@@ -1068,7 +1068,7 @@ function renderDiseaseView(code){
   h+='<li>覆盖率 = 有数据的维度数 / 20 核心临床维度 × 100%</li>';
   h+='<li>20 核心维度：<span class="cov-tag core">症状·体征·检查·检验·药物·手术·危险因素·并发症·鉴别诊断·风险分层·预后·随访·治疗方案·诊断标准·病因·流行病学·病理生理·护理计划·护理评估·护理诊断</span>（护理3维度为20260906候选批次，待临床审核）</li>';
   h+='<li>检查项目/检验项目通过检查方案中转查询（includes_exam_item / includes_lab_item）</li>';
-  h+='<li>药物/手术通过治疗方案中转查询（includes_medication / includes_procedure）；正式 CDSS 医嘱推荐仅读 RecommendationStatement→recommends_action</li>';
+  h+='<li>药品/手术通过治疗方案中转查询（includes_drug / includes_procedure）；正式 CDSS 医嘱推荐仅读 RecommendationStatement→recommends_action</li>';
   h+='<li>当前疾病类型：<span class="cov-tag '+SCHEMA.roleClass(info.diagnostic_role)+'">'+roleText+'</span></li>';
   h+='<li>疑似/宽泛诊断：合并其所有分型的维度数据统计</li>';
   h+='<li>具体分型：自身维度 + 从父疾病继承的维度</li>';
@@ -1123,11 +1123,11 @@ function renderDiseaseView(code){
       dims: ['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'],
       desc: '诊断标准、鉴别诊断和风险分层'
     },
-    // 5.治疗方案（含禁忌约束）
+    // 5.治疗方案（含禁忌约束；V4.1 药品统一 Drug）
     {
       name: '治疗方案', icon: '💊', layer: 'knowledge',
-      dims: ['TreatmentPlan','Medication','Procedure','Contraindication'],
-      desc: '治疗策略、药物、手术操作和禁忌条件'
+      dims: ['TreatmentPlan','Drug','Procedure','Contraindication'],
+      desc: '治疗策略、药品、手术操作和禁忌条件'
     },
     // 5.5 护理支持（Schema V4.0 护理批次）
     {
@@ -1312,12 +1312,12 @@ function renderDiseaseView(code){
           it.forEach(function(e) {
             h+='<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,146,43,.06);border:1px solid rgba(255,146,43,.15);border-radius:6px">';
             h+='<div style="font-weight:700;color:#ff922b;margin-bottom:6px">'+cleanName(e)+'</div>';
-            // 药物
-            if (e.sub_medication && e.sub_medication.length) {
-              h+='<div style="font-size:11px;color:var(--muted);margin-bottom:4px">💊 药物（'+e.sub_medication.length+'）</div>';
-              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 展开药物列表</div>';
+            // 药品（V4.1：sub_drug）
+            if (e.sub_drug && e.sub_drug.length) {
+              h+='<div style="font-size:11px;color:var(--muted);margin-bottom:4px">💊 药品（'+e.sub_drug.length+'）</div>';
+              h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 展开药品列表</div>';
               h+='<div class="ex-sub-list">';
-              e.sub_medication.forEach(function(sm) {
+              e.sub_drug.forEach(function(sm) {
                 h+='<div class="ex-sub-item">'+cleanName(sm)+'</div>';
               });
               h+='</div>';
@@ -1488,7 +1488,7 @@ function renderDiseaseView(code){
           it.forEach(function(e) {
             h+='<div class="ex-drill-item">';
             h+='<span class="ex-tag" onclick="showEntityDetail(\''+code+'\',\''+k+'\',\''+escAttr(e.code||e.name)+'\')">'+cleanName(e)+'</span>';
-            // StandardProcedure 标准手术编码
+            // 标准手术编码（V4.1：读取 Procedure 节点 standard_code 字段）
             if (e.std_procedures && e.std_procedures.length) {
               h+='<div class="ex-sub-toggle" onclick="toggleSubList(this)">▸ 标准手术编码（'+e.std_procedures.length+'）</div>';
               h+='<div class="ex-sub-list">';
@@ -1639,7 +1639,7 @@ function renderDiseaseView(code){
     h+='</div></div>';
   });
 
-  // 临床路径（ClinicalPathway）
+  // 专科诊疗路径（V4.1：SpecialtyCarePathway）
   var pathways = d.pathways || [];
   if (pathways.length) {
     h+='<div class="ex-clinical-group">';
@@ -1813,7 +1813,7 @@ function drawGraph(code){
     {name:'临床表现',dims:['Symptom','Sign'],color:'#51cf66'},
     {name:'诊断检查',dims:['ExamItem','ExamObservation','LabItem','LabSubitem'],color:'#22b8cf'},
     {name:'诊断与鉴别',dims:['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'],color:'#ffd43b'},
-    {name:'治疗方案',dims:['TreatmentPlan','Medication','Procedure','Contraindication'],color:'#ff922b'},
+    {name:'治疗方案',dims:['TreatmentPlan','Drug','Procedure','Contraindication'],color:'#ff922b'},
     {name:'临床规则',dims:['ClinicalRule'],color:'#339af0'},
     {name:'预后与预防',dims:['Prognosis','FollowUp','Complication','Prevention'],color:'#cc5de8'},
     {name:'病因与机制',dims:['Etiology','Pathophysiology','Epidemiology','RiskFactor'],color:'#fcc419'},
@@ -1876,7 +1876,7 @@ function drawGraph(code){
       });
     });
   });
-  // ClinicalPathway 融入临床规则分组（不再独立渲染）
+  // 专科诊疗路径融入临床规则分组（不再独立渲染）
   if(d.pathways && d.pathways.length){
     var pwColor='#339af0';
     d.pathways.forEach(function(pw){
@@ -1890,9 +1890,9 @@ function drawGraph(code){
       });
     });
   }
-  // 跨维度连线：ClinicalRule → Medication/Procedure (recommends_action)
+  // 跨维度连线：ClinicalRule → Drug/Procedure (recommends_action)
   var ruleList=d.dimensions['ClinicalRule']||[];
-  var medList=d.dimensions['Medication']||[];
+  var medList=d.dimensions['Drug']||[];
   var procList=d.dimensions['Procedure']||[];
   if(ruleList.length){
     ruleList.forEach(function(rule){
@@ -1915,12 +1915,12 @@ function drawGraph(code){
       });
     });
   }
-  // 跨维度连线：TreatmentPlan → Medication/Procedure
+  // 跨维度连线：TreatmentPlan → Drug/Procedure
   var txList=d.dimensions['TreatmentPlan']||[];
   txList.forEach(function(tx){
     var txName=cleanName(tx);
-    if(tx.sub_medication){
-      tx.sub_medication.forEach(function(med){
+    if(tx.sub_drug){
+      tx.sub_drug.forEach(function(med){
         var medName=cleanName(med);
         if(seen[txName] && seen[medName]){
           links.push({source:txName, target:medName, lineStyle:{color:'#ff922b44',width:1,opacity:.3,type:'dashed'}});
@@ -1941,7 +1941,7 @@ function drawGraph(code){
   var legendData=cGroups.filter(function(g){
     return g.dims.some(function(k){return (d.dimensions[k]||[]).length>0;});
   }).map(function(g){return g.name;});
-  // ClinicalPathway 有数据时也加入图例
+  // 专科诊疗路径有数据时也加入图例
   if(d.pathways && d.pathways.length && legendData.indexOf('临床规则')===-1) legendData.push('临床规则');
 
   GRAPH.setOption({

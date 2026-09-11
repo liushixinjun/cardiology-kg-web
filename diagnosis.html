@@ -130,6 +130,7 @@
 .dim-Exam { background: rgba(34,184,207,0.15); color: var(--cyan); }
 .dim-LabTest { background: rgba(81,207,102,0.15); color: var(--green); }
 .dim-Medication { background: rgba(255,146,43,0.15); color: var(--orange); }
+.dim-Drug { background: rgba(255,146,43,0.15); color: var(--orange); }
 .dim-Procedure { background: rgba(240,101,149,0.15); color: var(--pink); }
 .dim-RiskFactor { background: rgba(255,107,107,0.15); color: var(--accent2); }
 .dim-Complication { background: rgba(255,210,59,0.15); color: var(--yellow); }
@@ -669,6 +670,7 @@ var DIM_WEIGHTS = {
   LabTest: 6,
   Complication: 5,
   TreatmentPlan: 4,
+  Drug: 3,
   Medication: 3,
   Procedure: 3,
   Etiology: 2,
@@ -767,7 +769,7 @@ var MED_TERMS = {
     '抗核抗体','ANA','类风湿因子','RF','抗链球菌溶血素O','ASO',
     '铁蛋白','转铁蛋白','总铁结合力','维生素B12','叶酸'
   ],
-  Medication: [
+  Drug: [
     '阿司匹林','拜阿司匹灵','aspirin','他汀','他汀类药物','阿托伐他汀','瑞舒伐他汀','辛伐他汀','匹伐他汀',
     '美托洛尔','倍他乐克','比索洛尔','阿替洛尔','β受体阻滞剂','β-blocker',
     'ACEI','血管紧张素转换酶抑制剂','依那普利','贝那普利','培哚普利','雷米普利','卡托普利',

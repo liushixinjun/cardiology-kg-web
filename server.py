@@ -74,11 +74,11 @@ REL_MAP = {
     "Symptom": "has_symptom",
     "Sign": "has_sign",
     "RiskFactor": "has_risk_factor",
-    "Complication": "may_cause_complication",
+    "Complication": "has_complication",
     "DifferentialDiagnosis": "has_differential_diagnosis",
     "RiskStratification": "has_risk_stratification",
     "Prognosis": "has_prognosis",
-    "FollowUp": "has_follow_up",
+    "FollowUp": "has_followup",
     "TreatmentPlan": "has_treatment_plan",
     "DiagnosisCriteria": "has_diagnostic_criteria",
     "Etiology": "has_etiology",
@@ -95,7 +95,7 @@ REL_MAP = {
 }
 
 # Schema V2.x 多跳维度（原一跳直连关系已迁移）
-# ExamItem/LabItem 通过 ExamPlan 中转，Medication/Procedure 通过 TreatmentPlan 中转
+# Schema V4.1：ExamItem/LabItem 经 ExamPlan 中转，Drug/Procedure 经 TreatmentPlan 中转
 MULTI_HOP_DIMS = {
     "ExamItem": {
         "chain": ["has_exam_plan", "includes_exam_item"],
@@ -105,9 +105,9 @@ MULTI_HOP_DIMS = {
         "chain": ["has_exam_plan", "includes_lab_item"],
         "target_label": "LabItem"
     },
-    "Medication": {
-        "chain": ["has_treatment_plan", "includes_medication"],
-        "target_label": "Medication"
+    "Drug": {
+        "chain": ["has_treatment_plan", "includes_drug"],
+        "target_label": "Drug"
     },
     "Procedure": {
         "chain": ["has_treatment_plan", "includes_procedure"],
@@ -276,7 +276,7 @@ def query_disease_tree():
     with d.session() as sess:
         # 1. 查询疾病大类（V2.0 主分类以 CAT- 前缀标识；过滤非 CAT 重复旧分类）
         cat_rows = list(sess.run("""
-            MATCH (sp:Specialty)-[:has_disease_category]->(cat:DiseaseCategory)
+            MATCH (sp:Specialty)-[:has_category]->(cat:DiseaseCategory)
             WHERE """ + _active_node_filter('sp') + """ AND """ + _active_node_filter('cat') + """
               AND cat.code STARTS WITH 'CAT-'
             RETURN cat.code AS cat_code, cat.name AS cat_name, cat.display_name AS cat_dn,
@@ -286,7 +286,7 @@ def query_disease_tree():
 
         # 2. 查询大类 -> 宽口径/独立疾病（只从 V2.0 CAT- 主分类读取）
         broad_rows = list(sess.run("""
-            MATCH (sp:Specialty)-[:has_disease_category]->(cat:DiseaseCategory)-[:has_disease]->(dis:Disease)
+            MATCH (sp:Specialty)-[:has_category]->(cat:DiseaseCategory)-[:has_disease]->(dis:Disease)
             WHERE """ + _active_node_filter('sp') + """ AND """ + _active_node_filter('cat') + """ AND """ + _active_node_filter('dis') + """
               AND cat.code STARTS WITH 'CAT-'
               AND dis.diagnostic_role IN ['broad_diagnosis', 'independent_disease']
@@ -442,7 +442,7 @@ def query_disease_list():
                     dim_counts[code] = {}
                 dim_counts[code][dim] = r["cnt"]
 
-        # Schema V2.x 多跳维度统计（ExamItem/LabItem/Medication/Procedure）
+        # Schema V4.1 多跳维度统计（ExamItem/LabItem/Drug/Procedure）
         for dim, cfg in MULTI_HOP_DIMS.items():
             chain = cfg["chain"]
             target_label = cfg["target_label"]
@@ -589,7 +589,7 @@ def query_disease_full(code):
         # 17维度 + 二跳
         dimensions = {}
 
-        # Schema V2.x 多跳维度（ExamItem/LabItem/Medication/Procedure）
+        # Schema V4.1 多跳维度（ExamItem/LabItem/Drug/Procedure）
         for dim, cfg in MULTI_HOP_DIMS.items():
             chain = cfg["chain"]
             target_label = cfg["target_label"]
@@ -642,30 +642,31 @@ def query_disease_full(code):
                     "evidence_count": r["evidence_count"] or 0,
                 }
 
-                # Medication 二跳 — has_specific_medication
-                if dim == "Medication" and r["ncode"]:
-                    item["sub_medication"] = []
+                # Drug 二跳 — has_specific_drug（药品类别→具体药品）
+                if dim == "Drug" and r["ncode"]:
+                    item["sub_drug"] = []
                     try:
                         sub_meds = sess.run("""
-                            MATCH (m:KGNode {code: $med_code})-[:has_specific_medication]->(s)
+                            MATCH (m:KGNode {code: $med_code})-[:has_specific_drug]->(s)
                             RETURN DISTINCT s.code as code, s.name as name, s.preferred_name as pref
                             ORDER BY s.name LIMIT 15
                         """, med_code=r["ncode"])
                         for sm in sub_meds:
                             n = clean_name_from_row(sm, 'pref', 'name', 'code')
-                            item["sub_medication"].append({"name": n, "code": sm["code"]})
+                            item["sub_drug"].append({"name": n, "code": sm["code"]})
                     except Exception:
                         pass
 
-                # Procedure 二跳 — StandardProcedure
+                # Procedure 二跳 — CDSS 手术字典编码（V4.1）
                 if dim == "Procedure" and r["ncode"]:
                     item["std_procedures"] = []
                     try:
                         sp_rs = sess.run("""
-                            MATCH (p:KGNode {code: $proc_code})-[:has_standard_procedure]->(sp:StandardProcedure)
-                            RETURN DISTINCT sp.code as code, sp.name as name,
-                                   sp.standard_code as standard_code, sp.coding_system as coding_system
-                            ORDER BY sp.name LIMIT 10
+                            MATCH (p:Procedure {code: $proc_code})
+                            WHERE p.standard_code IS NOT NULL AND p.standard_code <> ''
+                            RETURN DISTINCT p.code as code, p.name as name,
+                                   p.standard_code as standard_code, p.coding_system as coding_system
+                            LIMIT 10
                         """, proc_code=r["ncode"])
                         for sp in sp_rs:
                             item["std_procedures"].append({
@@ -765,19 +766,19 @@ def query_disease_full(code):
 
                 # TreatmentPlan 二跳
                 if dim == "TreatmentPlan" and r["ncode"]:
-                    item["sub_medication"] = []
+                    item["sub_drug"] = []
                     item["sub_procedure"] = []
                     item["sub_treatment_item"] = []
                     item["sub_evidence"] = []
                     try:
                         sub_meds = sess.run("""
-                            MATCH (tp:KGNode {code: $tp_code})-[:includes_medication]->(m)
+                            MATCH (tp:KGNode {code: $tp_code})-[:includes_drug]->(m)
                             RETURN DISTINCT m.code as code, m.name as name, m.preferred_name as pref
                             ORDER BY m.name LIMIT 15
                         """, tp_code=r["ncode"])
                         for sm in sub_meds:
                             n = clean_name_from_row(sm, 'pref', 'name', 'code')
-                            item["sub_medication"].append({"name": n, "code": sm["code"]})
+                            item["sub_drug"].append({"name": n, "code": sm["code"]})
 
                         sub_tis = sess.run("""
                             MATCH (tp:KGNode {code: $tp_code})-[:includes_treatment_item]->(t)
@@ -799,10 +800,11 @@ def query_disease_full(code):
                             # 查询 StandardProcedure
                             try:
                                 sp_rs = sess.run("""
-                                    MATCH (p:KGNode {code: $proc_code})-[:has_standard_procedure]->(sp:StandardProcedure)
-                                    RETURN DISTINCT sp.code as code, sp.name as name,
-                                           sp.standard_code as standard_code, sp.coding_system as coding_system
-                                    ORDER BY sp.name LIMIT 5
+                                    MATCH (p:Procedure {code: $proc_code})
+                                    WHERE p.standard_code IS NOT NULL AND p.standard_code <> ''
+                                    RETURN DISTINCT p.code as code, p.name as name,
+                                           p.standard_code as standard_code, p.coding_system as coding_system
+                                    LIMIT 5
                                 """, proc_code=sp["code"])
                                 for sp_row in sp_rs:
                                     proc_item["std_procedures"].append({
@@ -825,30 +827,31 @@ def query_disease_full(code):
                     except Exception:
                         pass
 
-                # Medication 二跳
-                if dim == "Medication" and r["ncode"]:
-                    item["sub_medication"] = []
+                # Drug 二跳
+                if dim == "Drug" and r["ncode"]:
+                    item["sub_drug"] = []
                     try:
                         sub_meds = sess.run("""
-                            MATCH (m:KGNode {code: $med_code})-[:has_specific_medication]->(s)
+                            MATCH (m:KGNode {code: $med_code})-[:has_specific_drug]->(s)
                             RETURN DISTINCT s.code as code, s.name as name, s.preferred_name as pref
                             ORDER BY s.name LIMIT 15
                         """, med_code=r["ncode"])
                         for sm in sub_meds:
                             n = clean_name_from_row(sm, 'pref', 'name', 'code')
-                            item["sub_medication"].append({"name": n, "code": sm["code"]})
+                            item["sub_drug"].append({"name": n, "code": sm["code"]})
                     except Exception:
                         pass
 
-                # Procedure 二跳 — StandardProcedure（标准手术编码）
+                # Procedure 二跳 — CDSS 手术字典编码（V4.1：standard_code 在 Procedure 节点自身）
                 if dim == "Procedure" and r["ncode"]:
                     item["std_procedures"] = []
                     try:
                         sp_rs = sess.run("""
-                            MATCH (p:KGNode {code: $proc_code})-[:has_standard_procedure]->(sp:StandardProcedure)
-                            RETURN DISTINCT sp.code as code, sp.name as name,
-                                   sp.standard_code as standard_code, sp.coding_system as coding_system
-                            ORDER BY sp.name LIMIT 10
+                            MATCH (p:Procedure {code: $proc_code})
+                            WHERE p.standard_code IS NOT NULL AND p.standard_code <> ''
+                            RETURN DISTINCT p.code as code, p.name as name,
+                                   p.standard_code as standard_code, p.coding_system as coding_system
+                            LIMIT 10
                         """, proc_code=r["ncode"])
                         for sp in sp_rs:
                             item["std_procedures"].append({
@@ -941,11 +944,11 @@ def query_disease_full(code):
                         item["risk_sub"]["levels"] = lvs
                     except Exception:
                         item["risk_sub"]["levels"] = []
-                    # 相关推荐（RecommendationStatement -recommends_action/recommends_assessment-> 本评分，同一陈述去重合并关系）
+                    # 相关推荐（RecommendationStatement -recommends_action-> 本评分，V4.1 统一推荐动作关系）
                     try:
                         rec_rows = sess.run("""
                             MATCH (rec:RecommendationStatement)-[rel]->(rs:KGNode {code: $rcode})
-                            WHERE type(rel) IN ['recommends_action', 'recommends_assessment']
+                            WHERE type(rel) = 'recommends_action'
                               AND (rec.status IS NULL OR rec.status <> 'deprecated')
                             WITH rec, collect(DISTINCT type(rel)) AS rels
                             RETURN rec.code AS code, rec.name AS name,
@@ -1279,12 +1282,12 @@ def query_disease_full(code):
                         "stage": r["stage"] or "",
                         "source": "diagnostic_criteria",
                     })
-            # 路径2: 临床路径 -> 阶段 -> ClinicalRule
+            # 路径2: 专科路径 -> 阶段 -> ClinicalRule（Schema V4.1：has_specialty_care_pathway/includes_pathway_stage/has_clinical_rule）
             cr_rs2 = sess.run("""
                 MATCH (d:Disease {code: $code})
-                      -[:has_clinical_pathway]->(p:KGNode)
-                      -[:has_pathway_stage]->(s:KGNode)
-                      -[:has_stage_rule]->(r:KGNode {entityType:'ClinicalRule'})
+                      -[:has_specialty_care_pathway]->(p:KGNode)
+                      -[:includes_pathway_stage]->(s:KGNode)
+                      -[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
                 WHERE (r.status IS NULL OR r.status <> 'deprecated')
                 RETURN DISTINCT r.code as code, r.name as name, r.preferred_name as pref,
                        r.display_name as dn, r.description as desc,
@@ -1314,6 +1317,35 @@ def query_disease_full(code):
                         "stage_name": r["stage_name"] or "",
                         "pathway_name": r["pathway_name"] or "",
                     })
+            # 路径3: Disease 直连 ClinicalRule（Schema V4.1 has_clinical_rule，主链路）
+            cr_rs3 = sess.run("""
+                MATCH (d:Disease {code: $code})-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
+                WHERE (r.status IS NULL OR r.status <> 'deprecated')
+                RETURN DISTINCT r.code as code, r.name as name, r.preferred_name as pref,
+                       r.display_name as dn, r.description as desc,
+                       r.rule_logic as logic, r.trigger_condition as trigger,
+                       r.output_content as output, r.usage_boundary as boundary,
+                       r.trigger_phase as phase, r.read_fields as fields,
+                       r.category as category, r.stage as stage
+                ORDER BY r.name LIMIT 100
+            """, code=code)
+            for r in cr_rs3:
+                if r["code"] not in seen_rule_codes:
+                    seen_rule_codes.add(r["code"])
+                    clinical_rules.append({
+                        "name": clean_name_from_row(r, 'pref', 'name', 'code'),
+                        "code": r["code"],
+                        "description": r["desc"] or "",
+                        "rule_logic": r["logic"] or "",
+                        "trigger_condition": r["trigger"] or "",
+                        "output_content": r["output"] or "",
+                        "usage_boundary": r["boundary"] or "",
+                        "trigger_phase": r["phase"] or "",
+                        "read_fields": r["fields"] or "",
+                        "category": r["category"] or "",
+                        "stage": r["stage"] or "",
+                        "source": "disease_rule",
+                    })
         except Exception:
             pass
         dimensions["ClinicalRule"] = clinical_rules
@@ -1337,8 +1369,8 @@ def query_disease_full(code):
         pathways = []
         try:
             pathway_results = sess.run("""
-                MATCH (d:Disease {code: $code})-[:has_clinical_pathway]->(p:KGNode {entityType:'ClinicalPathway'})
-                OPTIONAL MATCH (p)-[:has_pathway_stage]->(s:KGNode {entityType:'PathwayStage'})
+                MATCH (d:Disease {code: $code})-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
+                OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode {entityType:'PathwayStage'})
                 RETURN p.code AS code, p.name AS name,
                        collect(DISTINCT {
                            code: s.code, name: s.name,
@@ -1366,10 +1398,10 @@ def query_disease_full(code):
                         "blocked_actions": [],
                         "evidence": [],
                     }
-                    # has_stage_rule
+                    # has_clinical_rule（V4.1：阶段→规则）
                     try:
                         rule_rs = sess.run("""
-                            MATCH (s:KGNode {code: $s_code})-[:has_stage_rule]->(r)
+                            MATCH (s:KGNode {code: $s_code})-[:has_clinical_rule]->(r)
                             RETURN DISTINCT r.code as code, r.name as name, r.preferred_name as pref,
                                    r.display_name as dn
                             ORDER BY r.name LIMIT 30
@@ -1766,7 +1798,7 @@ def query_schema_info():
 
         # V2.0 关键关系统计
         v2_rels = {}
-        for rel in ['has_disease', 'has_clinical_subtype', 'has_standard_diagnosis', 'has_disease_category']:
+        for rel in ['has_disease', 'has_clinical_subtype', 'has_standard_diagnosis', 'has_category']:
             rows = sess.run(f"MATCH ()-[r:{rel}]->() RETURN count(*) AS cnt")
             for r in rows:
                 v2_rels[rel] = r["cnt"]
@@ -2084,7 +2116,7 @@ def query_action_evidence(disease_code, action_code):
     with d.session() as sess:
         results = sess.run("""
             MATCH (d:KGNode {code: $diseaseCode})
-            -[:has_clinical_pathway|has_treatment_plan|has_recommended_action|recommends_action*1..4]->(action:KGNode)
+            -[:has_specialty_care_pathway|includes_pathway_stage|includes_pathway_task|pathway_task_uses_action|has_treatment_plan|has_recommended_action|recommends_action*1..4]->(action:KGNode)
             WHERE action.code = $actionCode
             OPTIONAL MATCH (action)-[:supported_by_evidence]->(ev:KGNode)
             OPTIONAL MATCH (rule:KGNode)-[:recommends_action|blocks_action|has_recommended_action]->(action)
@@ -2418,11 +2450,11 @@ def query_cdss_pathway(disease_code):
 
         # 2. 查询CDSS路径（优先动态路径）
         pathways = sess.run("""
-            MATCH (d:KGNode {code: $code})-[:has_clinical_pathway]->(p:KGNode)
-            WHERE p.entityType = 'ClinicalPathway'
-            OPTIONAL MATCH (p)-[:has_pathway_stage]->(s:KGNode)
-            OPTIONAL MATCH (s)-[:has_stage_rule]->(r:KGNode)
-            OPTIONAL MATCH (r)-[:has_recommendation_statement]->(rec:KGNode {entityType:'RecommendationStatement'})
+            MATCH (d:KGNode {code: $code})-[:has_specialty_care_pathway]->(p:KGNode)
+            WHERE p.entityType = 'SpecialtyCarePathway'
+            OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode)
+            OPTIONAL MATCH (s)-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
+            OPTIONAL MATCH (r)-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
             OPTIONAL MATCH (rec)-[:recommends_action]->(a:KGNode)
             OPTIONAL MATCH (rec)-[:blocks_action]->(ba:KGNode)
             OPTIONAL MATCH (rec)-[:derived_from]->(e:KGNode)
@@ -2530,11 +2562,11 @@ def query_cdss_diseases():
     d = get_driver()
     with d.session() as sess:
         rows = sess.run("""
-            MATCH (d:Disease)-[:has_clinical_pathway]->(p:KGNode {entityType:'ClinicalPathway'})
+            MATCH (d:Disease)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
             WHERE """ + _active_node_filter('d') + """
-            OPTIONAL MATCH (p)-[:has_pathway_stage]->(s:KGNode)
-            OPTIONAL MATCH (s)-[:has_stage_rule]->(r:KGNode)
-            OPTIONAL MATCH (r)-[:has_recommendation_statement]->(rec:KGNode {entityType:'RecommendationStatement'})
+            OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode)
+            OPTIONAL MATCH (s)-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
+            OPTIONAL MATCH (r)-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
             OPTIONAL MATCH (rec)-[:supported_by_evidence]->(e:KGNode)
             OPTIONAL MATCH (rec)-[:based_on_guideline]->(g:KGNode)
             RETURN d.code AS disease_code,
@@ -2578,11 +2610,11 @@ def query_cdss_coverage():
     d = get_driver()
     with d.session() as sess:
         rows = sess.run("""
-            MATCH (d:Disease)-[:has_clinical_pathway]->(p:KGNode {entityType:'ClinicalPathway'})
+            MATCH (d:Disease)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
             WHERE """ + _active_node_filter('d') + """
-            OPTIONAL MATCH (p)-[:has_pathway_stage]->(s:KGNode)
-            OPTIONAL MATCH (s)-[:has_stage_rule]->(r:KGNode)
-            OPTIONAL MATCH (r)-[:has_recommendation_statement]->(rec:KGNode {entityType:'RecommendationStatement'})
+            OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode)
+            OPTIONAL MATCH (s)-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
+            OPTIONAL MATCH (r)-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
             OPTIONAL MATCH (rec)-[:recommends_action]->(a:KGNode)
             OPTIONAL MATCH (rec)-[:blocks_action]->(ba:KGNode)
             OPTIONAL MATCH (rec)-[:supported_by_evidence]->(e:KGNode)
@@ -2851,40 +2883,107 @@ EDITABLE_FIELDS = {
 }
 
 REL_NAME_MAP = {
-    'has_symptom': '症状关联', 'has_sign': '体征关联',
+    'has_symptom': '症状关联', 'has_sign': '体征关联', 'has_complication': '并发症关联',
     'has_diagnostic_criteria': '诊断标准关联',
     'has_risk_factor': '危险因素关联',
     'has_etiology': '病因关联', 'has_complication': '并发症关联',
     'has_pathophysiology': '病理生理关联',
-    'has_prognosis': '预后关联', 'has_follow_up': '随访关联',
+    'has_prognosis': '预后关联', 'has_followup': '随访关联',
     'has_risk_stratification': '风险分层关联',
     'has_epidemiology': '流行病学关联',
     'has_treatment_plan': '治疗方案关联',
     'differentiates_from': '鉴别诊断关联',
     'has_threshold_rule': '阈值规则关联',
-    # Schema V2.x 新关系
-    'has_exam_plan': '辅助检查方案',
+    # 检查检验方案
+    'has_exam_plan': '检查/检验方案', 'has_lab_plan': '检验方案',
     'includes_exam_item': '检查项目',
     'includes_lab_item': '检验项目',
     'exam_item_has_observation': '检查发现',
     'lab_item_has_subitem': '检验细项',
-    'includes_medication': '治疗药物',
-    'includes_procedure': '治疗手术',
+    'lab_item_has_observation': '检验发现',
+    'uses_lab_sample': '检验标本',
+    # 治疗与药品（Schema V4.1）
+    'includes_drug': '方案药品', 'includes_procedure': '治疗手术',
+    'includes_treatment_item': '治疗项目',
+    'has_specific_drug': '具体药品', 'interacts_with': '药物相互作用',
+    # 正式推荐链（Schema V4.1）
+    'has_recommendation_statement': '推荐陈述关联',
+    'triggers_recommendation': '触发推荐',
+    'recommends_action': '推荐动作',
+    'targets_differential_diagnosis': '服务于鉴别',
+    'requires_pre_treatment_exam': '治疗前检查',
+    'requires_pre_treatment_lab': '治疗前检验',
+    'blocked_by_differential': '鉴别阻断',
+    'has_alternative_action': '替代动作',
+    'blocks_action': '阻断动作',
+    'has_contraindication': '禁忌关联',
+    'requires_exclusion_exam': '排除检查关联',
+    'requires_exclusion_lab': '排除检验关联',
+    # 证据链
     'supported_by_evidence': '证据支持',
+    'has_evidence': '包含证据',
+    'based_on_guideline': '依据指南',
+    'uses_primary_guideline': '主依据指南',
+    'uses_source_section': '使用来源章节',
+    'has_source_section': '包含来源章节',
+    'has_alias': '受控别名',
+    # 其他既有
     'has_diagnostic_component': '诊断组件关联',
     'derived_from': '来源关联',
     'has_standard_diagnosis': '标准诊断关联',
-    'has_standard_procedure': '标准手术关联',
     'has_source_adjudication': '来源裁决关联',
-    'uses_primary_guideline': '主依据关联',
     'decides_recommendation': '形成推荐关联',
     'has_definition_component': '定义明细关联',
-    'blocks_action': '阻断动作关联',
-    'has_contraindication': '禁忌关联',
-    'requires_exclusion_exam': '排除检查关联',
-    'has_specific_medication': '具体药品关联',
     'has_treatment_component': '治疗组件关联',
     'stage_has_available_action': '阶段可选动作',
+    # 评估五件套（Schema V4.1）
+    'has_assessment_scale': '适用评估量表',
+    'includes_assessment_item': '评估评分项',
+    'has_score_rule': '计分规则',
+    'has_total_score_rule': '总分规则',
+    'has_result_level': '结果等级',
+    'determines_result_level': '判定等级',
+    'supports_risk_stratification': '支撑风险分层',
+    'triggers_assessment_action': '触发结果动作',
+    'assessment_supported_by_evidence': '评估证据',
+    'level_supported_by_evidence': '等级证据',
+    'uses_assessment_scale': '复用量表',
+    # 护理（Schema V4.1）
+    'has_nursing_assessment': '护理评估关联',
+    'has_nursing_assessment_item': '护理评估条目',
+    'has_nursing_care_plan': '护理计划关联',
+    'has_nursing_diagnosis': '护理诊断关联',
+    'has_nursing_intervention': '护理措施关联',
+    'targets_nursing_outcome': '护理结局目标',
+    'achieves_nursing_outcome': '达成护理结局',
+    'determines_nursing_grade': '判定护理分级',
+    'plan_uses_assessment': '计划使用评估',
+    'plan_has_nursing_diagnosis': '计划关联护理诊断',
+    'plan_targets_outcome': '计划目标结局',
+    'records_nursing_item': '护理记录项',
+    'includes_nursing_intervention': '包含护理措施',
+    'restricts_nursing_intervention': '约束护理措施',
+    'checks_target': '核对对象',
+    # 路径（Schema V4.1）
+    'has_specialty_care_pathway': '专科诊疗路径',
+    'has_inpatient_clinical_pathway': '住院临床路径',
+    'includes_pathway_stage': '包含路径阶段',
+    'includes_pathway_task': '包含路径任务',
+    'pathway_task_uses_action': '任务绑定动作',
+    'depends_on_task': '依赖前置任务',
+    'next_pathway_stage': '后继阶段',
+    'maps_to_pathway_task': '路径任务映射',
+    'has_variation_reason': '变异原因',
+    'has_exit_criteria': '出径/出院条件',
+    # 质控（Schema V4.1）
+    'has_quality_control_point': '质控点关联',
+    'has_quality_control_rule': '质控规则关联',
+    'checks_required_exam': '检查必需检查',
+    'checks_required_lab': '检查必需检验',
+    'checks_contraindication': '检查禁忌',
+    'checks_assessment_level': '检查评估等级',
+    'checks_pathway_task': '检查路径任务',
+    'quality_rule_supported_by_evidence': '质控证据',
 }
 
 ENTITY_NAME_MAP = {
@@ -2896,11 +2995,12 @@ ENTITY_NAME_MAP = {
     'Pathophysiology': '病理生理', 'Symptom': '症状',
     'Sign': '体征', 'RiskFactor': '危险因素',
     'Complication': '并发症', 'ExamItem': '检查项目',
-    'ExamObservation': '检查发现', 'LabItem': '检验项目',
-    'LabSubitem': '检验细项', 'LabSpecimen': '检验标本',
+    'ExamObservation': '检查发现', 'ExamPlan': '检查/检验方案',
+    'LabItem': '检验项目', 'LabSubitem': '检验细项',
+    'LabSample': '检验标本',
     'DiagnosisCriteria': '诊断标准', 'DiagnosisCriteriaComponent': '诊断标准明细',
     'RiskStratification': '风险分层',
-    'Medication': '药物', 'Procedure': '手术/操作',
+    'Drug': '药品', 'Procedure': '手术/操作',
     'TreatmentPlan': '治疗方案', 'TreatmentItem': '治疗项目',
     'Prognosis': '预后', 'FollowUp': '随访',
     'DifferentialDiagnosis': '鉴别诊断', 'Contraindication': '禁忌',
@@ -2908,14 +3008,26 @@ ENTITY_NAME_MAP = {
     'ThresholdRule': '阈值规则', 'Prevention': '预防',
     'ClinicalPathway': '诊疗路径', 'PathwayStage': '路径阶段',
     'ClinicalRule': '临床规则', 'RecommendationStatement': '推荐陈述',
+    # Schema V4.1 评估五件套
+    'AssessmentScale': '评估量表', 'AssessmentItem': '评估评分项',
+    'AssessmentScoreRule': '计分规则', 'AssessmentResultLevel': '评分结果等级',
+    'AssessmentActionRule': '结果动作规则',
+    # Schema V4.1 护理十件套
     'NursingCarePlan': '护理计划', 'NursingAssessment': '护理评估',
     'NursingAssessmentItem': '护理评估条目', 'NursingDiagnosis': '护理诊断',
     'NursingIntervention': '护理措施', 'NursingOutcome': '护理结局',
     'NursingRecordItem': '护理记录条目', 'NursingGrade': '护理分级',
-    'AssessmentScale': '评估量表', 'MedicationCheck': '医嘱核对',
+    'NursingContraindication': '护理禁忌', 'NursingOrderCheckRule': '护理医嘱核对',
+    # Schema V4.1 路径与质控
+    'SpecialtyCarePathway': '专科诊疗路径', 'InpatientClinicalPathway': '住院临床路径',
+    'PathwayTask': '路径任务', 'PathwayVariationReason': '路径变异原因',
+    'PathwayExitCriteria': '路径结束条件',
+    'QualityControlPoint': '质控点', 'QualityControlRule': '质控规则',
+    # 其他
     'SourceAdjudication': '来源裁决', 'SourceSection': '来源章节',
     'PatientState': '患者状态', 'ClinicalEvent': '临床事件',
     'VitalSignItem': '生命体征', 'MedicalTerm': '医学术语',
+    'MedicalTermAlias': '医学术语别名',
 }
 
 
@@ -2937,10 +3049,143 @@ def write_audit_log(action, entity_code, operator, old_values, new_values):
         print(f"Audit log write failed: {e}")
 
 
-def query_entities_search(q='', entity_type='', limit=50, offset=0):
-    """全局实体搜索：按名称/编码/别名搜索，支持分页"""
+def query_entities_search(q='', entity_type='', limit=50, offset=0, category=''):
+    """全局实体搜索：按名称/编码/别名搜索，支持分页。
+    category（疾病大类名）传入时按级联过滤：该大类疾病集合（含分型）+ 这些疾病的全部维度关联实体。
+    实体类别/关键词在级联范围内继续生效；多映射范围通常数百级，内存合并分页。
+    """
     d = get_driver()
     with d.session() as sess:
+        # ============ 级联模式：疾病大类过滤 ============
+        if category:
+            tree = query_disease_tree()
+            codes = []
+            for cat in tree:
+                if cat.get('name') == category:
+                    for b in cat.get('children', []):
+                        codes.append(b['code'])
+                        for s in b.get('children', []):
+                            codes.append(s['code'])
+            if not codes:
+                return {'items': [], 'total': 0, 'offset': offset, 'limit': limit, 'category': category}
+
+            params = {'codes': codes}
+            if q:
+                params['q'] = q
+            if entity_type:
+                params['etype'] = entity_type
+            q_filter = (" AND (n.name CONTAINS $q OR n.code CONTAINS $q OR n.name_en CONTAINS $q"
+                        " OR any(a IN coalesce(n.aliases,[]) WHERE a CONTAINS $q))") if q else ""
+            etype_filter = " AND n.entityType = $etype" if entity_type else ""
+            # 全部类型模式排除支撑材料（量级 2.5 万的 Evidence 会淹没知识实体；可在左侧实体类别单独筛 Evidence）
+            exclude_support = "" if entity_type else (" AND n.entityType <> 'Evidence'"
+                                                      " AND n.entityType <> 'SourceSection'")
+            # 结构性/目录/疾病层级关系不产生"知识实体"，排除
+            struct_exclude = ("['belongs_to_category','belongs_to_subcategory','has_category','has_subcategory',"
+                              "'has_disease','has_clinical_subtype','has_category',"
+                              "'belongs_to_specialty','has_specialty']")
+            ret_clause = ("RETURN n.code as code, n.name as name, n.entityType as entityType,"
+                          " n.name_en as name_en, n.aliases as aliases,"
+                          " n.preferred_name as pref, n.display_name as dn, dcs")
+
+            merged = {}
+
+            # 1) 一跳维度实体（双向，排除结构关系），附带关联疾病 code 供前端映射大类
+            hop1_rows = list(sess.run(f"""
+                MATCH (d:Disease)-[r]-(n:KGNode)
+                WHERE d.code IN $codes AND n.entityType IS NOT NULL
+                  AND (n.status IS NULL OR n.status <> 'deprecated')
+                  AND NOT (type(r) IN {struct_exclude})
+                  AND NOT (n.code IN $codes)
+                  {etype_filter}
+                  {exclude_support}
+                  {q_filter}
+                WITH DISTINCT n, d
+                WITH n, collect(d.code)[0..8] AS dcs
+                {ret_clause}
+                ORDER BY n.name
+            """, **params))
+            for r in hop1_rows:
+                merged[r['code']] = r
+
+            # 2) 两跳维度实体（ExamItem/LabItem/Drug/Procedure，经 ExamPlan/TreatmentPlan 挂接）
+            hop2_rows = list(sess.run(f"""
+                MATCH (d:Disease)-[r1]->(p)-[r2]->(n:KGNode)
+                WHERE d.code IN $codes
+                  AND type(r1) IN ['has_exam_plan','has_treatment_plan']
+                  AND type(r2) IN ['includes_exam_item','includes_lab_item','includes_drug','includes_procedure']
+                  AND n.entityType IS NOT NULL
+                  AND (n.status IS NULL OR n.status <> 'deprecated')
+                  AND NOT (n.code IN $codes)
+                  {etype_filter}
+                  {exclude_support}
+                  {q_filter}
+                WITH DISTINCT n, d
+                WITH n, collect(d.code)[0..8] AS dcs
+                {ret_clause}
+                ORDER BY n.name
+            """, **params))
+            for r in hop2_rows:
+                if r['code'] not in merged:
+                    merged[r['code']] = r
+
+            # 3) 三跳维度实体（ThresholdRule/ExamObservation/LabSubitem，挂在 ExamItem/LabItem 下）
+            hop3_rows = list(sess.run(f"""
+                MATCH (d:Disease)-[:has_exam_plan]->(p)-[r2]->(i)-[r3]->(n:KGNode)
+                WHERE d.code IN $codes
+                  AND type(r2) IN ['includes_exam_item','includes_lab_item']
+                  AND type(r3) IN ['has_threshold_rule','exam_item_has_observation','lab_item_has_subitem']
+                  AND n.entityType IS NOT NULL
+                  AND (n.status IS NULL OR n.status <> 'deprecated')
+                  AND NOT (n.code IN $codes)
+                  {etype_filter}
+                  {exclude_support}
+                  {q_filter}
+                WITH DISTINCT n, d
+                WITH n, collect(d.code)[0..8] AS dcs
+                {ret_clause}
+                ORDER BY n.name
+            """, **params))
+            for r in hop3_rows:
+                if r['code'] not in merged:
+                    merged[r['code']] = r
+
+            # 4) 大类疾病本身（未指定类型或类型=Disease 时并入）
+            if not entity_type or entity_type == 'Disease':
+                dis_rows = list(sess.run(f"""
+                    MATCH (n:KGNode)
+                    WHERE n.code IN $codes AND n.entityType = 'Disease'
+                      AND (n.status IS NULL OR n.status <> 'deprecated')
+                      {q_filter}
+                    RETURN n.code as code, n.name as name, n.entityType as entityType,
+                           n.name_en as name_en, n.aliases as aliases,
+                           n.preferred_name as pref, n.display_name as dn
+                    ORDER BY n.name
+                """, **params))
+                for r in dis_rows:
+                    if r['code'] not in merged:
+                        row = dict(r)
+                        row['dcs'] = [r['code']]
+                        merged[r['code']] = row
+
+            items_sorted = sorted(merged.values(), key=lambda x: (x['name'] or x['code'] or ''))
+            total = len(items_sorted)
+            page = items_sorted[offset:offset + limit]
+            result = []
+            for r in page:
+                # 显示名走统一清洗链（剥离"1.定义依据"等编号前缀）
+                name = clean_name_from_row(r)
+                result.append({
+                    'code': r['code'],
+                    'name': name,
+                    'entityType': r['entityType'] or '',
+                    'name_en': r['name_en'] or '',
+                    'aliases': r['aliases'] or [],
+                    'disease_codes': list(r.get('dcs') or []),
+                })
+            return {'items': result, 'total': total, 'offset': offset, 'limit': limit, 'category': category}
+
+        # ============ 默认模式：全库检索（原逻辑） ============
         params = {'limit': limit, 'skip': offset}
         if q:
             params['q'] = q
@@ -4521,10 +4766,11 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             qs = urllib.parse.parse_qs(parsed.query)
             q = (qs.get('q', [''])[0] or '').strip()
             etype = (qs.get('type', [''])[0] or '').strip()
+            category = (qs.get('category', [''])[0] or '').strip()
             limit = int(qs.get('limit', ['50'])[0] or '50')
             offset = int(qs.get('offset', ['0'])[0] or '0')
             try:
-                self._json_response(query_entities_search(q, etype, limit, offset))
+                self._json_response(query_entities_search(q, etype, limit, offset, category))
             except Exception as e:
                 self._json_response({"error": str(e)}, 500)
             return

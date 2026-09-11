@@ -11,19 +11,19 @@ var APP_VERSION_DATE = '2026-07-13';
 
 /* === 专科知识图谱 · 共享应用逻辑 === */
 var KG_DATA = null;
-var DIM_NAMES = {Symptom:'症状',Sign:'体征',ExamItem:'检查项目',LabItem:'检验项目',ExamObservation:'检查发现',LabSubitem:'检验细项',Medication:'药物',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理',Evidence:'证据',Guideline:'指南',ThresholdRule:'阈值规则',Prevention:'预防',Definition:'定义',StandardDiagnosis:'标准诊断',Contraindication:'禁忌',ClinicalRule:'临床规则',NursingCarePlan:'护理计划',NursingAssessment:'护理评估',NursingDiagnosis:'护理诊断'};
+var DIM_NAMES = {Symptom:'症状',Sign:'体征',ExamItem:'检查项目',LabItem:'检验项目',ExamObservation:'检查发现',LabSubitem:'检验细项',Drug:'药品',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理',Evidence:'证据',Guideline:'指南',ThresholdRule:'阈值规则',Prevention:'预防',Definition:'定义',StandardDiagnosis:'标准诊断',Contraindication:'禁忌',ClinicalRule:'临床规则',NursingCarePlan:'护理计划',NursingAssessment:'护理评估',NursingDiagnosis:'护理诊断'};
 var DIM_KEYS = Object.keys(DIM_NAMES);
 /* 核心临床维度（用于覆盖度计算）；护理3维度为20260906候选批次，待临床审核 */
-var CORE_DIM_KEYS = ['Symptom','Sign','ExamItem','LabItem','Medication','Procedure','RiskFactor','Complication','DifferentialDiagnosis','RiskStratification','Prognosis','FollowUp','TreatmentPlan','DiagnosisCriteria','Etiology','Epidemiology','Pathophysiology','NursingCarePlan','NursingAssessment','NursingDiagnosis'];
+var CORE_DIM_KEYS = ['Symptom','Sign','ExamItem','LabItem','Drug','Procedure','RiskFactor','Complication','DifferentialDiagnosis','RiskStratification','Prognosis','FollowUp','TreatmentPlan','DiagnosisCriteria','Etiology','Epidemiology','Pathophysiology','NursingCarePlan','NursingAssessment','NursingDiagnosis'];
 /* 全局维度颜色（对象+数组两种形式，供各页面统一引用） */
-var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',ExamItem:'#22b8cf',LabItem:'#748ffc',ExamObservation:'#845ef7',LabSubitem:'#b197fc',Medication:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc',Evidence:'#40c057',Guideline:'#fab005',ThresholdRule:'#20c997',Prevention:'#20c997',Definition:'#748ffc',StandardDiagnosis:'#ff922b',Contraindication:'#ff6b6b',ClinicalRule:'#339af0',NursingCarePlan:'#0ca678',NursingAssessment:'#15aabf',NursingDiagnosis:'#e64980'};
+var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',ExamItem:'#22b8cf',LabItem:'#748ffc',ExamObservation:'#845ef7',LabSubitem:'#b197fc',Drug:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc',Evidence:'#40c057',Guideline:'#fab005',ThresholdRule:'#20c997',Prevention:'#20c997',Definition:'#748ffc',StandardDiagnosis:'#ff922b',Contraindication:'#ff6b6b',ClinicalRule:'#339af0',NursingCarePlan:'#0ca678',NursingAssessment:'#15aabf',NursingDiagnosis:'#e64980'};
 var DIM_COLORS_ARR = DIM_KEYS.map(function(k){return DIM_COLORS[k]});
 /* V2.0 三层架构分组 */
 var THREE_LAYERS = {
   knowledge: {
     name: '疾病知识层', icon: '📖', color: '#4f8cff', borderColor: 'rgba(79,140,255,.3)',
     desc: '这个病是什么、有哪些表现、如何检查和治疗',
-    dims: ['Definition','Symptom','Sign','ExamItem','ExamObservation','LabItem','LabSubitem','Medication','Procedure','TreatmentPlan','NursingCarePlan','NursingAssessment','NursingDiagnosis','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','FollowUp','Prevention','DifferentialDiagnosis','RiskStratification','DiagnosisCriteria','ThresholdRule','Contraindication','ClinicalRule']
+    dims: ['Definition','Symptom','Sign','ExamItem','ExamObservation','LabItem','LabSubitem','Drug','Procedure','TreatmentPlan','NursingCarePlan','NursingAssessment','NursingDiagnosis','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','FollowUp','Prevention','DifferentialDiagnosis','RiskStratification','DiagnosisCriteria','ThresholdRule','Contraindication','ClinicalRule']
   },
   masterdata: {
     name: 'CDSS标准主数据层', icon: '🏷️', color: '#ff922b', borderColor: 'rgba(255,146,43,.3)',
@@ -33,7 +33,8 @@ var THREE_LAYERS = {
   decision: {
     name: '临床决策层', icon: '🧠', color: '#51cf66', borderColor: 'rgba(81,207,102,.3)',
     desc: '当前患者何时触发、推荐什么、为什么',
-    dims: ['ClinicalPathway','Evidence','Guideline']
+    /* V4.1：旧 ClinicalPathway 拆分为专科路径与住院路径 */
+    dims: ['SpecialtyCarePathway','InpatientClinicalPathway','PathwayStage','PathwayTask','Evidence','Guideline']
   }
 };
 /* 实体类型→所属层级映射 */
@@ -395,7 +396,7 @@ function renderChangelog() {
     ]},
     { v: 'v1.2.0', date: '2026-06-27', items: [
       '重新从 Neo4j 导出最新数据快照，修复旧静态数据导致的空壳实体问题',
-      '图谱展示支持二跳展开：TreatmentPlan→includes_medication/includes_procedure，Medication→has_specific_medication',
+      '图谱展示支持二跳展开：TreatmentPlan→includes_drug/includes_procedure，Drug→has_specific_drug',
       '自动过滤空壳实体名（鉴别诊断/诊断标准/危险分层/预后良好/预后不良等）',
       '页面底部新增数据源信息栏：导出时间、节点数、关系数、空壳实体数',
       '节点去重改为按 code 去重'

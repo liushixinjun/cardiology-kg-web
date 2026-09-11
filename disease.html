@@ -428,7 +428,7 @@ function chainPrioClass(v){
   return '';
 }
 /* 链路已覆盖的维度，不再在"其他知识维度"平铺 */
-var CHAIN_DIMS={StandardDiagnosis:1,ExamItem:1,ExamObservation:1,LabItem:1,LabSubitem:1,DifferentialDiagnosis:1,TreatmentPlan:1,Medication:1,Procedure:1,Evidence:1,Guideline:1,ClinicalRule:1};
+var CHAIN_DIMS={StandardDiagnosis:1,ExamItem:1,ExamObservation:1,LabItem:1,LabSubitem:1,DifferentialDiagnosis:1,TreatmentPlan:1,Drug:1,Procedure:1,Evidence:1,Guideline:1,ClinicalRule:1};
 
 function renderDetail(code){
   var d=KG_DATA.diseases[code];if(!d)return;
@@ -561,7 +561,7 @@ function renderDetail(code){
   h+='<div class="chain-step-body">';
   if(tps.length){
     tps.forEach(function(tp){
-      var meds=tp.sub_medication||[],procs=tp.sub_procedure||[],tis=tp.sub_treatment_item||[];
+      var meds=tp.sub_drug||[],procs=tp.sub_procedure||[],tis=tp.sub_treatment_item||[];
       h+='<div class="chain-plan-card">';
       h+='<div class="chain-plan-name">💊 '+escH(tp.name||tp.code)+' <span style="font-weight:400;color:var(--muted);font-size:11px;margin-left:6px">药品 '+meds.length+' · 手术 '+procs.length+' · 治疗项目 '+tis.length+'</span></div>';
       if(tis.length){

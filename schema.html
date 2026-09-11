@@ -141,6 +141,7 @@
 .si-entity-type-badge.Disease{background:rgba(255,107,107,.12);color:#ff6b6b}
 .si-entity-type-badge.Symptom{background:rgba(81,207,102,.12);color:#51cf66}
 .si-entity-type-badge.Medication{background:rgba(255,159,64,.12);color:#ff9f40}
+.si-entity-type-badge.Drug{background:rgba(255,159,64,.12);color:#ff9f40}
 .si-entity-type-badge.ExamItem{background:rgba(79,140,255,.12);color:var(--accent)}
 .si-entity-type-badge.LabItem{background:rgba(153,102,255,.12);color:#9966ff}
 .si-entity-type-badge.DiagnosisCriteria{background:rgba(255,212,59,.15);color:#bcc02e}
@@ -427,7 +428,7 @@ var ENTITY_TYPES = [
   /* 第一层：疾病知识层 — 目录与疾病 */
   {code:'Specialty',cn:'学科',icon:'🏥',color:'#4f8cff',shape:'dot',desc:'多学科根目录，如心血管内科'},
   {code:'DiseaseCategory',cn:'疾病大类',icon:'📂',color:'#748ffc',shape:'square',desc:'组织一组相关疾病，如冠心病'},
-  {code:'DiseaseSubcategory',cn:'疾病亚类',icon:'📁',color:'#91a7ff',shape:'square',desc:'仅展示分组，不参与诊断、不回填EMR（has_display_group）'},
+  {code:'DiseaseSubcategory',cn:'疾病亚类',icon:'📁',color:'#91a7ff',shape:'square',desc:'仅展示分组，不参与诊断、不回填EMR（has_subcategory）'},
   {code:'Disease',cn:'疾病',icon:'🫀',color:'#ff6b6b',shape:'dot',desc:'临床疾病实体，可作为诊断'},
   /* 第一层：疾病知识层 — 定义与基础医学 */
   {code:'Definition',cn:'定义',icon:'📖',color:'#748ffc',shape:'dot',desc:'疾病定义和基本概念'},
@@ -441,12 +442,14 @@ var ENTITY_TYPES = [
   {code:'Complication',cn:'并发症',icon:'❗',color:'#e64980',shape:'dot',desc:'疾病发展过程中出现的其他问题'},
   {code:'Prognosis',cn:'预后',icon:'📊',color:'#15aabf',shape:'square',desc:'疾病的发展趋势和最终结局'},
   {code:'Prevention',cn:'预防',icon:'🛡️',color:'#20c997',shape:'square',desc:'一级/二级预防和患者教育'},
-  /* 第一层：疾病知识层 — 检查与检验 */
+  /* 第一层：疾病知识层 — 检查与检验（V4.1：ExamPlan 中转方案） */
+  {code:'ExamPlan',cn:'检查检验方案',icon:'📋',color:'#4dabf7',shape:'square',desc:'疾病下的检查/检验方案中转节点（has_exam_plan）'},
   {code:'ExamItem',cn:'检查项目',icon:'🔬',color:'#4f8cff',shape:'square',desc:'影像、心电、超声等检查项目'},
   {code:'ExamObservation',cn:'检查发现',icon:'📏',color:'#74c0fc',shape:'dot',desc:'检查报告中的结构化发现'},
   {code:'LabItem',cn:'检验项目',icon:'🧪',color:'#9966ff',shape:'diamond',desc:'血液、生化、标志物等检验项目'},
   {code:'LabSubitem',cn:'检验细项',icon:'🔬',color:'#b197fc',shape:'dot',desc:'检验项目下的具体可报告指标'},
-  {code:'LabSpecimen',cn:'检验标本',icon:'🧫',color:'#b197fc',shape:'dot',desc:'血清、血浆等检验标本'},
+  {code:'LabSample',cn:'检验标本',icon:'🧫',color:'#b197fc',shape:'dot',desc:'血清、血浆等检验标本（uses_lab_sample）'},
+  {code:'VitalSignItem',cn:'生命体征项',icon:'💓',color:'#ff8787',shape:'dot',desc:'体温、血压、心率等生命体征条目'},
   {code:'ThresholdRule',cn:'阈值规则',icon:'⚖️',color:'#fcc419',shape:'diamond',desc:'检验检查指标的临界值判定规则'},
   /* 第一层：疾病知识层 — 诊断与风险 */
   {code:'DiagnosisCriteria',cn:'诊断标准',icon:'📋',color:'#ffd43b',shape:'square',desc:'疾病诊断需要满足的条件'},
@@ -454,19 +457,45 @@ var ENTITY_TYPES = [
   {code:'DifferentialDiagnosis',cn:'鉴别诊断',icon:'🔍',color:'#ea7ccc',shape:'dot',desc:'需要与当前疾病区分的相似疾病'},
   {code:'RiskStratification',cn:'风险分层',icon:'📈',color:'#fd7e14',shape:'square',desc:'根据患者特征分为不同风险等级'},
   {code:'ClinicalRule',cn:'临床规则',icon:'📐',color:'#a9e34b',shape:'diamond',desc:'触发、适用、排除、禁忌逻辑'},
-  /* 第一层：疾病知识层 — 治疗与管理 */
-  {code:'Medication',cn:'药物',icon:'💊',color:'#ff9f40',shape:'triangle',desc:'心血管疾病治疗的核心药物'},
+  /* 第一层：疾病知识层 — 治疗与管理（V4.1：药品实体统一 Drug） */
+  {code:'Drug',cn:'药品',icon:'💊',color:'#ff9f40',shape:'triangle',desc:'心血管疾病治疗的核心药品（V4.1 统一命名）'},
   {code:'Procedure',cn:'手术/操作',icon:'🔧',color:'#f06595',shape:'triangle',desc:'外科手术或介入操作'},
-  {code:'TreatmentPlan',cn:'治疗方案',icon:'📝',color:'#22b8cf',shape:'square',desc:'针对特定疾病的系统治疗策略'},
+  {code:'TreatmentPlan',cn:'治疗方案',icon:'📝',color:'#22b8cf',shape:'square',desc:'针对特定疾病的系统治疗策略（includes_drug 含药品）'},
   {code:'TreatmentItem',cn:'治疗项目',icon:'💊',color:'#66d9e8',shape:'square',desc:'非药品、非手术的标准治疗'},
   {code:'Contraindication',cn:'禁忌',icon:'🚫',color:'#ff6b6b',shape:'dot',desc:'阻断推荐的临床原因'},
-  {code:'FollowUp',cn:'随访',icon:'🔄',color:'#20c997',shape:'square',desc:'出院后定期复查和追踪管理'},
+  {code:'FollowUp',cn:'随访',icon:'🔄',color:'#20c997',shape:'square',desc:'出院后定期复查和追踪管理（has_followup）'},
+  /* 专科应用结构层 — 评估五件套（V4.1） */
+  {code:'AssessmentScale',cn:'评估量表',icon:'📊',color:'#e599f7',shape:'square',desc:'如 GRACE、CHA₂DS₂-VASc 评分量表'},
+  {code:'AssessmentItem',cn:'评估评分项',icon:'📝',color:'#da77f2',shape:'dot',desc:'量表中的具体评分条目'},
+  {code:'AssessmentScoreRule',cn:'计分规则',icon:'⚖️',color:'#cc5de8',shape:'diamond',desc:'条目分值与总分计算规则'},
+  {code:'AssessmentResultLevel',cn:'评分结果等级',icon:'📈',color:'#be4bdb',shape:'dot',desc:'分值区间对应的风险等级'},
+  {code:'AssessmentActionRule',cn:'结果动作规则',icon:'⚡',color:'#ae3ec9',shape:'diamond',desc:'等级触发的临床动作'},
+  /* 专科应用结构层 — 护理十件套（V4.1） */
+  {code:'NursingAssessment',cn:'护理评估',icon:'🩺',color:'#63e6be',shape:'square',desc:'护理视角的患者评估'},
+  {code:'NursingAssessmentItem',cn:'护理评估条目',icon:'📋',color:'#38d9a9',shape:'dot',desc:'护理评估的具体条目'},
+  {code:'NursingDiagnosis',cn:'护理诊断',icon:'🏷️',color:'#20c997',shape:'dot',desc:'护理问题诊断'},
+  {code:'NursingIntervention',cn:'护理措施',icon:'💉',color:'#0ca678',shape:'dot',desc:'护理干预措施'},
+  {code:'NursingOutcome',cn:'护理结局',icon:'🎯',color:'#099268',shape:'dot',desc:'护理预期达成结局'},
+  {code:'NursingCarePlan',cn:'护理计划',icon:'📑',color:'#087f5b',shape:'square',desc:'整体护理计划'},
+  {code:'NursingGrade',cn:'护理分级',icon:'⭐',color:'#2f9e44',shape:'dot',desc:'一/二/三级护理等级'},
+  {code:'NursingContraindication',cn:'护理禁忌',icon:'🚫',color:'#e8590c',shape:'dot',desc:'护理操作禁忌'},
+  {code:'NursingRecordItem',cn:'护理记录条目',icon:'🗒️',color:'#66a80f',shape:'dot',desc:'护理文书记录项'},
+  {code:'NursingOrderCheckRule',cn:'护理医嘱核对规则',icon:'✅',color:'#5c940d',shape:'diamond',desc:'医嘱执行前核对规则'},
+  /* 专科应用结构层 — 路径与质控（V4.1） */
+  {code:'SpecialtyCarePathway',cn:'专科诊疗路径',icon:'🗺️',color:'#4dabf7',shape:'square',desc:'V4.1 专病诊疗路径（替代旧 ClinicalPathway）'},
+  {code:'InpatientClinicalPathway',cn:'住院临床路径',icon:'🏥',color:'#339af0',shape:'square',desc:'住院阶段的国家版/院内标准路径'},
+  {code:'PathwayStage',cn:'路径阶段',icon:'📊',color:'#339af0',shape:'square',desc:'疑似、确诊、分型、治疗、随访阶段'},
+  {code:'PathwayTask',cn:'路径任务',icon:'📌',color:'#1c7ed6',shape:'dot',desc:'阶段内具体执行任务，绑定动作实体'},
+  {code:'PathwayVariationReason',cn:'路径变异原因',icon:'🔀',color:'#f59f00',shape:'dot',desc:'偏离路径的记录原因'},
+  {code:'PathwayExitCriteria',cn:'出径/出院条件',icon:'🚪',color:'#e8590c',shape:'dot',desc:'退出路径的条件标准'},
+  {code:'QualityControlPoint',cn:'质控点',icon:'🎯',color:'#f76707',shape:'square',desc:'路径中的质量控制点位'},
+  {code:'QualityControlRule',cn:'质控规则',icon:'📐',color:'#e8590c',shape:'diamond',desc:'质控点校验规则'},
+  /* 证据治理层 — 术语（V4.1） */
+  {code:'MedicalTermAlias',cn:'受控医学别名',icon:'🔖',color:'#845ef7',shape:'dot',desc:'术语受控别名（has_alias）'},
   /* 第二层：CDSS标准主数据层 */
   {code:'StandardDiagnosis',cn:'标准诊断',icon:'🏷️',color:'#ff922b',shape:'dot',desc:'CDSS标准诊断字典，含ICD-10编码'},
-  {code:'StandardProcedure',cn:'标准手术',icon:'🔧',color:'#f06595',shape:'dot',desc:'CDSS标准手术字典'},
+  {code:'StandardProcedure',cn:'标准手术',icon:'🔧',color:'#f06595',shape:'dot',desc:'CDSS标准手术字典（V4.1 起并入 Procedure.standard_code）'},
   /* 第三层：临床决策层 */
-  {code:'ClinicalPathway',cn:'诊疗路径',icon:'🗺️',color:'#4dabf7',shape:'square',desc:'CDSS业务入口，疾病诊疗路径'},
-  {code:'PathwayStage',cn:'路径阶段',icon:'📊',color:'#339af0',shape:'square',desc:'疑似、确诊、分型、治疗、随访阶段'},
   {code:'RecommendationStatement',cn:'推荐陈述',icon:'📄',color:'#51cf66',shape:'square',desc:'医生推荐卡根实体'},
   {code:'SourceAdjudication',cn:'来源裁决',icon:'⚖️',color:'#cc5de8',shape:'dot',desc:'记录主依据、支持依据、冲突和理由'},
   {code:'Evidence',cn:'证据',icon:'📄',color:'#adb5bd',shape:'dot',desc:'循证医学证据来源'},
@@ -480,67 +509,85 @@ ENTITY_TYPES.forEach(function(t){TYPE_MAP[t.code]=t});
 ENTITY_TYPES.forEach(function(t){SI_STATE.typeVisible[t.code] = true;});
 
 var REL_DIM_MAP = {
-  /* 第一层：疾病知识层 — 临床表现 */
+  /* 第一层：疾病知识层 — 临床表现（V4.1 现行口径） */
   'has_symptom':'症状','has_sign':'体征','has_risk_factor':'危险因素',
-  'may_cause_complication':'并发症','has_etiology':'病因',
+  'has_complication':'并发症','has_etiology':'病因',
   'has_pathophysiology':'病理生理','has_prognosis':'预后',
   'has_epidemiology':'流行病学','has_prevention':'预防','has_definition':'定义',
   'has_definition_component':'定义明细','has_contraindication':'禁忌',
-  /* 第一层：疾病知识层 — 检查检验 */
-  'requires_exam':'检查项目','requires_lab_test':'检验项目',
-  'exam_has_indicator':'检查发现','lab_test_has_indicator':'检验细项',
+  /* 第一层：疾病知识层 — 检查检验（V4.1：ExamPlan 中转） */
+  'has_exam_plan':'检查检验方案','includes_exam_item':'检查项目','includes_lab_item':'检验项目',
+  'exam_item_has_observation':'检查发现','lab_item_has_subitem':'检验细项',
+  'lab_item_has_observation':'检验可见','uses_lab_sample':'检验标本',
   'has_threshold_rule':'阈值规则',
-  'requires_exclusion_exam':'排除检查',
+  'requires_exclusion_exam':'排除检查','requires_exclusion_lab':'排除检验',
+  'requires_pre_treatment_exam':'治疗前检查','requires_pre_treatment_lab':'治疗前检验',
   /* 第一层：疾病知识层 — 诊断 */
   'has_diagnostic_criteria':'诊断标准','has_diagnostic_component':'诊断标准明细',
-  'differentiates_from':'鉴别诊断','has_risk_stratification':'风险分层',
-  'has_clinical_rule':'临床规则',
-  /* 第一层：疾病知识层 — 治疗 */
-  'treated_by_medication':'药物','treated_by_procedure':'手术',
-  'has_treatment_plan':'治疗方案','has_follow_up':'随访',
-  'includes_medication':'方案药物','includes_procedure':'方案手术',
+  'has_differential_diagnosis':'鉴别诊断','has_differential_rule':'鉴别规则',
+  'has_risk_stratification':'风险分层','has_clinical_rule':'临床规则',
+  'has_alias':'受控别名',
+  /* 第一层：疾病知识层 — 治疗（V4.1 药品统一 Drug） */
+  'has_treatment_plan':'治疗方案','has_followup':'随访',
+  'includes_drug':'方案含药品','includes_procedure':'方案手术',
   'includes_treatment_item':'方案治疗项目',
-  'has_specific_medication':'具体药品','has_treatment_component':'治疗组件',
-  /* 目录 */
+  'has_specific_drug':'含具体药品','interacts_with':'药物相互作用',
+  /* 目录（V4.1：has_category/has_subcategory） */
   'has_disease':'疾病','has_clinical_subtype':'临床分型',
-  'has_disease_category':'疾病大类','has_display_group':'展示分组',
-  'groups_disease':'分组包含疾病',
+  'has_category':'疾病大类','has_subcategory':'疾病亚类',
   /* 第二层：CDSS标准主数据层 */
   'has_standard_diagnosis':'标准诊断',
-  'has_standard_procedure':'标准手术',
-  /* 第三层：临床决策层 */
-  'has_clinical_pathway':'诊疗路径','has_pathway_stage':'路径阶段',
+  /* 第三层：临床决策层（V4.1 路径体系） */
+  'has_specialty_care_pathway':'专科诊疗路径','has_inpatient_clinical_pathway':'住院临床路径',
+  'includes_pathway_stage':'路径阶段','includes_pathway_task':'路径任务',
+  'pathway_task_uses_action':'任务绑定动作','next_pathway_stage':'下一阶段',
+  'has_variation_reason':'路径变异原因','has_exit_criteria':'出径条件',
   'has_stage_rule':'阶段规则','has_recommendation_statement':'推荐陈述',
-  'stage_has_available_action':'阶段可选动作',
+  'triggers_recommendation':'触发推荐',
   'recommends_action':'推荐动作','blocks_action':'阻断动作',
-  'next_pathway_stage':'下一阶段',
-  'has_source_adjudication':'来源裁决',
-  'uses_primary_guideline':'主依据','decides_recommendation':'形成推荐',
+  'blocked_by_differential':'鉴别阻断','has_alternative_action':'替代动作',
+  /* 评估评分与质控（V4.1） */
+  'has_assessment_scale':'适用量表','includes_assessment_item':'评分条目',
+  'has_score_rule':'计分规则','has_total_score_rule':'总分规则',
+  'has_result_level':'结果等级','determines_result_level':'判定结果等级',
+  'triggers_assessment_action':'结果动作','supports_risk_stratification':'支撑风险分层',
+  'has_quality_control_point':'质控点','has_quality_control_rule':'质控规则',
+  /* 护理（V4.1） */
+  'has_nursing_care_plan':'护理计划','has_nursing_assessment':'护理评估',
+  'has_nursing_assessment_item':'护理评估条目','has_nursing_diagnosis':'护理诊断',
+  'has_nursing_intervention':'护理措施','includes_nursing_intervention':'含护理措施',
+  'targets_nursing_outcome':'目标护理结局','achieves_nursing_outcome':'达成护理结局',
+  'records_nursing_item':'记录护理条目','determines_nursing_grade':'判定护理分级',
+  'uses_assessment_scale':'使用评估量表','plan_uses_assessment':'计划用评估',
+  'plan_has_nursing_diagnosis':'计划含护理诊断','plan_targets_outcome':'计划目标结局',
+  'restricts_nursing_intervention':'限制护理措施','checks_target':'核对对象',
   /* 证据 */
   'supported_by_evidence':'证据支持','based_on_guideline':'依据指南',
-  'guideline_has_evidence':'指南证据','derived_from':'来源',
+  'has_evidence':'包含证据','derived_from':'来源',
+  'uses_primary_guideline':'主依据','uses_source_section':'使用来源章节',
+  'has_source_section':'包含来源章节',
 };
-/* 关系类型 → 目标实体类型映射（用于添加关联时按类型过滤搜索） */
+/* 关系类型 → 目标实体类型映射（用于添加关联时按类型过滤搜索；V4.1 现行关系） */
 var REL_ENTITY_MAP = {
-  'has_symptom':'Symptom','has_sign':'Sign','treated_by_medication':'Medication',
-  'treated_by_procedure':'Procedure','requires_exam':'ExamItem','requires_lab_test':'LabItem',
+  'has_symptom':'Symptom','has_sign':'Sign','includes_drug':'Drug',
+  'includes_procedure':'Procedure','includes_exam_item':'ExamItem','includes_lab_item':'LabItem',
   'has_diagnostic_criteria':'DiagnosisCriteria','has_risk_factor':'RiskFactor',
   'has_etiology':'Etiology','has_complication':'Complication',
   'has_pathophysiology':'Pathophysiology','has_prognosis':'Prognosis',
-  'has_follow_up':'FollowUp','has_risk_stratification':'RiskStratification',
+  'has_followup':'FollowUp','has_risk_stratification':'RiskStratification',
   'has_epidemiology':'Epidemiology','has_treatment_plan':'TreatmentPlan',
-  'differentiates_from':'Disease','has_threshold_rule':'ThresholdRule',
-  'exam_has_indicator':'ExamObservation','lab_test_has_indicator':'LabSubitem',
+  'has_differential_diagnosis':'DifferentialDiagnosis','has_threshold_rule':'ThresholdRule',
+  'exam_item_has_observation':'ExamObservation','lab_item_has_subitem':'LabSubitem',
   'has_diagnostic_component':'DiagnosisCriteriaComponent','derived_from':'',
   'supported_by_evidence':'Evidence','has_disease':'',
   'has_standard_diagnosis':'StandardDiagnosis',
   'has_contraindication':'Contraindication',
   'has_definition_component':'DefinitionComponent',
-  'blocks_action':'Medication',
-  'recommends_action':'Medication',
+  'has_specific_drug':'Drug','interacts_with':'Drug',
+  'blocks_action':'Drug',
+  'recommends_action':'Drug',
   'has_source_adjudication':'SourceAdjudication',
   'uses_primary_guideline':'Guideline',
-  'decides_recommendation':'RecommendationStatement',
 };
 
 /* ========== 初始化 ========== */
@@ -608,8 +655,9 @@ function siCascadeCategory(){
   var disSel = document.getElementById('si-sel-disease');
   if(!group){
     disSel.innerHTML = '<option value="">选择疾病...</option>';
-    // 清空分类时恢复默认疾病列表
-    siLoadSearchResults('Disease');
+    // 清空大类时恢复当前实体类别的默认列表（全库）
+    if(SI_STATE.mainView === 'dim'){ siLoadDimEntities(SI_DIM_CUR_TYPE); }
+    else { siLoadSearchResults(SI_STATE.typeFilter || ''); }
     return;
   }
   var list = SI_STATE.hierarchy[group] || [];
@@ -618,36 +666,17 @@ function siCascadeCategory(){
     html += '<option value="'+dis.code+'">'+dis.name+'</option>';
   });
   disSel.innerHTML = html;
-  // 选择分类后自动刷新列表（从本地数据过滤）
-  siRenderCategoryList(group);
-}
-
-/* 按疾病大类从本地数据渲染列表 */
-function siRenderCategoryList(group){
-  var list = SI_STATE.hierarchy[group] || [];
-  SI_SEARCH_STATE.type = 'Disease';
-  SI_SEARCH_STATE.q = group;
-  SI_SEARCH_STATE.total = list.length;
-  SI_SEARCH_STATE.page = 1;
-  SI_SEARCH_STATE.pageSize = list.length || 1;
-  // 转为与API返回格式一致
-  SI_SEARCH_STATE.items = list.map(function(d){
-    return {code:d.code, name:d.name, name_en:d.name_en||'', entityType:'Disease', aliases:d.aliases||[], icd_code:d.icd_code||''};
-  });
-  SI_STATE.view = 'search';
-  document.querySelectorAll('.si-view-tab').forEach(function(t){t.classList.remove('active')});
-  renderSearchTable();
-  document.getElementById('si-search-view').style.display = 'block';
-  document.getElementById('si-table-view').style.display = 'none';
-  document.getElementById('si-network-view').style.display = 'none';
+  // 级联过滤：按大类刷新当前视图（实体检索/维度视角均按已选条件组合，不强制维度类型）
+  if(SI_STATE.mainView === 'dim'){ siLoadDimEntities(SI_DIM_CUR_TYPE); }
+  else { siLoadSearchResults(SI_STATE.typeFilter || ''); }
 }
 
 /* ========== 查询检索 ========== */
 function siFilterList(){
   var q = document.getElementById('si-filter-input').value.trim();
   if(!q){
-    // 无关键词时恢复当前类型默认列表
-    siLoadSearchResults(SI_STATE.typeFilter || 'Disease');
+    // 无关键词时恢复当前实体类别列表（"全部实体"=全库或按已选大类级联）
+    siLoadSearchResults(SI_STATE.typeFilter || '');
     return;
   }
   siLoadSearchResults(SI_STATE.typeFilter || '', q);
@@ -672,11 +701,8 @@ function siSetTypeFilter(type){
     el.classList.remove('active');
   });
   event.target.classList.add('active');
-  if(type){
-    siLoadSearchResults(type);
-  } else if(SI_STATE.currentCode){
-    siLoadEntity(SI_STATE.currentCode);
-  }
+  // 实体类别切换与大类条件自由组合：未选类别=该范围内全部类型实体
+  siLoadSearchResults(type || '');
 }
 
 /* ========== 搜索 ========== */
@@ -696,16 +722,20 @@ function siSearch(){
 }
 
 /* ========== 分页搜索状态 ========== */
-var SI_SEARCH_STATE = {type:'', q:'', page:1, pageSize:20, total:0, items:[]};
+var SI_SEARCH_STATE = {type:'', q:'', category:'', page:1, pageSize:20, total:0, items:[]};
 
 function siLoadSearchResults(type, q, page){
   SI_SEARCH_STATE.type = type || '';
   SI_SEARCH_STATE.q = q || '';
   SI_SEARCH_STATE.page = page || 1;
+  // 级联：自动携带当前疾病大类条件（未选大类=全库）
+  var catSel = document.getElementById('si-sel-category');
+  SI_SEARCH_STATE.category = catSel ? catSel.value : '';
   var offset = (SI_SEARCH_STATE.page - 1) * SI_SEARCH_STATE.pageSize;
   var url = '/api/kg/entities?limit='+SI_SEARCH_STATE.pageSize+'&offset='+offset;
   if(type) url += '&type='+encodeURIComponent(type);
   if(q) url += '&q='+encodeURIComponent(q);
+  if(SI_SEARCH_STATE.category) url += '&category='+encodeURIComponent(SI_SEARCH_STATE.category);
   fetch(url).then(function(r){return r.json()}).then(function(data){
     SI_SEARCH_STATE.total = data.total;
     SI_SEARCH_STATE.items = data.items;
@@ -732,13 +762,13 @@ function renderSearchTable(){
     typeName = tm ? tm.cn : SI_SEARCH_STATE.type;
   }
   var html = '<div style="margin-bottom:10px;font-size:13px;color:var(--muted)">';
-  html += (typeName ? typeName+' · ' : '')+'共 '+total+' 条结果，第 '+page+'/'+totalPages+' 页</div>';
+  html += (SI_SEARCH_STATE.category ? '疾病大类「'+SI_SEARCH_STATE.category+'」· ' : '')+(typeName ? typeName+' · ' : '')+'共 '+total+' 条结果，第 '+page+'/'+totalPages+' 页</div>';
   if(data.length === 0){
     html += '<div class="si-empty">未找到匹配的实体</div>';
   } else {
     html += '<div class="si-search-table-wrap"><table class="si-search-table"><thead><tr>';
-    // 疾病类型额外显示大类列（放在名称前面）
-    var showGroup = (SI_SEARCH_STATE.type === 'Disease');
+    // 选了大类（级联模式）或疾病类型时显示大类列：Disease 用自身归属，其他实体用关联疾病反查
+    var showGroup = (SI_SEARCH_STATE.type === 'Disease' || !!SI_SEARCH_STATE.category);
     if(showGroup) html += '<th>疾病大类</th>';
     html += '<th>名称</th>';
     html += '<th>类型</th><th>编码</th><th>别名</th><th>操作</th>';
@@ -747,7 +777,17 @@ function renderSearchTable(){
       var t = TYPE_MAP[e.entityType] || {cn:e.entityType,icon:'📌'};
       html += '<tr>';
       if(showGroup){
-        var group = (SI_STATE.codeGroupMap || {})[e.code] || '-';
+        var gm = SI_STATE.codeGroupMap || {};
+        var group = gm[e.code] || '-';
+        if(!group || group === '-'){
+          // 非 Disease 实体：由关联疾病 code 反查所属大类（去重，最多展示 2 个）
+          var gs = [];
+          (e.disease_codes || []).forEach(function(dc){
+            var g = gm[dc];
+            if(g && gs.indexOf(g) === -1) gs.push(g);
+          });
+          group = gs.length ? (gs.slice(0,2).join(' / ')+(gs.length>2?' 等':'')) : (SI_SEARCH_STATE.category || '-');
+        }
         html += '<td style="font-size:11px;color:var(--muted);white-space:nowrap">'+group+'</td>';
       }
       html += '<td><span class="t-name" onclick="siLoadEntity(\''+e.code+'\')">'+e.name+'</span>';
@@ -1211,7 +1251,7 @@ function siRenderEChartsGraph(){
 
 function renderLegend(){
   var html = '<div class="lg-title">实体类别（点击切换）</div>';
-  var mainTypes = ['Disease','Symptom','Medication','ExamItem','LabItem','DiagnosisCriteria','Procedure','RiskFactor'];
+  var mainTypes = ['Disease','Symptom','Drug','ExamItem','LabItem','DiagnosisCriteria','Procedure','RiskFactor'];
   mainTypes.forEach(function(code){
     var t = TYPE_MAP[code];
     if(t){
@@ -1602,7 +1642,7 @@ function siInitModalNetwork(code){
 
   // 渲染图例
   var legendHtml = '<div class="lg-title">实体类别</div>';
-  var mainTypes = ['Disease','Symptom','Medication','ExamItem','LabItem','DiagnosisCriteria','Procedure','RiskFactor'];
+  var mainTypes = ['Disease','Symptom','Drug','ExamItem','LabItem','DiagnosisCriteria','Procedure','RiskFactor'];
   mainTypes.forEach(function(code){
     var t = TYPE_MAP[code];
     if(t) legendHtml += '<div class="lg-row"><span class="lg-dot" style="background:'+t.color+'"></span>'+t.cn+'</div>';
@@ -1772,7 +1812,10 @@ function siSwitchMainView(view){
   } else if(view==='dim'){
     dimView.style.display='block';
     if(!SI_DIM_INIT){ siInitDimTypeSelector(); }
-    if(!SI_DIM_CUR_TYPE && !SI_DIM_CUR_CODE){ dimView.innerHTML='<div class="si-empty" style="padding:60px;text-align:center">请在上方选择维度类型，查看该维度下全部实体及其关联疾病</div>'; }
+    /* 级联：未选维度类型时按已选条件（疾病大类）自动加载全部类型实体，不再强制先选维度 */
+    if(!SI_DIM_CUR_TYPE && !dimView.innerHTML.trim()){
+      siLoadDimEntities('');
+    }
     if(SI_DIM_CHART){
       var nc = document.getElementById('si-dim-network');
       if(nc){ setTimeout(function(){ if(SI_DIM_CHART) SI_DIM_CHART.resize(); }, 120); }
@@ -1796,7 +1839,7 @@ var SI_AUDIT_GROUPS = [
   {name:'临床表现', icon:'🩺', dims:['Symptom','Sign']},
   {name:'诊断检查', icon:'🔬', dims:['ExamItem','ExamObservation','LabItem','LabSubitem']},
   {name:'诊断与鉴别', icon:'🔍', dims:['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification']},
-  {name:'治疗方案', icon:'💊', dims:['Medication','Procedure','TreatmentPlan']},
+  {name:'治疗方案', icon:'💊', dims:['Drug','Procedure','TreatmentPlan']},
   {name:'临床规则', icon:'⚙️', dims:['ClinicalRule','ThresholdRule','Contraindication']},
   {name:'预后与预防', icon:'📊', dims:['Prognosis','FollowUp','Prevention','Complication']},
   {name:'病因与机制', icon:'🧬', dims:['Etiology','Pathophysiology','Epidemiology','RiskFactor']},
@@ -2055,19 +2098,29 @@ function siInitDimTypeSelector(){
 }
 function siSelectDimType(type){
   SI_DIM_CUR_TYPE = type || '';
+  siLoadDimEntities(SI_DIM_CUR_TYPE);
+}
+/* 维度视角统一加载：维度类型未选时按已选级联条件（疾病大类）展示全部类型实体；选了则在大类范围内过滤该类型 */
+function siLoadDimEntities(type){
+  type = type || '';
+  SI_DIM_CUR_TYPE = type;
   var cntEl = document.getElementById('si-dim-count');
-  if(!type){
-    SI_DIM_ENTITIES = [];
-    var v = document.getElementById('si-dim-view');
-    if(v) v.innerHTML = '<div class="si-empty" style="padding:60px;text-align:center">请选择维度类型</div>';
-    if(cntEl) cntEl.textContent = '';
-    return;
-  }
   var view = document.getElementById('si-dim-view');
-  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载 '+siEsc(type)+' 实体中...</div>';
-  fetch('/api/kg/entities?type='+encodeURIComponent(type)+'&limit=500').then(function(r){return r.json()}).then(function(data){
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">'+(type ? '加载 '+siEsc(type)+' 实体中...' : '按当前条件加载实体中...')+'</div>';
+  var catSel = document.getElementById('si-sel-category');
+  var category = catSel ? catSel.value : '';
+  var url = '/api/kg/entities?limit=1000';
+  if(type) url += '&type='+encodeURIComponent(type);
+  if(category) url += '&category='+encodeURIComponent(category);
+  fetch(url).then(function(r){return r.json()}).then(function(data){
     SI_DIM_ENTITIES = (data && data.items) || [];
     siRenderDimEntityList();
+    if(cntEl){
+      var tm = type ? TYPE_MAP[type] : null;
+      var tLabel = type ? (tm ? tm.cn : type) : '全部类型';
+      var scope = category ? ('疾病大类「'+category+'」范围内') : '全库';
+      cntEl.textContent = scope+'共 '+SI_DIM_ENTITIES.length+' 个'+tLabel+'实体'+(data.total > 1000 ? '（已截取前1000）' : '');
+    }
   }).catch(function(e){
     siNotify('加载实体失败: '+e.message,'err');
     view.innerHTML = '<div class="si-empty">加载失败</div>';
@@ -2087,17 +2140,26 @@ function siRenderDimEntityList(filter){
     });
   }
   var cntEl = document.getElementById('si-dim-count');
-  if(cntEl) cntEl.textContent = '共 '+list.length+' 个实体';
+  if(cntEl){
+    var tm0 = SI_DIM_CUR_TYPE ? TYPE_MAP[SI_DIM_CUR_TYPE] : null;
+    var tLabel0 = SI_DIM_CUR_TYPE ? (tm0 ? tm0.cn : SI_DIM_CUR_TYPE) : '全部类型';
+    cntEl.textContent = '当前展示 '+list.length+' 个'+tLabel0+'实体'+(q?'（关键词过滤后）':'');
+  }
   var html = '';
   if(list.length===0){
     html = '<div class="si-empty" style="padding:40px;text-align:center">未找到匹配的实体</div>';
   } else {
+    if(!SI_DIM_CUR_TYPE){
+      html += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">未选择维度类型，已按上方条件展示全部类型实体；可在右上"选择维度类型"进一步收窄</div>';
+    }
     html += '<div class="si-dim-entity-list">';
     list.forEach(function(e){
       var cls = (SI_DIM_DETAIL_CODE && e.code===SI_DIM_DETAIL_CODE) ? ' active' : '';
+      var t = TYPE_MAP[e.entityType] || {cn:e.entityType||'其他', icon:'📌'};
       html += '<div class="si-dim-entity-card'+cls+'" data-code="'+siEsc(e.code||'')+'" onclick="siSelectDimEntity(\''+siEscAttr(e.code||'')+'\')">';
       html += '<div class="name">'+siEsc(cleanName(e))+'</div>';
       html += '<div class="code">'+siEsc(e.code||'')+'</div>';
+      html += '<div style="margin-top:6px;font-size:10px;color:'+siEsc(t.color||'#888')+'">'+siEsc(t.icon+' '+t.cn)+'</div>';
       html += '</div>';
     });
     html += '</div>';
