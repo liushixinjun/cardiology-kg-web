@@ -4554,14 +4554,14 @@
         badge: "治疗手术",
         title: "治疗与手术层",
         desc: "用于维护专病治疗阶段的可执行动作。治疗方案作为知识容器，正式推荐必须落到药品、操作/手术或治疗项目。",
-        chain: ["Disease", "TreatmentPlan", "Medication", "Procedure", "StandardProcedure"],
-        edges: ["has_treatment_plan", "includes_medication", "includes_procedure", "has_standard_procedure"],
-        syntax: "STEMI -has_treatment_plan-> STEMI再灌注治疗方案\nSTEMI再灌注治疗方案 -includes_procedure-> 经皮冠状动脉介入治疗\n经皮冠状动脉介入治疗 -has_standard_procedure-> 00.6600 经皮冠状动脉介入治疗\nSTEMI再灌注治疗方案 -includes_medication-> 阿司匹林",
-        example: "PCI 不是只写英文缩写，页面同时展示经皮冠状动脉介入治疗，并映射标准手术项目，便于后续医嘱或手术项目质控。",
+        chain: ["Disease", "TreatmentPlan", "Drug", "Procedure"],
+        edges: ["has_treatment_plan", "includes_drug", "includes_procedure"],
+        syntax: "STEMI -has_treatment_plan-> STEMI再灌注治疗方案\nSTEMI再灌注治疗方案 -includes_procedure-> 经皮冠状动脉介入治疗（standard_code: 00.6600）\nSTEMI再灌注治疗方案 -includes_drug-> 阿司匹林",
+        example: "PCI 不是只写英文缩写，页面同时展示经皮冠状动脉介入治疗，并通过 standard_code 映射标准手术，便于后续医嘱或手术项目质控。",
         value: "支撑治疗方案推荐、PCI相关提醒、药物治疗监测和标准医嘱候选。",
         application: {
           scene: "患者完成分型确认并承接专病流程后，用于展示治疗方案、手术/介入项目和药物治疗候选。",
-          read: "读取 TreatmentPlan、Medication、Procedure、StandardProcedure 及 has_treatment_plan、includes_medication、includes_procedure 等关系。",
+          read: "读取 TreatmentPlan、Drug、Procedure 及 has_treatment_plan、includes_drug、includes_procedure 等关系；手术标准编码通过 Procedure.standard_code 字段承载。",
           landing: "落到右侧辅助诊疗的治疗建议、PCI相关提醒、药物治疗监测、术前术中术后关注项和标准医嘱候选。",
           boundary: "TreatmentPlan 是知识容器，不直接作为当前患者推荐；正式推荐需由临床规则和推荐陈述生成。"
         }

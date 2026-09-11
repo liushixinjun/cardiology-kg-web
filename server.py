@@ -1763,6 +1763,46 @@ def query_global_stats():
         return result
 
 
+def query_data_version():
+    """数据版本与时效信息 — 数据最后更新时间、节点关系计数、应用版本"""
+    cached = cache_get('kg:data_version')
+    if cached is not None:
+        return cached
+    d = get_driver()
+    with d.session() as sess:
+        # 节点最新更新时间 + 节点数
+        r1 = sess.run("""
+            MATCH (n:KGNode)
+            RETURN max(n.updated_at) AS node_latest, count(n) AS node_count
+        """).single()
+        # 关系最新更新时间 + 关系数
+        r2 = sess.run("""
+            MATCH ()-[r]->()
+            RETURN max(r.updated_at) AS rel_latest, count(r) AS rel_count
+        """).single()
+        
+        node_latest = r1["node_latest"]
+        rel_latest = r2["rel_latest"]
+        # 取两者中较新的那个
+        latest = None
+        if node_latest and rel_latest:
+            latest = max(node_latest, rel_latest)
+        elif node_latest:
+            latest = node_latest
+        elif rel_latest:
+            latest = rel_latest
+        
+        result = {
+            "app_version": APP_VERSION,
+            "data_updated_at": str(latest) if latest else None,
+            "data_source": "Neo4j实时",
+            "node_count": r1["node_count"],
+            "relationship_count": r2["rel_count"],
+        }
+        cache_set('kg:data_version', result, ttl=60)  # 短缓存1分钟
+        return result
+
+
 def query_schema_info():
     """返回数据库中实际的实体类型、关系类型及其数量，供图谱架构规范页面使用"""
     cached = cache_get('kg:schema_info')
@@ -4623,6 +4663,10 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
         # API 路由
         if path == '/api/kg/version':
             self._json_response({"version": APP_VERSION})
+            return
+
+        if path == '/api/kg/data_version':
+            self._json_response(query_data_version())
             return
 
         if path == '/api/kg/diseases':

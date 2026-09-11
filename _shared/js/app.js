@@ -1,11 +1,17 @@
 /* 全局版本号 — 从 API 动态获取，版本文件为 /VERSION */
 var APP_VERSION = 'v1.5.0';  // 默认值，API 加载后自动覆盖
 var APP_VERSION_DATE = '2026-07-13';
+var DATA_VERSION = null;     // 数据时效信息 {data_updated_at, data_source, node_count, relationship_count}
+var IS_FALLBACK = false;     // 是否处于离线快照降级状态
 
 /* 启动时从 API 获取版本号 */
 (function(){
   fetch('/api/kg/version').then(function(r){return r.json()}).then(function(d){
     if(d && d.version){ APP_VERSION='v'+d.version.replace(/^v/,''); }
+  }).catch(function(){});
+  // 获取数据时效信息
+  fetch('/api/kg/data_version?v=' + Date.now()).then(function(r){return r.json()}).then(function(d){
+    if(d && d.data_updated_at){ DATA_VERSION = d; updateFooterDataTime(); }
   }).catch(function(){});
 })();
 
@@ -165,7 +171,13 @@ function loadData(callback) {
   }).catch(function(e){
     console.error('API load failed:', e);
     // 降级到静态JSON
-    fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){KG_DATA=d;KG_DATA._loaded=true;callback(d)}).catch(function(e2){console.error('Fallback also failed:',e2)});
+    fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){
+      IS_FALLBACK = true;
+      KG_DATA = d;
+      KG_DATA._loaded = true;
+      showFallbackBanner(d);
+      callback(d);
+    }).catch(function(e2){console.error('Fallback also failed:',e2)});
   });
 }
 
@@ -320,13 +332,48 @@ function renderNav(activePage) {
 }
 
 /* Footer & Changelog */
+function buildFooterHtml() {
+  var dataTime = '';
+  var sourceLabel = 'Neo4j 实时数据';
+  if (IS_FALLBACK) {
+    sourceLabel = '<span style="color:#ff6b6b">⚠️ 离线快照</span>';
+    dataTime = '<span style="margin-left:6px;color:#ff6b6b">数据过期</span>';
+  } else if (DATA_VERSION && DATA_VERSION.data_updated_at) {
+    var t = DATA_VERSION.data_updated_at.replace('T', ' ').substring(0, 16);
+    dataTime = '<span style="margin-left:6px;color:#555">|</span> <span style="margin-left:6px">数据更新: ' + t + '</span>';
+  }
+  return '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">' + APP_VERSION + '</a> <span style="margin-left:6px;color:#555">|</span> ' + sourceLabel + dataTime + ' <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+}
+function updateFooterDataTime() {
+  var f = document.getElementById('app-footer');
+  if (f) f.innerHTML = buildFooterHtml();
+}
+function showFallbackBanner(snapshotData) {
+  // 降级横幅 — API 失败时醒目提示用户当前为离线快照数据
+  if (document.getElementById('fallback-banner')) return;
+  var banner = document.createElement('div');
+  banner.id = 'fallback-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,#c92a2a,#e03131);color:#fff;padding:10px 20px;font-size:13px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.3)';
+  var genTime = '';
+  if (snapshotData && snapshotData.data_source && snapshotData.data_source.export_time) {
+    genTime = '（' + snapshotData.data_source.export_time + '）';
+  } else if (snapshotData && snapshotData.stats && snapshotData.stats.generated_at) {
+    genTime = '（' + snapshotData.stats.generated_at + '）';
+  }
+  banner.innerHTML = '⚠️ <strong>数据库连接失败，当前显示的是离线快照数据' + genTime + '</strong>，数据可能严重过期且不完整，仅供浏览参考，请勿用于临床决策。';
+  document.body.insertBefore(banner, document.body.firstChild);
+  // 给 body 加 padding，避免内容被横幅遮挡
+  document.body.style.paddingTop = '40px';
+  // 更新 footer 状态
+  updateFooterDataTime();
+}
 function renderFooter() {
   // 如果已存在则跳过
   if (document.getElementById('app-footer')) return;
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">' + APP_VERSION + '</a> <span style="margin-left:6px;color:#555">|</span> Neo4j 实时数据 <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+  footer.innerHTML = buildFooterHtml();
   
   // 检查弹窗是否已存在，不存在则创建
   if (!document.getElementById('changelog-modal')) {
