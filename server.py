@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import time
 import datetime
 import urllib.parse
 from neo4j import GraphDatabase
@@ -28,15 +29,25 @@ REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
 CACHE_TTL = int(os.environ.get("CACHE_TTL", "300"))  # 默认5分钟过期
 
 _redis = None
+_redis_retry_after = 0
 def get_redis():
-    global _redis
-    if _redis is None:
-        try:
-            import redis
-            _redis = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
-            _redis.ping()
-        except Exception:
-            _redis = None
+    global _redis, _redis_retry_after
+    if _redis is not None:
+        return _redis
+    now = time.time()
+    if now < _redis_retry_after:
+        return None
+    try:
+        import redis
+        # retry=None 关闭 redis-py 8.x 默认重试，避免 Redis 不可达时每次挂起数十秒
+        _redis = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True,
+                             socket_connect_timeout=1, socket_timeout=1,
+                             retry=None, retry_on_error=[])
+        _redis.ping()
+    except Exception:
+        # 连接失败进入 30 秒冷却，避免高频请求反复等待连接超时
+        _redis_retry_after = now + 30
+        _redis = None
     return _redis
 
 def cache_get(key):
@@ -2602,18 +2613,26 @@ def query_cdss_diseases():
     d = get_driver()
     with d.session() as sess:
         rows = sess.run("""
-            MATCH (d:Disease)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
+            MATCH (d:Disease)
             WHERE """ + _active_node_filter('d') + """
-            OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode)
-            OPTIONAL MATCH (s)-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
-            OPTIONAL MATCH (r)-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
-            OPTIONAL MATCH (rec)-[:supported_by_evidence]->(e:KGNode)
-            OPTIONAL MATCH (rec)-[:based_on_guideline]->(g:KGNode)
-            RETURN d.code AS disease_code,
-                   count(DISTINCT p) AS pathway_count,
-                   count(DISTINCT rec) AS recommendation_count,
-                   count(DISTINCT e) AS evidence_count,
-                   count(DISTINCT g) AS guideline_count
+              AND (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
+                  RETURN count(DISTINCT p) AS pathway_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_clinical_rule]->(rd:KGNode {entityType:'ClinicalRule'})
+                  RETURN count(DISTINCT rd) AS rule_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
+                  RETURN count(DISTINCT rec) AS recommendation_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:supported_by_evidence]->(e:KGNode)
+                  RETURN count(DISTINCT e) AS evidence_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:based_on_guideline]->(g:KGNode)
+                  RETURN count(DISTINCT g) AS guideline_count }
+            RETURN d.code AS disease_code, pathway_count, rule_count,
+                   recommendation_count, evidence_count, guideline_count
             ORDER BY disease_code
         """)
 
@@ -2630,6 +2649,7 @@ def query_cdss_diseases():
                 "diagnostic_role": meta.get('diagnostic_role') or "",
                 "icd_code": meta.get('icd_code') or "",
                 "pathway_count": r["pathway_count"],
+                "rule_count": r["rule_count"],
                 "recommendation_count": r["recommendation_count"],
                 "evidence_count": r["evidence_count"],
                 "guideline_count": r["guideline_count"]
@@ -2650,24 +2670,40 @@ def query_cdss_coverage():
     d = get_driver()
     with d.session() as sess:
         rows = sess.run("""
-            MATCH (d:Disease)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
+            MATCH (d:Disease)
             WHERE """ + _active_node_filter('d') + """
-            OPTIONAL MATCH (p)-[:includes_pathway_stage]->(s:KGNode)
-            OPTIONAL MATCH (s)-[:has_clinical_rule]->(r:KGNode {entityType:'ClinicalRule'})
-            OPTIONAL MATCH (r)-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
-            OPTIONAL MATCH (rec)-[:recommends_action]->(a:KGNode)
-            OPTIONAL MATCH (rec)-[:blocks_action]->(ba:KGNode)
-            OPTIONAL MATCH (rec)-[:supported_by_evidence]->(e:KGNode)
-            OPTIONAL MATCH (rec)-[:based_on_guideline]->(g:KGNode)
-            RETURN d.code AS disease_code,
-                   count(DISTINCT p) AS pathway_count,
-                   count(DISTINCT s) AS stage_count,
-                   count(DISTINCT r) AS rule_count,
-                   count(DISTINCT rec) AS rec_count,
-                   count(DISTINCT a) + count(DISTINCT ba) AS action_count,
-                   count(DISTINCT e) AS evidence_count,
-                   count(DISTINCT g) AS guideline_count,
-                   sum(CASE WHEN rec.formal_cdss_ready = true THEN 1 ELSE 0 END) AS ready_count
+              AND (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(p:KGNode {entityType:'SpecialtyCarePathway'})
+                  RETURN count(DISTINCT p) AS pathway_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(s:KGNode)
+                  RETURN count(DISTINCT s) AS stage_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_clinical_rule]->(rd:KGNode {entityType:'ClinicalRule'})
+                  RETURN count(DISTINCT rd) AS rule_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec:KGNode {entityType:'RecommendationStatement'})
+                  RETURN count(DISTINCT rec) AS rec_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:recommends_action]->(a:KGNode)
+                  RETURN count(DISTINCT a) AS action_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:blocks_action]->(ba:KGNode)
+                  RETURN count(DISTINCT ba) AS blocked_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:supported_by_evidence]->(e:KGNode)
+                  RETURN count(DISTINCT e) AS evidence_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:based_on_guideline]->(g:KGNode)
+                  RETURN count(DISTINCT g) AS guideline_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec2:KGNode {entityType:'RecommendationStatement'})
+                  WHERE rec2.formal_cdss_ready = true
+                  RETURN count(DISTINCT rec2) AS ready_count }
+            RETURN d.code AS disease_code, pathway_count, stage_count, rule_count,
+                   rec_count, action_count + blocked_count AS action_count,
+                   evidence_count, guideline_count, ready_count
             ORDER BY disease_code
         """)
 
@@ -3024,6 +3060,34 @@ REL_NAME_MAP = {
     'checks_assessment_level': '检查评估等级',
     'checks_pathway_task': '检查路径任务',
     'quality_rule_supported_by_evidence': '质控证据',
+    # 目录与规则结构（V4.1 现行口径）
+    'has_category': '疾病大类关联', 'has_subcategory': '疾病亚类关联',
+    'has_disease': '疾病关联', 'has_definition': '定义关联',
+    'has_prevention': '预防关联', 'has_clinical_rule': '临床规则关联',
+    'has_clinical_subtype': '临床分型关联',
+    'has_differential_diagnosis': '鉴别诊断关联', 'has_differential_rule': '鉴别规则关联',
+    # 专病扩展槽位（V4.1 注册表已定义，库中待批次落地）
+    'device_has_parameter': '设备参数关联',
+    'diagnosis_criteria_uses_hemodynamic_indicator': '诊断标准用血流动力学指标',
+    'disease_associated_gene': '疾病基因关联',
+    'disease_has_blood_pressure_grade': '血压分级关联',
+    'disease_has_clinical_subtype': '临床分型关联',
+    'disease_has_ecg_pattern': '心电图模式关联',
+    'disease_has_electrophysiology_mechanism': '电生理机制关联',
+    'disease_has_heart_failure_phenotype': '心衰表型关联',
+    'disease_has_infarct_location': '梗死部位关联',
+    'disease_has_inheritance_pattern': '遗传方式关联',
+    'disease_has_valve_anatomy': '瓣膜部位关联',
+    'disease_has_valve_lesion_type': '瓣膜病变类型关联',
+    'disease_needs_secondary_cause_exclusion': '继发病因排除关联',
+    'exam_observation_indicates_vascular_territory': '冠脉区域提示关联',
+    'procedure_targets_ablation_site': '消融位点关联',
+    'procedure_uses_device': '器械使用关联',
+    'recommendation_has_time_window': '推荐时间窗关联',
+    'recommendation_requires_severity_grade': '推荐严重度关联',
+    'recommendation_requires_volume_status': '推荐容量状态关联',
+    'risk_stratification_uses_family_history': '风险分层用家族史',
+    'risk_stratification_uses_target_organ_damage': '风险分层用靶器官损害',
 }
 
 ENTITY_NAME_MAP = {
@@ -3068,6 +3132,17 @@ ENTITY_NAME_MAP = {
     'PatientState': '患者状态', 'ClinicalEvent': '临床事件',
     'VitalSignItem': '生命体征', 'MedicalTerm': '医学术语',
     'MedicalTermAlias': '医学术语别名',
+    # 专病扩展槽位（V4.1 注册表已定义，库中待批次落地）
+    'AblationTarget': '消融靶点', 'BloodPressureGrade': '血压分级',
+    'ClinicalSubtype': '临床分型', 'Device': '器械设备', 'DeviceParameter': '设备参数',
+    'ECGPattern': '心电图模式', 'ElectrophysiologyMechanism': '电生理机制',
+    'FamilyHistory': '家族史', 'Gene': '基因', 'GeneticVariant': '基因变异',
+    'HeartFailurePhenotype': '心衰表型', 'HemodynamicIndicator': '血流动力学指标',
+    'InfarctLocation': '梗死部位', 'InheritancePattern': '遗传方式',
+    'SecondaryCause': '继发病因', 'SeverityGrade': '严重程度',
+    'TargetOrganDamage': '靶器官损害', 'TimeWindow': '时间窗',
+    'ValveAnatomy': '瓣膜部位', 'ValveLesionType': '瓣膜病变类型',
+    'VascularTerritory': '冠脉供血区域', 'VolumeStatus': '容量状态',
 }
 
 

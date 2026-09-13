@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 图谱数据审核</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260908b">
+<link rel="stylesheet" href="./_shared/css/style.css?v=20260913b">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -24,6 +24,9 @@
 .si-type-item:hover{background:var(--bg3)}
 .si-type-item.active{background:rgba(79,140,255,.1);border-left-color:var(--accent);color:var(--accent)}
 .si-type-item .cnt{font-size:10px;background:var(--bg3);border-radius:999px;padding:1px 7px;color:var(--muted);font-weight:600}
+.si-type-item.si-slot{opacity:.55}
+.si-type-item.si-slot .cnt{background:rgba(206,212,218,.4);color:var(--muted)}
+.si-type-item.si-slot.active{opacity:.85}
 .si-type-item.active .cnt{background:rgba(79,140,255,.15);color:var(--accent)}
 .si-dim-list{padding:4px 0}
 .si-dim-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer}
@@ -406,7 +409,7 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/app.js?v=20260908"></script>
+<script src="./_shared/js/app.js?v=20260913"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -492,6 +495,29 @@ var ENTITY_TYPES = [
   {code:'QualityControlRule',cn:'质控规则',icon:'📐',color:'#e8590c',shape:'diamond',desc:'质控点校验规则'},
   /* 证据治理层 — 术语（V4.1） */
   {code:'MedicalTermAlias',cn:'受控医学别名',icon:'🔖',color:'#845ef7',shape:'dot',desc:'术语受控别名（has_alias）'},
+  /* 专病扩展槽位（V4.1 注册表已定义，库中待批次落地） */
+  {code:'ClinicalSubtype',cn:'临床分型',icon:'🔀',color:'#ffa8a8',shape:'dot',desc:'疾病具体分型实体（disease_has_clinical_subtype）'},
+  {code:'ECGPattern',cn:'心电图模式',icon:'📈',color:'#ffa94d',shape:'dot',desc:'心电图的特征性模式（disease_has_ecg_pattern）'},
+  {code:'ElectrophysiologyMechanism',cn:'电生理机制',icon:'⚡',color:'#ffc078',shape:'dot',desc:'心律失常的电生理发生机制'},
+  {code:'HeartFailurePhenotype',cn:'心衰表型',icon:'💓',color:'#ff8787',shape:'dot',desc:'心衰的临床表型分类'},
+  {code:'InfarctLocation',cn:'梗死部位',icon:'📍',color:'#f783ac',shape:'dot',desc:'心肌梗死发生的解剖部位'},
+  {code:'InheritancePattern',cn:'遗传方式',icon:'🧬',color:'#d0bfff',shape:'dot',desc:'遗传性心血管病的遗传方式'},
+  {code:'FamilyHistory',cn:'家族史',icon:'👨‍👩‍👧',color:'#9775fa',shape:'dot',desc:'家族史用于风险分层（risk_stratification_uses_family_history）'},
+  {code:'Gene',cn:'基因',icon:'🧬',color:'#b197fc',shape:'dot',desc:'与疾病相关的基因（disease_associated_gene）'},
+  {code:'GeneticVariant',cn:'基因变异',icon:'🧬',color:'#9775fa',shape:'dot',desc:'基因的具体变异位点'},
+  {code:'SecondaryCause',cn:'继发病因',icon:'🔁',color:'#e599f7',shape:'dot',desc:'需排除的继发性病因（disease_needs_secondary_cause_exclusion）'},
+  {code:'HemodynamicIndicator',cn:'血流动力学指标',icon:'🌊',color:'#66d9e8',shape:'dot',desc:'诊断标准使用的血流动力学指标'},
+  {code:'TargetOrganDamage',cn:'靶器官损害',icon:'🎯',color:'#4dabf7',shape:'dot',desc:'高血压等疾病导致的靶器官损害'},
+  {code:'BloodPressureGrade',cn:'血压分级',icon:'🩸',color:'#74c0fc',shape:'dot',desc:'血压水平分级（disease_has_blood_pressure_grade）'},
+  {code:'VolumeStatus',cn:'容量状态',icon:'💧',color:'#3bc9db',shape:'dot',desc:'推荐动作依赖的患者容量状态'},
+  {code:'SeverityGrade',cn:'严重程度',icon:'⚠️',color:'#ffe066',shape:'dot',desc:'推荐动作适用的严重程度分级'},
+  {code:'TimeWindow',cn:'时间窗',icon:'⏱️',color:'#fab005',shape:'dot',desc:'推荐动作适用的时间窗（recommendation_has_time_window）'},
+  {code:'Device',cn:'器械设备',icon:'🛠️',color:'#fcc419',shape:'dot',desc:'手术或操作使用的器械（procedure_uses_device）'},
+  {code:'DeviceParameter',cn:'设备参数',icon:'⚙️',color:'#ffd43b',shape:'dot',desc:'器械设备的参数（device_has_parameter）'},
+  {code:'AblationTarget',cn:'消融靶点',icon:'🎯',color:'#ff922b',shape:'dot',desc:'电生理消融的目标位置（procedure_targets_ablation_site）'},
+  {code:'ValveAnatomy',cn:'瓣膜部位',icon:'🫀',color:'#ff6b6b',shape:'dot',desc:'瓣膜病变的解剖部位（disease_has_valve_anatomy）'},
+  {code:'ValveLesionType',cn:'瓣膜病变类型',icon:'🫀',color:'#e8590c',shape:'dot',desc:'瓣膜病变的类型（disease_has_valve_lesion_type）'},
+  {code:'VascularTerritory',cn:'冠脉供血区域',icon:'🗺️',color:'#f06595',shape:'dot',desc:'心电图检查提示的冠脉供血区域'},
   /* 第二层：CDSS标准主数据层 */
   {code:'StandardDiagnosis',cn:'标准诊断',icon:'🏷️',color:'#ff922b',shape:'dot',desc:'CDSS标准诊断字典，含ICD-10编码'},
   {code:'StandardProcedure',cn:'标准手术',icon:'🔧',color:'#f06595',shape:'dot',desc:'CDSS标准手术字典（V4.1 起并入 Procedure.standard_code）'},
@@ -542,7 +568,7 @@ var REL_DIM_MAP = {
   'includes_pathway_stage':'路径阶段','includes_pathway_task':'路径任务',
   'pathway_task_uses_action':'任务绑定动作','next_pathway_stage':'下一阶段',
   'has_variation_reason':'路径变异原因','has_exit_criteria':'出径条件',
-  'has_stage_rule':'阶段规则','has_recommendation_statement':'推荐陈述',
+  'has_recommendation_statement':'推荐陈述',
   'triggers_recommendation':'触发推荐',
   'recommends_action':'推荐动作','blocks_action':'阻断动作',
   'blocked_by_differential':'鉴别阻断','has_alternative_action':'替代动作',
@@ -566,6 +592,18 @@ var REL_DIM_MAP = {
   'has_evidence':'包含证据','derived_from':'来源',
   'uses_primary_guideline':'主依据','uses_source_section':'使用来源章节',
   'has_source_section':'包含来源章节',
+  /* 专病扩展槽位（V4.1 注册表已定义，库中待批次落地） */
+  'device_has_parameter':'器械参数','diagnosis_criteria_uses_hemodynamic_indicator':'血流动力学指标',
+  'disease_associated_gene':'基因','disease_has_blood_pressure_grade':'血压分级',
+  'disease_has_clinical_subtype':'临床分型','disease_has_ecg_pattern':'心电图模式',
+  'disease_has_electrophysiology_mechanism':'电生理机制','disease_has_heart_failure_phenotype':'心衰表型',
+  'disease_has_infarct_location':'梗死部位','disease_has_inheritance_pattern':'遗传方式',
+  'disease_has_valve_anatomy':'瓣膜部位','disease_has_valve_lesion_type':'瓣膜病变类型',
+  'disease_needs_secondary_cause_exclusion':'继发病因','exam_observation_indicates_vascular_territory':'冠脉供血区域',
+  'procedure_targets_ablation_site':'消融靶点','procedure_uses_device':'器械设备',
+  'recommendation_has_time_window':'时间窗','recommendation_requires_severity_grade':'严重程度',
+  'recommendation_requires_volume_status':'容量状态','risk_stratification_uses_family_history':'家族史',
+  'risk_stratification_uses_target_organ_damage':'靶器官损害',
 };
 /* 关系类型 → 目标实体类型映射（用于添加关联时按类型过滤搜索；V4.1 现行关系） */
 var REL_ENTITY_MAP = {
@@ -588,6 +626,28 @@ var REL_ENTITY_MAP = {
   'recommends_action':'Drug',
   'has_source_adjudication':'SourceAdjudication',
   'uses_primary_guideline':'Guideline',
+  /* 专病扩展槽位（V4.1 注册表已定义，库中待批次落地） */
+  'device_has_parameter':'DeviceParameter',
+  'diagnosis_criteria_uses_hemodynamic_indicator':'HemodynamicIndicator',
+  'disease_associated_gene':'Gene',
+  'disease_has_blood_pressure_grade':'BloodPressureGrade',
+  'disease_has_clinical_subtype':'ClinicalSubtype',
+  'disease_has_ecg_pattern':'ECGPattern',
+  'disease_has_electrophysiology_mechanism':'ElectrophysiologyMechanism',
+  'disease_has_heart_failure_phenotype':'HeartFailurePhenotype',
+  'disease_has_infarct_location':'InfarctLocation',
+  'disease_has_inheritance_pattern':'InheritancePattern',
+  'disease_has_valve_anatomy':'ValveAnatomy',
+  'disease_has_valve_lesion_type':'ValveLesionType',
+  'disease_needs_secondary_cause_exclusion':'SecondaryCause',
+  'exam_observation_indicates_vascular_territory':'VascularTerritory',
+  'procedure_targets_ablation_site':'AblationTarget',
+  'procedure_uses_device':'Device',
+  'recommendation_has_time_window':'TimeWindow',
+  'recommendation_requires_severity_grade':'SeverityGrade',
+  'recommendation_requires_volume_status':'VolumeStatus',
+  'risk_stratification_uses_family_history':'FamilyHistory',
+  'risk_stratification_uses_target_organ_damage':'TargetOrganDamage',
 };
 
 /* ========== 初始化 ========== */
@@ -685,12 +745,18 @@ function siFilterList(){
 function initTypeList(){
   fetch('/api/kg/type-stats').then(function(r){return r.json()}).then(function(data){
     var html = '<div class="si-type-item'+(SI_STATE.typeFilter===''?' active':'')+'" onclick="siSetTypeFilter(\'\')">全部实体<span class="cnt">—</span></div>';
+    var slotHtml = '';
     ENTITY_TYPES.forEach(function(t){
       var cnt = (data.entity_types||{})[t.code] || 0;
       if(cnt > 0){
         html += '<div class="si-type-item'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\')">'+t.cn+(t.desc?'<span class="si-type-desc">'+t.desc+'</span>':'')+'<span class="cnt">'+cnt+'</span></div>';
+      } else {
+        slotHtml += '<div class="si-type-item si-slot'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\')">'+t.cn+'<span class="cnt">待落地</span></div>';
       }
     });
+    if(slotHtml){
+      html += '<div class="si-left-title" style="margin:10px 12px 2px">扩展槽位 · Schema已定义 库中待落地</div>' + slotHtml;
+    }
     document.getElementById('si-type-list').innerHTML = html;
   }).catch(function(){});
 }

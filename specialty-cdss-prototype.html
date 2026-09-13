@@ -4570,14 +4570,14 @@
         badge: "决策推荐",
         title: "临床决策推荐层",
         desc: "用于维护当前患者推荐动作的触发条件、推荐内容和证据来源。正式推荐需要路径阶段、临床规则、推荐陈述、具体动作和证据链共同形成。",
-        chain: ["ClinicalPathway", "PathwayStage", "ClinicalRule", "RecommendationStatement", "Evidence"],
-        edges: ["has_stage", "has_stage_rule", "has_recommendation_statement", "supported_by_evidence"],
-        syntax: "AMI专病诊疗路径 -has_stage-> STEMI再灌注评估阶段\nSTEMI再灌注评估阶段 -has_stage_rule-> 发病12小时内且PCI可及规则\n临床规则 -has_recommendation_statement-> 推荐急诊PCI\n推荐急诊PCI -recommends_action-> 经皮冠状动脉介入治疗\n推荐急诊PCI -supported_by_evidence-> STEMI指南证据",
+        chain: ["SpecialtyCarePathway", "PathwayStage", "ClinicalRule", "RecommendationStatement", "Evidence"],
+        edges: ["has_specialty_care_pathway", "includes_pathway_stage", "has_clinical_rule", "has_recommendation_statement", "supported_by_evidence"],
+        syntax: "急性心肌梗死 -has_specialty_care_pathway-> AMI专病诊疗路径\nAMI专病诊疗路径 -includes_pathway_stage-> STEMI再灌注评估阶段\nSTEMI再灌注评估阶段 -has_clinical_rule-> 发病12小时内且PCI可及规则\n临床规则 -has_recommendation_statement-> 推荐急诊PCI\n推荐急诊PCI -recommends_action-> 经皮冠状动脉介入治疗\n推荐急诊PCI -supported_by_evidence-> STEMI指南证据",
         example: "治疗方案不会直接变成当前患者推荐。只有患者满足阶段规则后，RecommendationStatement 才生成右侧辅助诊疗推荐卡。",
         value: "支撑治疗建议、阻断提醒、推荐依据展示和质控闭环。",
         application: {
           scene: "患者处于具体专病流程阶段时，用于判断当前阶段应展示哪些推荐卡、阻断提示、证据依据和后续动作。",
-          read: "读取 ClinicalPathway、PathwayStage、ClinicalRule、RecommendationStatement、Evidence 及 has_stage_rule、recommends_action、supported_by_evidence 等关系。",
+          read: "读取 SpecialtyCarePathway、PathwayStage、ClinicalRule、RecommendationStatement、Evidence 及 has_clinical_rule、recommends_action、supported_by_evidence 等关系。",
           landing: "落到右侧辅助诊疗的治疗推荐卡、质控提醒、推荐依据、缺失项和可执行动作按钮。",
           boundary: "推荐卡由 RecommendationStatement 结合患者数据和阶段规则生成，不由疾病节点直接连接治疗方案生成。"
         }

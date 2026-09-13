@@ -100,7 +100,34 @@ var SCHEMA = (function () {
     has_quality_control_point: '有质控点', has_quality_control_rule: '有质控规则',
     checks_required_exam: '检查必需检查', checks_required_lab: '检查必需检验',
     checks_contraindication: '检查禁忌', checks_assessment_level: '检查评估等级',
-    checks_pathway_task: '检查路径任务', quality_rule_supported_by_evidence: '质控有证据'
+    checks_pathway_task: '检查路径任务', quality_rule_supported_by_evidence: '质控有证据',
+    /* 目录与规则结构（V4.1 现行口径，库中已有数据） */
+    has_clinical_rule: '有临床规则', has_standard_diagnosis: '有标准诊断',
+    has_disease: '含疾病', has_category: '属疾病大类', has_subcategory: '属疾病亚类',
+    has_definition: '有定义', has_prevention: '有预防措施',
+    has_differential_rule: '有鉴别规则',
+    /* 专病扩展槽位（V4.1 注册表已定义，库中待批次落地） */
+    device_has_parameter: '设备含参数',
+    diagnosis_criteria_uses_hemodynamic_indicator: '诊断标准用血流动力学指标',
+    disease_associated_gene: '疾病关联基因',
+    disease_has_blood_pressure_grade: '有血压分级',
+    disease_has_clinical_subtype: '有临床分型',
+    disease_has_ecg_pattern: '有心电图模式',
+    disease_has_electrophysiology_mechanism: '有电生理机制',
+    disease_has_heart_failure_phenotype: '有心衰表型',
+    disease_has_infarct_location: '有梗死部位',
+    disease_has_inheritance_pattern: '有遗传方式',
+    disease_has_valve_anatomy: '有瓣膜部位',
+    disease_has_valve_lesion_type: '有瓣膜病变类型',
+    disease_needs_secondary_cause_exclusion: '需排除继发病因',
+    exam_observation_indicates_vascular_territory: '检查提示冠脉区域',
+    procedure_targets_ablation_site: '手术靶向消融位点',
+    procedure_uses_device: '手术使用器械',
+    recommendation_has_time_window: '推荐有时间窗',
+    recommendation_requires_severity_grade: '推荐需严重程度',
+    recommendation_requires_volume_status: '推荐需容量状态',
+    risk_stratification_uses_family_history: '风险分层用家族史',
+    risk_stratification_uses_target_organ_damage: '风险分层用靶器官损害'
   };
 
   function relationLabel(relType) { return RELATION_LABELS[relType] || relType || ''; }
@@ -118,8 +145,8 @@ var SCHEMA = (function () {
     ExamItem: 'includes_exam_item', LabItem: 'includes_lab_item',
     Drug: 'includes_drug', Procedure: 'includes_procedure',
     ExamObservation: 'exam_item_has_observation', LabSubitem: 'lab_item_has_subitem',
-    ThresholdRule: 'has_threshold_rule', StandardDiagnosis: 'maps_to_standard_diagnosis',
-    Contraindication: 'has_contraindication', ClinicalRule: 'has_stage_rule',
+    ThresholdRule: 'has_threshold_rule', StandardDiagnosis: 'has_standard_diagnosis',
+    Contraindication: 'has_contraindication', ClinicalRule: 'has_clinical_rule',
     /* 护理与评估评分（Schema V4.0） */
     NursingCarePlan: 'has_nursing_care_plan', NursingAssessment: 'has_nursing_assessment',
     NursingDiagnosis: 'has_nursing_diagnosis', NursingIntervention: 'has_nursing_intervention',
@@ -313,7 +340,26 @@ var SCHEMA = (function () {
     Procedure: '手术/操作', TreatmentPlan: '治疗方案', ClinicalRule: '临床规则',
     RecommendationStatement: '推荐陈述', Contraindication: '禁忌',
     Evidence: '证据', SourceSection: '来源章节', Guideline: '指南/教材',
-    DifferentialDiagnosis: '鉴别诊断', RiskStratification: '风险分层'
+    DifferentialDiagnosis: '鉴别诊断', RiskStratification: '风险分层',
+    /* 常用核心类型（V4.1 全量补齐） */
+    Specialty: '专科', DiseaseCategory: '疾病大类', DiseaseSubcategory: '疾病亚类',
+    Complication: '并发症', Definition: '疾病定义', DefinitionComponent: '定义明细',
+    DiagnosisCriteria: '诊断标准', DiagnosisCriteriaComponent: '诊断标准组件',
+    Etiology: '病因', Epidemiology: '流行病学', Pathophysiology: '病理生理',
+    Prevention: '预防', Prognosis: '预后', FollowUp: '随访',
+    RiskFactor: '危险因素', ExamObservation: '检查发现', LabSubitem: '检验细项',
+    ThresholdRule: '阈值规则', TreatmentItem: '治疗项目',
+    /* 专病扩展槽位（V4.1 注册表已定义，库中待批次落地） */
+    AblationTarget: '消融靶点', BloodPressureGrade: '血压分级',
+    ClinicalSubtype: '临床分型', Device: '器械设备', DeviceParameter: '设备参数',
+    ECGPattern: '心电图模式', ElectrophysiologyMechanism: '电生理机制',
+    FamilyHistory: '家族史', Gene: '基因', GeneticVariant: '基因变异',
+    HeartFailurePhenotype: '心衰表型', HemodynamicIndicator: '血流动力学指标',
+    InfarctLocation: '梗死部位', InheritancePattern: '遗传方式',
+    SecondaryCause: '继发病因', SeverityGrade: '严重程度',
+    TargetOrganDamage: '靶器官损害', TimeWindow: '时间窗',
+    ValveAnatomy: '瓣膜部位', ValveLesionType: '瓣膜病变类型',
+    VascularTerritory: '冠脉供血区域', VolumeStatus: '容量状态'
   };
   function typeName(t) { return TYPE_NAMES[t] || t || ''; }
 
