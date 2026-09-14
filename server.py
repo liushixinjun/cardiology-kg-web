@@ -1639,6 +1639,27 @@ def query_disease_full(code):
         except Exception:
             pass
 
+        # 交叉标记：首诊检查/检验中，同时用于鉴别诊断的项目打 diff_purpose 标
+        try:
+            diff_exam_names = set()
+            diff_lab_names = set()
+            for dd in differentials:
+                for ex in dd.get("exams", []):
+                    if ex.get("name"):
+                        diff_exam_names.add(ex["name"])
+                for lb in dd.get("labs", []):
+                    if lb.get("name"):
+                        diff_lab_names.add(lb["name"])
+            for plan in exam_plans:
+                for it in plan.get("exam_items", []):
+                    if it.get("name") in diff_exam_names:
+                        it["diff_purpose"] = "鉴别诊断用"
+                for it in plan.get("lab_items", []):
+                    if it.get("name") in diff_lab_names:
+                        it["diff_purpose"] = "鉴别诊断用"
+        except Exception:
+            pass
+
         # 资料覆盖：SourceSection 经"章节→实体"二跳关联到该疾病（Schema V3.2 资料追溯）
         source_section_count = 0
         source_sections = []
