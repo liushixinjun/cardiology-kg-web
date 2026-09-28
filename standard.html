@@ -269,6 +269,85 @@
 .std-pill.exam{border-color:rgba(79,140,255,.3);background:rgba(79,140,255,.08);color:var(--accent)}
 .std-pill.lab{border-color:rgba(255,146,43,.3);background:rgba(255,146,43,.08);color:#ff922b}
 @media(max-width:900px){.std-qa-grid{grid-template-columns:1fr}.std-patient-card{grid-template-columns:1fr}}
+
+/* ====== 分层结构图入口：左侧分层名称可点 ====== */
+.std-arch-dia-hint{font-size:12.5px;color:var(--muted);text-align:center;margin:-8px 0 18px;line-height:1.6}
+.std-arch-dia-hint b{color:var(--accent)}
+.std-arch-dia-layer.std-layer-link{cursor:pointer;position:relative;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+.std-arch-dia-layer.std-layer-link:hover{transform:translateX(3px);box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.std-arch-dia-layer.std-layer-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.std-arch-dia-layer.std-layer-link .lname{position:relative;display:inline-block}
+.std-arch-dia-layer.std-layer-link .lname::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:currentColor;opacity:.4;transform:scaleX(0);transform-origin:left;transition:transform .2s ease}
+.std-arch-dia-layer.std-layer-link:hover .lname::after{transform:scaleX(1)}
+.std-arch-dia-open{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:20px;border:1px solid currentColor;opacity:.62;white-space:nowrap;transition:opacity .16s ease}
+.std-arch-dia-layer.std-layer-link:hover .std-arch-dia-open{opacity:1}
+.std-arch-dia-l1.std-layer-link{color:#8b90a0}
+.std-arch-dia-l2.std-layer-link{color:var(--accent)}
+.std-arch-dia-l3.std-layer-link{color:#ff922b}
+.std-arch-dia-l4.std-layer-link{color:var(--green)}
+.std-arch-dia-l4b.std-layer-link{color:#9b6dff}
+.std-arch-dia-l5.std-layer-link{color:#ff9f43}
+
+/* ====== 分层结构图浮层 ====== */
+.ld-mask{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;display:none;padding:26px 18px;overflow-y:auto;background:rgba(5,7,12,.8);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.ld-mask.show{display:block;animation:ldFade .18s ease}
+@keyframes ldFade{from{opacity:0}to{opacity:1}}
+.ld-panel{--ld:#4f8cff;position:relative;max-width:1140px;margin:0 auto;background:#0f1220;border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;box-shadow:0 32px 90px rgba(0,0,0,.66);animation:ldRise .22s cubic-bezier(.2,.8,.3,1)}
+@keyframes ldRise{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+.ld-panel::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:34px 34px}
+.ld-head{position:relative;display:flex;align-items:center;gap:15px;padding:19px 22px 17px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ld-head::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ld)}
+.ld-head-num{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#0b0e17;background:var(--ld);flex-shrink:0;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.ld-head-main{flex:1;min-width:0}
+.ld-head-title{font-size:20px;font-weight:800;color:#eef1f8;line-height:1.25}
+.ld-head-sub{font-size:12px;color:#8f97ad;margin-top:3px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;letter-spacing:.02em}
+.ld-head-role{font-size:12.5px;color:#a8b0c4;margin-top:5px;line-height:1.55}
+.ld-head-q{flex-shrink:0;max-width:330px;font-size:12.5px;line-height:1.6;color:#c9d0e0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:9px 13px}
+.ld-head-q b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ld);margin-bottom:3px}
+.ld-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04);color:#a9b1c5;font-size:15px;line-height:1;cursor:pointer;transition:all .15s}
+.ld-close:hover{background:rgba(255,255,255,.12);color:#fff}
+.ld-tabs{position:relative;display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.014)}
+.ld-tab{font-size:12px;font-weight:700;padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.11);background:transparent;color:#939bb1;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ld-tab:hover{color:#eef1f8;border-color:rgba(255,255,255,.3)}
+.ld-tab.active{background:var(--ld);border-color:var(--ld);color:#0b0e17}
+.ld-body{position:relative;padding:20px 22px 24px}
+.ld-block{margin-bottom:20px}
+.ld-block:last-child{margin-bottom:0}
+.ld-block-title{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7e879d;margin-bottom:10px}
+.ld-block-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.1),transparent)}
+.ld-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:8px}
+.ld-card{position:relative;border:1px solid rgba(255,255,255,.085);border-radius:10px;padding:10px 12px 10px 14px;background:rgba(255,255,255,.022)}
+.ld-card::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--ld);opacity:.55}
+.ld-card-zh{font-size:13px;font-weight:700;color:#eef1f8;line-height:1.4}
+.ld-card-en{font-size:10.5px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#8f97ad;margin-top:3px;word-break:break-all}
+.ld-card-note{font-size:11.5px;color:#939bb1;margin-top:6px;line-height:1.6}
+.ld-chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 13px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.018);margin-bottom:8px}
+.ld-chain:last-child{margin-bottom:0}
+.ld-n{display:inline-flex;flex-direction:column;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid;line-height:1.35;white-space:nowrap}
+.ld-n small{font-size:9.5px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-weight:600;opacity:.72;margin-top:2px}
+.ld-n.type{color:#ccd4e5;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
+.ld-n.key{color:#0b0e17;background:var(--ld);border-color:var(--ld)}
+.ld-n.key small{opacity:.7}
+.ld-n.eg{color:#eef1f8;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.075)}
+.ld-n.act{color:#69db7c;border-color:rgba(81,207,102,.42);background:rgba(81,207,102,.1)}
+.ld-n.warn{color:#ff8787;border-color:rgba(250,82,82,.42);background:rgba(250,82,82,.1)}
+.ld-a{font-size:11px;color:#8f97ad;white-space:nowrap;letter-spacing:.01em}
+.ld-a b{color:var(--ld);font-weight:800;margin:0 1px}
+.ld-ami{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px dashed rgba(255,255,255,.16);background:linear-gradient(135deg,rgba(255,255,255,.035),transparent)}
+.ld-ami-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0b0e17;background:var(--ld);border-radius:5px;padding:3px 8px;margin-top:1px}
+.ld-ami-text{font-size:12.5px;color:#c3cbdd;line-height:1.75}
+.ld-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:8px}
+.ld-rule{display:flex;gap:9px;font-size:12.5px;color:#b9c1d4;line-height:1.68;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:10px 12px}
+.ld-rule i{font-style:normal;color:var(--ld);font-weight:800;flex-shrink:0}
+.ld-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.014);font-size:11.5px;color:#7e879d}
+@media(max-width:860px){
+  .ld-mask{padding:0}
+  .ld-panel{border-radius:0;min-height:100vh}
+  .ld-head{flex-wrap:wrap}
+  .ld-head-q{max-width:none;width:100%;order:5}
+  .ld-grid{grid-template-columns:1fr 1fr}
+  .ld-rules{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -488,6 +567,7 @@
         <div class="std-arch-diagram" id="arch-diagram">
           <div class="std-arch-dia-title">专科知识图谱总体架构：六层结构</div>
           <div class="std-arch-dia-sub">六层是同一张 Neo4j 图谱的逻辑分层，不是六套系统；医生端、维护端、治理端按层和场景过滤显示</div>
+          <div class="std-arch-dia-hint">💡 点击左侧任一<b>分层名称</b>，可单独查看该层的结构图（实体构成 · 关系链路 · AMI 实例）</div>
           <div class="std-arch-pipeline">
             <span class="std-arch-pipe-node">&#128214; 教材 / 指南</span><span class="std-arch-pipe-arrow">-&gt;</span>
             <span class="std-arch-pipe-node">&#9881;&#65039; 结构化提取</span><span class="std-arch-pipe-arrow">-&gt;</span>
@@ -496,32 +576,32 @@
             <span class="std-arch-pipe-node">&#129658; 医生端推荐卡</span>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l1"><span class="num">1</span><div><div class="lname">&#128193; 目录层</div><div class="lq">页面导航与疾病分组</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l1 std-layer-link" role="button" tabindex="0" title="点击查看「目录层」结构图" onclick="openLayerDiagram('catalog')" onkeydown="layerKey(event,'catalog')"><span class="num">1</span><div><div class="lname">&#128193; 目录层</div><div class="lq">页面导航与疾病分组</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">属于哪个专科、哪个疾病大类</div><div class="std-arch-dia-types"><span class="t-l1">专科 <i>Specialty</i></span><span class="t-l1">疾病大类 <i>DiseaseCategory</i></span><span class="t-l1">疾病亚类 <i>DiseaseSubcategory</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>心血管内科 -&gt; 冠心病</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l2"><span class="num">2</span><div><div class="lname">&#129658; 临床诊断层</div><div class="lq">疑似 / 待分型 / 具体分型</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l2 std-layer-link" role="button" tabindex="0" title="点击查看「临床诊断层」结构图" onclick="openLayerDiagram('diagnosis')" onkeydown="layerKey(event,'diagnosis')"><span class="num">2</span><div><div class="lname">&#129658; 临床诊断层</div><div class="lq">疑似 / 待分型 / 具体分型</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">患者可能或确定患什么病</div><div class="std-arch-dia-types"><span class="t-l2">疾病 <i>Disease</i></span><span class="t-l2">标准诊断 <i>StandardDiagnosis</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>急性心肌梗死（疑似）-&gt; STEMI（分型）-&gt; I21.900</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l3"><span class="num">3</span><div><div class="lname">&#128214; 医学知识层</div><div class="lq">疾病知识与检查治疗</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l3 std-layer-link" role="button" tabindex="0" title="点击查看「医学知识层」结构图" onclick="openLayerDiagram('medical')" onkeydown="layerKey(event,'medical')"><span class="num">3</span><div><div class="lname">&#128214; 医学知识层</div><div class="lq">疾病知识与检查治疗</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病是什么、有何表现、如何检查治疗</div><div class="std-arch-dia-types"><span class="t-l3">疾病定义 <i>Definition</i></span><span class="t-l3">症状 <i>Symptom</i></span><span class="t-l3">体征 <i>Sign</i></span><span class="t-l3">检查项目 <i>ExamItem</i></span><span class="t-l3">检验项目 <i>LabItem</i></span><span class="t-l3">药品 <i>Drug</i></span><span class="t-l3">手术/操作 <i>Procedure</i></span><span class="t-l3">治疗方案 <i>TreatmentPlan</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>胸痛 · 心电图 · 肌钙蛋白 · 阿司匹林</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l4"><span class="num">4</span><div><div class="lname">&#129504; CDSS决策层</div><div class="lq">正式推荐链</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l4 std-layer-link" role="button" tabindex="0" title="点击查看「CDSS决策层」结构图" onclick="openLayerDiagram('cdss')" onkeydown="layerKey(event,'cdss')"><span class="num">4</span><div><div class="lname">&#129504; CDSS决策层</div><div class="lq">正式推荐链</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">当前患者何时触发、推荐什么、为什么</div><div class="std-arch-dia-types"><span class="t-l4">临床规则 <i>ClinicalRule</i></span><span class="t-l4">推荐陈述 <i>RecommendationStatement</i></span><span class="t-l4">禁忌 <i>Contraindication</i></span><span class="t-l4">患者状态 <i>PatientState</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>发病12h内且PCI可及 -&gt; 推荐急诊 PCI（I类）</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l4b"><span class="num">5</span><div><div class="lname">&#128203; 专科应用结构层</div><div class="lq">评估评分 · 护理 · 路径 · 质控模板</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l4b std-layer-link" role="button" tabindex="0" title="点击查看「专科应用结构层」结构图" onclick="openLayerDiagram('app')" onkeydown="layerKey(event,'app')"><span class="num">5</span><div><div class="lname">&#128203; 专科应用结构层</div><div class="lq">评估评分 · 护理 · 路径 · 质控模板</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控</div><div class="std-arch-dia-types"><span class="t-l4b">评估量表 <i>AssessmentScale</i></span><span class="t-l4b">护理计划 <i>NursingCarePlan</i></span><span class="t-l4b">专科路径 <i>SpecialtyCarePathway</i></span><span class="t-l4b">质控规则 <i>QualityControlRule</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>GRACE 评分量表 · STEMI 护理计划 · 再灌注路径阶段 · 再灌注质控点</div></div>
           </div>
           <div class="std-arch-dia-row">
-            <div class="std-arch-dia-layer std-arch-dia-l5"><span class="num">6</span><div><div class="lname">&#128218; 证据治理层</div><div class="lq">指南原文与页码</div></div></div>
+            <div class="std-arch-dia-layer std-arch-dia-l5 std-layer-link" role="button" tabindex="0" title="点击查看「证据治理层」结构图" onclick="openLayerDiagram('evidence')" onkeydown="layerKey(event,'evidence')"><span class="num">6</span><div><div class="lname">&#128218; 证据治理层</div><div class="lq">指南原文与页码</div><div class="std-arch-dia-open">结构图 ↗</div></div></div>
             <div class="std-arch-dia-mid"><div class="std-arch-dia-q">推荐依据是哪份指南哪一页</div><div class="std-arch-dia-types"><span class="t-l5">指南/教材 <i>Guideline</i></span><span class="t-l5">来源章节 <i>SourceSection</i></span><span class="t-l5">证据片段 <i>Evidence</i></span></div></div>
             <div class="std-arch-dia-eg"><div class="std-arch-dia-eg-in"><strong>AMI 示例</strong><br>2025 ACS 指南再灌注章节原文</div></div>
           </div>
@@ -541,6 +621,11 @@
               <span class="std-chain-node evidence">2025 ACS 指南原文<span style="opacity:.55">（证据）</span></span>
             </div>
           </div>
+        </div>
+
+        <!-- 分层结构图浮层：点击左侧分层名称打开 -->
+        <div class="ld-mask" id="layerDiagram" onclick="closeLayerDiagram(event)">
+          <div class="ld-panel" id="layerPanel"></div>
         </div>
 
         <div class="std-sub-head" id="arch-boundary" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">疾病、方案和具体项目的唯一边界</span></div>
@@ -1704,6 +1789,363 @@ function toggleAllCollapse(btn) {
   btn.querySelector('.arrow').textContent = show ? '▾' : '▸';
   btn.lastChild.textContent = show ? ' 收起全部折叠内容' : ' 展开全部折叠内容';
 }
+
+/* ================= 分层结构图（浮层） =================
+   数据来源：本页第1章「总体架构」六层结构 + 第2章实体类型/关系标准，
+   关系中文名与编码口径与 _shared/js/schema-map.js、第2章关系表一致。
+   结构：[zh, en, note?] 实体；{t:分组名, seq:[...]} 链路；seq 元素：
+   {n:[中文, 类型/角色, 样式]} 节点、{r:[中文关系, relationType]} 关系箭头、{a:文本} 非关系说明箭头。
+   样式：type 普通 / key 本层主角 / eg AMI 实例 / act 动作 / warn 禁忌阻断。 */
+var LAYER_DIAGRAMS = {
+  catalog: {
+    num: '1', name: '目录层', en: 'Catalog Layer · Specialty / Category / Subcategory', color: '#8b90a0',
+    role: '图谱的骨架与页面导航层：定义学科归属和疾病分组，只做目录，不承担诊断与治疗语义。',
+    q: '属于哪个专科、哪个疾病大类',
+    entities: [
+      ['专科', 'Specialty', '多学科根节点；code 全局唯一；战略保留，不因低频删除'],
+      ['疾病大类', 'DiseaseCategory', '目录实体；不保存诊断编码，不写入病历系统'],
+      ['疾病亚类 / 展示分组', 'DiseaseSubcategory', '可选；仅用于展示；不参与诊断、不写入病历系统']
+    ],
+    tabs: [{
+      t: '目录归位链路',
+      chains: [
+        { t: '学科归属', seq: [{ n: ['心血管内科', 'Specialty', 'key'] }, { r: ['属疾病大类', 'has_category'] }, { n: ['冠心病', 'DiseaseCategory', 'key'] }, { r: ['属疾病亚类', 'has_subcategory'] }, { n: ['急性冠脉综合征', 'DiseaseSubcategory'] }] },
+        { t: '疾病入口', seq: [{ n: ['冠心病', 'DiseaseCategory', 'key'] }, { r: ['包含临床疾病', 'has_disease'] }, { n: ['急性心肌梗死', 'Disease', 'eg'] }] },
+        { t: '展示分组', seq: [{ n: ['急性冠脉综合征', 'DiseaseSubcategory'] }, { r: ['展示分组包含疾病', 'groups_disease'] }, { n: ['急性心肌梗死', 'Disease', 'eg'] }, { a: '等价反向：' }, { n: ['急性心肌梗死', 'Disease'] }, { r: ['归入展示分组', 'classified_as'] }, { n: ['急性冠脉综合征', 'DiseaseSubcategory'] }] }
+      ]
+    }],
+    ami: '急性心肌梗死的目录归属为 <b>心血管内科 → 冠心病 → 急性冠脉综合征（展示分组）</b>。目录层节点不带诊断编码，医生端据此生成左侧疾病导航树。',
+    rules: [
+      '目录层只回答「放在哪里」，疾病大类和疾病亚类都不能连接检查方案、治疗方案、药品、手术或治疗项目。',
+      '疾病亚类仅用于页面分组，与疾病分型是两回事：groups_disease / classified_as 不表示诊断父子层级。',
+      '目录层节点不写回病历系统，也不能作为推荐动作下发。'
+    ]
+  },
+  diagnosis: {
+    num: '2', name: '临床诊断层', en: 'Diagnosis Layer · Disease / StandardDiagnosis', color: '#4f8cff',
+    role: '回答「患者可能或确定患什么病」：待分型疾病与具体分型统一为 Disease，编码由标准诊断承载。',
+    q: '患者可能或确定患什么病',
+    entities: [
+      ['疾病', 'Disease', '待分型疾病和具体分型统一使用该类型；用 diagnostic_role 声明角色'],
+      ['标准诊断', 'CDSS StandardDiagnosis', '一条实体对应一条经二次校验通过的系统诊断记录，保留原始系统编号'],
+      ['疾病分型 / 分类（已停用）', 'DiseaseClassification', 'V2.0 停止新增；迁移为 Disease 或 DiseaseSubcategory']
+    ],
+    tabs: [
+      {
+        t: '分型链路',
+        chains: [
+          { t: '疑似 → 分型', seq: [{ n: ['急性心肌梗死', 'Disease · suspected_parent', 'key'] }, { r: ['有临床分型', 'has_clinical_subtype'] }, { n: ['ST段抬高型心肌梗死', 'Disease · specific_subtype', 'key'] }] },
+          { t: '独立诊断', seq: [{ n: ['稳定型心绞痛', 'Disease · standalone_diagnosis', 'key'] }, { a: '不依赖上级待分型疾病，自身即完整诊断' }] }
+        ]
+      },
+      {
+        t: '标准诊断映射',
+        chains: [
+          { t: '写入编码', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有标准诊断', 'has_standard_diagnosis'] }, { n: ['I21.900 急性心肌梗死', 'StandardDiagnosis', 'eg'] }] },
+          { t: '等价口径', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['映射标准诊断', 'maps_to_standard_diagnosis'] }, { n: ['I21.900', 'StandardDiagnosis', 'eg'] }] }
+        ]
+      },
+      {
+        t: '诊断角色',
+        chains: [
+          { t: 'suspected_parent', seq: [{ n: ['疑似 / 待分型诊断', 'suspected_parent', 'key'] }, { a: '早期只判大方向，可回写为疑似诊断，推荐排序只返回此类节点' }] },
+          { t: 'specific_subtype', seq: [{ n: ['具体分型诊断', 'specific_subtype', 'key'] }, { a: '证据充分，可进出院诊断；专病路径入径以此为准' }] },
+          { t: 'standalone_diagnosis', seq: [{ n: ['独立诊断', 'standalone_diagnosis', 'key'] }, { a: '不依赖上级诊断，自身完整' }] }
+        ]
+      }
+    ],
+    ami: '急性心肌梗死（疑似，suspected_parent）<b>→</b> STEMI（具体分型，specific_subtype）<b>→</b> I21.900 标准诊断。检查结果确认后落到 specific_subtype，此时才提示入径。',
+    rules: [
+      '父子分型均为 Disease；不得形成环。',
+      'has_standard_diagnosis 仅连接有效字典记录；只有 StandardDiagnosis 携带编码并可写回病历。',
+      '疑似疾病推荐只返回 suspected_parent；回写后工作台才展开分型入口。'
+    ]
+  },
+  medical: {
+    num: '3', name: '医学知识层', en: 'Medical Knowledge Layer · Facts / Exams / Treatment', color: '#ff922b',
+    role: '回答「这个病是什么、有何表现、如何检查治疗」：疾病挂载全部医学事实，方案作为策略容器中转。',
+    q: '这个病是什么、有何表现、如何检查治疗',
+    entities: [
+      ['疾病定义', 'Definition', '可继续下钻定义明细 DefinitionComponent'],
+      ['症状', 'Symptom', '患者主观感受，如胸痛'],
+      ['体征', 'Sign', '医生客观发现，如心包摩擦音'],
+      ['检查项目', 'ExamItem', '经检查方案 ExamPlan 中转挂载；检查发现单列 ExamObservation'],
+      ['检验项目', 'LabItem', '经检验方案中转；可下钻 LabSubitem、LabSpecimen'],
+      ['药品', 'Drug', '经治疗方案中转挂载，不直连疾病'],
+      ['手术 / 操作', 'Procedure', '经治疗方案中转挂载'],
+      ['治疗方案', 'TreatmentPlan', '策略容器：含药品 / 手术操作 / 治疗项目，本身不是医嘱']
+    ],
+    tabs: [
+      {
+        t: '疾病事实',
+        chains: [
+          { t: '定义与机制', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有定义', 'has_definition'] }, { n: ['AMI 定义', 'Definition'] }, { r: ['含定义明细', 'has_definition_component'] }, { n: ['心肌坏死', 'DefinitionComponent'] }] },
+          { t: '病因病理', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有病因', 'has_etiology'] }, { n: ['斑块破裂', 'Etiology'] }, { r: ['有病理生理', 'has_pathophysiology'] }, { n: ['冠脉急性闭塞', 'Pathophysiology'] }] },
+          { t: '临床表现', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有症状', 'has_symptom'] }, { n: ['胸痛', 'Symptom'] }, { r: ['有体征', 'has_sign'] }, { n: ['心包摩擦音', 'Sign'] }] },
+          { t: '风险与转归', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有危险因素', 'has_risk_factor'] }, { n: ['吸烟', 'RiskFactor'] }, { r: ['有并发症', 'has_complication'] }, { n: ['心源性休克', 'Complication'] }] },
+          { t: '人群与机制补充', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有流行病学', 'has_epidemiology'] }, { n: ['发病率变化', 'Epidemiology'] }] }
+        ]
+      },
+      {
+        t: '检查与检验',
+        chains: [
+          { t: '检查链路', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有检查方案', 'has_exam_plan'] }, { n: ['AMI 首诊辅助检查方案', 'ExamPlan'] }, { r: ['含检查项目', 'includes_exam_item'] }, { n: ['常规心电图', 'ExamItem', 'eg'] }, { r: ['检查可见', 'exam_item_has_observation'] }, { n: ['ST 段抬高', 'ExamObservation'] }] },
+          { t: '检验链路', seq: [{ n: ['AMI 首诊辅助检查方案', 'ExamPlan'] }, { r: ['含检验项目', 'includes_lab_item'] }, { n: ['心肌损伤标志物检测', 'LabItem', 'eg'] }, { r: ['检验含细项', 'lab_item_has_subitem'] }, { n: ['心肌肌钙蛋白 I', 'LabSubitem'] }, { r: ['用检验标本', 'lab_item_uses_specimen'] }, { n: ['血清', 'LabSpecimen'] }] }
+        ]
+      },
+      {
+        t: '治疗与随访',
+        chains: [
+          { t: '治疗方案中转', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有治疗方案', 'has_treatment_plan'] }, { n: ['再灌注治疗', 'TreatmentPlan'] }, { a: '↓ 分流为三类具体项目' }] },
+          { t: '— 具体项目', seq: [{ n: ['再灌注治疗', 'TreatmentPlan'] }, { r: ['含手术操作', 'includes_procedure'] }, { n: ['经皮冠状动脉介入治疗', 'Procedure', 'act'] }] },
+          { t: '— 具体药品', seq: [{ n: ['抗血小板治疗', 'TreatmentPlan'] }, { r: ['含药品', 'includes_drug'] }, { n: ['阿司匹林', 'Drug', 'act'] }] },
+          { t: '— 治疗项目', seq: [{ n: ['一般治疗', 'TreatmentPlan'] }, { r: ['含治疗项目', 'includes_treatment_item'] }, { n: ['氧疗', 'TreatmentItem', 'act'] }] },
+          { t: '随访与预后', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有随访', 'has_followup'] }, { n: ['出院后随访', 'FollowUp'] }, { r: ['有预后', 'has_prognosis'] }, { n: ['再梗死风险', 'Prognosis'] }, { r: ['有预防措施', 'has_prevention'] }, { n: ['戒烟', 'Prevention'] }] }
+        ]
+      },
+      {
+        t: '诊断与鉴别',
+        chains: [
+          { t: '诊断标准', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有诊断标准', 'has_diagnostic_criteria'] }, { n: ['AMI 诊断标准', 'DiagnosisCriteria'] }, { r: ['含诊断明细', 'has_diagnostic_component'] }, { n: ['肌钙蛋白动态升高', '可判断条件', 'eg'] }] },
+          { t: '鉴别对象', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有鉴别诊断对象', 'has_differential_diagnosis'] }, { n: ['主动脉夹层', 'DifferentialDiagnosis'] }] },
+          { t: '鉴别下钻', seq: [{ n: ['主动脉夹层', 'DifferentialDiagnosis'] }, { r: ['有鉴别规则', 'has_differential_rule'] }, { n: ['胸痛放射至背部', 'ClinicalRule'] }, { r: ['需排除检查', 'requires_exclusion_exam'] }, { n: ['主动脉 CTA', 'ExamItem'] }, { r: ['需排除检验', 'requires_exclusion_lab'] }, { n: ['D-二聚体', 'LabItem'] }] },
+          { t: '风险分层', seq: [{ n: ['急性心肌梗死', 'Disease'] }, { r: ['有风险分层', 'has_risk_stratification'] }, { n: ['GRACE 评分', 'RiskStratification'] }] }
+        ]
+      }
+    ],
+    ami: '胸痛（Symptom）· 心电图（ExamItem）· 心肌肌钙蛋白（LabItem）· 阿司匹林（Drug）· 经皮冠状动脉介入治疗（Procedure），全部由 <b>急性心肌梗死</b> 一个疾病节点挂载。',
+    rules: [
+      '疾病不直连药品 / 手术：必经治疗方案（TreatmentPlan）中转，或经推荐陈述下发。',
+      '方案只是策略容器，不是医嘱项目，不保存系统编码，也不能作为正式推荐。',
+      '主观感受是 Symptom，客观发现是 Sign；检查项目是 ExamItem，检查发现是 ExamObservation，不得混用。',
+      '检验项目与细项、标本必须维护归属：LabItem → LabSubitem → LabSpecimen。'
+    ]
+  },
+  cdss: {
+    num: '4', name: 'CDSS决策层', en: 'CDSS Decision Layer · Rule / Recommendation / Contraindication', color: '#51cf66',
+    role: '回答「当前患者何时触发、推荐什么、为什么」：规则命中后由推荐陈述承载展示与审核，再落到可执行动作。',
+    q: '当前患者何时触发、推荐什么、为什么',
+    entities: [
+      ['临床规则', 'ClinicalRule', '结构化触发条件（condition_expression / rule_text）'],
+      ['推荐陈述', 'RecommendationStatement', '正式推荐载体：承载推荐等级、证据等级、时间窗与排除条件'],
+      ['禁忌 / 排除条件', 'Contraindication', '命中即阻断执行，并向医生显示原因'],
+      ['患者状态', 'PatientState', '规则匹配的输入（发病时间窗、PCI 可及性、合并症、用药等）']
+    ],
+    tabs: [
+      {
+        t: '正式推荐链',
+        chains: [
+          { t: '疾病 → 陈述', seq: [{ n: ['ST段抬高型心肌梗死', 'Disease', 'key'] }, { r: ['有正式推荐陈述', 'has_recommendation_statement'] }, { n: ['STEMI 确诊后尽快完成再灌注治疗', 'RecommendationStatement', 'key'] }] },
+          { t: '规则触发', seq: [{ n: ['再灌注决策规则', 'ClinicalRule'] }, { r: ['触发推荐', 'triggers_recommendation'] }, { n: ['STEMI 再灌注推荐陈述', 'RecommendationStatement'] }] },
+          { t: '陈述 → 动作', seq: [{ n: ['STEMI 再灌注推荐陈述', 'RecommendationStatement', 'key'] }, { r: ['推荐动作', 'recommends_action'] }, { n: ['经皮冠状动脉介入治疗', 'Procedure · 首选', 'act'] }, { r: ['推荐动作', 'recommends_action'] }, { n: ['溶栓治疗', 'TreatmentItem · 次选', 'act'] }] },
+          { t: '规则输入', seq: [{ n: ['患者状态', 'PatientState'] }, { a: '（发病时间、PCI 可及性、出血风险）作为规则匹配输入' }] }
+        ]
+      },
+      {
+        t: '安全阻断',
+        chains: [
+          { t: '禁忌阻断', seq: [{ n: ['STEMI 再灌注推荐陈述', 'RecommendationStatement'] }, { r: ['有禁忌 / 排除条件', 'has_contraindication'] }, { n: ['活动性出血', 'Contraindication', 'warn'] }, { r: ['阻断动作', 'blocks_action'] }, { n: ['溶栓治疗', 'TreatmentItem', 'warn'] }] },
+          { t: '鉴别阻断', seq: [{ n: ['主动脉夹层', 'DifferentialDiagnosis'] }, { r: ['有鉴别规则', 'has_differential_rule'] }, { n: ['胸痛放射至背部', 'ClinicalRule', 'warn'] }, { a: '未排除前阻断溶栓' }] },
+          { t: '评估目标', seq: [{ n: ['AMI 诊断推荐', 'RecommendationStatement'] }, { r: ['推荐临床评估', 'recommends_assessment'] }, { n: ['AMI 诊断标准', 'DiagnosisCriteria'] }, { a: '评估目标不是医嘱项目' }] }
+        ]
+      },
+      {
+        t: '陈述字段',
+        chains: [
+          { t: '触发与适用范围', seq: [{ n: ['trigger_condition', '触发条件'] }, { n: ['applicable_population', '适用人群'] }, { n: ['exclusion_condition', '排除条件'] }, { n: ['clinical_scene', '临床场景'] }] },
+          { t: '等级与来源', seq: [{ n: ['recommendation_class', '推荐等级（I / IIa / IIb / III）'] }, { n: ['evidence_level', '证据等级（A / B / C）'] }, { n: ['primary_evidence_code', '主证据'] }, { n: ['primary_guideline_code', '主依据指南'] }] },
+          { t: '落地状态', seq: [{ n: ['cdss_use_status', 'formal_recommendation 正式推荐'] }, { n: ['formal_cdss_ready', '是否可直接下发'] }, { n: ['safety_review_status', '安全审核状态'] }] }
+        ]
+      }
+    ],
+    ami: '患者状态「确诊 STEMI 且发病 12 小时内、PCI 可及」触发规则 → 推荐陈述「STEMI 确诊后尽快完成再灌注治疗」（<b>I 类 / A 级</b>）→ <b>首选直接 PCI，次选静脉溶栓</b>；排除条件：活动性出血、主动脉夹层、既往颅内出血。',
+    rules: [
+      '正式推荐必经「疾病 → 推荐陈述 → 动作」，疾病不直连药品、手术。',
+      '触发口径唯一：ClinicalRule -[触发推荐 triggers_recommendation]-> RecommendationStatement。',
+      '推荐陈述必须携带 recommendation_class / evidence_level 与主证据；无证据不得下发。',
+      '禁忌命中即阻断动作并展示原因；安全审核未通过不得进入 formal_recommendation。'
+    ]
+  },
+  app: {
+    num: '5', name: '专科应用结构层', en: 'Specialty Application Layer · Scale / Nursing / Pathway / QC', color: '#9b6dff',
+    role: 'V4.0 新增层：把评估评分、护理、路径、质控四类应用模板建成可计算结构，是专科 CDSS 的落地骨架。',
+    q: '这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控',
+    entities: [
+      ['评估量表', 'AssessmentScale', '含评分条目、计分规则、结果等级三层，可算出分值'],
+      ['护理计划', 'NursingCarePlan', '护理评估 → 护理诊断 → 护理措施 → 护理结局闭环'],
+      ['专科路径', 'SpecialtyCarePathway', '含路径阶段、路径任务、变异原因与出径条件'],
+      ['质控规则', 'QualityControlRule', '含质控点：检查必需检查 / 检验 / 禁忌 / 评估等级 / 路径任务']
+    ],
+    tabs: [
+      {
+        t: '评估评分',
+        chains: [
+          { t: '量表挂载', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有适用量表', 'has_assessment_scale'] }, { n: ['GRACE 评分', 'AssessmentScale', 'eg'] }] },
+          { t: '可计算结构', seq: [{ n: ['GRACE 评分', 'AssessmentScale'] }, { r: ['含评分条目', 'includes_assessment_item'] }, { n: ['评分条目', 'AssessmentItem'] }, { r: ['有计分规则', 'has_score_rule'] }, { n: ['计分规则', 'AssessmentScoreRule'] }, { r: ['有结果等级', 'has_result_level'] }, { n: ['结果等级', 'AssessmentResultLevel'] }, { r: ['触发结果动作', 'triggers_assessment_action'] }, { n: ['结果动作', 'AssessmentActionRule', 'act'] }] },
+          { t: '风险分层对接', seq: [{ n: ['结果等级', 'AssessmentResultLevel'] }, { r: ['支撑风险分层', 'supports_risk_stratification'] }, { n: ['急性心肌梗死风险分层', 'RiskStratification'] }] }
+        ]
+      },
+      {
+        t: '护理计划',
+        chains: [
+          { t: '护理闭环', seq: [{ n: ['ST段抬高型心肌梗死', 'Disease', 'key'] }, { r: ['有护理计划', 'has_nursing_care_plan'] }, { n: ['STEMI 护理计划', 'NursingCarePlan', 'eg'] }, { r: ['计划含护理诊断', 'plan_has_nursing_diagnosis'] }, { n: ['护理诊断', 'NursingDiagnosis'] }, { r: ['含护理措施', 'includes_nursing_intervention'] }, { n: ['护理措施', 'NursingIntervention'] }, { r: ['计划目标结局', 'plan_targets_outcome'] }, { n: ['护理结局', 'NursingOutcome'] }] },
+          { t: '分级与记录', seq: [{ n: ['护理评估', 'NursingAssessment'] }, { r: ['判定护理分级', 'determines_nursing_grade'] }, { n: ['护理分级', 'NursingGrade'] }, { r: ['记录护理条目', 'records_nursing_item'] }, { n: ['护理记录条目', 'NursingRecordItem'] }] },
+          { t: '安全限制', seq: [{ n: ['护理计划', 'NursingCarePlan'] }, { r: ['限制护理措施', 'restricts_nursing_intervention'] }, { n: ['护理禁忌', 'NursingContraindication', 'warn'] }] }
+        ]
+      },
+      {
+        t: '专科路径',
+        chains: [
+          { t: '入径', seq: [{ n: ['急性心肌梗死', 'Disease', 'key'] }, { r: ['有专科诊疗路径', 'has_specialty_care_pathway'] }, { n: ['急诊诊疗路径', 'SpecialtyCarePathway', 'eg'] }] },
+          { t: '阶段与规则', seq: [{ n: ['急诊诊疗路径', 'SpecialtyCarePathway'] }, { r: ['含路径阶段', 'includes_pathway_stage'] }, { n: ['再灌注决策阶段', 'PathwayStage'] }, { r: ['有临床规则', 'has_clinical_rule'] }, { n: ['PCI 可及规则', 'ClinicalRule'] }] },
+          { t: '任务与动作', seq: [{ n: ['再灌注决策阶段', 'PathwayStage'] }, { r: ['含路径任务', 'includes_pathway_task'] }, { n: ['路径任务', 'PathwayTask'] }, { r: ['任务绑定动作', 'pathway_task_uses_action'] }, { n: ['经皮冠状动脉介入治疗', 'Procedure', 'act'] }] },
+          { t: '流转与出径', seq: [{ n: ['再灌注决策阶段', 'PathwayStage'] }, { r: ['下一阶段', 'next_pathway_stage'] }, { n: ['术后管理阶段', 'PathwayStage'] }, { r: ['有出径 / 出院条件', 'has_exit_criteria'] }, { n: ['出径条件', 'PathwayExitCriteria'] }, { r: ['有变异原因', 'has_variation_reason'] }, { n: ['变异原因', 'PathwayVariationReason'] }] }
+        ]
+      },
+      {
+        t: '质控规则',
+        chains: [
+          { t: '质控点', seq: [{ n: ['再灌注质控规则', 'QualityControlRule', 'key'] }, { r: ['有质控点', 'has_quality_control_point'] }, { n: ['再灌注质控点', 'QualityControlPoint', 'eg'] }] },
+          { t: '检查对象', seq: [{ n: ['再灌注质控点', 'QualityControlPoint'] }, { r: ['检查必需检查', 'checks_required_exam'] }, { n: ['常规心电图', 'ExamItem'] }, { r: ['检查禁忌', 'checks_contraindication'] }, { n: ['活动性出血', 'Contraindication', 'warn'] }, { r: ['检查评估等级', 'checks_assessment_level'] }, { n: ['GRACE 结果等级', 'AssessmentResultLevel'] }, { r: ['检查路径任务', 'checks_pathway_task'] }, { n: ['PCI 任务', 'PathwayTask'] }] },
+          { t: '证据留痕', seq: [{ n: ['质控规则', 'QualityControlRule'] }, { r: ['质控有证据', 'quality_rule_supported_by_evidence'] }, { n: ['质控依据原文', 'Evidence'] }] }
+        ]
+      }
+    ],
+    ami: '<b>GRACE 评分量表</b>（算分 → 等级 → 结果动作）· <b>STEMI 护理计划</b>（诊断 → 措施 → 结局）· <b>再灌注路径阶段</b>（阶段 → 规则 → 任务）· <b>再灌注质控点</b>（检查检查、禁忌、等级、任务）。',
+    rules: [
+      '四大族（评估评分、护理、路径、质控）为 V4.0 新增，共 23 种实体类型。',
+      '评估量表必须建成「条目 + 计分规则 + 结果等级」三层，才能算分并驱动结果动作。',
+      '路径与住院临床路径分实体：专科路径用于专科 CDSS 入口，住院路径另建。',
+      '质控规则只做检查与留痕，不产生推荐动作；所有质控点需可追溯到证据。'
+    ]
+  },
+  evidence: {
+    num: '6', name: '证据治理层', en: 'Evidence Governance Layer · Guideline / SourceSection / Evidence', color: '#ff9f43',
+    role: '回答「推荐依据是哪份指南哪一页」：指南按章节拆证据，推荐与知识实体反向回指，保证全链可追溯。',
+    q: '推荐依据是哪份指南哪一页',
+    entities: [
+      ['指南 / 教材', 'Guideline', '来源文献实体，保留 source_name / source_year / document_code'],
+      ['来源章节', 'SourceSection', '章节可定位：section_title、locator、page_start、page_end'],
+      ['证据片段', 'Evidence', '保存原文 evidence_text 与推荐等级、证据等级']
+    ],
+    tabs: [
+      {
+        t: '章节与证据',
+        chains: [
+          { t: '章节下钻', seq: [{ n: ['2025 ACS 指南', 'Guideline', 'key'] }, { r: ['有来源章节', 'has_source_section'] }, { n: ['再灌注章节', 'SourceSection'] }, { r: ['包含证据', 'section_has_evidence'] }, { n: ['PCI 原文', 'Evidence', 'eg'] }] },
+          { t: '全局索引', seq: [{ n: ['2025 ACS 指南', 'Guideline'] }, { r: ['包含证据', 'guideline_has_evidence'] }, { n: ['PCI 原文', 'Evidence'] }, { a: '不依赖章节也可全局追溯' }] }
+        ]
+      },
+      {
+        t: '推荐回指',
+        chains: [
+          { t: '主依据', seq: [{ n: ['STEMI 再灌注推荐陈述', 'RecommendationStatement', 'key'] }, { r: ['使用主依据指南', 'uses_primary_guideline'] }, { n: ['2025 ACS 指南', 'Guideline'] }, { a: '每条推荐只有一个主依据' }] },
+          { t: '基于指南 / 来自证据', seq: [{ n: ['STEMI 再灌注推荐陈述', 'RecommendationStatement'] }, { r: ['基于指南', 'based_on_guideline'] }, { n: ['2025 ACS 指南', 'Guideline'] }, { r: ['来自证据', 'derived_from'] }, { n: ['PCI 原文', 'Evidence'] }] },
+          { t: '知识实体留痕', seq: [{ n: ['AMI 定义', 'Definition'] }, { r: ['有证据支撑', 'supported_by_evidence'] }, { n: ['教材原文', 'Evidence'] }] }
+        ]
+      }
+    ],
+    ami: '2025 ACS 指南（Guideline）→ 再灌注章节（SourceSection，带页码定位）→ PCI 原文（Evidence）→ STEMI 再灌注推荐陈述。医生端点开推荐即可看到「哪份指南、哪一页、原文怎么写的」。',
+    rules: [
+      '章节必须可定位：document_code / locator / page_start / page_end 四要素齐备。',
+      '同一医学概念只建一个正式实体；不同教材、指南通过各自的证据连接同一事实，不重复建疾病、症状、药品、手术节点。',
+      '教材不负责系统编码，也不得把教材建议直接写成指南推荐等级。',
+      '推荐、规则、知识实体都可挂证据；无证据支撑的内容不得进入正式推荐。'
+    ]
+  }
+};
+
+function ldSeq(list) {
+  var h = '';
+  (list || []).forEach(function (it) {
+    if (it.n) {
+      h += '<span class="ld-n ' + (it.n[2] || 'type') + '">' + it.n[0] + (it.n[1] ? '<small>' + it.n[1] + '</small>' : '') + '</span>';
+    } else if (it.r) {
+      h += '<span class="ld-a">-[ ' + it.r[0] + ' <b>' + it.r[1] + '</b> ]-&gt;</span>';
+    } else if (it.a) {
+      h += '<span class="ld-a">' + it.a + '</span>';
+    }
+  });
+  return h;
+}
+
+function openLayerDiagram(key, tabIdx) {
+  var d = LAYER_DIAGRAMS[key];
+  if (!d) return;
+  var idx = tabIdx || 0;
+  if (idx >= d.tabs.length) idx = 0;
+  var tab = d.tabs[idx];
+  var multi = d.tabs.length > 1;
+
+  var h = '';
+  h += '<div class="ld-head">';
+  h += '<div class="ld-head-num">' + d.num + '</div>';
+  h += '<div class="ld-head-main"><div class="ld-head-title">' + d.name + '<span class="ld-head-sub" style="margin-left:8px">' + d.en + '</span></div>';
+  h += '<div class="ld-head-role">' + d.role + '</div></div>';
+  h += '<div class="ld-head-q"><b>本层回答</b>' + d.q + '</div>';
+  h += '<button class="ld-close" onclick="closeLayerDiagram()" title="关闭（Esc）">✕</button>';
+  h += '</div>';
+
+  if (multi) {
+    h += '<div class="ld-tabs">';
+    d.tabs.forEach(function (t, i) {
+      h += '<button class="ld-tab' + (i === idx ? ' active' : '') + '" onclick="openLayerDiagram(\'' + key + '\',' + i + ')">' + t.t + '</button>';
+    });
+    h += '</div>';
+  }
+
+  h += '<div class="ld-body">';
+
+  h += '<div class="ld-block"><div class="ld-block-title">本层实体构成 · ' + d.entities.length + ' 类</div><div class="ld-grid">';
+  d.entities.forEach(function (e) {
+    h += '<div class="ld-card"><div class="ld-card-zh">' + e[0] + '</div><div class="ld-card-en">' + e[1] + '</div>' + (e[2] ? '<div class="ld-card-note">' + e[2] + '</div>' : '') + '</div>';
+  });
+  h += '</div></div>';
+
+  h += '<div class="ld-block"><div class="ld-block-title">' + (multi ? tab.t + ' · 关系链路' : tab.t) + '</div>';
+  (tab.chains || []).forEach(function (c) {
+    h += '<div class="ld-chain">';
+    if (c.t) h += '<span class="ld-a" style="min-width:104px;font-weight:700;color:#b9c1d4">' + c.t + '</span>';
+    h += ldSeq(c.seq) + '</div>';
+  });
+  h += '</div>';
+
+  h += '<div class="ld-block"><div class="ld-block-title">AMI 实例贯通</div><div class="ld-ami"><span class="ld-ami-tag">AMI</span><div class="ld-ami-text">' + d.ami + '</div></div></div>';
+
+  if (d.rules && d.rules.length) {
+    h += '<div class="ld-block"><div class="ld-block-title">硬规则</div><div class="ld-rules">';
+    d.rules.forEach(function (r, i) {
+      h += '<div class="ld-rule"><i>' + ('0' + (i + 1)).slice(-2) + '</i><span>' + r + '</span></div>';
+    });
+    h += '</div></div>';
+  }
+
+  h += '</div>';
+  h += '<div class="ld-foot"><span>口径来源：图谱架构规范 第1章「六层结构」＋第2章实体类型与关系标准（schema-map.js 同源）</span><span>Esc 或点击空白处关闭</span></div>';
+
+  var panel = document.getElementById('layerPanel');
+  panel.style.setProperty('--ld', d.color);
+  panel.innerHTML = h;
+  document.getElementById('layerDiagram').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLayerDiagram(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('layerDiagram').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function layerKey(e, key) {
+  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    openLayerDiagram(key);
+  }
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeLayerDiagram();
+});
 
 /* section级别折叠：点击h2标题折叠/展开整个section */
 document.querySelectorAll('.std-section > h2').forEach(function(h2) {

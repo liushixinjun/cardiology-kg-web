@@ -546,5 +546,5 @@ function showEntityModal(diseaseCode,dimKey,entityCode) {
   document.getElementById('modal-content').innerHTML=h;
   document.getElementById('entity-modal').classList.add('show');
 }
-function closeModal(){document.getElementById('entity-modal').classList.remove('show');}
+function closeModal(){var m=document.getElementById('entity-modal');if(m)m.classList.remove('show');}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});

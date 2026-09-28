@@ -123,6 +123,16 @@
 
 ---
 
+## #015 — 全局 Esc 监听调用 `closeModal()` 空指针，按 Esc 必报错
+
+**日期**：2026-09-28
+**现象**：在 `standard.html` 等页面按 Esc 键，控制台必抛 `TypeError: Cannot read properties of null (reading 'classList') at closeModal (app.js:549)`。因为页面里根本没有 `#entity-modal` 元素，功能表面正常但控制台一直报错
+**根因**：`app.js` 底部注册了全局 `keydown` 监听，任何 Esc 都调用 `closeModal()`；而 `closeModal()` 直接写 `document.getElementById('entity-modal').classList.remove('show')`，未判空。`#entity-modal` 只存在于部分页面（且 `schema.html` 中实际叫 `si-entity-modal`），其余页面取到 `null`
+**修复**：`closeModal()` 加判空保护 —— `var m=document.getElementById('entity-modal');if(m)m.classList.remove('show');`
+**教训**：**`app.js` 是全站共享脚本，其中的全局事件监听会在每个页面触发。监听器里访问的 DOM 必须一律判空，不能假设元素一定存在。** 本次做「分层结构图浮层」时新增了 Esc 关闭逻辑，正是这次自测才暴露出这个潜伏已久的报错。
+
+---
+
 ## 通用教训总结
 
 1. **先分析再修复**：遇到 bug 先用控制台验证，找到确切根因再改代码
