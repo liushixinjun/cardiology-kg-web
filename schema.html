@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>专科知识图谱 · 心血管内科 - 图谱数据审核</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260913b">
+<title>专科知识图谱 · 心血管内科 - 图谱数据字典</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026092813">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -301,13 +301,17 @@
 
   <!-- 主区域 -->
   <div class="si-main" id="si-main">
-    <!-- 主视图切换Tab -->
+    <!-- 主视图切换Tab（4001整改：页面定位为图谱数据字典，新增结构注册表Tab） -->
     <div class="si-main-tabs" role="tablist">
-      <div class="si-main-tab active" role="tab" aria-selected="true" data-view="search" onclick="siSwitchMainView('search')">🔍 实体检索</div>
+      <div class="si-main-tab active" role="tab" aria-selected="true" data-view="registry" onclick="siSwitchMainView('registry')">📐 结构注册表</div>
+      <div class="si-main-tab" role="tab" aria-selected="false" data-view="search" onclick="siSwitchMainView('search')">🔍 实体检索</div>
       <div class="si-main-tab" role="tab" aria-selected="false" data-view="audit" onclick="siSwitchMainView('audit')">🫀 疾病审核</div>
       <div class="si-main-tab" role="tab" aria-selected="false" data-view="dim" onclick="siSwitchMainView('dim')">🌐 维度视角</div>
       <div class="si-main-tab" role="tab" aria-selected="false" data-view="dict" onclick="siSwitchMainView('dict')">🏷️ 字典对比</div>
     </div>
+
+    <!-- 视图容器：结构注册表（4001整改新增，默认视图） -->
+    <div id="si-registry-view"></div>
 
     <!-- 实体检索/疾病审核 共用工具栏 -->
     <div class="si-topbar" id="si-topbar-default">
@@ -409,7 +413,7 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/app.js?v=20260913"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -656,8 +660,9 @@ loadData(function(d){
   initDiseaseSelect(d);
   initTypeList();
   renderLegend();
-  // 默认显示疾病实体列表（表格+分页）
+  /* 4001整改：默认展示结构注册表（图谱数据字典定位）；实体检索数据预载 */
   siLoadSearchResults('Disease');
+  siSwitchMainView('registry');
 });
 
 function initDiseaseSelect(d){
@@ -1850,7 +1855,7 @@ function siSwitchMainView(view){
     else { t.classList.remove('active'); t.setAttribute('aria-selected','false'); }
   });
   /* 统一工具栏：始终显示 si-topbar-default */
-  document.getElementById('si-topbar-default').style.display = 'flex';
+  document.getElementById('si-topbar-default').style.display = (view==='registry') ? 'none' : 'flex';
   /* 搜索栏仅 search 视图显示 */
   var searchBar = document.getElementById('si-search-bar');
   var dimBar = document.getElementById('si-dim-bar');
@@ -1863,8 +1868,17 @@ function siSwitchMainView(view){
   var auditView = document.getElementById('si-audit-view');
   var dimView = document.getElementById('si-dim-view');
   var dictView = document.getElementById('si-dict-view');
+  var regView = document.getElementById('si-registry-view');
   tableView.style.display='none'; networkView.style.display='none'; searchView.style.display='none';
   auditView.style.display='none'; dimView.style.display='none'; dictView.style.display='none';
+  regView.style.display='none';
+  if(view==='registry'){
+    /* 4001整改：结构注册表视图（默认） */
+    regView.style.display='block';
+    if(!SI_REGISTRY_DATA){ siLoadRegistry(); }
+    else { siRenderRegistry(); }
+    return;
+  }
   if(view==='search'){
     if(SI_STATE.view==='table'){ tableView.style.display='block'; }
     else if(SI_STATE.view==='network'){ networkView.style.display='block'; }
@@ -1896,6 +1910,139 @@ function siSwitchMainView(view){
       dictView.innerHTML='<div class="si-empty" style="padding:60px;text-align:center">请先在上方选择疾病，再查看字典对比</div>';
     }
   }
+}
+
+/* ========== 1.5 结构注册表视图（4001整改：图谱数据字典核心） ========== */
+var SI_REGISTRY_DATA = null;
+var SI_REGISTRY_FILTER = { kind:'relation', q:'', status:'', extOnly:false };
+
+function siLoadRegistry(){
+  var el = document.getElementById('si-registry-view');
+  el.innerHTML = '<div class="si-empty" style="padding:60px;text-align:center;color:var(--muted)">正在加载结构注册表…</div>';
+  fetch('/api/kg/schema-registry?v=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      SI_REGISTRY_DATA = data || {};
+      siRenderRegistry();
+    })
+    .catch(function(e){
+      el.innerHTML = '<div class="si-empty" style="padding:60px;text-align:center;color:#ff6b6b">注册表加载失败：' + (e.message||e) + '<br>请刷新重试</div>';
+    });
+}
+
+function siRegBadge(ok, warn, text){
+  var cls = ok ? 'match' : (warn ? 'partial' : 'missing');
+  return '<span class="si-dict-status ' + cls + '">' + text + '</span>';
+}
+
+function siRenderRegistry(){
+  var el = document.getElementById('si-registry-view');
+  var d = SI_REGISTRY_DATA || {};
+  var sum = d.summary || {};
+  var f = SI_REGISTRY_FILTER;
+  var h = '';
+
+  /* 头部统计 */
+  h += '<div class="si-dict-section" style="margin-bottom:14px">';
+  h += '<h3>📐 图谱结构注册表 · 基准 ' + (d.schema_standard_version||'-') + '（生成于 ' + (d.generated_at||'-') + '）</h3>';
+  h += '<div class="si-dict-summary" style="flex-wrap:wrap;gap:8px 20px">';
+  h += '<span>实体类型：已注册 <b>' + (sum.entity_types_registered||0) + '</b> · 扩展槽位 <b>' + (sum.entity_types_extension_slots||0) + '</b> · 未注册 <b>' + (sum.entity_types_unregistered||0) + '</b></span>';
+  h += '<span>关系类型：已注册 <b>' + (sum.relation_types_registered||0) + '</b> · 扩展槽位 <b>' + (sum.relation_types_extension_slots||0) + '</b> · 未注册 <b>' + (sum.relation_types_unregistered||0) + '</b></span>';
+  h += '</div>';
+  h += '<div style="padding:10px 16px;font-size:11px;color:var(--muted);line-height:1.7">' + (d.note||'') + '</div>';
+  h += '</div>';
+
+  /* 药品结构提示（4001整改：当前Drug结构，旧Medication仅历史迁移提示） */
+  var meds = (d.entity_types||[]).filter(function(e){ return e.type==='Medication'; });
+  var drugs = (d.entity_types||[]).filter(function(e){ return e.type==='Drug'; });
+  h += '<div class="si-dict-section" style="margin-bottom:14px">';
+  h += '<h3>💊 药品结构口径（Schema V4.1）</h3>';
+  h += '<div class="si-dict-table"><table>';
+  h += '<tr><th>结构</th><th>中文</th><th>实例数</th><th>状态</th><th>说明</th></tr>';
+  h += '<tr><td><b>Drug</b></td><td>药品</td><td>' + ((drugs[0]&&drugs[0].instance_count)||0) + '</td><td>' + siRegBadge(true,false,'现行结构') + '</td><td>治疗方案包含药品用 includes_drug；药品类别到具体药品用 has_specific_drug；相互作用用 interacts_with</td></tr>';
+  h += '<tr><td style="color:var(--muted)">Medication</td><td style="color:var(--muted)">药品(旧)</td><td>' + ((meds[0]&&meds[0].instance_count)||0) + '</td><td>' + (meds.length && meds[0].instance_count>0 ? siRegBadge(false,false,'残留待清理') : siRegBadge(false,true,'已清除·历史迁移提示')) + '</td><td style="color:var(--muted)">旧结构仅作历史迁移提示，不作为现行结构展示或生成</td></tr>';
+  h += '</table></div>';
+  h += '</div>';
+
+  /* 筛选工具栏 */
+  h += '<div class="si-topbar" style="margin-bottom:12px">';
+  h += '<div class="si-view-tabs">';
+  h += '<div class="si-view-tab' + (f.kind==='relation'?' active':'') + '" onclick="siRegSetKind(\'relation\')">🔗 关系类型</div>';
+  h += '<div class="si-view-tab' + (f.kind==='entity'?' active':'') + '" onclick="siRegSetKind(\'entity\')">📦 实体类型</div>';
+  h += '</div>';
+  h += '<input type="text" value="' + f.q + '" placeholder="搜索类型/中文语义…" oninput="siRegSetQ(this.value)" style="width:220px">';
+  h += '<select onchange="siRegSetStatus(this.value)">';
+  h += '<option value="">全部状态</option>';
+  h += '<option value="inst"' + (f.status==='inst'?' selected':'') + '>实例已存在</option>';
+  h += '<option value="slot"' + (f.status==='slot'?' selected':'') + '>结构已定义·实例未落地</option>';
+  h += '</select>';
+  h += '<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer"><input type="checkbox" ' + (f.extOnly?'checked':'') + ' onchange="siRegSetExt(this.checked)"> 仅专科扩展槽位</label>';
+  h += '<span id="si-reg-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>';
+  h += '</div>';
+
+  h += '<div id="si-registry-table"></div>';
+  el.innerHTML = h;
+  siRenderRegistryTable();
+}
+
+function siRegSetKind(k){ SI_REGISTRY_FILTER.kind=k; siRenderRegistry(); }
+function siRegSetQ(q){ SI_REGISTRY_FILTER.q=q; siRenderRegistryTable(); }
+function siRegSetStatus(s){ SI_REGISTRY_FILTER.status=s; siRenderRegistryTable(); }
+function siRegSetExt(b){ SI_REGISTRY_FILTER.extOnly=b; siRenderRegistryTable(); }
+
+function siRenderRegistryTable(){
+  var el = document.getElementById('si-registry-table');
+  if(!el || !SI_REGISTRY_DATA) return;
+  var f = SI_REGISTRY_FILTER;
+  var q = (f.q||'').toLowerCase();
+  var rows = [];
+  if(f.kind==='relation'){
+    (SI_REGISTRY_DATA.relation_types||[]).forEach(function(r){
+      if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
+      if(f.status==='inst' && r.instance_count<=0) return;
+      if(f.status==='slot' && r.instance_count>0) return;
+      if(f.extOnly && !r.is_extension_slot) return;
+      rows.push(r);
+    });
+    var h = '<div class="si-dict-section"><h3>🔗 关系类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
+    h += '<tr><th>关系类型</th><th>中文语义</th><th>注册</th><th>实例数</th><th>允许起点实体</th><th>允许终点实体</th><th>状态</th></tr>';
+    rows.forEach(function(r){
+      h += '<tr>';
+      h += '<td style="font-family:monospace;font-size:12px">' + (r.type||'') + '</td>';
+      h += '<td>' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
+      h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
+      h += '<td>' + (r.instance_count||0) + '</td>';
+      h += '<td style="font-size:11px;color:var(--muted)">' + (r.start_entity_types||[]).join(', ') + '</td>';
+      h += '<td style="font-size:11px;color:var(--muted)">' + (r.end_entity_types||[]).join(', ') + '</td>';
+      h += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td>';
+      h += '</tr>';
+    });
+    h += '</table></div></div>';
+    el.innerHTML = h;
+  } else {
+    (SI_REGISTRY_DATA.entity_types||[]).forEach(function(r){
+      if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
+      if(f.status==='inst' && r.instance_count<=0) return;
+      if(f.status==='slot' && r.instance_count>0) return;
+      if(f.extOnly && !r.is_extension_slot) return;
+      rows.push(r);
+    });
+    var h = '<div class="si-dict-section"><h3>📦 实体类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
+    h += '<tr><th>实体类型</th><th>中文名称</th><th>注册</th><th>实例数</th><th>状态</th></tr>';
+    rows.forEach(function(r){
+      h += '<tr>';
+      h += '<td style="font-family:monospace;font-size:12px">' + (r.type||'') + '</td>';
+      h += '<td>' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
+      h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
+      h += '<td>' + (r.instance_count||0) + '</td>';
+      h += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td>';
+      h += '</tr>';
+    });
+    h += '</table></div></div>';
+    el.innerHTML = h;
+  }
+  var cnt = document.getElementById('si-reg-count');
+  if(cnt) cnt.textContent = '共 ' + rows.length + ' 条';
 }
 
 /* ========== 2. 疾病审核视图 ========== */

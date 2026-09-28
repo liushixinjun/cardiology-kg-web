@@ -220,6 +220,25 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .cdss-rec-source .page { font-size: 10px; color: var(--accent); background: rgba(79,140,255,.1); padding: 0 5px; border-radius: 4px; margin-left: 2px; }
 .cdss-rec-evidence { font-size: 12px; color: var(--ink); background: rgba(79,140,255,.06); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; line-height: 1.6; }
 
+/* ===== 4001整改：推荐卡片新增元素（状态徽章/闭环链路/缺失项/受阻卡片） ===== */
+.cdss-rec-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.cdss-rec-status.ok { background: #d3f9d8; color: #2b8a3e; }
+.cdss-rec-status.warn { background: #fff3bf; color: #e67700; }
+.cdss-rec-status.bad { background: #ffe3e3; color: #c92a2a; }
+.cdss-rec-closure {
+  font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 8px;
+  padding: 4px 8px; background: rgba(139,146,165,.08); border-radius: 6px;
+}
+.cdss-rec-closure.none { color: #e8590c; background: rgba(232,89,12,.08); }
+.bf-mark { color: #4f8cff; font-weight: 700; cursor: help; margin-left: 1px; }
+.cdss-rec-missing {
+  font-size: 11px; color: #e8590c; line-height: 1.5; margin-bottom: 6px;
+  padding: 4px 8px; background: rgba(232,89,12,.07); border: 1px dashed rgba(232,89,12,.35);
+  border-radius: 6px;
+}
+.cdss-rec-isblocked { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.03); }
+.chain-blocked-box summary::-webkit-details-marker { color: #ffb020; }
+
 /* ===== Schema V3.2 状态摘要条（5指标） ===== */
 .cdss-sum-bar { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 14px 0; }
 .cdss-sum-card {
@@ -434,12 +453,13 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/schema-map.js?v=20260914"></script>
-<script src="./_shared/js/app.js?v=20260914"></script>
+<script src="./_shared/js/schema-map.js?v=2026092813"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
 var CURRENT_DISEASE = null;
 var CDSS_DISEASES_MAP = {};   // CDSS疾病就绪状态缓存
+var DISEASE_TREE = null;      // 疾病层级树（/api/kg/disease-tree）
 var GRAPH=null,ALL_ENTITIES=[];
 var COLORS = DIM_COLORS_ARR;
 // 预加载CDSS疾病列表（用于就绪率徽章）
@@ -684,8 +704,11 @@ function renderCDSSView(code) {
     }
     fetch('/api/kg/disease/' + encodeURIComponent(code) + '/recommendations?v=' + Date.now())
       .then(function(r) { return r.json(); })
-      .then(function(recs) { renderCDSSChain(d, recs || []); })
-      .catch(function() { renderCDSSChain(d, []); });
+      .then(function(data) {
+        /* 4001整改：接口返回 {recommendations, blocked_recommendations, summary} */
+        renderCDSSChain(d, data || { recommendations: [], blocked_recommendations: [], summary: {} });
+      })
+      .catch(function() { renderCDSSChain(d, { recommendations: [], blocked_recommendations: [], summary: {} }); });
   });
 }
 function chainStepHead(num, icon, title, count, note) {
@@ -706,8 +729,11 @@ function chainPrioClass(v) {
   if (s.indexOf('低') >= 0 || s.indexOf('可选') >= 0 || s === 'low' || s === 'optional' || s === 'p3') return 'low';
   return '';
 }
-/* 状态摘要条：5 指标回答"有什么、依据是什么、能不能进CDSS"（Schema V3.2） */
-function buildStatusSummaryBar(d, recs) {
+/* 状态摘要条：5 指标回答"有什么、依据是什么、能不能进CDSS"（Schema V3.2）
+   4001整改：recData 支持新结构 {recommendations, blocked_recommendations, summary}，受阻单列 */
+function buildStatusSummaryBar(d, recData) {
+  var recs = Array.isArray(recData) ? recData : (recData.recommendations || []);
+  var blockList = Array.isArray(recData) ? [] : (recData.blocked_recommendations || []);
   var dims = d.dimensions || {};
   var stdDx = dims.StandardDiagnosis || [];
   /* 字典映射率：五类可医嘱/字典实体按 cdss_dict_id 推导 */
@@ -745,16 +771,24 @@ function buildStatusSummaryBar(d, recs) {
   h += card('🗂️', '字典映射率', dictRate === null ? '无实体' : dictRate + '%',
     dictRate === null ? 'warn' : (dictRate >= 60 ? 'ok' : 'warn'),
     dictTypeStats.length ? '按 cdss_dict_id 推导：' + dictTypeStats.join('；') + (dictRate !== null && dictRate < 60 ? '（低于 60%，映射率低本身即审核重点）' : '') : '无可医嘱类实体，无需字典映射');
-  h += card('✅', '正式推荐链', recs.length ? recs.length + ' 条' : '无',
+  h += card('✅', '可用推荐', recs.length ? recs.length + ' 条' : '无',
     recs.length ? 'ok' : 'bad',
-    recs.length ? 'RecommendationStatement→recommends_action 正式推荐 ' + recs.length + ' 条，其中 ' + contraCount + ' 条带禁忌条件' : '该疾病无 RecommendationStatement 正式推荐（不把治疗方案冒充推荐）');
+    recs.length ? '临床审核通过(clinical_ready)的推荐 ' + recs.length + ' 条，其中 ' + contraCount + ' 条带禁忌条件；正式发布(formal_cdss_ready)以卡片状态徽章为准' : '该疾病无临床审核通过的正式推荐（不把治疗方案冒充推荐）');
+  if (blockList.length) {
+    h += card('⛔', '受阻/待审核', blockList.length + ' 条', 'bad',
+      'clinical_review_status=blocked/pending 的推荐，已从推荐结果隔离，详见"正式CDSS推荐"段受阻清单');
+  }
   h += '</div>';
   return h;
 }
-/* 专科CDSS诊疗链路主渲染：6段式（疑似/分型→首诊检查检验→鉴别诊断→治疗方案→正式推荐→证据） */
-function renderCDSSChain(d, recs) {
+/* 专科CDSS诊疗链路主渲染：6段式（疑似/分型→首诊检查检验→鉴别诊断→治疗方案→正式推荐→证据）
+   4001整改：recData 为 {recommendations(可用), blocked_recommendations(受阻), summary} */
+function renderCDSSChain(d, recData) {
   var ws = document.getElementById('workspace');
   try {
+    var recList = Array.isArray(recData) ? recData : ((recData && recData.recommendations) || []);
+    var blockList = (!Array.isArray(recData) && recData && recData.blocked_recommendations) || [];
+    var summ = (!Array.isArray(recData) && recData && recData.summary) || null;
     var info = d.info, code = info.code;
     var dims = d.dimensions || {};
     var h = '<div class="cdss-pathway chain-wrap">';
@@ -766,12 +800,12 @@ function renderCDSSChain(d, recs) {
     h += '<div class="cdss-meta">';
     if (info.icd_code) h += '<span>' + escAttr(info.coding_system || 'ICD-10') + ' ' + escAttr(info.icd_code) + '</span>';
     h += '<span>' + escAttr(code) + '</span>';
-    h += '<span>推荐 ' + recs.length + ' 条</span>';
+    h += '<span>可用推荐 ' + recList.length + ' 条' + (blockList.length ? ' · 受阻 ' + blockList.length + ' 条' : '') + '</span>';
     h += '<span>鉴别 ' + (d.differentials || []).length + ' 项</span>';
     h += '</div></div>';
 
     /* ===== 状态摘要条：5 指标（Schema V3.2 数据就绪度） ===== */
-    h += buildStatusSummaryBar(d, recs);
+    h += buildStatusSummaryBar(d, recData);
 
     /* ===== 段1：疑似疾病/具体分型 ===== */
     h += '<div class="chain-step">';
@@ -986,16 +1020,25 @@ function renderCDSSChain(d, recs) {
     }
     h += '</div></div>';
 
-    /* ===== 段5：正式CDSS推荐 ===== */
+    /* ===== 段5：正式CDSS推荐（4001整改：可用/受阻分离）===== */
     h += '<div class="chain-step">';
-    h += chainStepHead(5, '✅', '正式CDSS推荐', recs.length ? recs.length + ' 条' : '', '仅读取 RecommendationStatement→recommends_action（按 disease_code=' + escAttr(code) + ' 过滤）');
+    h += chainStepHead(5, '✅', '正式CDSS推荐',
+      recList.length ? recList.length + ' 条可用' + (blockList.length ? ' · ' + blockList.length + ' 条受阻' : '') : (blockList.length ? blockList.length + ' 条受阻' : ''),
+      '仅展示临床审核通过(clinical_ready)的推荐；blocked/pending 进入受阻清单，不作为推荐结果（按 disease_code=' + escAttr(code) + ' 过滤）');
     h += '<div class="chain-step-body">';
-    if (recs.length) {
+    if (recList.length) {
       h += '<div class="chain-rec-grid">';
-      recs.forEach(function(rec) { h += chainRecCard(rec); });
+      recList.forEach(function(rec) { h += chainRecCard(rec); });
       h += '</div>';
     } else {
-      h += '<div class="chain-empty">该疾病暂无 RecommendationStatement 正式推荐（不用疾病直连治疗方案冒充推荐）</div>';
+      h += '<div class="chain-empty">该疾病暂无临床审核通过的正式推荐（不用疾病直连治疗方案冒充推荐）</div>';
+    }
+    if (blockList.length) {
+      h += '<details class="chain-blocked-box" style="margin-top:12px;border:1px dashed #5a4a1a;border-radius:8px;padding:10px 12px;background:rgba(255,176,32,.04)">';
+      h += '<summary style="cursor:pointer;font-size:12px;font-weight:700;color:#ffb020">⛔ 受阻/待审核推荐 ' + blockList.length + ' 条（不进入推荐结果，点击展开）</summary>';
+      h += '<div class="chain-rec-grid" style="margin-top:10px">';
+      blockList.forEach(function(rec) { h += chainRecCard(rec, { blocked: true }); });
+      h += '</div></details>';
     }
     h += '</div></div>';
 
@@ -1003,8 +1046,8 @@ function renderCDSSChain(d, recs) {
     var evMap = {}, evOrder = [];
     var guideMap = {}, guideOrder = [];
     var recSummaries = [];
-    recs.forEach(function(rec) {
-      // 直连证据（derived_from → Evidence）
+    recList.forEach(function(rec) {
+      // 直连证据（supported_by_evidence → Evidence，4001整改）
       (rec.evidences || []).forEach(function(ev) {
         if (!ev.code) return;
         if (!evMap[ev.code]) {
@@ -1087,8 +1130,8 @@ function renderCDSSChain(d, recs) {
     if (!evOrder.length && guideOrder.length) {
       hasContent = true;
       h += '<div class="chain-ev-empty-tip">';
-      h += '💡 该疾病推荐语句暂未建立 RS→derived_from→Evidence 直连证据节点，当前证据来源为指南依据（上方 Guideline）。';
-      h += '如需查看直连证据，需在图谱生产流程中补充 derived_from 关系。';
+      h += '💡 该疾病推荐语句暂未建立 RS→supported_by_evidence→Evidence 直连证据节点，当前证据来源为指南依据（上方 Guideline）。';
+      h += '如需查看直连证据，需在图谱生产流程中补充 supported_by_evidence 关系。';
       h += '</div>';
     }
 
@@ -1121,13 +1164,21 @@ function renderCDSSChain(d, recs) {
     ws.innerHTML = '<div class="cdss-empty">渲染诊疗链路出错: ' + e.message + '<br>请刷新页面重试</div>';
   }
 }
-function chainRecCard(rec) {
+/* 4001整改：推荐卡片 — 新增审核状态徽章、闭环链路(路径→阶段→规则,支持回填标注)、缺失项清单 */
+var MISSING_FIELD_NAMES = { rule_name: '触发规则', stage_name: '路径阶段', pathway_name: '所属路径', evidence: '证据', action: '动作' };
+function chainRecCard(rec, opts) {
+  opts = opts || {};
   var isBlock = rec.recommendation_type === 'block';
   var contras = rec.contraindications || [];
   var contraText = rec.contraindication_conditions && rec.contraindication_conditions !== 'N/A' ? rec.contraindication_conditions : '';
-  var h = '<div class="cdss-rec" onclick="showRecommendationDetail(\'' + escAttr(rec.code) + '\')">';
+  var h = '<div class="cdss-rec' + (opts.blocked ? ' cdss-rec-isblocked' : '') + '" onclick="showRecommendationDetail(\'' + escAttr(rec.code) + '\')">';
   h += '<div class="cdss-rec-head">';
   h += '<span class="cdss-rec-badge ' + (isBlock ? 'block' : 'recommend') + '">' + (isBlock ? '\u{1F6AB} 阻断' : '\u2705 推荐') + '</span>';
+  /* 审核状态徽章：可正式使用 / 审核通过·待正式发布 / 已阻断 / 待审核 */
+  if (rec.usable_label) {
+    var uCls = rec.usable ? 'ok' : (rec.clinical_review_status === 'blocked' ? 'bad' : 'warn');
+    h += '<span class="cdss-rec-status ' + uCls + '">' + escAttr(rec.usable_label) + '</span>';
+  }
   if (rec.recommendation_class && rec.recommendation_class !== '未结构化') {
     h += '<span class="cdss-rec-class">' + escAttr(rec.recommendation_class) + '</span>';
   }
@@ -1141,6 +1192,17 @@ function chainRecCard(rec) {
     h += '<span class="cdss-rec-contra" title="' + escAttr('禁忌：' + contraTip) + '">\u26D4 禁忌 ' + (contras.length || '有') + '</span>';
   }
   h += '</div>';
+  /* 闭环链路：路径 → 阶段 → 规则（回填值标 ↩，说明来源关系推导） */
+  var meta = [];
+  var bf = rec.closure_backfilled || {};
+  if (rec.pathway_name) meta.push(escAttr(rec.pathway_name) + (bf.pathway_name ? ' <span class="bf-mark" title="属性缺失，由关系回填">↩</span>' : ''));
+  if (rec.stage_name) meta.push(escAttr(rec.stage_name) + (bf.stage_name ? ' <span class="bf-mark" title="属性缺失，由关系回填">↩</span>' : ''));
+  if (rec.rule_name) meta.push(escAttr(rec.rule_name) + (bf.rule_name ? ' <span class="bf-mark" title="属性缺失，由关系回填">↩</span>' : ''));
+  if (meta.length) {
+    h += '<div class="cdss-rec-closure" title="闭环链路：在哪个路径的哪个阶段、由什么规则触发">🛤️ ' + meta.join(' <span style="color:var(--muted)">›</span> ') + '</div>';
+  } else {
+    h += '<div class="cdss-rec-closure none" title="该推荐未挂接规则触发链（无 ClinicalRule/PathwayStage 关联）">🛤️ 闭环链路缺失</div>';
+  }
   if (contras.length) {
     h += '<div class="cdss-rec-contra-list">' + contras.slice(0, 4).map(function(c) {
       return '<span class="cdss-contra-tag">' + escAttr(c.name) + '</span>';
@@ -1157,6 +1219,15 @@ function chainRecCard(rec) {
     });
     if (actions.length > 4) h += '<span class="cdss-rec-action">+' + (actions.length - 4) + '</span>';
     h += '</div>';
+  }
+  /* 缺失项清单（4001整改：明确缺失项，不做静默） */
+  if (rec.missing_fields && rec.missing_fields.length) {
+    var mfNames = rec.missing_fields.map(function(k) { return MISSING_FIELD_NAMES[k] || k; });
+    h += '<div class="cdss-rec-missing" title="闭环字段缺失清单（待数据生产补齐）">⚠ 待完善：缺' + escAttr(mfNames.join('、')) + '</div>';
+  }
+  /* 阻断原因（受阻卡片） */
+  if (opts.blocked && rec.release_block_reasons && rec.release_block_reasons.length) {
+    h += '<div class="cdss-rec-missing" style="color:#ff8080" title="发布阻断原因">⛔ 阻断原因：' + escAttr(rec.release_block_reasons.join('、')) + '</div>';
   }
   var srcName = rec.primary_source_name || rec.primary_guideline_name || (rec.guidelines && rec.guidelines[0]);
   if (srcName) {
@@ -1336,6 +1407,14 @@ function renderDiseaseView(code){
       desc: 'CDSS标准诊断字典(ICD-10等)'
     }
   ];
+  /* 兜底：未归组维度（Schema升级新增维度经 /api/kg/dimensions 注册后自动落这里，无需改本页） */
+  (function(){
+    var known = {}, legacy = {};
+    groups.forEach(function(g){ g.dims.forEach(function(k){ known[k] = 1; }); });
+    for (var ak in CORE_DIM_ALIAS) legacy[CORE_DIM_ALIAS[ak]] = 1;  /* 旧键名=新键别名，不重复展示 */
+    var others = DIM_KEYS.filter(function(k){ return !known[k] && !legacy[k]; });
+    if (others.length) groups.push({ name: '其他维度', icon: '🗂️', layer: 'knowledge', dims: others, desc: 'Schema扩展维度（自动归组）' });
+  })();
 
   // 吸顶分组导航：模块直达（无数据分组渲染后由 pruneKnowNav 自动隐藏）
   h+='<div class="ex-know-nav" id="know-nav">';
@@ -1991,6 +2070,14 @@ function drawGraph(code){
     {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule'],color:'#40c057'},
     {name:'护理支持',dims:['NursingCarePlan','NursingAssessment','NursingDiagnosis'],color:'#0ca678'}
   ];
+  /* 兜底：未归组维度（Schema扩展维度自动归组，无需改本页） */
+  (function(){
+    var known={},legacy={};
+    cGroups.forEach(function(g){g.dims.forEach(function(k){known[k]=1;});});
+    for (var ak in CORE_DIM_ALIAS) legacy[CORE_DIM_ALIAS[ak]]=1;
+    var others=DIM_KEYS.filter(function(k){return !known[k]&&!legacy[k];});
+    if(others.length) cGroups.push({name:'其他维度',dims:others,color:'#94a3b8'});
+  })();
   /* 分组显隐控制 */
   var groupVisible={};
   cGroups.forEach(function(g){groupVisible[g.name]=true;});

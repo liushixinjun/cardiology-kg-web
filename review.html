@@ -362,7 +362,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 </button>
 
 <!-- 加载共享导航 -->
-<script src="./_shared/js/app.js?v=20260914"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -1322,21 +1322,78 @@ function renderSkeletonPanel(data) {
    Tab 5: CDSS 推荐审核（RecommendationStatement）
    ===================================================================== */
 function loadCDSSReview() {
-  fetch('/api/kg/rs-review?v=' + Date.now())
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      renderCDSSPanel(data);
-      document.getElementById('tab-badge-cdss').textContent = data.total || 0;
-    })
-    .catch(function() {
-      document.getElementById('panel-cdss').innerHTML =
-        '<div class="rv-empty"><div class="rv-empty-icon">&#9888;</div><div class="rv-empty-text">加载CDSS推荐审核数据失败</div></div>';
-    });
+  /* 4001整改：同时取版本信息（G6/G8状态）与审核汇总 */
+  Promise.all([
+    fetch('/api/kg/rs-review?v=' + Date.now()).then(function(r) { return r.json(); }),
+    fetch('/api/kg/version?v=' + Date.now()).then(function(r) { return r.json(); }).catch(function() { return null; })
+  ]).then(function(rs) {
+    var data = rs[0] || {};
+    var ver = rs[1] || {};
+    renderCDSSPanel(data, ver);
+    document.getElementById('tab-badge-cdss').textContent = data.total || 0;
+  })
+  .catch(function() {
+    document.getElementById('panel-cdss').innerHTML =
+      '<div class="rv-empty"><div class="rv-empty-icon">&#9888;</div><div class="rv-empty-text">加载CDSS推荐审核数据失败</div></div>';
+  });
 }
 
-function renderCDSSPanel(data) {
+function renderCDSSPanel(data, ver) {
+  ver = ver || {};
   var panel = document.getElementById('panel-cdss');
   var h = '';
+
+  /* ===== 4001整改：审核基线与G6/G8状态 ===== */
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+  /* 左：审核基线 */
+  var cr = data.clinical_review_status || {};
+  var baselineTotal = (cr.clinical_ready || 0) + (cr.blocked || 0) + (cr.pending || 0) + (cr['未设置'] || 0);
+  h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">📋 审核基线（clinical_review_status）</div>';
+  var bl = [
+    { k: 'clinical_ready', n: '审核通过', c: '#52c41a' },
+    { k: 'blocked', n: '审核受阻', c: '#ff6b6b' },
+    { k: 'pending', n: '待审核', c: '#ffd43b' },
+    { k: '未设置', n: '未设置', c: '#8b90a0' },
+  ];
+  bl.forEach(function(x) {
+    var v = cr[x.k] || 0;
+    var pct = baselineTotal > 0 ? Math.round(v / baselineTotal * 100) : 0;
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+    h += '<div style="font-size:12px;color:var(--ink);min-width:80px">' + x.n + '</div>';
+    h += '<div style="flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">';
+    h += '<div style="height:100%;width:' + pct + '%;background:' + x.c + ';border-radius:4px"></div>';
+    h += '</div>';
+    h += '<div style="font-size:12px;font-weight:700;color:' + x.c + ';min-width:70px;text-align:right">' + v + ' (' + pct + '%)</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  /* 右：G6/G8 状态 */
+  h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">🔄 生产流水线状态（G6/G8）</div>';
+  function gRow(name, val, ok, warn) {
+    var col = ok ? '#52c41a' : (warn ? '#ffd43b' : '#ff6b6b');
+    h += '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px">';
+    h += '<span style="color:var(--muted)">' + name + '</span><span style="color:' + col + ';font-weight:700">' + val + '</span>';
+    h += '</div>';
+  }
+  gRow('Schema 标准（G6迁移基准）', ver.schema_standard_version || '-', !!ver.schema_standard_version, false);
+  var migrated = !!ver.schema_v41_migrated_at;
+  gRow('G6 V4.1迁移完成', ver.schema_v41_migrated_at ? String(ver.schema_v41_migrated_at).replace('T',' ').slice(0,19) : '未完成', migrated, false);
+  gRow('G8 状态一致性回读', ver.g8_readback_time ? String(ver.g8_readback_time).replace('T',' ').slice(0,19) : '无记录', !!ver.g8_readback_time, !ver.g8_readback_time && !!ver.data_updated_at);
+  gRow('实例版本一致性', ver.instance_version_consistent ? '统一' + Object.keys(ver.instance_schema_versions || {}).join('、') : '混合·待迁移复核', !!ver.instance_version_consistent, false);
+  gRow('数据最后更新', ver.data_updated_at ? String(ver.data_updated_at).replace('T',' ').slice(0,19) : '-', true, false);
+  if (ver.latest_batch_id) gRow('最近解析批次', ver.latest_batch_id, true, false);
+  h += '</div>';
+  h += '</div>';
+
+  /* 状态矛盾警示（4001整改暴露） */
+  if (data.inconsistent_status_count > 0) {
+    h += '<div class="rv-warning" style="background:rgba(255,107,107,.06);border-color:rgba(255,107,107,.3);color:#ff6b6b">';
+    h += '<span>&#9888;</span>';
+    h += '<span>状态矛盾：' + data.inconsistent_status_count + ' 条推荐 clinical_review_status=blocked 但 cdss_use_status=正式推荐，需修正数据后重新发布（此类推荐已从推荐结果隔离）</span>';
+    h += '</div>';
+  }
 
   // 硬闸门状态
   var gate = data.gate_check || {};
@@ -1346,12 +1403,15 @@ function renderCDSSPanel(data) {
   h += '<span>全库硬闸门：' + (allPass ? '全部通过' : '存在未通过项') + '</span>';
   h += '</div>';
 
-  // KPI 指标
+  // KPI 指标（4001整改：口径标注）
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
   var kpis = [
     { num: data.total, label: 'RS总数', color: 'var(--accent)', icon: '&#128203;' },
-    { num: data.formal_cdss_ready, label: 'CDSS就绪', color: '#52c41a', icon: '&#9989;' },
-    { num: data.formal_cdss_not_ready, label: '未就绪', color: '#ff6b6b', icon: '&#9888;' },
+    { num: data.formal_cdss_ready, label: '正式可用(formal_ready)', color: '#52c41a', icon: '&#9989;' },
+    { num: data.formal_cdss_not_ready, label: '发布受阻(formal_blocked)', color: '#ff6b6b', icon: '&#9888;' },
+    { num: cr.clinical_ready || 0, label: '临床审核通过', color: '#52c41a', icon: '&#128100;' },
+    { num: cr.blocked || 0, label: '临床审核受阻', color: '#ff6b6b', icon: '&#128683;' },
+    { num: data.inconsistent_status_count || 0, label: '状态矛盾记录', color: '#ffd43b', icon: '&#9888;' },
     { num: data.no_action_count, label: '无动作RS', color: '#ffd43b', icon: '&#128269;' },
     { num: data.no_evidence_count, label: '无证据RS', color: '#ffd43b', icon: '&#128214;' },
     { num: data.no_guideline_count, label: '无指南RS', color: '#ffd43b', icon: '&#128220;' },
@@ -1369,6 +1429,9 @@ function renderCDSSPanel(data) {
 
   // clinical_review_status 分布
   h += renderDistTable('审核状态分布', data.clinical_review_status, 'var(--accent)');
+
+  // cdss_use_status 分布（4001整改新增）
+  h += renderDistTable('CDSS使用状态分布（cdss_use_status）', data.cdss_use_status || {}, '#fa5252');
 
   // recommendation_class 分布
   h += renderDistTable('推荐等级分布', data.recommendation_class, '#52c41a');

@@ -60,7 +60,7 @@ const doc = new Document({
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 2400 },
-        children: [new TextRun({ text: "版本：v1.3.0", size: 20 })]
+        children: [new TextRun({ text: "版本：v1.3.1（Schema 标准 V4.1）", size: 20 })]
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -81,11 +81,12 @@ const doc = new Document({
       new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.2 图谱探索")] }),
       new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.3 网络探索")] }),
       new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.4 数据覆盖分析")] }),
-      new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.5 临床诊断模拟")] }),
+      new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.5 临床审核")] }),
       new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.6 图谱数据字典")] }),
       new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.7 Schema标准")] }),
-      new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.8 医学术语知识库")] }),
-      new Paragraph({ spacing: { after: 240 }, children: [new TextRun("   3.9 系统配置")] }),
+      new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.8 指南库")] }),
+      new Paragraph({ spacing: { after: 120 }, children: [new TextRun("   3.9 医学术语库")] }),
+      new Paragraph({ spacing: { after: 240 }, children: [new TextRun("   3.10 系统配置")] }),
       new Paragraph({ spacing: { after: 240 }, children: [new TextRun("4. 使用技巧")] }),
       new Paragraph({ spacing: { after: 240 }, children: [new TextRun("5. 常见问题解答")] }),
       new Paragraph({ spacing: { after: 240 }, children: [new TextRun("6. 联系支持")] }),
@@ -98,7 +99,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 240 },
-        children: [new TextRun("心血管专科知识图谱Web系统是一个基于Neo4j图数据库的交互式知识可视化平台，专注于心血管内科专科知识的结构化展示与分析。系统整合了84种心血管疾病、17个知识维度、28,966个知识节点和12,470条关系边，为医疗专业人员提供全面、直观的知识图谱浏览和分析工具。")]
+        children: [new TextRun("心血管专科知识图谱Web系统是一个基于Neo4j图数据库的交互式知识可视化平台，专注于心血管内科专科知识的结构化展示与分析。系统整合了132种心血管疾病、20个核心知识维度（17基础+3护理）、35,606个知识节点和140,349条关系边，为医疗专业人员提供全面、直观的知识图谱浏览和分析工具。")]
       }),
       
       new Paragraph({
@@ -111,11 +112,11 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("多维度数据浏览：按临床逻辑分组的17个知识维度")]
+        children: [new TextRun("多维度数据浏览：按临床逻辑分组的20个核心知识维度")]
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("智能诊断辅助：基于知识图谱的临床诊断模拟")]
+        children: [new TextRun("智能辅助分析：基于知识图谱的临床规则审核与证据溯源")]
       }),
       new Paragraph({
         spacing: { after: 240 },
@@ -204,7 +205,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("17维度知识成熟度：展示各维度在所有疾病中的覆盖情况")]
+        children: [new TextRun("维度知识成熟度：展示20个核心维度（17基础+3护理）在所有疾病中的覆盖情况")]
       }),
       new Paragraph({
         spacing: { after: 240 },
@@ -218,7 +219,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("图谱探索模块是系统的核心功能，支持按疾病查看详细的17维度知识、关系网络和实体详情。")]
+        children: [new TextRun("图谱探索模块是系统的核心功能，支持按疾病查看详细的20个核心维度知识、关系网络和实体详情。")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -342,7 +343,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("数据覆盖分析模块提供84种专病×17维度的矩阵视图，帮助识别知识缺口。")]
+        children: [new TextRun("数据覆盖分析模块提供132种专病×20个核心维度的矩阵视图，帮助识别知识缺口。")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -373,14 +374,14 @@ const doc = new Document({
         children: [new TextRun("缺口识别：快速定位缺失数据的疾病-维度组合")]
       }),
 
-      // 3.5 临床诊断模拟
+      // 3.5 临床审核
       new Paragraph({
         heading: HeadingLevel.HEADING_2,
-        children: [new TextRun("3.5 临床诊断模拟")]
+        children: [new TextRun("3.5 临床审核")]
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("临床诊断模拟模块支持输入病例信息，基于知识图谱匹配候选疾病。")]
+        children: [new TextRun("临床审核模块用于对图谱中的临床规则进行逐条审核与状态维护，区分「可临床用 / 阻塞 / 待处理」三种状态。")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -388,7 +389,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("首页 → 临床诊断模拟")]
+        children: [new TextRun("首页 → 临床审核")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -396,19 +397,19 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("在输入框中输入症状、体征、检查结果等信息")]
+        children: [new TextRun("按疾病或状态筛选待审核的临床规则")]
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("系统自动匹配相关疾病")]
+        children: [new TextRun("查看规则内容、阈值条件与引用证据")]
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("查看匹配度评分和匹配依据")]
+        children: [new TextRun("标记审核结论（可临床用 / 阻塞）并填写阻塞原因")]
       }),
       new Paragraph({
         spacing: { after: 240 },
-        children: [new TextRun("点击疾病可跳转到图谱探索查看详情")]
+        children: [new TextRun("在审核进度面板查看总数与分布：可临床用 363 条 / 阻塞 209 条 / 待处理 2 条")]
       }),
 
       // 3.6 图谱数据字典
@@ -479,14 +480,14 @@ const doc = new Document({
         children: [new TextRun("质量校验规则：数据完整性、一致性检查标准")]
       }),
 
-      // 3.8 医学术语知识库
+      // 3.8 指南库
       new Paragraph({
         heading: HeadingLevel.HEADING_2,
-        children: [new TextRun("3.8 医学术语知识库")]
+        children: [new TextRun("3.8 指南库")]
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("医学术语知识库模块按维度浏览所有医学术语，支持搜索、分类筛选和关联关系查看。")]
+        children: [new TextRun("指南库模块集中展示系统引用的临床指南（当前 154 条），并提供指南原文与证据条目的对应关系。")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -494,7 +495,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("首页 → 医学术语知识库")]
+        children: [new TextRun("首页 → 指南库")]
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_3,
@@ -502,7 +503,41 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun("维度分类：按17个知识维度浏览术语")]
+        children: [new TextRun("指南列表：按发布机构、年份浏览指南")]
+      }),
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [new TextRun("原文定位：查看指南章节对应的证据条目")]
+      }),
+      new Paragraph({
+        spacing: { after: 240 },
+        children: [new TextRun("关联跳转：从证据反向定位到引用它的疾病维度")]
+      }),
+
+      // 3.9 医学术语库
+      new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        children: [new TextRun("3.9 医学术语库")]
+      }),
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [new TextRun("医学术语库模块按维度浏览所有医学术语，支持搜索、分类筛选和关联关系查看。")]
+      }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_3,
+        children: [new TextRun("访问路径")]
+      }),
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [new TextRun("首页 → 医学术语库")]
+      }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_3,
+        children: [new TextRun("核心功能")]
+      }),
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [new TextRun("维度分类：按20个核心知识维度浏览术语")]
       }),
       new Paragraph({
         spacing: { after: 120 },
@@ -517,10 +552,10 @@ const doc = new Document({
         children: [new TextRun("统计信息：各维度术语数量统计")]
       }),
 
-      // 3.9 系统配置
+      // 3.10 系统配置
       new Paragraph({
         heading: HeadingLevel.HEADING_2,
-        children: [new TextRun("3.9 系统配置")]
+        children: [new TextRun("3.10 系统配置")]
       }),
       new Paragraph({
         spacing: { after: 120 },
@@ -599,7 +634,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 240 },
-        children: [new TextRun("结合临床诊断模拟验证知识应用")]
+        children: [new TextRun("结合临床审核流程验证知识应用")]
       }),
 
       // 常见问题
@@ -642,11 +677,11 @@ const doc = new Document({
       }),
       new Paragraph({
         heading: HeadingLevel.HEADING_2,
-        children: [new TextRun("Q5: 临床诊断模拟的准确性如何？")]
+        children: [new TextRun("Q5: 临床审核状态如何理解？")]
       }),
       new Paragraph({
         spacing: { after: 240 },
-        children: [new TextRun("A: 临床诊断模拟基于现有知识图谱数据进行匹配，结果仅供参考，不能替代专业医生的诊断。建议结合临床经验和其他检查结果综合判断。")]
+        children: [new TextRun("A: 临床审核分为「可临床用」「阻塞」「待处理」三种状态。「可临床用」表示规则内容与证据均已核对通过；「阻塞」表示存在待补充的证据或口径争议，暂不可用于临床；「待处理」表示尚未审核。审核结果仅作为知识质量标识，最终判断仍需结合专业医生的临床经验。")]
       }),
 
       // 联系支持

@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="880" viewBox="0 0 1280 880" role="img" aria-labelledby="title desc">
+  <title id="title">专科辅助诊疗泳道流程图</title>
+  <desc id="desc">展示专科辅助诊疗从疑似识别到疗效质控的主干流程、辅助输入校正、页面输出状态和路径变异闭环。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#eef7ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f4c81" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1677ff"/>
+    </marker>
+    <marker id="varArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#722ed1"/>
+    </marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; }
+      .title { font-size: 26px; font-weight: 700; fill: #0f4c81; }
+      .subtitle { font-size: 14px; fill: #607089; }
+      .lane-label { font-size: 16px; font-weight: 700; fill: #0f4c81; }
+      .stage-title { font-size: 14px; font-weight: 700; fill: #0f4c81; }
+      .stage-sub { font-size: 12px; fill: #607089; }
+      .cell-title { font-size: 13px; font-weight: 700; fill: #0f4c81; }
+      .cell-text { font-size: 12px; fill: #334a62; }
+      .aux-title { fill: #ad6800; }
+      .aux-text { fill: #5a3c00; }
+      .out-title { fill: #237a57; }
+      .out-text { fill: #24563f; }
+      .var-title { fill: #722ed1; }
+      .var-text { fill: #4b2e83; }
+      .legend { font-size: 12px; fill: #607089; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="880" rx="18" fill="url(#bg)"/>
+  <text class="title" x="40" y="48">专科辅助诊疗泳道流程图</text>
+  <text class="subtitle" x="40" y="75">主干流程按原型阶段推进；辅助输入只做校正、约束和状态迭代，不作为硬阻断。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="30" y="100" width="1220" height="666" rx="14" fill="#ffffff" stroke="#bfd6ee"/>
+
+    <rect x="30" y="100" width="130" height="64" fill="#edf6ff"/>
+    <rect x="160" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="315" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="470" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="625" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="780" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="935" y="100" width="155" height="64" fill="#f4f9ff"/>
+    <rect x="1090" y="100" width="160" height="64" fill="#f4f9ff"/>
+
+    <text class="lane-label" x="58" y="139">泳道/阶段</text>
+    <text class="stage-title" x="196" y="126">1 疑似识别</text><text class="stage-sub" x="210" y="148">首诊入口</text>
+    <text class="stage-title" x="351" y="126">2 初筛检查</text><text class="stage-sub" x="365" y="148">关注疾病</text>
+    <text class="stage-title" x="506" y="126">3 分型确诊</text><text class="stage-sub" x="520" y="148">结果迭代</text>
+    <text class="stage-title" x="661" y="126">4 流程承接</text><text class="stage-sub" x="675" y="148">路径判断</text>
+    <text class="stage-title" x="816" y="126">5 专项评估</text><text class="stage-sub" x="830" y="148">风险评估</text>
+    <text class="stage-title" x="971" y="126">6 治疗方案</text><text class="stage-sub" x="985" y="148">治疗决策</text>
+    <text class="stage-title" x="1138" y="126">7 疗效质控</text><text class="stage-sub" x="1138" y="148">治疗后评价</text>
+
+    <rect x="30" y="164" width="130" height="150" fill="#edf6ff"/>
+    <rect x="160" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="315" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="470" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="625" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="780" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="935" y="164" width="155" height="150" fill="#f8fbff"/>
+    <rect x="1090" y="164" width="160" height="150" fill="#f8fbff"/>
+    <text class="lane-label" x="61" y="245">诊疗主干</text>
+
+    <text class="cell-title" x="178" y="196">主诉 + 现病史</text>
+    <text class="cell-text" x="178" y="218"><tspan x="178" dy="0">生成本次疑似疾病</tspan><tspan x="178" dy="18">Top5 和主推依据</tspan></text>
+    <text class="cell-title" x="333" y="196">关注疑似疾病</text>
+    <text class="cell-text" x="333" y="218"><tspan x="333" dy="0">推荐检查、检验和</tspan><tspan x="333" dy="18">鉴别诊断提示</tspan></text>
+    <text class="cell-title" x="488" y="196">分型确诊</text>
+    <text class="cell-text" x="488" y="218"><tspan x="488" dy="0">报告回填后迭代；</tspan><tspan x="488" dy="18">无报告不阻断</tspan></text>
+    <text class="cell-title" x="643" y="196">流程承接</text>
+    <text class="cell-text" x="643" y="218"><tspan x="643" dy="0">判断专病路径或</tspan><tspan x="643" dy="18">普通专科管理</tspan></text>
+    <text class="cell-title" x="798" y="196">专项评估</text>
+    <text class="cell-text" x="798" y="218"><tspan x="798" dy="0">风险分层、严重程度</tspan><tspan x="798" dy="18">和专病特色评估</tspan></text>
+    <text class="cell-title" x="953" y="196">治疗方案</text>
+    <text class="cell-text" x="953" y="218"><tspan x="953" dy="0">药物、手术/介入、</tspan><tspan x="953" dy="18">一般治疗和安全约束</tspan></text>
+    <text class="cell-title" x="1108" y="196">疗效质控</text>
+    <text class="cell-text" x="1108" y="218"><tspan x="1108" dy="0">评价当前治疗效果、</tspan><tspan x="1108" dy="18">安全性和路径执行</tspan></text>
+
+    <line x1="282" y1="272" x2="334" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <line x1="437" y1="272" x2="489" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <line x1="592" y1="272" x2="644" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <line x1="747" y1="272" x2="799" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <line x1="902" y1="272" x2="954" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <line x1="1057" y1="272" x2="1109" y2="272" stroke="#1677ff" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="30" y="314" width="130" height="150" fill="#edf6ff"/>
+    <rect x="160" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="315" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="470" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="625" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="780" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="935" y="314" width="155" height="150" fill="#fffaf0"/>
+    <rect x="1090" y="314" width="160" height="150" fill="#fffaf0"/>
+    <text class="lane-label" x="46" y="384">辅助输入</text>
+    <text class="lane-label" x="55" y="407">/ 校正</text>
+
+    <text class="cell-title aux-title" x="178" y="346">既往/个人/家族史</text>
+    <text class="cell-text aux-text" x="178" y="368"><tspan x="178" dy="0">风险校正、共病、</tspan><tspan x="178" dy="18">遗传和早发风险</tspan></text>
+    <text class="cell-title aux-title" x="333" y="346">过敏史</text>
+    <text class="cell-text aux-text" x="333" y="368"><tspan x="333" dy="0">约束造影、用药和</tspan><tspan x="333" dy="18">检查安全</tspan></text>
+    <text class="cell-title aux-title" x="488" y="346">已有结果/报告</text>
+    <text class="cell-text aux-text" x="488" y="368"><tspan x="488" dy="0">更新诊断、分型和</tspan><tspan x="488" dy="18">鉴别状态</tspan></text>
+    <text class="cell-title aux-title" x="643" y="346">医生确认</text>
+    <text class="cell-text aux-text" x="643" y="368"><tspan x="643" dy="0">确认诊断、分型、</tspan><tspan x="643" dy="18">排除鉴别或入径</tspan></text>
+    <text class="cell-title aux-title" x="798" y="346">体征/生命体征</text>
+    <text class="cell-text aux-text" x="798" y="368"><tspan x="798" dy="0">更新严重程度、</tspan><tspan x="798" dy="18">休克、心衰风险</tspan></text>
+    <text class="cell-title aux-title" x="953" y="346">禁忌/前置检查</text>
+    <text class="cell-text aux-text" x="953" y="368"><tspan x="953" dy="0">影响治疗安全锁和</tspan><tspan x="953" dy="18">替代方案</tspan></text>
+    <text class="cell-title aux-title" x="1108" y="346">治疗后资料</text>
+    <text class="cell-text aux-text" x="1108" y="368"><tspan x="1108" dy="0">结果、不良反应、</tspan><tspan x="1108" dy="18">并发症和路径变异</tspan></text>
+
+    <rect x="30" y="464" width="130" height="150" fill="#edf6ff"/>
+    <rect x="160" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="315" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="470" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="625" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="780" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="935" y="464" width="155" height="150" fill="#f6fffb"/>
+    <rect x="1090" y="464" width="160" height="150" fill="#f6fffb"/>
+    <text class="lane-label" x="46" y="534">页面输出</text>
+    <text class="lane-label" x="55" y="557">/ 状态</text>
+
+    <text class="cell-title out-title" x="178" y="496">疑似疾病</text>
+    <text class="cell-text out-text" x="178" y="518"><tspan x="178" dy="0">Top5、主推依据、</tspan><tspan x="178" dy="18">风险校正依据</tspan></text>
+    <text class="cell-title out-title" x="333" y="496">推荐清单</text>
+    <text class="cell-text out-text" x="333" y="518"><tspan x="333" dy="0">初筛检查、初筛检验、</tspan><tspan x="333" dy="18">鉴别诊断提示</tspan></text>
+    <text class="cell-title out-title" x="488" y="496">证据状态</text>
+    <text class="cell-text out-text" x="488" y="518"><tspan x="488" dy="0">待报告、证据不足、</tspan><tspan x="488" dy="18">支持确诊/分型/排除</tspan></text>
+    <text class="cell-title out-title" x="643" y="496">路径状态</text>
+    <text class="cell-text out-text" x="643" y="518"><tspan x="643" dy="0">专病路径入口、</tspan><tspan x="643" dy="18">普通专科建议</tspan></text>
+    <text class="cell-title out-title" x="798" y="496">评估任务</text>
+    <text class="cell-text out-text" x="798" y="518"><tspan x="798" dy="0">风险分层、专项表、</tspan><tspan x="798" dy="18">缺失资料</tspan></text>
+    <text class="cell-title out-title" x="953" y="496">治疗输出</text>
+    <text class="cell-text out-text" x="953" y="518"><tspan x="953" dy="0">治疗建议、安全锁、</tspan><tspan x="953" dy="18">替代方案</tspan></text>
+    <text class="cell-title out-title" x="1108" y="496">疗效输出</text>
+    <text class="cell-text out-text" x="1108" y="518"><tspan x="1108" dy="0">疗效状态、安全事件、</tspan><tspan x="1108" dy="18">路径变异、调整治疗</tspan></text>
+
+    <rect x="30" y="614" width="130" height="126" fill="#f1e8ff"/>
+    <rect x="160" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="315" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="470" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="625" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="780" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="935" y="614" width="155" height="126" fill="#fbf8ff"/>
+    <rect x="1090" y="614" width="160" height="126" fill="#fbf8ff"/>
+    <text class="lane-label" x="46" y="672">路径变异</text>
+    <text class="lane-label" x="55" y="695">/ 闭环</text>
+
+    <text class="cell-title var-title" x="178" y="646">资料来源变异</text>
+    <text class="cell-text var-text" x="178" y="668"><tspan x="178" dy="0">外院转入、复诊资料</tspan><tspan x="178" dy="18">需标记可信度</tspan></text>
+    <text class="cell-title var-title" x="333" y="646">项目执行变异</text>
+    <text class="cell-text var-text" x="333" y="668"><tspan x="333" dy="0">无法完成检查时</tspan><tspan x="333" dy="18">记录替代项目</tspan></text>
+    <text class="cell-title var-title" x="488" y="646">证据不一致</text>
+    <text class="cell-text var-text" x="488" y="668"><tspan x="488" dy="0">报告冲突或证据不足</tspan><tspan x="488" dy="18">退回待确认</tspan></text>
+    <text class="cell-title var-title" x="643" y="646">入径变异</text>
+    <text class="cell-text var-text" x="643" y="668"><tspan x="643" dy="0">未入径、退出路径</tspan><tspan x="643" dy="18">或转住院路径</tspan></text>
+    <text class="cell-title var-title" x="798" y="646">风险变异</text>
+    <text class="cell-text var-text" x="798" y="668"><tspan x="798" dy="0">病情升级或降级</tspan><tspan x="798" dy="18">重算评估任务</tspan></text>
+    <text class="cell-title var-title" x="953" y="646">治疗变异</text>
+    <text class="cell-text var-text" x="953" y="668"><tspan x="953" dy="0">禁忌、拒绝、资源限制</tspan><tspan x="953" dy="18">触发替代方案</tspan></text>
+    <text class="cell-title var-title" x="1108" y="646">闭环处理</text>
+    <text class="cell-text var-text" x="1108" y="668"><tspan x="1108" dy="0">记录原因、责任阶段</tspan><tspan x="1108" dy="18">和是否调整治疗</tspan></text>
+
+    <line x1="160" y1="164" x2="1250" y2="164" stroke="#bfd6ee"/>
+    <line x1="160" y1="314" x2="1250" y2="314" stroke="#bfd6ee"/>
+    <line x1="160" y1="464" x2="1250" y2="464" stroke="#bfd6ee"/>
+    <line x1="160" y1="614" x2="1250" y2="614" stroke="#bfd6ee"/>
+    <line x1="160" y1="740" x2="1250" y2="740" stroke="#bfd6ee"/>
+    <line x1="160" y1="100" x2="160" y2="740" stroke="#bfd6ee"/>
+    <line x1="315" y1="100" x2="315" y2="740" stroke="#d8e2ee"/>
+    <line x1="470" y1="100" x2="470" y2="740" stroke="#d8e2ee"/>
+    <line x1="625" y1="100" x2="625" y2="740" stroke="#d8e2ee"/>
+    <line x1="780" y1="100" x2="780" y2="740" stroke="#d8e2ee"/>
+    <line x1="935" y1="100" x2="935" y2="740" stroke="#d8e2ee"/>
+    <line x1="1090" y1="100" x2="1090" y2="740" stroke="#d8e2ee"/>
+    <path d="M 1168 724 C 1090 768 934 768 842 724" fill="none" stroke="#722ed1" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#varArrow)"/>
+    <text class="legend" x="872" y="756" fill="#4b2e83">变异未闭环时回到专项评估或治疗方案重新判断</text>
+  </g>
+
+  <g>
+    <circle cx="45" cy="825" r="6" fill="#1677ff"/><text class="legend" x="60" y="830">蓝色：主干阶段推进</text>
+    <circle cx="230" cy="825" r="6" fill="#faad14"/><text class="legend" x="245" y="830">黄色：辅助输入只做校正和约束</text>
+    <circle cx="510" cy="825" r="6" fill="#20c997"/><text class="legend" x="525" y="830">绿色：医生可见输出和状态</text>
+    <circle cx="745" cy="825" r="6" fill="#722ed1"/><text class="legend" x="760" y="830">紫色：路径变异记录和闭环回退</text>
+    <text class="legend" x="45" y="855">关键边界：检查检验结果回填不是主干必经步骤；没有报告时不阻断页面阶段推进；治疗或路径偏离必须留痕并闭环。</text>
+  </g>
+</svg>

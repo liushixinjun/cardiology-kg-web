@@ -24,8 +24,15 @@
 .cov-table .disease-name:hover{color:var(--accent)}
 .cov-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
 .cov-badge.ready{background:#d3f9d8;color:#2b8a3e}
+.cov-badge.reviewed{background:#d0ebff;color:#1971c2}
 .cov-badge.partial{background:#fff3bf;color:#e67700}
+.cov-badge.struct{background:#e9ecef;color:#495057}
 .cov-badge.none{background:var(--bg3);color:var(--muted)}
+/* 4001整改：四层覆盖点 */
+.cov-layer-cell{text-align:center;min-width:34px}
+.cov-dot{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;font-size:11px;font-weight:800;cursor:help}
+.cov-dot.yes{background:rgba(81,207,102,.15);color:#51cf66}
+.cov-dot.no{background:var(--bg3);color:var(--muted);opacity:.45}
 .cov-num{font-weight:700;color:var(--accent);min-width:20px;display:inline-block;text-align:center}
 .cov-num.zero{color:var(--muted);opacity:.5}
 .cov-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
@@ -93,8 +100,8 @@
 <div class="nav"></div>
 <div class="cov-page">
   <div class="page-header">
-    <h1>🔬 专病诊疗框架覆盖分析<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>指标说明</h4><div class="cov-help-item"><span class="cov-help-key">框架疾病 Disease</span><span class="cov-help-val">已建立临床路径的疾病数。全库疾病含未建路径的，与首页一致</span></div><div class="cov-help-item"><span class="cov-help-key">就绪 Ready</span><span class="cov-help-val">推荐≥5条且证据≥3条，可正式用于临床决策</span></div><div class="cov-help-item"><span class="cov-help-key">测试中 Testing</span><span class="cov-help-val">有推荐但未达到就绪标准，正在补充数据</span></div><div class="cov-help-item"><span class="cov-help-key">未就绪 N/A</span><span class="cov-help-val">无推荐陈述，诊疗框架尚未建立</span></div><div class="cov-help-item"><span class="cov-help-key">推荐陈述 Rec.</span><span class="cov-help-val">临床推荐条目总数（RecommendationStatement）</span></div><div class="cov-help-item"><span class="cov-help-key">推荐动作 Action</span><span class="cov-help-val">推荐关联的具体医嘱/操作数（recommends_action + blocks_action）</span></div><div class="cov-help-item"><span class="cov-help-key">关联证据 Evidence</span><span class="cov-help-val">推荐陈述直接关联的证据条目数，全库证据含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">关联指南 Guideline</span><span class="cov-help-val">推荐陈述直接关联的指南数，全库指南含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">20维度覆盖 Dimension</span><span class="cov-help-val">20个核心临床维度（17基础+3护理）的平均覆盖率，与首页/图谱探索一致（CORE_DIM_KEYS）</span></div></div></span></h1>
-    <div class="subtitle">按 疾病 Disease → 临床路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation → 动作/证据/指南 Actions/Evidence/Guidelines 链路，分析每个疾病的专病诊疗框架就绪程度，同时展示20核心维度知识覆盖（与首页/图谱探索一致）。</div>
+    <h1>🔬 专病诊疗框架覆盖分析<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>指标说明</h4><div class="cov-help-item"><span class="cov-help-key">框架疾病 Disease</span><span class="cov-help-val">已建立临床路径的疾病数。全库疾病含未建路径的，与首页一致</span></div><div class="cov-help-item"><span class="cov-help-key">四层覆盖（4001整改）</span><span class="cov-help-val">结构已定义=存在专科诊疗路径；实例已存在=存在推荐陈述实例；审核已通过=存在clinical_ready推荐；可正式使用=存在formal_cdss_ready=true推荐（逐层递进）</span></div><div class="cov-help-item"><span class="cov-help-key">状态 Status</span><span class="cov-help-val">取该疾病达到的最高层：可正式使用/审核已通过·待发布/实例已存在·待审核/结构已定义·无实例/无覆盖。不再用"推荐≥5且证据≥3"的数量阈值判定</span></div><div class="cov-help-item"><span class="cov-help-key">推荐陈述 Rec.</span><span class="cov-help-val">临床推荐条目总数（RecommendationStatement），另单列审核通过数与受阻数</span></div><div class="cov-help-item"><span class="cov-help-key">推荐动作 Action</span><span class="cov-help-val">推荐关联的具体医嘱/操作数（recommends_action + blocks_action）</span></div><div class="cov-help-item"><span class="cov-help-key">关联证据 Evidence</span><span class="cov-help-val">推荐陈述直接关联的证据条目数，全库证据含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">关联指南 Guideline</span><span class="cov-help-val">推荐陈述直接关联的指南数，全库指南含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">20维度覆盖 Dimension</span><span class="cov-help-val">20个核心临床维度（17基础+3护理）的平均覆盖率，与首页/图谱探索一致（CORE_DIM_KEYS）</span></div></div></span></h1>
+    <div class="subtitle">按 疾病 Disease → 临床路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation → 动作/证据/指南 Actions/Evidence/Guidelines 链路，以 结构/实例/审核/可用 四层覆盖分析每个疾病的专病诊疗框架就绪程度（4001整改：删除数量阈值误判），同时展示20核心维度知识覆盖（与首页/图谱探索一致）。</div>
   </div>
 
   <!-- 总览统计 -->
@@ -109,15 +116,17 @@
 
   <!-- 筛选 -->
   <div class="cov-section">
-    <div class="cov-section-title">📊 疾病覆盖明细<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>疾病覆盖明细说明</h4><div class="cov-help-item"><span class="cov-help-key">20维度列</span><span class="cov-help-val">与首页/图谱探索一致（CORE_DIM_KEYS），如 20/20 表示该疾病20个核心维度全部有数据</span></div><div class="cov-help-item"><span class="cov-help-key">链路列</span><span class="cov-help-val">路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Rec. → 动作 Action → 证据 Evidence → 指南 Guideline，数字为该疾病在此层的节点数</span></div><div class="cov-help-item"><span class="cov-help-key">状态判定</span><span class="cov-help-val">就绪 Ready = 推荐≥5且证据≥3；测试中 Testing = 有推荐但不达标；未就绪 N/A = 无推荐</span></div><div class="cov-help-item"><span class="cov-help-key">展开链路</span><span class="cov-help-val">点击任意行展开，查看该疾病的完整 路径→阶段→规则→推荐 树状链路，点击推荐卡片可跳转到诊疗流程页</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病的知识维度覆盖；本页只统计有临床路径的疾病，同时增加决策链路维度</span></div></div></span></div>
-    <div class="cov-section-desc">📊 20维度列与首页/图谱探索一致（CORE_DIM_KEYS）。点击任意行展开查看 路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation 完整链路，点击推荐卡片可跳转到诊疗流程页。</div>
+    <div class="cov-section-title">📊 疾病覆盖明细<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>疾病覆盖明细说明</h4><div class="cov-help-item"><span class="cov-help-key">20维度列</span><span class="cov-help-val">与首页/图谱探索一致（CORE_DIM_KEYS），如 20/20 表示该疾病20个核心维度全部有数据</span></div><div class="cov-help-item"><span class="cov-help-key">链路列</span><span class="cov-help-val">路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Rec. → 动作 Action → 证据 Evidence → 指南 Guideline，数字为该疾病在此层的节点数</span></div><div class="cov-help-item"><span class="cov-help-key">四层矩阵列（4001整改）</span><span class="cov-help-val">结构/实例/审核/可用 四列，✓=该层已达到，·=未达到；逐层递进</span></div><div class="cov-help-item"><span class="cov-help-key">状态判定</span><span class="cov-help-val">可正式使用=存在formal_cdss_ready推荐；审核已通过·待发布=存在clinical_ready推荐但未正式发布；实例已存在·待审核=有推荐但临床审核未通过；结构已定义·无实例=仅有路径骨架</span></div><div class="cov-help-item"><span class="cov-help-key">展开链路</span><span class="cov-help-val">点击任意行展开，查看该疾病的完整 路径→阶段→规则→推荐 树状链路，点击推荐卡片可跳转到诊疗流程页</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病的知识维度覆盖；本页只统计有临床路径的疾病，同时增加决策链路与四层覆盖维度</span></div></div></span></div>
+    <div class="cov-section-desc">📊 20维度列与首页/图谱探索一致（CORE_DIM_KEYS）。四层矩阵列（结构/实例/审核/可用）为4001整改新增。点击任意行展开查看 路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation 完整链路，点击推荐卡片可跳转到诊疗流程页。</div>
     <div class="cov-filter">
       <label>筛选：</label>
       <select id="cov-status-filter" onchange="renderCoverageTable()">
         <option value="">全部状态</option>
-        <option value="ready">✅ 就绪 Ready</option>
-        <option value="partial">🟡 测试中 Testing</option>
-        <option value="none">🔴 未就绪 N/A</option>
+        <option value="usable">✅ 可正式使用</option>
+        <option value="reviewed">🟢 审核已通过·待发布</option>
+        <option value="instance">🟡 实例已存在·待审核</option>
+        <option value="structure">⚪ 结构已定义·无实例</option>
+        <option value="none">🔴 无覆盖</option>
       </select>
       <select id="cov-category-filter" onchange="renderCoverageTable()">
         <option value="">全部大类</option>
@@ -127,7 +136,7 @@
     <div id="cov-table-container"></div>
   </div>
 </div>
-<script src="./_shared/js/app.js?v=20260914"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
 <script>
 renderNav('heatmap');
 var COV_DATA = [];
@@ -180,9 +189,16 @@ Promise.all([
 function renderSummary(){
   var cdssTotal = COV_DATA.length;
   var globalDiseases = GLOBAL_STATS.disease_count || 0;
-  var ready = COV_DATA.filter(function(d){return d.status==='ready'}).length;
-  var partial = COV_DATA.filter(function(d){return d.status==='partial'}).length;
-  var none = cdssTotal - ready - partial;
+  /* 4001整改：四层覆盖统计（结构→实例→审核→可用，逐层递进） */
+  var structureN = COV_DATA.filter(function(d){return d.structure_ready}).length;
+  var instanceN = COV_DATA.filter(function(d){return d.instance_ready}).length;
+  var reviewedN = COV_DATA.filter(function(d){return d.review_ready}).length;
+  var usableN = COV_DATA.filter(function(d){return d.usable_ready}).length;
+  var blockedRecs = 0, reviewedRecs = 0;
+  COV_DATA.forEach(function(d){
+    blockedRecs += (d.blocked_rec_count || 0);
+    reviewedRecs += (d.reviewed_count || 0);
+  });
   var totalRecs = 0, totalEvs = 0, totalGls = 0, totalActions = 0;
   COV_DATA.forEach(function(d){
     totalRecs += d.rec_count;
@@ -199,14 +215,16 @@ function renderSummary(){
   var avgDimPct = cdssTotal > 0 ? Math.round(dimSum / cdssTotal) : 0;
 
   var h = '';
-  /* 第一行：疾病数 + 就绪状态 */
+  /* 第一行：疾病数 + 四层覆盖（4001整改） */
   h += statCardDual(cdssTotal, globalDiseases, '框架疾病 Disease', '全库疾病');
-  h += statCard(ready, '就绪 Ready', '#51cf66');
-  h += statCard(partial, '测试中 Testing', '#ffd43b');
-  h += statCard(none, '未就绪 N/A', '#8b90a0');
+  h += statCard(structureN, '结构已定义 Structure', '#8b90a0');
+  h += statCard(instanceN, '实例已存在 Instance', '#ffd43b');
+  h += statCard(reviewedN, '审核已通过 Reviewed', '#4f8cff');
+  h += statCard(usableN, '可正式使用 Usable', '#51cf66');
   /* 第二行：CDSS链路统计 */
-  h += statCard(totalRecs, '推荐陈述 Rec.', '#4f8cff');
+  h += statCardDual(totalRecs, reviewedRecs, '推荐陈述 Rec.', '审核通过');
   h += statCard(totalActions, '推荐动作 Action', '#22b8cf');
+  h += statCard(blockedRecs, '受阻推荐 Blocked', '#ff6b6b');
   h += statCardDual(totalEvs, globalEvidence, '关联证据 Evidence', '全库证据');
   h += statCardDual(totalGls, globalGuidelines, '关联指南 Guideline', '全库指南');
   /* 20维度覆盖 */
@@ -307,13 +325,19 @@ function renderCoverageTable(){
   h += '<th>📊 20维度</th>';
   h += '<th>🗺️ 路径 Pathway</th><th>📋 阶段 Stage</th><th>⚙️ 规则 Rule</th>';
   h += '<th>📄 推荐 Rec.</th><th>💊 动作 Action</th><th>📖 证据 Evidence</th><th>📚 指南 Guideline</th>';
+  /* 4001整改：四层覆盖矩阵 */
+  h += '<th title="结构已定义：存在专科诊疗路径">结构</th>';
+  h += '<th title="实例已存在：存在推荐陈述实例">实例</th>';
+  h += '<th title="审核已通过：存在clinical_ready推荐">审核</th>';
+  h += '<th title="可正式使用：存在formal_cdss_ready推荐">可用</th>';
   h += '<th>状态 Status</th>';
   h += '</tr></thead><tbody>';
+  var STATUS_CLS = { usable: 'ready', reviewed: 'reviewed', instance: 'partial', structure: 'struct', none: 'none' };
+  var STATUS_ICON = { usable: '✅', reviewed: '🟢', instance: '🟡', structure: '⚪', none: '🔴' };
   rows.forEach(function(d, i){
     var g = parseParentCode(d.parent_code).group;
-    var badge = d.status === 'ready' ? '<span class="cov-badge ready">✅ 就绪 Ready</span>'
-              : d.status === 'partial' ? '<span class="cov-badge partial">🟡 测试中 Testing</span>'
-              : '<span class="cov-badge none">🔴 未就绪 N/A</span>';
+    var st = d.status || 'none';
+    var badge = '<span class="cov-badge ' + (STATUS_CLS[st] || 'none') + '">' + (STATUS_ICON[st] || '') + ' ' + escHtml(d.status_label || st) + '</span>';
     var expanded = EXPANDED_ROW === d.disease_code;
     /* 20维度覆盖率显示（与首页/explore一致：dimCount/20） */
     var dimCount = d.dim_count || 0;
@@ -331,10 +355,15 @@ function renderCoverageTable(){
     h += '<td>' + numCell(d.action_count) + '</td>';
     h += '<td>' + numCell(d.evidence_count) + '</td>';
     h += '<td>' + numCell(d.guideline_count) + '</td>';
+    /* 四层覆盖矩阵（4001整改） */
+    h += '<td class="cov-layer-cell">' + layerDot(d.structure_ready, '结构已定义：存在专科诊疗路径') + '</td>';
+    h += '<td class="cov-layer-cell">' + layerDot(d.instance_ready, '实例已存在：存在' + (d.rec_count || 0) + '条推荐') + '</td>';
+    h += '<td class="cov-layer-cell">' + layerDot(d.review_ready, '审核已通过：' + (d.reviewed_count || 0) + '条clinical_ready') + '</td>';
+    h += '<td class="cov-layer-cell">' + layerDot(d.usable_ready, '可正式使用：' + (d.ready_count || 0) + '条formal_cdss_ready') + '</td>';
     h += '<td>' + badge + '</td>';
     h += '</tr>';
     if (expanded) {
-      h += '<tr class="cov-expand-row"><td colspan="12"><div class="cov-expand" id="expand-' + d.disease_code + '">';
+      h += '<tr class="cov-expand-row"><td colspan="16"><div class="cov-expand" id="expand-' + d.disease_code + '">';
       if (CHAIN_CACHE[d.disease_code]) {
         h += renderChainHTML(CHAIN_CACHE[d.disease_code]);
       } else {
@@ -349,6 +378,13 @@ function renderCoverageTable(){
   if (EXPANDED_ROW && !CHAIN_CACHE[EXPANDED_ROW]) {
     loadChain(EXPANDED_ROW);
   }
+}
+
+/* 4001整改：四层覆盖点（✓/·） */
+function layerDot(ok, tip){
+  return ok
+    ? '<span class="cov-dot yes" title="' + escHtml(tip || '') + '">✓</span>'
+    : '<span class="cov-dot no" title="' + escHtml(tip ? '未达到：' + tip : '未达到') + '">·</span>';
 }
 
 function toggleRow(code){

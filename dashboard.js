@@ -26,22 +26,56 @@ var _cachedGroups = null;
 
 /* ====== 辅助函数 ====== */
 
+/* 维度有无数据：兼容 完整数据dimensions / 列表骨架dim_counts / 旧键名静态快照 三种形态 */
+function dimHasData(d, k) {
+  if (!d) return false;
+  if (d.dimensions) {
+    var v = d.dimensions[k];
+    if ((!v || !v.length) && CORE_DIM_ALIAS[k]) v = d.dimensions[CORE_DIM_ALIAS[k]];
+    if (v && v.length > 0) return true;
+  }
+  if (d.dim_counts) {
+    var c = d.dim_counts[k];
+    if (!c && CORE_DIM_ALIAS[k]) c = d.dim_counts[CORE_DIM_ALIAS[k]];
+    if (c && c > 0) return true;
+  }
+  return false;
+}
+
+/* 维度实体数量：完整数据取数组长度，骨架取 dim_counts，旧键别名兜底 */
+function dimCountValue(d, k) {
+  if (!d) return 0;
+  if (d.dimensions) {
+    var v = d.dimensions[k];
+    if ((!v || !v.length) && CORE_DIM_ALIAS[k]) v = d.dimensions[CORE_DIM_ALIAS[k]];
+    if (v && v.length > 0) return v.length;
+  }
+  if (d.dim_counts) {
+    var c = d.dim_counts[k];
+    if (!c && CORE_DIM_ALIAS[k]) c = d.dim_counts[CORE_DIM_ALIAS[k]];
+    if (c && c > 0) return c;
+  }
+  return 0;
+}
+
 function getDimCount(code) {
   if (!KG_DATA || !KG_DATA.diseases[code]) return 0;
   var d = KG_DATA.diseases[code], f = 0;
-  if (d._loaded && d.dimensions) {
-    CORE_DIM_KEYS.forEach(function(k) { if (d.dimensions[k] && d.dimensions[k].length > 0) f++; });
-  } else if (d.dim_counts) {
-    CORE_DIM_KEYS.forEach(function(k) { if (d.dim_counts[k] && d.dim_counts[k] > 0) f++; });
-  }
+  CORE_DIM_KEYS.forEach(function(k) { if (dimHasData(d, k)) f++; });
   return f;
 }
 
 function getMedCount(code) {
   if (!KG_DATA || !KG_DATA.diseases[code]) return 0;
   var d = KG_DATA.diseases[code];
-  if (d._loaded && d.dimensions && d.dimensions.Drug) return d.dimensions.Drug.length;
-  if (d.dim_counts && d.dim_counts.Drug) return d.dim_counts.Drug;
+  if (d.dimensions) {
+    if (d.dimensions.Drug && d.dimensions.Drug.length) return d.dimensions.Drug.length;
+    if (d.dimensions.Medication && d.dimensions.Medication.length) return d.dimensions.Medication.length;
+  }
+  if (d.dim_counts) {
+    if (d.dim_counts.Drug) return d.dim_counts.Drug;
+    if (d.dim_counts.Medication) return d.dim_counts.Medication;
+  }
   return 0;
 }
 
@@ -51,9 +85,7 @@ function buildGroupDims(diseases) {
     var has = 0;
     diseases.forEach(function(d) {
       if (!KG_DATA || !KG_DATA.diseases[d.code]) return;
-      var dd = KG_DATA.diseases[d.code];
-      if (dd._loaded && dd.dimensions && dd.dimensions[k] && dd.dimensions[k].length > 0) has = 1;
-      else if (dd.dim_counts && dd.dim_counts[k] && dd.dim_counts[k] > 0) has = 1;
+      if (dimHasData(KG_DATA.diseases[d.code], k)) has = 1;
     });
     vec.push(has);
   });
@@ -70,9 +102,10 @@ function buildGroupStats() {
   var ds = KG_DATA.diseases, groups = {};
   Object.keys(ds).forEach(function(code) {
     var info = ds[code].info, p = parseParentCode(info.parent);
-    if (!groups[p.group]) groups[p.group] = { name: p.group, icon: GROUP_ICONS[p.group] || '\ud83d\udcc1', count: 0, coverage: 0, dims: [], diseases: [] };
-    groups[p.group].count++;
-    groups[p.group].diseases.push({ name: info.name, code: code, pct: Math.round(getCoverage(code)), dimCount: getDimCount(code), medCount: getMedCount(code) });
+    var gName = getGroupName(info) || p.group;
+    if (!groups[gName]) groups[gName] = { name: gName, icon: GROUP_ICONS[gName] || '\ud83d\udcc1', count: 0, coverage: 0, dims: [], diseases: [] };
+    groups[gName].count++;
+    groups[gName].diseases.push({ name: info.name, code: code, pct: Math.round(getCoverage(code)), dimCount: getDimCount(code), medCount: getMedCount(code) });
   });
   Object.keys(groups).forEach(function(g) {
     var covs = groups[g].diseases.map(function(d) { return d.pct; });
@@ -138,7 +171,7 @@ function renderDiseaseTable(groups) {
     order.forEach(function(g, idx) {
       var gr = groups[g], cov = gr.coverage;
       var covCls = cov >= 80 ? 'cov-full' : cov >= 60 ? 'cov-good' : cov >= 40 ? 'cov-mid' : 'cov-low';
-      var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>'; }).join('');
+      var dimVec = gr.dims.map(function(v, i) { return v ? '<span class="dim-dot dim-on" title="' + (CORE_DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>' : '<span class="dim-dot dim-off" title="' + (CORE_DIM_NAMES[CORE_DIM_KEYS[i]] || CORE_DIM_KEYS[i]) + '"></span>'; }).join('');
       var realIdx = groupOrder.indexOf(g);
       html += '<tr class="dt-row" onclick="openModal(' + realIdx + ')">';
       html += '<td><span class="dt-icon">' + gr.icon + '</span> ' + g + '</td>';
@@ -288,9 +321,7 @@ function renderRadar() {
   CORE_DIM_KEYS.forEach(function(k) {
     var filled = 0;
     Object.keys(ds).forEach(function(code) {
-      var d = ds[code];
-      if (d._loaded && d.dimensions && d.dimensions[k] && d.dimensions[k].length > 0) filled++;
-      else if (d.dim_counts && d.dim_counts[k] && d.dim_counts[k] > 0) filled++;
+      if (dimHasData(ds[code], k)) filled++;
     });
     indicators.push({ name: DIM_NAMES[k] || k, max: 100 });
     values.push(total > 0 ? Math.round(filled / total * 100) : 0);
@@ -328,11 +359,9 @@ function renderDimChart() {
   CORE_DIM_KEYS.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
   Object.keys(ds).forEach(function(code) {
     CORE_DIM_KEYS.forEach(function(k) {
-      var d = ds[code], items = [];
-      if (d._loaded && d.dimensions) items = d.dimensions[k] || [];
-      else if (d.dim_counts) items = new Array(d.dim_counts[k] || 0);
-      totals[k] += items.length;
-      if (items.length > 0) filled[k]++;
+      var n = dimCountValue(ds[code], k);
+      totals[k] += n;
+      if (n > 0) filled[k]++;
     });
   });
   var total = Object.keys(ds).length;
@@ -379,10 +408,7 @@ function renderGaps() {
   CORE_DIM_KEYS.forEach(function(k) { missing[k] = 0; });
   Object.keys(ds).forEach(function(code) {
     CORE_DIM_KEYS.forEach(function(k) {
-      var d = ds[code], has = false;
-      if (d._loaded && d.dimensions && d.dimensions[k] && d.dimensions[k].length > 0) has = true;
-      if (!has && d.dim_counts && d.dim_counts[k] && d.dim_counts[k] > 0) has = true;
-      if (!has) missing[k]++;
+      if (!dimHasData(ds[code], k)) missing[k]++;
     });
   });
   var sorted = CORE_DIM_KEYS.slice().sort(function(a, b) { return missing[b] - missing[a]; });

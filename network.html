@@ -516,7 +516,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 <div class="nw-datasource" id="nw-datasource"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260914"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
 <script>
 /* ================================================================
    网络探索 - 知识图谱交互分析
@@ -682,6 +682,12 @@ function renderDimFilters() {
     { name: '护理支持', icon: '🧑‍⚕️', dims: ['NursingCarePlan','NursingAssessment','NursingDiagnosis'] },
     { name: '标准主数据', icon: '🏷️', dims: ['StandardDiagnosis'] }
   ];
+  /* 兜底：未归组维度（Schema升级新增维度经 /api/kg/dimensions 注册后自动落这里，无需改本页） */
+  var _known = {}, _legacy = {};
+  dimGroups.forEach(function(g){ g.dims.forEach(function(k){ _known[k] = 1; }); });
+  for (var _ak in CORE_DIM_ALIAS) _legacy[CORE_DIM_ALIAS[_ak]] = 1;  /* 旧键名=新键别名，不重复展示 */
+  var _others = DIM_KEYS.filter(function(k){ return !_known[k] && !_legacy[k]; });
+  if (_others.length) dimGroups.push({ name: '其他维度', icon: '🗂️', dims: _others });
   var html = '';
   dimGroups.forEach(function(grp) {
     var totalVisible = 0;

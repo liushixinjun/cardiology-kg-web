@@ -1,35 +1,104 @@
-/* 全局版本号 — 从 API 动态获取，版本文件为 /VERSION */
-var APP_VERSION = 'v1.5.0';  // 默认值，API 加载后自动覆盖
-var APP_VERSION_DATE = '2026-07-13';
-var DATA_VERSION = null;     // 数据时效信息 {data_updated_at, data_source, node_count, relationship_count}
-var IS_FALLBACK = false;     // 是否处于离线快照降级状态
-
-/* 启动时从 API 获取版本号 */
-(function(){
-  fetch('/api/kg/version').then(function(r){return r.json()}).then(function(d){
-    if(d && d.version){ APP_VERSION='v'+d.version.replace(/^v/,''); }
-  }).catch(function(){});
-  // 获取数据时效信息
-  fetch('/api/kg/data_version?v=' + Date.now()).then(function(r){return r.json()}).then(function(d){
-    if(d && d.data_updated_at){ DATA_VERSION = d; updateFooterDataTime(); }
-  }).catch(function(){});
-})();
-
 /* === 专科知识图谱 · 共享应用逻辑 === */
+/* v1.3.1 4001整改 + 恢复API动态数据模式（v1.5.0共享基础设施）
+   数据优先级：Neo4j实时API → 静态快照 assets/kg_full_data.json 兜底 */
+
 var KG_DATA = null;
-var DIM_NAMES = {Symptom:'症状',Sign:'体征',ExamItem:'检查项目',LabItem:'检验项目',ExamObservation:'检查发现',LabSubitem:'检验细项',Drug:'药品',Procedure:'手术',RiskFactor:'危险因素',Complication:'并发症',DifferentialDiagnosis:'鉴别诊断',RiskStratification:'风险分层',Prognosis:'预后',FollowUp:'随访',TreatmentPlan:'治疗方案',DiagnosisCriteria:'诊断标准',Etiology:'病因',Epidemiology:'流行病学',Pathophysiology:'病理生理',Evidence:'证据',Guideline:'指南',ThresholdRule:'阈值规则',Prevention:'预防',Definition:'定义',StandardDiagnosis:'标准诊断',Contraindication:'禁忌',ClinicalRule:'临床规则',NursingCarePlan:'护理计划',NursingAssessment:'护理评估',NursingDiagnosis:'护理诊断'};
+
+/* 维度中文名（V4.1实体类型键名，全站展示统一入口；旧键 Exam/LabTest/Medication 走 CORE_DIM_ALIAS 别名兜底） */
+var DIM_NAMES = {
+  Symptom:'症状', Sign:'体征',
+  ExamItem:'检查', ExamObservation:'检查发现', LabItem:'检验', LabSubitem:'检验细项',
+  Drug:'药品', Procedure:'手术',
+  RiskFactor:'危险因素', Complication:'并发症', DifferentialDiagnosis:'鉴别诊断',
+  RiskStratification:'风险分层', Prognosis:'预后', FollowUp:'随访',
+  TreatmentPlan:'治疗方案', DiagnosisCriteria:'诊断标准',
+  Etiology:'病因', Epidemiology:'流行病学', Pathophysiology:'病理生理',
+  Evidence:'证据', Guideline:'指南', ThresholdRule:'阈值规则',
+  Prevention:'预防', Definition:'定义', StandardDiagnosis:'标准诊断', Contraindication:'禁忌',
+  ClinicalRule:'临床规则',
+  NursingCarePlan:'护理计划', NursingAssessment:'护理评估', NursingDiagnosis:'护理诊断',
+  /* 旧静态快照键名（别名兜底，避免旧数据显示 undefined） */
+  Exam:'检查', LabTest:'检验', Medication:'药品'
+};
 var DIM_KEYS = Object.keys(DIM_NAMES);
-/* 核心临床维度（用于覆盖度计算）；护理3维度为20260906候选批次，待临床审核 */
-var CORE_DIM_KEYS = ['Symptom','Sign','ExamItem','LabItem','Drug','Procedure','RiskFactor','Complication','DifferentialDiagnosis','RiskStratification','Prognosis','FollowUp','TreatmentPlan','DiagnosisCriteria','Etiology','Epidemiology','Pathophysiology','NursingCarePlan','NursingAssessment','NursingDiagnosis'];
+
+/* 4001整改：20个核心临床维度 = 17基础 + 3护理（V4.0护理批次）。
+   键名与 /api/kg/diseases 返回的 dim_counts 一致（V4.1 实体类型键名）。 */
+var CORE_DIM_KEYS = ['Symptom','Sign','ExamItem','LabItem','Drug','Procedure','RiskFactor',
+  'Complication','DifferentialDiagnosis','RiskStratification','Prognosis','FollowUp',
+  'TreatmentPlan','DiagnosisCriteria','Etiology','Epidemiology','Pathophysiology',
+  'NursingCarePlan','NursingAssessment','NursingDiagnosis'];
+/* 静态快照 assets/kg_full_data.json 仍用旧键名，读取时按别名兜底 */
+var CORE_DIM_ALIAS = { ExamItem: 'Exam', LabItem: 'LabTest', Drug: 'Medication' };
+/* 核心维度中文名（含旧键，覆盖度计算与标签展示用） */
+var CORE_DIM_NAMES = { Symptom: '症状', Sign: '体征', ExamItem: '检查', LabItem: '检验',
+  Drug: '药品', Medication: '药品', Exam: '检查', LabTest: '检验', Procedure: '手术',
+  RiskFactor: '危险因素', Complication: '并发症', DifferentialDiagnosis: '鉴别诊断',
+  RiskStratification: '风险分层', Prognosis: '预后', FollowUp: '随访',
+  TreatmentPlan: '治疗方案', DiagnosisCriteria: '诊断标准', Etiology: '病因',
+  Epidemiology: '流行病学', Pathophysiology: '病理生理', NursingCarePlan: '护理计划',
+  NursingAssessment: '护理评估', NursingDiagnosis: '护理诊断' };
+
 /* 全局维度颜色（对象+数组两种形式，供各页面统一引用） */
-var DIM_COLORS = {Symptom:'#51cf66',Sign:'#cc5de8',ExamItem:'#22b8cf',LabItem:'#748ffc',ExamObservation:'#845ef7',LabSubitem:'#b197fc',Drug:'#ff922b',Procedure:'#f06595',RiskFactor:'#ff6b6b',Complication:'#ffd43b',DiagnosisCriteria:'#94d82d',TreatmentPlan:'#66d9e8',Etiology:'#fcc419',DifferentialDiagnosis:'#ea7ccc',RiskStratification:'#a9e34b',Prognosis:'#63e6be',FollowUp:'#fcc419',Epidemiology:'#da77f2',Pathophysiology:'#748ffc',Evidence:'#40c057',Guideline:'#fab005',ThresholdRule:'#20c997',Prevention:'#20c997',Definition:'#748ffc',StandardDiagnosis:'#ff922b',Contraindication:'#ff6b6b',ClinicalRule:'#339af0',NursingCarePlan:'#0ca678',NursingAssessment:'#15aabf',NursingDiagnosis:'#e64980'};
-var DIM_COLORS_ARR = DIM_KEYS.map(function(k){return DIM_COLORS[k]});
+var DIM_COLORS = {
+  Symptom:'#51cf66', Sign:'#cc5de8',
+  ExamItem:'#22b8cf', ExamObservation:'#845ef7', LabItem:'#748ffc', LabSubitem:'#b197fc',
+  Drug:'#ff922b', Medication:'#ff922b', Procedure:'#f06595',
+  RiskFactor:'#ff6b6b', Complication:'#ffd43b', DifferentialDiagnosis:'#ea7ccc',
+  RiskStratification:'#a9e34b', Prognosis:'#63e6be', FollowUp:'#fcc419',
+  TreatmentPlan:'#66d9e8', DiagnosisCriteria:'#94d82d',
+  Etiology:'#fcc419', Epidemiology:'#da77f2', Pathophysiology:'#748ffc',
+  Evidence:'#40c057', Guideline:'#fab005', ThresholdRule:'#20c997',
+  Prevention:'#20c997', Definition:'#748ffc', StandardDiagnosis:'#ff922b', Contraindication:'#ff6b6b',
+  ClinicalRule:'#339af0',
+  NursingCarePlan:'#0ca678', NursingAssessment:'#12b886', NursingDiagnosis:'#20c997'
+};
+var DIM_COLORS_ARR = DIM_KEYS.map(function(k){ return DIM_COLORS[k] || '#4f8cff' });
+/* 新维度自动配色盘（动态注册时兜底） */
+var DIM_COLOR_PALETTE = ['#4f8cff','#51cf66','#cc5de8','#22b8cf','#748ffc','#ff922b','#f06595','#ff6b6b','#ffd43b','#94d82d','#66d9e8','#fcc419','#ea7ccc','#a9e34b','#63e6be','#da77f2','#20c997','#845ef7','#b197fc','#339af0'];
+
+/* ====== 动态维度注册（单一事实源：/api/kg/dimensions） ======
+   Schema 升级新增维度批次时，只改 server.py（REL_MAP/MULTI_HOP_DIMS/CORE_DIM_ORDER），
+   前端启动时自动拉取本接口刷新口径；接口不可用时保留下方静态兜底值。 */
+function applyDimRegistry(reg) {
+  try {
+    if (!reg) return;
+    if (Array.isArray(reg.core_dimensions) && reg.core_dimensions.length) {
+      CORE_DIM_KEYS = reg.core_dimensions.slice();
+    }
+    /* 注册表声明的新维度追加进 DIM_KEYS（旧键顺序不变，末尾追加），筛选器/雷达自动跟随 */
+    if (Array.isArray(reg.all_dimensions)) {
+      reg.all_dimensions.forEach(function(k) {
+        if (DIM_KEYS.indexOf(k) === -1) DIM_KEYS.push(k);
+      });
+    }
+    if (reg.alias) {
+      for (var ak in reg.alias) CORE_DIM_ALIAS[ak] = reg.alias[ak];
+    }
+    if (reg.names) {
+      for (var nk in reg.names) {
+        if (reg.names[nk]) {
+          CORE_DIM_NAMES[nk] = reg.names[nk];
+          DIM_NAMES[nk] = reg.names[nk];  /* 只补中文名标签，不扩容 DIM_KEYS（避免筛选/雷达轴爆炸） */
+        }
+      }
+    }
+    /* 新维度自动配色 */
+    var ci = 0;
+    Object.keys(DIM_NAMES).forEach(function(k) {
+      if (!DIM_COLORS[k]) { DIM_COLORS[k] = DIM_COLOR_PALETTE[ci % DIM_COLOR_PALETTE.length]; ci++; }
+    });
+    /* 口径刷新后回写页面上的维度数占位 */
+    if (typeof injectDimCount === 'function') { try { injectDimCount(); } catch(e){} }
+  } catch (e) { console.error('applyDimRegistry failed:', e); }
+}
+
 /* V2.0 三层架构分组 */
 var THREE_LAYERS = {
   knowledge: {
     name: '疾病知识层', icon: '📖', color: '#4f8cff', borderColor: 'rgba(79,140,255,.3)',
     desc: '这个病是什么、有哪些表现、如何检查和治疗',
-    dims: ['Definition','Symptom','Sign','ExamItem','ExamObservation','LabItem','LabSubitem','Drug','Procedure','TreatmentPlan','NursingCarePlan','NursingAssessment','NursingDiagnosis','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','FollowUp','Prevention','DifferentialDiagnosis','RiskStratification','DiagnosisCriteria','ThresholdRule','Contraindication','ClinicalRule']
+    dims: ['Definition','Symptom','Sign','ExamItem','ExamObservation','LabItem','LabSubitem','Drug','Procedure','TreatmentPlan','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','FollowUp','Prevention','DifferentialDiagnosis','RiskStratification','DiagnosisCriteria','ThresholdRule','Contraindication','ClinicalRule','NursingCarePlan','NursingAssessment','NursingDiagnosis']
   },
   masterdata: {
     name: 'CDSS标准主数据层', icon: '🏷️', color: '#ff922b', borderColor: 'rgba(255,146,43,.3)',
@@ -39,8 +108,7 @@ var THREE_LAYERS = {
   decision: {
     name: '临床决策层', icon: '🧠', color: '#51cf66', borderColor: 'rgba(81,207,102,.3)',
     desc: '当前患者何时触发、推荐什么、为什么',
-    /* V4.1：旧 ClinicalPathway 拆分为专科路径与住院路径 */
-    dims: ['SpecialtyCarePathway','InpatientClinicalPathway','PathwayStage','PathwayTask','Evidence','Guideline']
+    dims: ['ClinicalPathway','Evidence','Guideline']
   }
 };
 /* 实体类型→所属层级映射 */
@@ -52,15 +120,12 @@ var ENTITY_LAYER_MAP = {};
 })();
 function getEntityLayer(dimKey) { return ENTITY_LAYER_MAP[dimKey] || 'knowledge'; }
 function getLayerInfo(layerKey) { return THREE_LAYERS[layerKey] || THREE_LAYERS.knowledge; }
-/* 动态注入维度数量：替换页面中所有 .dcp 占位符 */
+
+/* 维度数量注入：把页面中 .dcp 占位数字替换为实际核心维度数 */
 function injectDimCount() {
   var els = document.querySelectorAll('.dcp');
-  for (var i = 0; i < els.length; i++) {
-    els[i].textContent = CORE_DIM_KEYS.length;
-    els[i].className = '';
-  }
+  for (var i = 0; i < els.length; i++) els[i].textContent = CORE_DIM_KEYS.length;
 }
-
 
 /* 二级层级映射：从 parentCode 提取大类前缀 → 大类名 + 子类名 */
 function parseParentCode(pc) {
@@ -91,25 +156,29 @@ function parseParentCode(pc) {
 }
 var GROUP_ICONS = {'心力衰竭':'❤️','心律失常':'💓','冠心病':'🫀','心肌病':'🔬','瓣膜性心脏病':'🫀','心包疾病':'🫀','高血压':'💊','先天性心脏病':'👶','感染性心内膜炎':'🦠','心脏骤停/猝死':'🚑','主动脉/外周血管':'🩸','外周血管':'🩸','心脏神经症':'🧠','血脂异常':'🧪','心肌/心包/感染性':'🫀','肺动脉高压':'🫁','心肌炎':'🦠','其他':'📁'};
 
+/* 疾病大类名：优先用后端动态解析的 category_name（/api/kg/diseases 随图谱返回），
+   降级走 parseParentCode 前缀映射（静态快照旧数据兜底）。新增疾病大类无需改前端。 */
+function getGroupName(info) {
+  if (info && info.category_name) return info.category_name;
+  return parseParentCode(info && info.parent).group;
+}
+
 /* 临床展示名清理：display_name > preferred_name > name > code，兜底去前缀 */
 var _PREFIX_PATTERNS = [
   'AMI诊断明细：','STEMI诊断明细：','NSTEMI诊断明细：',
   'AMI鉴别：','STEMI鉴别：','NSTEMI鉴别：',
   'AMI诊断明细:','STEMI诊断明细:','NSTEMI诊断明细:',
-  'AMI鉴别:','STEMI鉴别:','NSTEMI鉴别:',
+  'AMI鉴别:','STEMI鉴别:','NSTEMI鉴别:'
 ];
-/* 技术编码前缀：如果 name 以这些开头，说明是未清理的技术名 */
 var _CODE_PREFIX_RE = /^(EXAM-|RULE-|DXC-|STAGE-|REC-|EVD-|SRC-DOC-|PATHWAY-|DIS-|SUB-CARD-)/;
 function cleanName(entity) {
   var raw = entity.display_name || entity.preferred_name || entity.name || entity.code || '';
-  // 兜底去疾病/用途前缀
   for (var i = 0; i < _PREFIX_PATTERNS.length; i++) {
     if (raw.indexOf(_PREFIX_PATTERNS[i]) === 0) {
       raw = raw.substring(_PREFIX_PATTERNS[i].length).replace(/^\s+/, '');
       break;
     }
   }
-  // 如果清理后仍是技术编码，尝试用 preferred_name 或 code
   if (_CODE_PREFIX_RE.test(raw)) {
     var alt = entity.preferred_name || entity.name || '';
     if (alt && !_CODE_PREFIX_RE.test(alt)) return alt;
@@ -146,19 +215,20 @@ function getServerConfig() {
 }
 function saveServerConfig(cfg) { localStorage.setItem('kg_server_config', JSON.stringify(cfg)); }
 
-/* Data loading - 动态API模式 */
+/* Data loading - 动态API模式：疾病列表骨架(dim_counts) + 全局统计 + 维度口径注册 */
 function loadData(callback) {
   if (KG_DATA && KG_DATA._loaded) { callback(KG_DATA); return; }
-  // 并行加载疾病列表 + 全局统计
   Promise.all([
     fetch('/api/kg/diseases?v=' + Date.now()).then(function(r){return r.json()}),
-    fetch('/api/kg/stats?v=' + Date.now()).then(function(r){return r.json()})
+    fetch('/api/kg/stats?v=' + Date.now()).then(function(r){return r.json()}),
+    /* 维度口径单一事实源（失败不阻断，用静态兜底） */
+    fetch('/api/kg/dimensions?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return null})
   ]).then(function(results){
     var diseaseList = results[0];
     var stats = results[1];
+    if (results[2]) applyDimRegistry(results[2]);  /* 先应用口径，再回调渲染 */
     var diseases = {};
     diseaseList.forEach(function(d){
-      // 建骨架对象，含 dim_counts 用于 getCoverage
       diseases[d.code] = { info: d, dimensions: {}, dim_counts: d.dim_counts || {}, relations_summary: [], evidence_count: 0, _loaded: false };
     });
     KG_DATA = {
@@ -170,14 +240,8 @@ function loadData(callback) {
     callback(KG_DATA);
   }).catch(function(e){
     console.error('API load failed:', e);
-    // 降级到静态JSON
-    fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){
-      IS_FALLBACK = true;
-      KG_DATA = d;
-      KG_DATA._loaded = true;
-      showFallbackBanner(d);
-      callback(d);
-    }).catch(function(e2){console.error('Fallback also failed:',e2)});
+    /* 降级到静态JSON（旧键名，走 CORE_DIM_ALIAS 别名兼容） */
+    fetch('./assets/kg_full_data.json').then(function(r){return r.json()}).then(function(d){KG_DATA=d;KG_DATA._loaded=true;callback(d)}).catch(function(e2){console.error('Fallback also failed:',e2)});
   });
 }
 
@@ -196,17 +260,16 @@ function loadDiseaseData(code, callback) {
   });
 }
 
-/* 批量加载所有疾病完整数据（1次请求替代76次） */
+/* 批量加载所有疾病完整数据（1次请求替代上百次） */
 function loadAllDiseaseData(callback) {
   /* 1. 检查内存缓存 */
   if (KG_DATA && KG_DATA._allLoaded) { callback(KG_DATA); return; }
-  
+
   /* 2. 检查 sessionStorage 缓存 */
   try {
     var cached = sessionStorage.getItem('kg_all_diseases');
     if (cached) {
       var parsed = JSON.parse(cached);
-      /* 恢复到 KG_DATA */
       if (!KG_DATA) KG_DATA = {diseases: {}, stats: null, _loaded: false};
       Object.keys(parsed.diseases).forEach(function(code) {
         parsed.diseases[code]._loaded = true;
@@ -219,7 +282,7 @@ function loadAllDiseaseData(callback) {
       return;
     }
   } catch(e) {}
-  
+
   /* 3. 发起批量请求 */
   fetch('/api/kg/diseases/all?v=' + Date.now())
     .then(function(r){return r.json()})
@@ -233,7 +296,6 @@ function loadAllDiseaseData(callback) {
       KG_DATA.stats = data.stats;
       KG_DATA._loaded = true;
       KG_DATA._allLoaded = true;
-      /* 缓存到 sessionStorage */
       try { sessionStorage.setItem('kg_all_diseases', JSON.stringify(data)); } catch(e) {}
       callback(KG_DATA);
     })
@@ -256,7 +318,7 @@ function loadAllDiseaseData(callback) {
 /* 前端兜底：过滤 status=deprecated 的节点 */
 function filterDeprecatedEntities(diseaseData){
   if(!diseaseData || !diseaseData.dimensions) return;
-  DIM_KEYS.forEach(function(k){
+  Object.keys(diseaseData.dimensions).forEach(function(k){
     var it = diseaseData.dimensions[k];
     if(it && it.length){
       diseaseData.dimensions[k] = it.filter(function(e){ return e.status !== 'deprecated'; });
@@ -264,20 +326,25 @@ function filterDeprecatedEntities(diseaseData){
   });
 }
 
+/* 覆盖度：20核心维度（V4.1键名，旧键别名兜底），口径与图谱数据字典/热力图一致 */
 function getCoverage(code) {
   if(!KG_DATA||!KG_DATA.diseases[code])return 0;
-  var d=KG_DATA.diseases[code];
-  // 使用20核心维度（17基础+3护理）计算覆盖度
-  var keys = CORE_DIM_KEYS;
+  var d=KG_DATA.diseases[code],f=0;
   if(d._loaded && d.dimensions) {
-    var f=0;
-    keys.forEach(function(k){if(d.dimensions[k]&&d.dimensions[k].length>0)f++});
-    return(f/keys.length)*100;
+    CORE_DIM_KEYS.forEach(function(k){
+      var v=d.dimensions[k];
+      if((!v||!v.length)&&CORE_DIM_ALIAS[k]) v=d.dimensions[CORE_DIM_ALIAS[k]];
+      if(v&&v.length>0)f++;
+    });
+    return Math.round(f/CORE_DIM_KEYS.length*100);
   }
   if(d.dim_counts) {
-    var f=0;
-    keys.forEach(function(k){if(d.dim_counts[k]&&d.dim_counts[k]>0)f++});
-    return(f/keys.length)*100;
+    CORE_DIM_KEYS.forEach(function(k){
+      var c=d.dim_counts[k];
+      if(!c&&CORE_DIM_ALIAS[k]) c=d.dim_counts[CORE_DIM_ALIAS[k]];
+      if(c&&c>0)f++;
+    });
+    return Math.round(f/CORE_DIM_KEYS.length*100);
   }
   return 0;
 }
@@ -288,7 +355,7 @@ function getDefaultDiseaseCode(){
   if(!KG_DATA||!KG_DATA.diseases)return null;
   var ds=KG_DATA.diseases,groups={};
   Object.keys(ds).forEach(function(code){
-    var info=ds[code].info,g=parseParentCode(info.parent).group;
+    var info=ds[code].info,g=getGroupName(info);
     if(!groups[g])groups[g]=[];
     groups[g].push({code:code,cov:getCoverage(code)});
   });
@@ -306,76 +373,86 @@ function getDefaultDiseaseCode(){
 
 /* Professional Nav — brand links back to index */
 function renderNav(activePage) {
+  /* 10个功能菜单（数据总览/图谱探索/网络探索/数据覆盖分析/临床审核/图谱数据字典/
+     Schema标准/指南库/医学术语库）+ 外部链接（专科辅助诊疗，新标签页打开）
+     注：diagnosis.html(临床诊断模拟)、engine.html(路径编辑) 已作废并已从仓库移除 */
   var pages = [
     {id:'index',label:'数据总览',icon:'📊'},
     {id:'explore',label:'图谱探索',icon:'🧭'},
     {id:'network',label:'网络探索',icon:'🕸️'},
-    {id:'heatmap',label:'专病诊疗框架覆盖分析',icon:'🔬'},
-    {id:'schema',label:'图谱数据审核',icon:'📐'},
-    {id:'standard',label:'图谱架构规范',icon:'📘'},
-    {id:'guideline',label:'指南库',icon:'📋'},
+    {id:'heatmap',label:'数据覆盖分析',icon:'🗺️'},
+    {id:'review',label:'临床审核',icon:'✅'},
+    {id:'schema',label:'图谱数据字典',icon:'📐'},
+    {id:'standard',label:'Schema标准',icon:'📘'},
+    {id:'guideline',label:'指南库',icon:'📚'},
     {id:'terminology',label:'医学术语库',icon:'🧬'},
     {id:'specialty-cdss-prototype',label:'专科辅助诊疗',icon:'🩺',external:true}
   ];
   var cfg = getServerConfig();
   var h = '<a class="nav-brand" href="index.html">🏥 专科知识图谱 · 心血管内科</a><div class="nav-links">';
   pages.forEach(function(p){
-    var cls = 'nav-link'+(activePage===p.id?' active':'');
     var target = p.external ? ' target="_blank"' : '';
-    h += '<a class="'+cls+'" href="'+p.id+'.html"'+target+'>'+p.icon+' '+p.label+'</a>';
+    h += '<a class="nav-link'+(activePage===p.id?' active':'')+'" href="'+p.id+'.html"'+target+'>'+p.icon+' '+p.label+'</a>';
   });
   h += '</div><div class="nav-right">';
   h += '<a class="nav-config-btn" href="config.html" title="系统配置">⚙</a>';
   h += '</div>';
   document.querySelector('.nav').innerHTML = h;
   renderFooter();
+  renderVersionBar();
+}
+
+/* 4001整改 3.1：全站版本信息条 — 显示当前实际数据版本
+   Schema标准版本 / 实例版本一致性 / 解析Skill版本 / G8回读时间 / 前端+API版本 */
+var KG_VERSION_INFO = null;
+function renderVersionBar() {
+  var bar = document.getElementById('kg-version-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'kg-version-bar';
+    var nav = document.querySelector('.nav');
+    if (nav && nav.parentNode) nav.parentNode.insertBefore(bar, nav.nextSibling);
+    else document.body.insertBefore(bar, document.body.firstChild);
+  }
+  bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:6px 22px;font-size:11px;color:#9aa1b5;background:#151824;border-bottom:1px solid #262b3d;line-height:1.7';
+  bar.innerHTML = '<span style="color:#6b7286">版本信息加载中…</span>';
+  fetch('/api/kg/version').then(function(r){return r.json()}).then(function(v){
+    KG_VERSION_INFO = v;
+    var consistent = v.instance_version_consistent;
+    var items = [];
+    items.push('<span><span style="color:#6b7286">Schema标准</span> <b style="color:#dfe4f0">' + (v.schema_standard_version||'-') + '</b></span>');
+    // 实例版本：统一/混合 两种呈现，不能只显示标准版本误导用户
+    if (consistent) {
+      var vs = Object.keys(v.instance_schema_versions||{});
+      items.push('<span><span style="color:#6b7286">实例版本</span> <b style="color:#51cf66">统一 ' + (vs[0]||'-') + '</b></span>');
+    } else {
+      items.push('<span title="' + (v.version_label||'') + '"><span style="color:#6b7286">实例版本</span> <b style="color:#ffb020">混合 · 待迁移复核</b></span>');
+    }
+    items.push('<span><span style="color:#6b7286">解析Skill</span> <b style="color:#dfe4f0">' + (v.skill_version||'-') + '</b></span>');
+    if (v.g8_readback_time) {
+      items.push('<span><span style="color:#6b7286">G8回读</span> <b style="color:#dfe4f0">' + String(v.g8_readback_time).replace('T',' ').slice(0,16) + '</b></span>');
+    } else if (v.data_updated_at) {
+      items.push('<span title="无G8回读记录，显示数据最后更新时间"><span style="color:#6b7286">数据更新</span> <b style="color:#dfe4f0">' + String(v.data_updated_at).replace('T',' ').slice(0,16) + '</b></span>');
+    }
+    items.push('<span><span style="color:#6b7286">前端</span> <b style="color:#dfe4f0">v' + (v.app_version||'-') + '</b> <span style="color:#6b7286">/ API</span> <b style="color:#dfe4f0">' + (v.api_version||'-') + '</b></span>');
+    if (!consistent) items.push('<span style="color:#ffb020">⚠ ' + (v.version_label||'实例版本混合，待迁移复核') + '</span>');
+    bar.innerHTML = items.join('<span style="color:#39405a">|</span>');
+    // 页脚版本号联动
+    var fv = document.getElementById('footer-version');
+    if (fv && v.app_version) fv.textContent = 'v' + v.app_version;
+  }).catch(function(e){
+    bar.innerHTML = '<span style="color:#ff6b6b">⚠ 版本信息获取失败（API不可达）</span>';
+  });
 }
 
 /* Footer & Changelog */
-function buildFooterHtml() {
-  var dataTime = '';
-  var sourceLabel = 'Neo4j 实时数据';
-  if (IS_FALLBACK) {
-    sourceLabel = '<span style="color:#ff6b6b">⚠️ 离线快照</span>';
-    dataTime = '<span style="margin-left:6px;color:#ff6b6b">数据过期</span>';
-  } else if (DATA_VERSION && DATA_VERSION.data_updated_at) {
-    var t = DATA_VERSION.data_updated_at.replace('T', ' ').substring(0, 16);
-    dataTime = '<span style="margin-left:6px;color:#555">|</span> <span style="margin-left:6px">数据更新: ' + t + '</span>';
-  }
-  return '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px">' + APP_VERSION + '</a> <span style="margin-left:6px;color:#555">|</span> ' + sourceLabel + dataTime + ' <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
-}
-function updateFooterDataTime() {
-  var f = document.getElementById('app-footer');
-  if (f) f.innerHTML = buildFooterHtml();
-}
-function showFallbackBanner(snapshotData) {
-  // 降级横幅 — API 失败时醒目提示用户当前为离线快照数据
-  if (document.getElementById('fallback-banner')) return;
-  var banner = document.createElement('div');
-  banner.id = 'fallback-banner';
-  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,#c92a2a,#e03131);color:#fff;padding:10px 20px;font-size:13px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.3)';
-  var genTime = '';
-  if (snapshotData && snapshotData.data_source && snapshotData.data_source.export_time) {
-    genTime = '（' + snapshotData.data_source.export_time + '）';
-  } else if (snapshotData && snapshotData.stats && snapshotData.stats.generated_at) {
-    genTime = '（' + snapshotData.stats.generated_at + '）';
-  }
-  banner.innerHTML = '⚠️ <strong>数据库连接失败，当前显示的是离线快照数据' + genTime + '</strong>，数据可能严重过期且不完整，仅供浏览参考，请勿用于临床决策。';
-  document.body.insertBefore(banner, document.body.firstChild);
-  // 给 body 加 padding，避免内容被横幅遮挡
-  document.body.style.paddingTop = '40px';
-  // 更新 footer 状态
-  updateFooterDataTime();
-}
 function renderFooter() {
-  // 如果已存在则跳过
   if (document.getElementById('app-footer')) return;
   var footer = document.createElement('div');
   footer.id = 'app-footer';
   footer.style.cssText = 'text-align:center;padding:24px;font-size:11px;color:#8b90a0;border-top:1px solid #2e3348;margin-top:32px';
-  footer.innerHTML = buildFooterHtml();
-  
-  // 检查弹窗是否已存在，不存在则创建
+  footer.innerHTML = '专科知识图谱 · 心血管内科 <a href="javascript:void(0)" onclick="showChangelog()" style="color:#4f8cff;margin-left:6px" id="footer-version">v1.3.1</a> <span style="margin-left:6px;color:#555">|</span> <a href="https://github.com/liushixinjun/cardiology-kg-web" target="_blank" style="color:#8b90a0;margin-left:6px">GitHub</a>';
+
   if (!document.getElementById('changelog-modal')) {
     var modal = document.createElement('div');
     modal.id = 'changelog-modal';
@@ -399,81 +476,22 @@ function hideChangelog() {
 
 function renderChangelog() {
   var list = [
-    { v: 'v1.5.0', date: '2026-07-13', items: [
-      '新增6个事件类型：入院登记/转科/病情变化/生命体征报警/随访就诊/再入院',
-      '新增5个自动动作：转ICU/升级治疗/通知上级医师/启动急救团队/再入院流程',
-      '新增pathway_stage节点类型（门急诊/住院/ICU/随访阶段标记）',
-      'AMI案例升级为完整闭环路径：门急诊→住院→病情加重ICU升级→随访→恶化再入院',
-      'AMI新增ICU升级路径（心源性休克转ICU/Code Blue急救/ICU高级治疗/脱机评估）',
-      'AMI新增随访恶化再入院闭环（随访异常→再入院→重新住院）',
-      'HTN模板升级：新增start节点/准入规则/住院阶段/血压达标ICU升级路径',
-      'HF模板升级：新增完整闭环（住院容量管理+心衰加重ICU升级+随访再入院）',
-      'AF模板升级：新增完整闭环（住院抗凝管理+血流动力学不稳定紧急复律+随访卒中再入院）',
-      '所有模板统一新格式：rules[]/events[]/entry_rules/state/output_type/auto_actions'
-    ]},
-    { v: 'v1.4.2', date: '2026-07-13', items: [
-      '修复P0: buildFlowData/loadFlowData 连线导出导入补全rules/rule_result，解决规则数据丢失',
-      '修复P0: generateDroolsDRL 升级支持新rules[]数组、准入规则、连线规则、医嘱类别规则',
-      '修复P0: runSimulation 升级为完整路径流转模拟（准入检查→规则执行→推荐来源→路径遍历）',
-      '修复P1: validateFlow 新增准入规则/推荐来源/连线规则一致性校验',
-      '修复P1: compilePathway 编译准入规则/连线规则/推荐来源',
-      '修复P1: showPathStats 新增连线规则/准入规则/推荐来源统计',
-      '清理P2: 移除废弃的addDecisionRule/removeDecisionRule函数'
-    ]},
-    { v: 'v1.4.1', date: '2026-07-13', items: [
-      '连接线规则：移除图谱/混合选项，仅保留Drools规则引擎',
-      '疾病准入规则：同步精简为仅Drools',
-      '业务组件新增推荐来源配置：医嘱类别推荐（检验/检查/药物/手术介入）',
-      '业务组件新增Dify智能体推荐：可配置Agent API地址和描述',
-      '业务组件新增图谱推荐：可配置图谱规则编码'
-    ]},
-    { v: 'v1.4.0', date: '2026-07-13', items: [
-      '条件分支组件：开发备注移除，判断条件改造为规则选择器（Drools/Graph/混合）',
-      '疾病入口节点：疾病编码/疾病名称/入选条件移除，新增ICD-10准入规则绑定',
-      '新增开始节点：AMI路径入口，流程起点',
-      '所有节点：开发备注统一移除'
-    ]},
-    { v: 'v1.3.0', date: '2026-07-06', items: [
-      '统计口径对齐Codex验收标准：疾病大类12、可视化实体1,145、关系99,269',
-      '诊断模拟结果卡片新增诊疗指南依据展示，推理有据可循',
-      '全局缓存管理：server.py所有静态文件统一no-cache策略，彻底解决版本缓存问题',
-      '版本号全局统一管理：APP_VERSION集中定义，底部版本号自动跟随',
-      '默认疾病选择改为动态取第一个疾病大类下覆盖度最高的疾病',
-      'Redis缓存部署，提升API响应性能'
-    ]},
-    { v: 'v1.2.0', date: '2026-06-27', items: [
-      '重新从 Neo4j 导出最新数据快照，修复旧静态数据导致的空壳实体问题',
-      '图谱展示支持二跳展开：TreatmentPlan→includes_drug/includes_procedure，Drug→has_specific_drug',
-      '自动过滤空壳实体名（鉴别诊断/诊断标准/危险分层/预后良好/预后不良等）',
-      '页面底部新增数据源信息栏：导出时间、节点数、关系数、空壳实体数',
-      '节点去重改为按 code 去重'
-    ]},
-    { v: 'v1.1.4', date: '2026-06-27', items: [
-      '修复网络探索图谱空白/空数据问题，节点与关系构建改为去重后再渲染',
-      '优化力导向图布局参数，默认图谱进入页面即可散开显示',
-      '右侧详情默认保持图谱概览，避免鼠标移出后回到空状态'
-    ]},
-    { v: 'v1.1.2', date: '2026-06-26', items: [
-      '优化网络探索默认首屏，进入页面自动选择高价值示例疾病并展示关联网络',
-      '新增图谱引导浮层、推荐探索节点、右侧默认概览与可见节点/关系统计',
-      '修复网络探索维度计数在默认疾病选中后不刷新的问题',
-      '减少页面可见英文标签，实体标签和补充说明统一中文展示'
-    ]},
-    { v: 'v1.1.1', date: '2026-06-26', items: [
-      '修复网络探索页面缺少共享导航的问题',
-      '调整网络探索页面布局高度，适配顶部导航栏',
-      '首页和全局菜单均可进入网络探索'
-    ]},
-    { v: 'v1.1.0', date: '2026-06-26', items: [
-      '新增网络探索页面，支持节点点击展开、三级探索、路径模式和全屏浏览',
-      '左侧支持多维度筛选，右侧展示实体详情、标签颜色和关联疾病'
+    { v: 'v1.3.1 · 4001整改', date: '2026-09-19', items: [
+      '全站新增版本信息条：Schema标准/实例版本一致性/解析Skill/G8回读时间/前端与API版本',
+      '导航补齐11个功能菜单：路径编辑、临床审核、指南库',
+      '就绪状态修正：数据覆盖分析改为 结构/实例/审核/可用 四层判定，删除数量阈值误判',
+      '推荐接口整改：受阻(blocked/待审核)推荐与可用推荐分离展示，不再混入推荐结果',
+      '推荐闭环字段补齐：规则/阶段/路径通过关系回填，证据改读supported_by_evidence，缺失项明确标注',
+      '统计口径统一：区分"图谱实例数"与"已映射CDSS标准字典数"',
+      '新增图谱结构注册表API /api/kg/schema-registry（91实体类型+128关系类型）',
+      '修复：恢复API动态数据模式与共享基础函数（loadDiseaseData/DIM_COLORS/cleanName等），页面数据恢复正常'
     ]},
     { v: 'v1.0.0', date: '2026-06-26', items: [
       '新增心血管内科专科知识图谱 Web 测试平台',
-      '新增专病知识总览驾驶舱，按疾病大类展示17维度完整率',
+      '新增专病知识总览驾驶舱，按疾病大类展示维度完整率',
       '新增图谱探索工作台，融合疾病视角、关系视角、实体视角',
-      '新增数据覆盖分析热力图，77种专病×17维度',
-      '新增临床诊断模拟，支持17维度加权匹配',
+      '新增数据覆盖分析热力图',
+      '新增临床诊断模拟，支持多维度加权匹配',
       '新增图谱数据字典，展示实体类型、关系类型、疾病分类',
       '新增 Schema 标准定义页，展示建模规范和字段约束',
       '新增医学术语知识库，按维度分类浏览所有术语',

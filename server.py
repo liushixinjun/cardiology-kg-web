@@ -19,10 +19,16 @@ from neo4j import GraphDatabase
 # 读取版本号（单一真相源）
 VERSION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'VERSION')
 try:
-    with open(VERSION_FILE, 'r') as f:
+    # utf-8-sig 自动剥离 BOM（4001整改：防止版本号带 U+FEFF）
+    with open(VERSION_FILE, 'r', encoding='utf-8-sig') as f:
         APP_VERSION = f.read().strip()
 except Exception:
     APP_VERSION = '0.0.0'
+
+# ============ 标准版本常量（4001整改 2026-09-19）============
+SCHEMA_STANDARD_VERSION = 'V4.1'   # 当前执行的专科知识图谱Schema标准
+API_VERSION = 'v1.3'               # API版本（与APP_VERSION同源，标注接口代次）
+# 解析Skill版本不设硬编码常量：实例上的 skill_version 由查询动态统计（4001整改3.1）
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
@@ -145,6 +151,20 @@ TWO_HOP_DIMS = {
         ]
     },
 }
+
+# ============ 核心维度口径（前端覆盖度分母的单一事实源） ============
+# 20 = 17基础 + 3护理（Schema V4.0 护理批次）。
+# Schema 升级新增维度批次时：改 REL_MAP/MULTI_HOP_DIMS + 此列表即可，
+# 前端 app.js 启动时经 /api/kg/dimensions 自动拉取，无需改任何前端代码。
+CORE_DIM_ORDER = [
+    "Symptom", "Sign", "ExamItem", "LabItem", "Drug", "Procedure", "RiskFactor",
+    "Complication", "DifferentialDiagnosis", "RiskStratification", "Prognosis", "FollowUp",
+    "TreatmentPlan", "DiagnosisCriteria", "Etiology", "Epidemiology", "Pathophysiology",
+    "NursingCarePlan", "NursingAssessment", "NursingDiagnosis",
+]
+
+# 旧静态快照键名别名（新键 → 旧键）：前端读取旧数据时的兜底映射
+DIM_ALIAS = {"ExamItem": "Exam", "LabItem": "LabTest", "Drug": "Medication"}
 
 EXCLUDE_REL = [
     'belongs_to_category', 'belongs_to_subcategory',
@@ -468,6 +488,21 @@ def query_disease_list():
                     dim_counts[code] = {}
                 dim_counts[code][dim] = r["cnt"]
 
+        # 疾病大类名（动态解析：DiseaseCategory -has_disease-> 疾病/分型，最多两级分型；
+        # 供前端 dashboard 分组直接使用，新增疾病大类无需改前端前缀映射表）
+        cat_rows = sess.run("""
+            MATCH (cat:DiseaseCategory)-[:has_disease]->()-[:has_clinical_subtype*0..2]->(dis:Disease)
+            WHERE cat.code STARTS WITH 'CAT-'
+            RETURN dis.code AS code, cat.name AS cat_name, cat.display_name AS cat_dn,
+                   cat.preferred_name AS cat_pref
+        """)
+        cat_name_map = {}
+        for r in cat_rows:
+            if r["code"] not in cat_name_map:
+                cat_name_map[r["code"]] = clean_name_from_row(
+                    {'dn': r['cat_dn'], 'pref': r['cat_pref'], 'name': r['cat_name'], 'code': ''},
+                    'pref', 'name', 'code')
+
         for d in disease_list:
             d["dim_counts"] = dim_counts.get(d["code"], {})
             std = std_dx_map.get(d["code"], {})
@@ -480,6 +515,7 @@ def query_disease_list():
             d["coding_system"] = std.get("coding_system") or ""
             d["std_mapping_type"] = std.get("mapping_type") or ""
             d["std_diagnoses"] = std.get("all") or []
+            d["category_name"] = cat_name_map.get(d["code"], "")
 
         cache_set('kg:disease_list', disease_list)
         return disease_list
@@ -533,7 +569,7 @@ def query_diseases_summary():
 
 
 def query_disease_full(code):
-    """获取单个疾病的完整17维度数据 + 二跳展开"""
+    """获取单个疾病的完整核心维度数据（20 个核心维度 = 17 基础 + 3 护理） + 二跳展开"""
     d = get_driver()
     with d.session() as sess:
         # 基本信息
@@ -597,7 +633,7 @@ def query_disease_full(code):
             "name_en": info_r["name_en"] or "",
         }
 
-        # 17维度 + 二跳
+        # 核心维度（20 个：17 基础 + 3 护理）+ 二跳
         dimensions = {}
 
         # Schema V4.1 多跳维度（ExamItem/LabItem/Drug/Procedure）
@@ -1752,13 +1788,16 @@ def query_disease_full(code):
 
 
 def query_global_stats():
-    """全局统计 — 单次查询优化，Redis缓存（V2.0三层统计）"""
+    """全局统计 — 单次查询优化，Redis缓存（V2.0三层统计）
+    4001整改：区分"图谱实例数"与"已映射CDSS标准字典数"两种口径，避免
+    std_procedure_count=0 被误读为"图谱没有操作数据"。
+    """
     cached = cache_get('kg:global_stats')
     if cached is not None:
         return cached
     d = get_driver()
     with d.session() as sess:
-        # 单次查询获取所有统计（V2.0：新增三层统计）
+        # 单次查询获取所有统计（V2.0：新增三层统计 + 4001整改双口径）
         r = sess.run("""
             MATCH (n:KGNode)
             WITH
@@ -1769,11 +1808,34 @@ def query_global_stats():
                 count(CASE WHEN n.entityType = 'Evidence' THEN 1 END) AS evidence_count,
                 count(CASE WHEN n.entityType = 'StandardDiagnosis' THEN 1 END) AS std_diagnosis_count,
                 count(CASE WHEN n.entityType = 'StandardProcedure' THEN 1 END) AS std_procedure_count,
-                count(CASE WHEN n.entityType = 'SourceAdjudication' THEN 1 END) AS source_adjudication_count
+                count(CASE WHEN n.entityType = 'SourceAdjudication' THEN 1 END) AS source_adjudication_count,
+                count(CASE WHEN n.entityType = 'Procedure' THEN 1 END) AS procedure_instance_count,
+                count(CASE WHEN n.entityType = 'Procedure' AND n.cdss_dict_id IS NOT NULL THEN 1 END) AS procedure_cdss_mapped_count,
+                count(CASE WHEN n.entityType = 'ExamItem' THEN 1 END) AS exam_item_instance_count,
+                count(CASE WHEN n.entityType = 'ExamItem' AND n.cdss_dict_id IS NOT NULL THEN 1 END) AS exam_item_cdss_mapped_count,
+                count(CASE WHEN n.entityType = 'LabItem' THEN 1 END) AS lab_item_instance_count,
+                count(CASE WHEN n.entityType = 'LabItem' AND n.cdss_dict_id IS NOT NULL THEN 1 END) AS lab_item_cdss_mapped_count,
+                count(CASE WHEN n.entityType = 'Drug' THEN 1 END) AS drug_instance_count,
+                count(CASE WHEN n.entityType = 'Drug' AND n.cdss_dict_id IS NOT NULL THEN 1 END) AS drug_cdss_mapped_count,
+                count(CASE WHEN n.entityType = 'RecommendationStatement' THEN 1 END) AS rs_total_count,
+                count(CASE WHEN n.entityType = 'RecommendationStatement'
+                           AND n.clinical_review_status = 'clinical_ready' THEN 1 END) AS rs_reviewed_count,
+                count(CASE WHEN n.entityType = 'RecommendationStatement'
+                           AND n.clinical_review_status = 'blocked' THEN 1 END) AS rs_blocked_count,
+                count(CASE WHEN n.entityType = 'RecommendationStatement'
+                           AND n.clinical_review_status = 'pending' THEN 1 END) AS rs_pending_count,
+                count(CASE WHEN n.entityType = 'RecommendationStatement'
+                           AND n.formal_cdss_ready = true THEN 1 END) AS rs_formal_ready_count
             MATCH ()-[r]->()
             RETURN disease_category_count, disease_count, visual_entity_count,
                    kg_node_count, evidence_count, std_diagnosis_count,
-                   std_procedure_count, source_adjudication_count, count(r) AS total_rels
+                   std_procedure_count, source_adjudication_count, count(r) AS total_rels,
+                   procedure_instance_count, procedure_cdss_mapped_count,
+                   exam_item_instance_count, exam_item_cdss_mapped_count,
+                   lab_item_instance_count, lab_item_cdss_mapped_count,
+                   drug_instance_count, drug_cdss_mapped_count,
+                   rs_total_count, rs_reviewed_count, rs_blocked_count, rs_pending_count,
+                   rs_formal_ready_count
         """).single()
 
         result = {
@@ -1787,6 +1849,34 @@ def query_global_stats():
             "std_diagnosis_count": r["std_diagnosis_count"],
             "std_procedure_count": r["std_procedure_count"],
             "source_adjudication_count": r["source_adjudication_count"],
+            # ===== 4001整改：双口径统计（图谱实例 vs CDSS标准字典映射）=====
+            "instance_counts": {
+                "procedure": r["procedure_instance_count"],
+                "exam_item": r["exam_item_instance_count"],
+                "lab_item": r["lab_item_instance_count"],
+                "drug": r["drug_instance_count"],
+            },
+            "cdss_mapped_counts": {
+                "procedure": r["procedure_cdss_mapped_count"],
+                "exam_item": r["exam_item_cdss_mapped_count"],
+                "lab_item": r["lab_item_cdss_mapped_count"],
+                "drug": r["drug_cdss_mapped_count"],
+            },
+            "std_dict_node_counts": {
+                "std_diagnosis": r["std_diagnosis_count"],
+                "std_procedure": r["std_procedure_count"],
+            },
+            "stats_note": "图谱实例数=Neo4j中该entityType节点数；CDSS字典映射数=其中已具备cdss_dict_id的节点数；"
+                          "std_procedure_count=StandardProcedure标准字典节点数（当前未建设，不代表图谱无操作数据，"
+                          "操作实例见instance_counts.procedure）",
+            # 推荐陈述审核四态（4001整改）
+            "rs_review_stats": {
+                "total": r["rs_total_count"],
+                "clinical_ready": r["rs_reviewed_count"],
+                "blocked": r["rs_blocked_count"],
+                "pending": r["rs_pending_count"],
+                "formal_cdss_ready": r["rs_formal_ready_count"],
+            },
             # 兼容旧字段
             "total_nodes": r["kg_node_count"],
             "shell_entity_count": 0,
@@ -1833,6 +1923,114 @@ def query_data_version():
         }
         cache_set('kg:data_version', result, ttl=60)  # 短缓存1分钟
         return result
+
+
+def query_full_version():
+    """完整版本信息（4001整改 3.1）：Schema标准版本 / 解析Skill版本 / 实例数据版本 /
+    最近一次状态一致性回读时间（G8） / 前端版本 / API版本。
+    不能只返回一个 APP_VERSION，让用户无法判断数据库实际处于什么版本。
+    """
+    cached = cache_get('kg:full_version')
+    if cached is not None:
+        return cached
+
+    d = get_driver()
+    with d.session() as sess:
+        # 1. 实例 schema_version 分布（判断实例版本是否与标准一致/混合）
+        sv_rows = sess.run("""
+            MATCH (n:KGNode)
+            RETURN n.schema_version AS v, count(*) AS cnt
+            ORDER BY cnt DESC
+        """)
+        instance_versions = {}
+        for r in sv_rows:
+            key = str(r["v"]) if r["v"] is not None else "未标注"
+            instance_versions[key] = r["cnt"]
+
+        # 2. 解析Skill版本分布（skill_version 可能为字符串或列表，Python侧聚合）
+        skill_rows = sess.run("""
+            MATCH (n:KGNode)
+            WHERE n.skill_version IS NOT NULL
+            RETURN n.skill_version AS sv, count(*) AS cnt
+        """)
+        skill_dist = {}
+        for r in skill_rows:
+            v = r["sv"]
+            keys = sorted(set(v)) if isinstance(v, list) else [str(v)]
+            for k in keys:
+                skill_dist[k] = skill_dist.get(k, 0) + r["cnt"]
+
+        # 3. 关键时间：数据最后更新 / V4.1迁移完成时间 / 状态一致性回读（G8）
+        t = sess.run("""
+            MATCH (n:KGNode)
+            RETURN max(n.updated_at) AS data_updated,
+                   max(n.schema_v41_migrated_at) AS v41_migrated,
+                   max(n.status_consistency_updated_at) AS consistency_at,
+                   count(n) AS node_count
+        """).single()
+        rel_t = sess.run("MATCH ()-[r]->() RETURN max(r.updated_at) AS rel_updated").single()
+
+        # 4. 最近解析批次
+        batch = sess.run("""
+            MATCH (n:KGNode)
+            WHERE n.batch_id IS NOT NULL
+            RETURN n.batch_id AS b, max(n.updated_at) AS t
+            ORDER BY t DESC LIMIT 1
+        """).single()
+
+    versions = sorted(instance_versions.keys())
+    consistent = (len(versions) == 1 and versions[0] == SCHEMA_STANDARD_VERSION)
+    if consistent:
+        version_label = "标准版本%s / 实例版本统一%s" % (SCHEMA_STANDARD_VERSION, versions[0] if versions else "无")
+    elif len(versions) == 0:
+        version_label = "标准版本%s / 实例未标注版本" % SCHEMA_STANDARD_VERSION
+    else:
+        version_label = "标准版本%s / 实例版本混合(%s) / 待迁移复核" % (
+            SCHEMA_STANDARD_VERSION, ", ".join(versions[:4]))
+
+    # 当前解析Skill：取分布中的最新系列（按基础版本号排序，如 V1.40 < V2.1）
+    skill_series = []
+    for k in skill_dist:
+        base = k.split('-')[0]
+        if base not in skill_series:
+            skill_series.append(base)
+
+    def _ver_key(v):
+        nums = re.findall(r'\d+', v)
+        return [int(x) for x in nums] if nums else [0]
+    skill_series.sort(key=_ver_key)
+    current_skill = skill_series[-1] if skill_series else None
+
+    data_updated = t["data_updated"] if t and t["data_updated"] else (rel_t["rel_updated"] if rel_t else None)
+
+    result = {
+        # 向后兼容：原接口只返回 {"version": "1.3.0"}
+        "version": APP_VERSION,
+        # 前端/API版本
+        "app_version": APP_VERSION,
+        "api_version": API_VERSION,
+        # Schema标准与实例版本
+        "schema_standard_version": SCHEMA_STANDARD_VERSION,
+        "instance_schema_versions": instance_versions,
+        "instance_version_consistent": consistent,
+        "version_label": version_label,
+        # 解析Skill版本
+        "skill_version": current_skill,
+        "skill_version_detail": skill_dist,
+        "skill_version_note": "实例生产Skill版本分布；最新系列=%s，历史系列仅作溯源" % current_skill if current_skill else "无Skill版本记录",
+        # 关键时间
+        "data_updated_at": str(data_updated) if data_updated else None,
+        "schema_v41_migrated_at": str(t["v41_migrated"]) if t and t["v41_migrated"] else None,
+        "g8_readback_time": str(t["consistency_at"]) if t and t["consistency_at"] else None,
+        "g8_readback_note": "最近一次状态一致性回读时间（对应生产流水线G8回读校验步骤）；无记录时以数据最后更新时间为准",
+        "latest_batch_id": batch["b"] if batch else None,
+        "latest_batch_time": str(batch["t"]) if batch else None,
+        # 计数
+        "node_count": t["node_count"] if t else 0,
+        "generated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    cache_set('kg:full_version', result, ttl=60)
+    return result
 
 
 def query_schema_info():
@@ -1886,6 +2084,144 @@ def query_schema_info():
 
         cache_set('kg:schema_info', result)
         return result
+
+
+def query_dimensions():
+    """维度口径单一事实源（动态维度注册）。
+    前端 app.js 启动时拉取本接口，动态更新 CORE_DIM_KEYS / CORE_DIM_NAMES / CORE_DIM_ALIAS / DIM_NAMES。
+    Schema 升级（新增维度批次）只改 server.py 常量（REL_MAP/MULTI_HOP_DIMS/CORE_DIM_ORDER），
+    前端零改动即可跟随新口径。纯常量计算，无 Neo4j 查询，响应即时。"""
+    all_dims = list(REL_MAP.keys()) + list(MULTI_HOP_DIMS.keys())
+    sub_dims = list(TWO_HOP_DIMS.keys())
+    names = {}
+    for k in all_dims + sub_dims:
+        if k in ENTITY_NAME_MAP:
+            names[k] = ENTITY_NAME_MAP[k]
+    # 旧静态快照别名键也给中文名（降级模式下不显示英文）
+    for new_k, legacy_k in DIM_ALIAS.items():
+        if legacy_k not in names and new_k in ENTITY_NAME_MAP:
+            names[legacy_k] = ENTITY_NAME_MAP[new_k]
+    return {
+        "schema_standard_version": SCHEMA_STANDARD_VERSION,
+        "core_dimensions": CORE_DIM_ORDER,
+        "core_dimension_count": len(CORE_DIM_ORDER),
+        "all_dimensions": all_dims,
+        "sub_dimensions": sub_dims,
+        "names": names,
+        "alias": DIM_ALIAS,
+        "note": "core_dimensions=覆盖度计算分母（核心口径）；all_dimensions=dim_counts 可能出现的键；"
+                "sub_dimensions=嵌套子维度（ExamObservation/LabSubitem/ThresholdRule）；"
+                "names=中文名（ENTITY_NAME_MAP）；alias=旧静态快照键名兜底",
+    }
+
+
+def query_schema_registry():
+    """图谱结构注册表（4001整改 4.9）：以 V4.1 注册表（ENTITY_NAME_MAP/REL_NAME_MAP）为基准，
+    对照 Neo4j 实际数据，输出实体类型与关系类型的：
+      - 中文名称/中文语义
+      - 已注册 / 未注册（库里存在但注册表没有）
+      - 状态：实例已存在 / 结构已定义·实例未落地（注册表有、库里无实例，含专病扩展槽位）
+      - 关系类型的实际起点/终点实体类型（观测到的合法端点）
+    供"图谱数据字典"页面按实体、关系、专科扩展、状态查询。
+    同时落盘 schema_docs/图谱结构注册表.json 作为交付快照。
+    """
+    cache_key = "kg:schema_registry"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    d = get_driver()
+    with d.session() as sess:
+        # 库内实体类型计数
+        et_rows = sess.run("""
+            MATCH (n:KGNode)
+            WHERE n.entityType IS NOT NULL
+            RETURN n.entityType AS et, count(*) AS cnt
+        """)
+        et_counts = {r["et"]: r["cnt"] for r in et_rows}
+
+        # 库内关系类型：计数 + 实际端点（起点/终点实体类型）
+        rel_rows = sess.run("""
+            MATCH (a:KGNode)-[r]->(b:KGNode)
+            RETURN type(r) AS rt, count(*) AS cnt,
+                   collect(DISTINCT a.entityType) AS start_types,
+                   collect(DISTINCT b.entityType) AS end_types
+        """)
+        rel_obs = {}
+        for r in rel_rows:
+            rel_obs[r["rt"]] = {
+                "count": r["cnt"],
+                "start_types": sorted([x for x in (r["start_types"] or []) if x]),
+                "end_types": sorted([x for x in (r["end_types"] or []) if x]),
+            }
+
+    # ---- 实体类型注册表 ----
+    registered_ets = set(ENTITY_NAME_MAP.keys())
+    db_ets = set(et_counts.keys())
+    entity_registry = []
+    for et in sorted(registered_ets | db_ets):
+        cnt = et_counts.get(et, 0)
+        entity_registry.append({
+            "type": et,
+            "name_cn": ENTITY_NAME_MAP.get(et, ""),
+            "registered": et in registered_ets,
+            "instance_count": cnt,
+            "status": "实例已存在" if cnt > 0 else "结构已定义·实例未落地",
+            "is_extension_slot": (et in registered_ets and cnt == 0),
+        })
+    unregistered_entity_types = sorted(db_ets - registered_ets)
+
+    # ---- 关系类型注册表 ----
+    registered_rels = set(REL_NAME_MAP.keys())
+    db_rels = set(rel_obs.keys())
+    relation_registry = []
+    for rt in sorted(registered_rels | db_rels):
+        obs = rel_obs.get(rt, {"count": 0, "start_types": [], "end_types": []})
+        relation_registry.append({
+            "type": rt,
+            "name_cn": REL_NAME_MAP.get(rt, ""),
+            "registered": rt in registered_rels,
+            "instance_count": obs["count"],
+            "start_entity_types": obs["start_types"],   # 观测到的合法起点
+            "end_entity_types": obs["end_types"],       # 观测到的合法终点
+            "status": "实例已存在" if obs["count"] > 0 else "结构已定义·实例未落地",
+            "is_extension_slot": (rt in registered_rels and obs["count"] == 0),
+        })
+    unregistered_relation_types = sorted(db_rels - registered_rels)
+
+    result = {
+        "schema_standard_version": SCHEMA_STANDARD_VERSION,
+        "generated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "summary": {
+            "entity_types_registered": len(registered_ets & db_ets),
+            "entity_types_extension_slots": len(registered_ets - db_ets),
+            "entity_types_unregistered": len(unregistered_entity_types),
+            "relation_types_registered": len(registered_rels & db_rels),
+            "relation_types_extension_slots": len(registered_rels - db_rels),
+            "relation_types_unregistered": len(unregistered_relation_types),
+        },
+        "entity_types": entity_registry,
+        "relation_types": relation_registry,
+        "unregistered_entity_types": unregistered_entity_types,
+        "unregistered_relation_types": unregistered_relation_types,
+        "note": "注册表基准=代码内V4.1 ENTITY_NAME_MAP/REL_NAME_MAP；端点为Neo4j实际观测值；"
+                "未注册=库中存在但注册表未定义（需复核）；扩展槽位=注册表已定义、实例待批次落地",
+    }
+
+    # 落盘快照（注册表交付物），失败不影响API
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        reg_dir = os.path.join(base_dir, 'schema_docs')
+        if not os.path.isdir(reg_dir):
+            os.makedirs(reg_dir, exist_ok=True)
+        reg_file = os.path.join(reg_dir, '图谱结构注册表.json')
+        with open(reg_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+    cache_set(cache_key, result, ttl=300)
+    return result
 
 
 def query_guidelines():
@@ -2267,32 +2603,54 @@ def query_disease_recommendations(disease_code):
     """正式CDSS推荐：按 RecommendationStatement.disease_code 属性过滤，只读 recommends_action 链
     不依赖 Disease -> has_recommendation_statement；
     不把 has_treatment_plan / stage_has_available_action 当正式推荐。
-    同时返回每条 RS 直连的主证据（derived_from）、主指南（based_on_guideline）。
+
+    4001整改（2026-09-19）：
+    1. 证据链改为 supported_by_evidence（真实证据关系，库中9.2万条），
+       derived_from 仅作兜底合并；based_on_guideline / uses_primary_guideline 保留。
+    2. rule_name/stage_name/pathway_name 属性为空或占位(N/A)时，通过
+       (ClinicalRule)-[:triggers_recommendation]->(RS)、
+       (PathwayStage)-[:has_recommendation_statement]->(RS)、
+       (SpecialtyCarePathway)-[:includes_pathway_stage]->(stage) 关系回填。
+    3. clinical_review_status=blocked/pending 的推荐不再混入推荐结果，
+       单独进入 blocked_recommendations（受阻/待审核清单）并给出阻断原因与缺失字段。
+    4. 每条推荐带 usable / missing_fields / blocked_reasons 闭环字段，
+       供前端按"可使用 / 审核通过待发布 / 待完善"分组展示。
     """
-    cache_key = f"kg:recommendations_v3:{disease_code}"
+    cache_key = f"kg:recommendations_v4:{disease_code}"
     cached = cache_get(cache_key)
     if cached is not None:
         return cached
 
     d = get_driver()
     recommendations = []
+    blocked_recommendations = []
 
     with d.session() as sess:
         rs = sess.run("""
             MATCH (rs:RecommendationStatement {disease_code: $code})
             OPTIONAL MATCH (rs)-[:recommends_action]->(action:KGNode)
-            OPTIONAL MATCH (rs)-[:derived_from]->(ev:KGNode)
+            OPTIONAL MATCH (rs)-[:supported_by_evidence]->(ev:KGNode)
+            OPTIONAL MATCH (rs)-[:derived_from]->(ev2:KGNode)
             OPTIONAL MATCH (rs)-[:based_on_guideline]->(g:KGNode)
+            OPTIONAL MATCH (rs)-[:uses_primary_guideline]->(g2:KGNode)
             OPTIONAL MATCH (rs)-[:has_contraindication]->(contra:KGNode)
+            OPTIONAL MATCH (rule:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rs)
+            OPTIONAL MATCH (stage:KGNode {entityType:'PathwayStage'})-[:has_recommendation_statement]->(rs)
+            OPTIONAL MATCH (path:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(stage)
             RETURN rs.code AS rs_code, rs.display_name AS rs_display, rs.name AS rs_name,
                    rs.recommendation_class AS rec_class, rs.evidence_level AS ev_level,
                    rs.recommendation_type AS rec_type,
                    rs.statement_text AS stmt_text, rs.statement_summary AS stmt_summary,
                    rs.clinical_review_status AS review_status, rs.formal_cdss_ready AS formal_ready,
+                   rs.cdss_use_status AS cdss_use_status, rs.cdss_release_level AS cdss_release_level,
+                   rs.release_block_reasons AS block_reasons,
                    rs.indication_conditions AS indication, rs.contraindication_conditions AS contra,
                    rs.rule_name AS rule_name, rs.stage_name AS stage_name, rs.pathway_name AS pathway_name,
                    rs.primary_source_name AS primary_source_name,
                    rs.primary_source_page AS primary_source_page,
+                   rule.name AS rel_rule_name,
+                   stage.name AS rel_stage_name,
+                   path.name AS rel_pathway_name,
                    collect(DISTINCT {
                        code: action.code,
                        name: coalesce(action.display_name, action.preferred_name, action.name, ''),
@@ -2308,12 +2666,30 @@ def query_disease_recommendations(disease_code):
                        excerpt: left(coalesce(ev.evidence_text, ''), 300)
                    }) AS evidences,
                    collect(DISTINCT {
+                       code: ev2.code,
+                       name: coalesce(ev2.display_name, ev2.preferred_name, ev2.name, ''),
+                       source_name: coalesce(ev2.source_name, ''),
+                       source_page: coalesce(toString(ev2.source_page), ''),
+                       evidence_level: coalesce(ev2.evidence_level, ''),
+                       recommendation_class: coalesce(ev2.recommendation_class, ''),
+                       excerpt: left(coalesce(ev2.evidence_text, ''), 300)
+                   }) AS evidences2,
+                   collect(DISTINCT {
                        code: contra.code,
                        name: coalesce(contra.display_name, contra.preferred_name, contra.name, '')
                    }) AS contraindications,
-                   collect(DISTINCT g.name) AS guidelines
+                   collect(DISTINCT g.name) AS guidelines,
+                   collect(DISTINCT g2.name) AS guidelines2
             ORDER BY rs.name LIMIT 200
         """, code=disease_code)
+
+        def _valid_name(v):
+            """属性名有效性：空 / N/A / 无 视为缺失"""
+            if v is None:
+                return ""
+            s = str(v).strip()
+            return "" if s in ('', 'N/A', 'n/a', '无', 'null', 'None') else s
+
         for r in rs:
             actions = []
             seen_a = set()
@@ -2321,13 +2697,17 @@ def query_disease_recommendations(disease_code):
                 if a and a.get("code") and a["code"] not in seen_a:
                     seen_a.add(a["code"])
                     actions.append(a)
+            # 证据合并：supported_by_evidence 优先，derived_from 兜底去重
             evidences = []
             seen_e = set()
-            for e in (r["evidences"] or []):
+            for e in ((r["evidences"] or []) + (r["evidences2"] or [])):
                 if e and e.get("code") and e["code"] not in seen_e:
                     seen_e.add(e["code"])
                     evidences.append(e)
-            guidelines = [g for g in (r["guidelines"] or []) if g]
+            guidelines = []
+            for g in (r["guidelines"] or []) + (r["guidelines2"] or []):
+                if g and g not in guidelines:
+                    guidelines.append(g)
             primary_guideline = guidelines[0] if guidelines else ""
             contraindications = []
             seen_c = set()
@@ -2336,7 +2716,38 @@ def query_disease_recommendations(disease_code):
                     seen_c.add(c["code"])
                     if c.get("name"):
                         contraindications.append(c)
-            recommendations.append({
+
+            # 闭环字段：属性优先，为空时用关系回填（4001整改3）
+            rule_name = _valid_name(r["rule_name"]) or _valid_name(r["rel_rule_name"])
+            stage_name = _valid_name(r["stage_name"]) or _valid_name(r["rel_stage_name"])
+            pathway_name = _valid_name(r["pathway_name"]) or _valid_name(r["rel_pathway_name"])
+
+            # 缺失字段清单（4001整改：明确缺失项）
+            missing_fields = []
+            if not rule_name:
+                missing_fields.append("rule_name")
+            if not stage_name:
+                missing_fields.append("stage_name")
+            if not pathway_name:
+                missing_fields.append("pathway_name")
+            if not evidences:
+                missing_fields.append("evidence")
+            if not actions:
+                missing_fields.append("action")
+
+            review_status = r["review_status"] or ""
+            formal_ready = bool(r["formal_ready"])
+            usable = (review_status == 'clinical_ready' and formal_ready)
+
+            # 阻断原因（兼容字符串/列表两种存储）
+            br = r["block_reasons"]
+            if br is None:
+                br = []
+            elif isinstance(br, str):
+                br = [br]
+            block_reasons = [str(x) for x in br]
+
+            item = {
                 "code": r["rs_code"] or "",
                 "name": clean_name_from_row(r, "rs_display", "rs_name", "rs_code"),
                 "recommendation_class": r["rec_class"] or "",
@@ -2348,11 +2759,26 @@ def query_disease_recommendations(disease_code):
                 "action_code": actions[0]["code"] if actions else "",
                 "action_name": actions[0]["name"] if actions else "",
                 "action_entity_type": actions[0]["entityType"] if actions else "",
-                "rule_name": r["rule_name"] or "",
-                "stage_name": r["stage_name"] or "",
-                "pathway_name": r["pathway_name"] or "",
-                "clinical_review_status": r["review_status"] or "",
-                "formal_cdss_ready": r["formal_ready"] or False,
+                # 闭环字段（4001整改：属性+关系回填后的最终值；来源标注）
+                "rule_name": rule_name,
+                "stage_name": stage_name,
+                "pathway_name": pathway_name,
+                "closure_backfilled": {
+                    "rule_name": (not _valid_name(r["rule_name"])) and bool(rule_name),
+                    "stage_name": (not _valid_name(r["stage_name"])) and bool(stage_name),
+                    "pathway_name": (not _valid_name(r["pathway_name"])) and bool(pathway_name),
+                },
+                "clinical_review_status": review_status,
+                "formal_cdss_ready": formal_ready,
+                "cdss_use_status": r["cdss_use_status"] or "",
+                "cdss_release_level": r["cdss_release_level"] or "",
+                "release_block_reasons": block_reasons,
+                "usable": usable,
+                "usable_label": ("可正式使用" if usable else
+                                 "审核通过·待正式发布" if review_status == 'clinical_ready' else
+                                 "待审核" if review_status == 'pending' else "已阻断"),
+                "missing_fields": missing_fields,
+                "closure_complete": len(missing_fields) == 0,
                 "indication_conditions": r["indication"] or "",
                 "contraindication_conditions": r["contra"] or "",
                 "contraindications": contraindications,
@@ -2361,10 +2787,32 @@ def query_disease_recommendations(disease_code):
                 "primary_guideline_name": primary_guideline,
                 "guidelines": guidelines,
                 "evidences": evidences,
-            })
+            }
 
-    cache_set(cache_key, recommendations, ttl=300)
-    return recommendations
+            # 4001整改：blocked/pending 不进入默认推荐结果
+            if review_status in ('blocked', 'pending'):
+                blocked_recommendations.append(item)
+            else:
+                recommendations.append(item)
+
+    # 汇总（4001整改：推荐闭环统计）
+    summary = {
+        "total": len(recommendations) + len(blocked_recommendations),
+        "usable": sum(1 for x in recommendations if x["usable"]),
+        "reviewed_pending_release": sum(1 for x in recommendations if not x["usable"]),
+        "blocked": sum(1 for x in blocked_recommendations if x["clinical_review_status"] == 'blocked'),
+        "pending": sum(1 for x in blocked_recommendations if x["clinical_review_status"] == 'pending'),
+        "missing_closure": sum(1 for x in recommendations if not x["closure_complete"]),
+    }
+
+    result = {
+        "disease_code": disease_code,
+        "recommendations": recommendations,
+        "blocked_recommendations": blocked_recommendations,
+        "summary": summary,
+    }
+    cache_set(cache_key, result, ttl=300)
+    return result
 
 
 def query_recommendation_detail(rs_code):
@@ -2681,7 +3129,15 @@ def query_cdss_diseases():
 
 
 def query_cdss_coverage():
-    """CDSS决策层覆盖分析：每个疾病的 路径/阶段/规则/推荐/动作/证据/指南 覆盖情况（V2.0）"""
+    """CDSS决策层覆盖分析：每个疾病的 路径/阶段/规则/推荐/动作/证据/指南 覆盖情况（V2.0）
+    4001整改：就绪状态不再用"推荐≥5且证据≥3"的数量阈值判定。
+    改为四层状态：结构已定义 → 实例已存在 → 审核已通过 → 可正式使用。
+      structure_ready: 存在专科诊疗路径（结构骨架已定义）
+      instance_ready:  存在推荐陈述实例
+      review_ready:    存在临床审核通过(clinical_ready)的推荐
+      usable_ready:    存在正式发布可用(formal_cdss_ready=true)的推荐
+    status 取已达到的最高层，blocked_count 单列，绝不因"有规则有证据"直接判ready。
+    """
     cache_key = "kg:cdss:coverage"
     cached = cache_get(cache_key)
     if cached is not None:
@@ -2719,12 +3175,21 @@ def query_cdss_coverage():
                   MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(:KGNode {entityType:'RecommendationStatement'})-[:based_on_guideline]->(g:KGNode)
                   RETURN count(DISTINCT g) AS guideline_count }
             CALL { WITH d
-                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec2:KGNode {entityType:'RecommendationStatement'})
-                  WHERE rec2.formal_cdss_ready = true
-                  RETURN count(DISTINCT rec2) AS ready_count }
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec3:KGNode {entityType:'RecommendationStatement'})
+                  WHERE rec3.formal_cdss_ready = true
+                  RETURN count(DISTINCT rec3) AS usable_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec4:KGNode {entityType:'RecommendationStatement'})
+                  WHERE rec4.clinical_review_status = 'clinical_ready'
+                  RETURN count(DISTINCT rec4) AS reviewed_count }
+            CALL { WITH d
+                  MATCH (d)-[:has_specialty_care_pathway]->(:KGNode {entityType:'SpecialtyCarePathway'})-[:includes_pathway_stage]->(:KGNode)-[:has_clinical_rule]->(:KGNode {entityType:'ClinicalRule'})-[:triggers_recommendation]->(rec5:KGNode {entityType:'RecommendationStatement'})
+                  WHERE rec5.clinical_review_status = 'blocked'
+                  RETURN count(DISTINCT rec5) AS blocked_rec_count }
             RETURN d.code AS disease_code, pathway_count, stage_count, rule_count,
                    rec_count, action_count + blocked_count AS action_count,
-                   evidence_count, guideline_count, ready_count
+                   evidence_count, guideline_count, usable_count,
+                   reviewed_count, blocked_rec_count
             ORDER BY disease_code
         """)
 
@@ -2735,7 +3200,23 @@ def query_cdss_coverage():
             if not meta:
                 continue
             rec_count = r["rec_count"]
-            ready = rec_count >= 5 and r["evidence_count"] >= 3
+            usable_count = r["usable_count"]
+            reviewed_count = r["reviewed_count"]
+            # 四层状态判定（4001整改：结构→实例→审核→可用，逐层递进）
+            structure_ready = r["pathway_count"] >= 1
+            instance_ready = rec_count >= 1
+            review_ready = reviewed_count >= 1
+            usable_ready = usable_count >= 1
+            if usable_ready:
+                status = "usable"        # 可正式使用
+            elif review_ready:
+                status = "reviewed"      # 审核已通过，待正式发布
+            elif instance_ready:
+                status = "instance"      # 实例已存在，临床审核未通过
+            elif structure_ready:
+                status = "structure"     # 结构已定义，尚无推荐实例
+            else:
+                status = "none"
             result.append({
                 "disease_code": code,
                 "disease_name": meta.get('name') or code,
@@ -2749,8 +3230,20 @@ def query_cdss_coverage():
                 "action_count": r["action_count"],
                 "evidence_count": r["evidence_count"],
                 "guideline_count": r["guideline_count"],
-                "ready_count": r["ready_count"],
-                "status": "ready" if ready else ("partial" if rec_count >= 1 else "none")
+                # 4001整改：四层覆盖 + 状态（ready_count 语义=可正式使用数，兼容旧字段名）
+                "ready_count": usable_count,
+                "reviewed_count": reviewed_count,
+                "blocked_rec_count": r["blocked_rec_count"],
+                "structure_ready": structure_ready,
+                "instance_ready": instance_ready,
+                "review_ready": review_ready,
+                "usable_ready": usable_ready,
+                "status": status,
+                "status_label": {
+                    "usable": "可正式使用", "reviewed": "审核已通过·待发布",
+                    "instance": "实例已存在·待审核", "structure": "结构已定义·无实例",
+                    "none": "无覆盖",
+                }[status],
             })
 
         cache_set(cache_key, result)
@@ -2778,7 +3271,8 @@ def query_rs_review_summary():
         """)
         ready_dist = {}
         for r in ready:
-            key = str(r["ready"]) if r["ready"] is not None else "null"
+            # 4001整改修正：布尔键统一小写（原"TRUE"写法永远取不到值）
+            key = str(r["ready"]).lower() if r["ready"] is not None else "null"
             ready_dist[key] = r["cnt"]
 
         # clinical_review_status 分布
@@ -2790,6 +3284,23 @@ def query_rs_review_summary():
         for r in review:
             key = r["status"] or "未设置"
             review_dist[key] = r["cnt"]
+
+        # cdss_use_status 分布（4001整改新增）
+        use = sess.run("""
+            MATCH (rs:KGNode {entityType:'RecommendationStatement'})
+            RETURN rs.cdss_use_status as st, count(*) as cnt
+        """)
+        use_dist = {}
+        for r in use:
+            key = r["st"] or "未设置"
+            use_dist[key] = r["cnt"]
+
+        # 状态矛盾统计（4001整改新增）：审核受阻却标记正式推荐使用
+        inconsistent = sess.run("""
+            MATCH (rs:KGNode {entityType:'RecommendationStatement'})
+            WHERE rs.clinical_review_status = 'blocked' AND rs.cdss_use_status = '正式推荐'
+            RETURN count(rs) as cnt
+        """).single()["cnt"]
 
         # recommendation_class 分布
         rec_class = sess.run("""
@@ -2828,25 +3339,30 @@ def query_rs_review_summary():
             RETURN count(rs) as cnt
         """).single()["cnt"]
 
-        # 无证据 RS
+        # 无证据 RS（4001整改修正：真实证据关系是 supported_by_evidence，
+        # 原来只查 derived_from 会把有证据的 RS 误报为无证据）
         no_evidence = sess.run("""
             MATCH (rs:KGNode {entityType:'RecommendationStatement'})
-            WHERE NOT (rs)-[:derived_from]->()
+            WHERE NOT (rs)-[:supported_by_evidence]->() AND NOT (rs)-[:derived_from]->()
             RETURN count(rs) as cnt
         """).single()["cnt"]
 
         # 无指南 RS
         no_guideline = sess.run("""
             MATCH (rs:KGNode {entityType:'RecommendationStatement'})
-            WHERE NOT (rs)-[:based_on_guideline]->()
+            WHERE NOT (rs)-[:based_on_guideline]->() AND NOT (rs)-[:uses_primary_guideline]->()
             RETURN count(rs) as cnt
         """).single()["cnt"]
 
         result = {
             "total": total,
-            "formal_cdss_ready": ready_dist.get("TRUE", 0),
-            "formal_cdss_not_ready": ready_dist.get("FALSE", 0),
+            "formal_cdss_ready": ready_dist.get("true", 0),
+            "formal_cdss_not_ready": ready_dist.get("false", 0),
+            "formal_cdss_ready_dist": ready_dist,
             "clinical_review_status": review_dist,
+            "cdss_use_status": use_dist,
+            "inconsistent_status_count": inconsistent,
+            "inconsistent_status_note": "clinical_review_status=blocked 但 cdss_use_status=正式推荐的矛盾记录数（4001整改暴露）",
             "recommendation_class": class_dist,
             "evidence_level": level_dist,
             "recommendation_type": type_dist,
@@ -2885,7 +3401,11 @@ def query_skeleton_audit():
             RETURN n.skeleton_slot as val, count(*) as cnt ORDER BY cnt DESC
         """)
         for r in rows:
-            slot_dist[r["val"]] = r["cnt"]
+            # 4001整改修复：skeleton_slot 可能为 list（历史批次），转字符串避免 dict 键不可哈希崩溃
+            key = r["val"]
+            if isinstance(key, list):
+                key = "+".join(str(x) for x in key)
+            slot_dist[key] = r["cnt"]
 
         # knowledge_layer 分布
         layer_dist = {}
@@ -2894,7 +3414,11 @@ def query_skeleton_audit():
             RETURN n.knowledge_layer as val, count(*) as cnt ORDER BY cnt DESC
         """)
         for r in rows:
-            layer_dist[r["val"]] = r["cnt"]
+            # 4001整改修复：knowledge_layer 同样防御 list 类型
+            key = r["val"]
+            if isinstance(key, list):
+                key = "+".join(str(x) for x in key)
+            layer_dist[key] = r["cnt"]
 
         # source_type 分布
         source_dist = {}
@@ -2903,7 +3427,11 @@ def query_skeleton_audit():
             RETURN n.source_type as val, count(*) as cnt ORDER BY cnt DESC
         """)
         for r in rows:
-            source_dist[r["val"]] = r["cnt"]
+            # 4001整改修复：source_type 同样防御 list 类型
+            key = r["val"]
+            if isinstance(key, list):
+                key = "+".join(str(x) for x in key)
+            source_dist[key] = r["cnt"]
 
         # 硬闸门检查
         # 1. 教材核心无skeleton_slot
@@ -4758,7 +5286,7 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
 
         # API 路由
         if path == '/api/kg/version':
-            self._json_response({"version": APP_VERSION})
+            self._json_response(query_full_version())
             return
 
         if path == '/api/kg/data_version':
@@ -4792,6 +5320,16 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == '/api/kg/schema-info':
             self._json_response(query_schema_info())
+            return
+
+        if path == '/api/kg/schema-registry':
+            # 4001整改：图谱结构注册表（V4.1基准 + 库内实例对照）
+            self._json_response(query_schema_registry())
+            return
+
+        if path == '/api/kg/dimensions':
+            # 维度口径单一事实源：前端启动时动态拉取，Schema升级后前端零改动
+            self._json_response(query_dimensions())
             return
 
         if path == '/api/kg/stats':
@@ -4938,15 +5476,45 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response({"error": str(e)}, 500)
             return
 
+        # 未匹配的 /api/* 路径：干净 JSON 404（修复：原先落进静态兜底会先发200头再发404，
+        # 两个HTTP响应粘连成非法报文，浏览器/Node均报 Invalid header token）
+        if path.startswith('/api/'):
+            self._json_response({"error": "Not found", "path": path}, 404)
+            return
+
+        # ---------- 静态资源访问黑名单（4001整改 2026-09-28）----------
+        # 目的：站点只对外提供"页面与页面资源"。
+        # 后端源码(server.py)、日志(*.log)、部署脚本(*.sh)、备份(*.bak)、
+        # 进程文件(*.pid)、依赖清单(package.json)、隐藏文件(.gitignore) 一律 404，
+        # 避免内网任意访问者直接拉走源码与运行日志。
+        _BLOCK_EXT = ('.py', '.pyc', '.pyo', '.sh', '.log', '.bak', '.pid',
+                      '.ini', '.conf', '.cfg', '.env', '.sql', '.tar', '.gz', '.zip')
+        _BLOCK_NAME = ('package.json', 'package-lock.json', 'VERSION', 'README.md',
+                       'requirements.txt', '.gitignore', 'generate-doc.js')
+        # 仅后台本机读写、不对外提供的目录（后端落盘快照等）
+        _BLOCK_DIR = ('/schema_docs/',)
+        _last = path.rstrip('/').split('/')[-1]
+        _full = path if path.endswith('/') else path + '/'
+        if (_last.startswith('.')
+                or _last.lower().endswith(_BLOCK_EXT)
+                or _last in _BLOCK_NAME
+                or any(d in _full for d in _BLOCK_DIR)):
+            self.send_error(404, 'File not found')
+            return
+
         # 静态文件（所有文件禁止缓存，确保每次刷新拿到最新版本）
+        # 修复：先判断文件存在再发响应头，避免不存在时 send_error 追加第二个响应
+        filepath = self.translate_path(path)
+        if os.path.isdir(filepath):
+            filepath = os.path.join(filepath, 'index.html')
+        if not os.path.isfile(filepath):
+            self.send_error(404, 'File not found')
+            return
         self.send_response(200)
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
-        filepath = self.translate_path(path)
-        if os.path.isdir(filepath):
-            filepath = os.path.join(filepath, 'index.html')
-        if os.path.isfile(filepath):
+        if True:
             # 自动检测 MIME 类型
             ext = os.path.splitext(filepath)[1].lower()
             mime_map = {'.html':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon'}
@@ -4963,8 +5531,6 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
-        else:
-            self.send_error(404, 'File not found')
 
     def _json_response(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')

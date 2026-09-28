@@ -28,7 +28,7 @@
       "disease_review_count": 22,
       "scenario_card_count": 103,
       "pharmacist_item_count": 187,
-      "out_dir": "E:\\BigMouse\\0.CDSS文献诊疗指南材料PDF\\AI专科知识图谱生成\\心血管内科文献集合\\99_临床审核_clinical_review\\20260629_临床使用效果审核包_effect_review"
+      "out_dir": "D:\\BigMouse\\0.CDSS文献诊疗指南材料PDF\\AI专科知识图谱生成\\心血管内科文献集合\\99_临床审核_clinical_review\\20260629_临床使用效果审核包_effect_review"
     },
     "source_detail_summary": {
       "review_item_count": 303,
@@ -48,7 +48,7 @@
         "medication_aliases": 13,
         "evidence_source_chain": 38
       },
-      "review_csv": "E:\\BigMouse\\0.CDSS文献诊疗指南材料PDF\\AI专科知识图谱生成\\心血管内科文献集合\\99_临床审核_clinical_review\\20260629_pending_review_pack_latest\\clinical_review_items.csv",
+      "review_csv": "D:\\BigMouse\\0.CDSS文献诊疗指南材料PDF\\AI专科知识图谱生成\\心血管内科文献集合\\99_临床审核_clinical_review\\20260629_pending_review_pack_latest\\clinical_review_items.csv",
       "decision_rule": "只有 clinical_review_decision=approve 且 reviewer_name/reviewer_role/reviewed_at 完整的行可回写为 clinical_approved。"
     }
   },

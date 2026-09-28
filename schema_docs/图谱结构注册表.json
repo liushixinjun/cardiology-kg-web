@@ -1,0 +1,2506 @@
+{
+  "schema_standard_version": "V4.1",
+  "generated_at": "2026-09-28 15:04:17",
+  "summary": {
+    "entity_types_registered": 63,
+    "entity_types_extension_slots": 28,
+    "entity_types_unregistered": 0,
+    "relation_types_registered": 93,
+    "relation_types_extension_slots": 35,
+    "relation_types_unregistered": 0
+  },
+  "entity_types": [
+    {
+      "type": "AblationTarget",
+      "name_cn": "消融靶点",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "AssessmentActionRule",
+      "name_cn": "结果动作规则",
+      "registered": true,
+      "instance_count": 10,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "AssessmentItem",
+      "name_cn": "评估评分项",
+      "registered": true,
+      "instance_count": 20,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "AssessmentResultLevel",
+      "name_cn": "评分结果等级",
+      "registered": true,
+      "instance_count": 12,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "AssessmentScale",
+      "name_cn": "评估量表",
+      "registered": true,
+      "instance_count": 3,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "AssessmentScoreRule",
+      "name_cn": "计分规则",
+      "registered": true,
+      "instance_count": 23,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "BloodPressureGrade",
+      "name_cn": "血压分级",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ClinicalEvent",
+      "name_cn": "临床事件",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ClinicalPathway",
+      "name_cn": "诊疗路径",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ClinicalRule",
+      "name_cn": "临床规则",
+      "registered": true,
+      "instance_count": 7794,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ClinicalSubtype",
+      "name_cn": "临床分型",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Complication",
+      "name_cn": "并发症",
+      "registered": true,
+      "instance_count": 83,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Contraindication",
+      "name_cn": "禁忌",
+      "registered": true,
+      "instance_count": 19,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Definition",
+      "name_cn": "定义",
+      "registered": true,
+      "instance_count": 217,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "DefinitionComponent",
+      "name_cn": "定义明细",
+      "registered": true,
+      "instance_count": 321,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Device",
+      "name_cn": "器械设备",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "DeviceParameter",
+      "name_cn": "设备参数",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "DiagnosisCriteria",
+      "name_cn": "诊断标准",
+      "registered": true,
+      "instance_count": 115,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "DiagnosisCriteriaComponent",
+      "name_cn": "诊断标准明细",
+      "registered": true,
+      "instance_count": 656,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "DifferentialDiagnosis",
+      "name_cn": "鉴别诊断",
+      "registered": true,
+      "instance_count": 45,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Disease",
+      "name_cn": "疾病",
+      "registered": true,
+      "instance_count": 132,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "DiseaseCategory",
+      "name_cn": "疾病大类",
+      "registered": true,
+      "instance_count": 15,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "DiseaseSubcategory",
+      "name_cn": "疾病亚类",
+      "registered": true,
+      "instance_count": 50,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Drug",
+      "name_cn": "药品",
+      "registered": true,
+      "instance_count": 139,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ECGPattern",
+      "name_cn": "心电图模式",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ElectrophysiologyMechanism",
+      "name_cn": "电生理机制",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Epidemiology",
+      "name_cn": "流行病学",
+      "registered": true,
+      "instance_count": 33,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Etiology",
+      "name_cn": "病因",
+      "registered": true,
+      "instance_count": 348,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Evidence",
+      "name_cn": "证据",
+      "registered": true,
+      "instance_count": 18980,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ExamItem",
+      "name_cn": "检查项目",
+      "registered": true,
+      "instance_count": 99,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ExamObservation",
+      "name_cn": "检查发现",
+      "registered": true,
+      "instance_count": 175,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ExamPlan",
+      "name_cn": "检查/检验方案",
+      "registered": true,
+      "instance_count": 130,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "FamilyHistory",
+      "name_cn": "家族史",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "FollowUp",
+      "name_cn": "随访",
+      "registered": true,
+      "instance_count": 228,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Gene",
+      "name_cn": "基因",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "GeneticVariant",
+      "name_cn": "基因变异",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Guideline",
+      "name_cn": "指南",
+      "registered": true,
+      "instance_count": 170,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "HeartFailurePhenotype",
+      "name_cn": "心衰表型",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "HemodynamicIndicator",
+      "name_cn": "血流动力学指标",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "InfarctLocation",
+      "name_cn": "梗死部位",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "InheritancePattern",
+      "name_cn": "遗传方式",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "InpatientClinicalPathway",
+      "name_cn": "住院临床路径",
+      "registered": true,
+      "instance_count": 1,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "LabItem",
+      "name_cn": "检验项目",
+      "registered": true,
+      "instance_count": 27,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "LabSample",
+      "name_cn": "检验标本",
+      "registered": true,
+      "instance_count": 4,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "LabSubitem",
+      "name_cn": "检验细项",
+      "registered": true,
+      "instance_count": 23,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "MedicalTerm",
+      "name_cn": "医学术语",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "MedicalTermAlias",
+      "name_cn": "医学术语别名",
+      "registered": true,
+      "instance_count": 862,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingAssessment",
+      "name_cn": "护理评估",
+      "registered": true,
+      "instance_count": 8,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingAssessmentItem",
+      "name_cn": "护理评估条目",
+      "registered": true,
+      "instance_count": 10,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingCarePlan",
+      "name_cn": "护理计划",
+      "registered": true,
+      "instance_count": 5,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingContraindication",
+      "name_cn": "护理禁忌",
+      "registered": true,
+      "instance_count": 2,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingDiagnosis",
+      "name_cn": "护理诊断",
+      "registered": true,
+      "instance_count": 7,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingGrade",
+      "name_cn": "护理分级",
+      "registered": true,
+      "instance_count": 4,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingIntervention",
+      "name_cn": "护理措施",
+      "registered": true,
+      "instance_count": 9,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingOrderCheckRule",
+      "name_cn": "护理医嘱核对",
+      "registered": true,
+      "instance_count": 2,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingOutcome",
+      "name_cn": "护理结局",
+      "registered": true,
+      "instance_count": 7,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "NursingRecordItem",
+      "name_cn": "护理记录条目",
+      "registered": true,
+      "instance_count": 8,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Pathophysiology",
+      "name_cn": "病理生理",
+      "registered": true,
+      "instance_count": 302,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "PathwayExitCriteria",
+      "name_cn": "路径结束条件",
+      "registered": true,
+      "instance_count": 1,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "PathwayStage",
+      "name_cn": "路径阶段",
+      "registered": true,
+      "instance_count": 458,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "PathwayTask",
+      "name_cn": "路径任务",
+      "registered": true,
+      "instance_count": 2038,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "PathwayVariationReason",
+      "name_cn": "路径变异原因",
+      "registered": true,
+      "instance_count": 3,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "PatientState",
+      "name_cn": "患者状态",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Prevention",
+      "name_cn": "预防",
+      "registered": true,
+      "instance_count": 150,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Procedure",
+      "name_cn": "手术/操作",
+      "registered": true,
+      "instance_count": 38,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Prognosis",
+      "name_cn": "预后",
+      "registered": true,
+      "instance_count": 209,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "QualityControlPoint",
+      "name_cn": "质控点",
+      "registered": true,
+      "instance_count": 2,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "QualityControlRule",
+      "name_cn": "质控规则",
+      "registered": true,
+      "instance_count": 4,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "RecommendationStatement",
+      "name_cn": "推荐陈述",
+      "registered": true,
+      "instance_count": 574,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "RiskFactor",
+      "name_cn": "危险因素",
+      "registered": true,
+      "instance_count": 91,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "RiskStratification",
+      "name_cn": "风险分层",
+      "registered": true,
+      "instance_count": 95,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "SecondaryCause",
+      "name_cn": "继发病因",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "SeverityGrade",
+      "name_cn": "严重程度",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Sign",
+      "name_cn": "体征",
+      "registered": true,
+      "instance_count": 95,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "SourceAdjudication",
+      "name_cn": "来源裁决",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "SourceSection",
+      "name_cn": "来源章节",
+      "registered": true,
+      "instance_count": 101,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "Specialty",
+      "name_cn": "专科",
+      "registered": true,
+      "instance_count": 1,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "SpecialtyCarePathway",
+      "name_cn": "专科诊疗路径",
+      "registered": true,
+      "instance_count": 142,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "StandardDiagnosis",
+      "name_cn": "标准诊断",
+      "registered": true,
+      "instance_count": 89,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "StandardProcedure",
+      "name_cn": "标准手术",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "Symptom",
+      "name_cn": "症状",
+      "registered": true,
+      "instance_count": 53,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "TargetOrganDamage",
+      "name_cn": "靶器官损害",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ThresholdRule",
+      "name_cn": "阈值规则",
+      "registered": true,
+      "instance_count": 172,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "TimeWindow",
+      "name_cn": "时间窗",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "TreatmentItem",
+      "name_cn": "治疗项目",
+      "registered": true,
+      "instance_count": 22,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "TreatmentPlan",
+      "name_cn": "治疗方案",
+      "registered": true,
+      "instance_count": 164,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "ValveAnatomy",
+      "name_cn": "瓣膜部位",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "ValveLesionType",
+      "name_cn": "瓣膜病变类型",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "VascularTerritory",
+      "name_cn": "冠脉供血区域",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "VitalSignItem",
+      "name_cn": "生命体征",
+      "registered": true,
+      "instance_count": 6,
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "VolumeStatus",
+      "name_cn": "容量状态",
+      "registered": true,
+      "instance_count": 0,
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    }
+  ],
+  "relation_types": [
+    {
+      "type": "achieves_nursing_outcome",
+      "name_cn": "达成护理结局",
+      "registered": true,
+      "instance_count": 9,
+      "start_entity_types": [
+        "NursingIntervention"
+      ],
+      "end_entity_types": [
+        "NursingOutcome"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "assessment_supported_by_evidence",
+      "name_cn": "评估证据",
+      "registered": true,
+      "instance_count": 7,
+      "start_entity_types": [
+        "AssessmentScale"
+      ],
+      "end_entity_types": [
+        "Evidence"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "based_on_guideline",
+      "name_cn": "依据指南",
+      "registered": true,
+      "instance_count": 2264,
+      "start_entity_types": [
+        "Disease",
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "Guideline"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "blocked_by_differential",
+      "name_cn": "鉴别阻断",
+      "registered": true,
+      "instance_count": 9,
+      "start_entity_types": [
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "DifferentialDiagnosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "blocks_action",
+      "name_cn": "阻断动作",
+      "registered": true,
+      "instance_count": 43,
+      "start_entity_types": [
+        "ClinicalRule",
+        "Contraindication",
+        "DifferentialDiagnosis",
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "Drug",
+        "TreatmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "checks_assessment_level",
+      "name_cn": "检查评估等级",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "checks_contraindication",
+      "name_cn": "检查禁忌",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "checks_pathway_task",
+      "name_cn": "检查路径任务",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "checks_required_exam",
+      "name_cn": "检查必需检查",
+      "registered": true,
+      "instance_count": 2,
+      "start_entity_types": [
+        "QualityControlRule"
+      ],
+      "end_entity_types": [
+        "ExamItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "checks_required_lab",
+      "name_cn": "检查必需检验",
+      "registered": true,
+      "instance_count": 3,
+      "start_entity_types": [
+        "QualityControlRule"
+      ],
+      "end_entity_types": [
+        "LabItem",
+        "LabSubitem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "checks_target",
+      "name_cn": "核对对象",
+      "registered": true,
+      "instance_count": 10,
+      "start_entity_types": [
+        "NursingOrderCheckRule",
+        "QualityControlRule"
+      ],
+      "end_entity_types": [
+        "Drug",
+        "NursingAssessment",
+        "NursingIntervention",
+        "NursingRecordItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "decides_recommendation",
+      "name_cn": "形成推荐关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "depends_on_task",
+      "name_cn": "依赖前置任务",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "derived_from",
+      "name_cn": "来源关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "determines_nursing_grade",
+      "name_cn": "判定护理分级",
+      "registered": true,
+      "instance_count": 4,
+      "start_entity_types": [
+        "NursingAssessment"
+      ],
+      "end_entity_types": [
+        "NursingGrade"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "determines_result_level",
+      "name_cn": "判定等级",
+      "registered": true,
+      "instance_count": 12,
+      "start_entity_types": [
+        "AssessmentScoreRule"
+      ],
+      "end_entity_types": [
+        "AssessmentResultLevel"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "device_has_parameter",
+      "name_cn": "设备参数关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "diagnosis_criteria_uses_hemodynamic_indicator",
+      "name_cn": "诊断标准用血流动力学指标",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "differentiates_from",
+      "name_cn": "鉴别诊断关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_associated_gene",
+      "name_cn": "疾病基因关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_blood_pressure_grade",
+      "name_cn": "血压分级关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_clinical_subtype",
+      "name_cn": "临床分型关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_ecg_pattern",
+      "name_cn": "心电图模式关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_electrophysiology_mechanism",
+      "name_cn": "电生理机制关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_heart_failure_phenotype",
+      "name_cn": "心衰表型关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_infarct_location",
+      "name_cn": "梗死部位关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_inheritance_pattern",
+      "name_cn": "遗传方式关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_valve_anatomy",
+      "name_cn": "瓣膜部位关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_has_valve_lesion_type",
+      "name_cn": "瓣膜病变类型关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "disease_needs_secondary_cause_exclusion",
+      "name_cn": "继发病因排除关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "exam_item_has_observation",
+      "name_cn": "检查发现",
+      "registered": true,
+      "instance_count": 165,
+      "start_entity_types": [
+        "ExamItem"
+      ],
+      "end_entity_types": [
+        "ExamObservation"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "exam_observation_indicates_vascular_territory",
+      "name_cn": "冠脉区域提示关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "has_alias",
+      "name_cn": "受控别名",
+      "registered": true,
+      "instance_count": 862,
+      "start_entity_types": [
+        "Disease",
+        "Drug",
+        "ExamItem",
+        "ExamObservation",
+        "LabItem",
+        "LabSubitem",
+        "Procedure",
+        "Sign",
+        "Symptom",
+        "TreatmentItem",
+        "VitalSignItem"
+      ],
+      "end_entity_types": [
+        "MedicalTermAlias"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_alternative_action",
+      "name_cn": "替代动作",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "has_assessment_scale",
+      "name_cn": "适用评估量表",
+      "registered": true,
+      "instance_count": 1,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "AssessmentScale"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_category",
+      "name_cn": "疾病大类关联",
+      "registered": true,
+      "instance_count": 15,
+      "start_entity_types": [
+        "Specialty"
+      ],
+      "end_entity_types": [
+        "DiseaseCategory"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_clinical_rule",
+      "name_cn": "临床规则关联",
+      "registered": true,
+      "instance_count": 8067,
+      "start_entity_types": [
+        "DiagnosisCriteriaComponent",
+        "Disease",
+        "PathwayStage"
+      ],
+      "end_entity_types": [
+        "ClinicalRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_clinical_subtype",
+      "name_cn": "临床分型关联",
+      "registered": true,
+      "instance_count": 46,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "Disease"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_complication",
+      "name_cn": "并发症关联",
+      "registered": true,
+      "instance_count": 739,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "Complication"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_contraindication",
+      "name_cn": "禁忌关联",
+      "registered": true,
+      "instance_count": 382,
+      "start_entity_types": [
+        "Disease",
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "Contraindication"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_definition",
+      "name_cn": "定义关联",
+      "registered": true,
+      "instance_count": 138,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Definition"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_definition_component",
+      "name_cn": "定义明细关联",
+      "registered": true,
+      "instance_count": 205,
+      "start_entity_types": [
+        "Definition"
+      ],
+      "end_entity_types": [
+        "DefinitionComponent"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_diagnostic_component",
+      "name_cn": "诊断组件关联",
+      "registered": true,
+      "instance_count": 596,
+      "start_entity_types": [
+        "DiagnosisCriteria"
+      ],
+      "end_entity_types": [
+        "DiagnosisCriteriaComponent"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_diagnostic_criteria",
+      "name_cn": "诊断标准关联",
+      "registered": true,
+      "instance_count": 130,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "DiagnosisCriteria"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_differential_diagnosis",
+      "name_cn": "鉴别诊断关联",
+      "registered": true,
+      "instance_count": 150,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "DifferentialDiagnosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_differential_rule",
+      "name_cn": "鉴别规则关联",
+      "registered": true,
+      "instance_count": 67,
+      "start_entity_types": [
+        "DifferentialDiagnosis"
+      ],
+      "end_entity_types": [
+        "ClinicalRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_disease",
+      "name_cn": "疾病关联",
+      "registered": true,
+      "instance_count": 332,
+      "start_entity_types": [
+        "DiseaseCategory",
+        "DiseaseSubcategory"
+      ],
+      "end_entity_types": [
+        "Disease"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_epidemiology",
+      "name_cn": "流行病学关联",
+      "registered": true,
+      "instance_count": 39,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "Epidemiology"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_etiology",
+      "name_cn": "病因关联",
+      "registered": true,
+      "instance_count": 381,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Etiology"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_evidence",
+      "name_cn": "包含证据",
+      "registered": true,
+      "instance_count": 16009,
+      "start_entity_types": [
+        "Guideline",
+        "SourceSection"
+      ],
+      "end_entity_types": [
+        "Evidence"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_exam_plan",
+      "name_cn": "检查/检验方案",
+      "registered": true,
+      "instance_count": 130,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "ExamPlan"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_exit_criteria",
+      "name_cn": "出径/出院条件",
+      "registered": true,
+      "instance_count": 1,
+      "start_entity_types": [
+        "InpatientClinicalPathway"
+      ],
+      "end_entity_types": [
+        "PathwayExitCriteria"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_followup",
+      "name_cn": "随访关联",
+      "registered": true,
+      "instance_count": 206,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "FollowUp"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_inpatient_clinical_pathway",
+      "name_cn": "住院临床路径",
+      "registered": true,
+      "instance_count": 1,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "InpatientClinicalPathway"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_lab_plan",
+      "name_cn": "检验方案",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "has_nursing_assessment",
+      "name_cn": "护理评估关联",
+      "registered": true,
+      "instance_count": 21,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "NursingAssessment"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_nursing_assessment_item",
+      "name_cn": "护理评估条目",
+      "registered": true,
+      "instance_count": 10,
+      "start_entity_types": [
+        "NursingAssessment"
+      ],
+      "end_entity_types": [
+        "NursingAssessmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_nursing_care_plan",
+      "name_cn": "护理计划关联",
+      "registered": true,
+      "instance_count": 13,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "NursingCarePlan"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_nursing_diagnosis",
+      "name_cn": "护理诊断关联",
+      "registered": true,
+      "instance_count": 21,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "NursingDiagnosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_nursing_intervention",
+      "name_cn": "护理措施关联",
+      "registered": true,
+      "instance_count": 10,
+      "start_entity_types": [
+        "NursingDiagnosis"
+      ],
+      "end_entity_types": [
+        "NursingIntervention"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_pathophysiology",
+      "name_cn": "病理生理关联",
+      "registered": true,
+      "instance_count": 284,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Pathophysiology"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_prevention",
+      "name_cn": "预防关联",
+      "registered": true,
+      "instance_count": 84,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory",
+        "TreatmentPlan"
+      ],
+      "end_entity_types": [
+        "Prevention"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_prognosis",
+      "name_cn": "预后关联",
+      "registered": true,
+      "instance_count": 192,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Prognosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_quality_control_point",
+      "name_cn": "质控点关联",
+      "registered": true,
+      "instance_count": 10,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "QualityControlPoint"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_quality_control_rule",
+      "name_cn": "质控规则关联",
+      "registered": true,
+      "instance_count": 2,
+      "start_entity_types": [
+        "QualityControlPoint"
+      ],
+      "end_entity_types": [
+        "QualityControlRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_recommendation_statement",
+      "name_cn": "推荐陈述关联",
+      "registered": true,
+      "instance_count": 1142,
+      "start_entity_types": [
+        "Disease",
+        "PathwayStage"
+      ],
+      "end_entity_types": [
+        "RecommendationStatement"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_result_level",
+      "name_cn": "结果等级",
+      "registered": true,
+      "instance_count": 12,
+      "start_entity_types": [
+        "AssessmentScale"
+      ],
+      "end_entity_types": [
+        "AssessmentResultLevel"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_risk_factor",
+      "name_cn": "危险因素关联",
+      "registered": true,
+      "instance_count": 847,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory",
+        "RiskStratification"
+      ],
+      "end_entity_types": [
+        "RiskFactor"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_risk_stratification",
+      "name_cn": "风险分层关联",
+      "registered": true,
+      "instance_count": 90,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "RiskStratification"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_score_rule",
+      "name_cn": "计分规则",
+      "registered": true,
+      "instance_count": 20,
+      "start_entity_types": [
+        "AssessmentItem"
+      ],
+      "end_entity_types": [
+        "AssessmentScoreRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_sign",
+      "name_cn": "体征关联",
+      "registered": true,
+      "instance_count": 812,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Sign"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_source_adjudication",
+      "name_cn": "来源裁决关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "has_source_section",
+      "name_cn": "包含来源章节",
+      "registered": true,
+      "instance_count": 12,
+      "start_entity_types": [
+        "Guideline"
+      ],
+      "end_entity_types": [
+        "SourceSection"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_specialty_care_pathway",
+      "name_cn": "专科诊疗路径",
+      "registered": true,
+      "instance_count": 142,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "SpecialtyCarePathway"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_specific_drug",
+      "name_cn": "具体药品",
+      "registered": true,
+      "instance_count": 111,
+      "start_entity_types": [
+        "Drug"
+      ],
+      "end_entity_types": [
+        "Drug"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_standard_diagnosis",
+      "name_cn": "标准诊断关联",
+      "registered": true,
+      "instance_count": 94,
+      "start_entity_types": [
+        "Disease"
+      ],
+      "end_entity_types": [
+        "StandardDiagnosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_subcategory",
+      "name_cn": "疾病亚类关联",
+      "registered": true,
+      "instance_count": 51,
+      "start_entity_types": [
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "DiseaseSubcategory"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_symptom",
+      "name_cn": "症状关联",
+      "registered": true,
+      "instance_count": 987,
+      "start_entity_types": [
+        "Disease",
+        "DiseaseCategory"
+      ],
+      "end_entity_types": [
+        "Symptom"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_threshold_rule",
+      "name_cn": "阈值规则关联",
+      "registered": true,
+      "instance_count": 164,
+      "start_entity_types": [
+        "ExamObservation",
+        "LabSubitem"
+      ],
+      "end_entity_types": [
+        "ThresholdRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_total_score_rule",
+      "name_cn": "总分规则",
+      "registered": true,
+      "instance_count": 3,
+      "start_entity_types": [
+        "AssessmentScale"
+      ],
+      "end_entity_types": [
+        "AssessmentScoreRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_treatment_component",
+      "name_cn": "治疗组件关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "has_treatment_plan",
+      "name_cn": "治疗方案关联",
+      "registered": true,
+      "instance_count": 492,
+      "start_entity_types": [
+        "Disease",
+        "RecommendationStatement",
+        "TreatmentPlan"
+      ],
+      "end_entity_types": [
+        "TreatmentPlan"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "has_variation_reason",
+      "name_cn": "变异原因",
+      "registered": true,
+      "instance_count": 3,
+      "start_entity_types": [
+        "PathwayStage"
+      ],
+      "end_entity_types": [
+        "PathwayVariationReason"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_assessment_item",
+      "name_cn": "评估评分项",
+      "registered": true,
+      "instance_count": 20,
+      "start_entity_types": [
+        "AssessmentScale"
+      ],
+      "end_entity_types": [
+        "AssessmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_drug",
+      "name_cn": "方案药品",
+      "registered": true,
+      "instance_count": 878,
+      "start_entity_types": [
+        "TreatmentPlan"
+      ],
+      "end_entity_types": [
+        "Drug"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_exam_item",
+      "name_cn": "检查项目",
+      "registered": true,
+      "instance_count": 874,
+      "start_entity_types": [
+        "ExamPlan"
+      ],
+      "end_entity_types": [
+        "ExamItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_lab_item",
+      "name_cn": "检验项目",
+      "registered": true,
+      "instance_count": 442,
+      "start_entity_types": [
+        "ExamPlan"
+      ],
+      "end_entity_types": [
+        "LabItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_nursing_intervention",
+      "name_cn": "包含护理措施",
+      "registered": true,
+      "instance_count": 15,
+      "start_entity_types": [
+        "AssessmentActionRule",
+        "NursingCarePlan"
+      ],
+      "end_entity_types": [
+        "NursingIntervention"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_pathway_stage",
+      "name_cn": "包含路径阶段",
+      "registered": true,
+      "instance_count": 458,
+      "start_entity_types": [
+        "InpatientClinicalPathway",
+        "SpecialtyCarePathway"
+      ],
+      "end_entity_types": [
+        "PathwayStage"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_pathway_task",
+      "name_cn": "包含路径任务",
+      "registered": true,
+      "instance_count": 2038,
+      "start_entity_types": [
+        "PathwayStage"
+      ],
+      "end_entity_types": [
+        "PathwayTask"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_procedure",
+      "name_cn": "治疗手术",
+      "registered": true,
+      "instance_count": 376,
+      "start_entity_types": [
+        "TreatmentPlan"
+      ],
+      "end_entity_types": [
+        "Procedure"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "includes_treatment_item",
+      "name_cn": "治疗项目",
+      "registered": true,
+      "instance_count": 36,
+      "start_entity_types": [
+        "TreatmentPlan"
+      ],
+      "end_entity_types": [
+        "TreatmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "interacts_with",
+      "name_cn": "药物相互作用",
+      "registered": true,
+      "instance_count": 43,
+      "start_entity_types": [
+        "Drug"
+      ],
+      "end_entity_types": [
+        "Drug"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "lab_item_has_observation",
+      "name_cn": "检验发现",
+      "registered": true,
+      "instance_count": 25,
+      "start_entity_types": [
+        "LabItem"
+      ],
+      "end_entity_types": [
+        "ExamObservation"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "lab_item_has_subitem",
+      "name_cn": "检验细项",
+      "registered": true,
+      "instance_count": 27,
+      "start_entity_types": [
+        "LabItem"
+      ],
+      "end_entity_types": [
+        "LabSubitem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "level_supported_by_evidence",
+      "name_cn": "等级证据",
+      "registered": true,
+      "instance_count": 12,
+      "start_entity_types": [
+        "AssessmentResultLevel"
+      ],
+      "end_entity_types": [
+        "Evidence"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "maps_to_pathway_task",
+      "name_cn": "路径任务映射",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "next_pathway_stage",
+      "name_cn": "后继阶段",
+      "registered": true,
+      "instance_count": 319,
+      "start_entity_types": [
+        "PathwayStage"
+      ],
+      "end_entity_types": [
+        "PathwayStage"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "pathway_task_uses_action",
+      "name_cn": "任务绑定动作",
+      "registered": true,
+      "instance_count": 2027,
+      "start_entity_types": [
+        "PathwayTask"
+      ],
+      "end_entity_types": [
+        "Drug",
+        "ExamItem",
+        "FollowUp",
+        "LabItem",
+        "LabSubitem",
+        "Procedure",
+        "TreatmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "plan_has_nursing_diagnosis",
+      "name_cn": "计划关联护理诊断",
+      "registered": true,
+      "instance_count": 9,
+      "start_entity_types": [
+        "NursingCarePlan"
+      ],
+      "end_entity_types": [
+        "NursingDiagnosis"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "plan_targets_outcome",
+      "name_cn": "计划目标结局",
+      "registered": true,
+      "instance_count": 7,
+      "start_entity_types": [
+        "NursingCarePlan"
+      ],
+      "end_entity_types": [
+        "NursingOutcome"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "plan_uses_assessment",
+      "name_cn": "计划使用评估",
+      "registered": true,
+      "instance_count": 7,
+      "start_entity_types": [
+        "NursingCarePlan"
+      ],
+      "end_entity_types": [
+        "NursingAssessment"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "procedure_targets_ablation_site",
+      "name_cn": "消融位点关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "procedure_uses_device",
+      "name_cn": "器械使用关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "quality_rule_supported_by_evidence",
+      "name_cn": "质控证据",
+      "registered": true,
+      "instance_count": 2,
+      "start_entity_types": [
+        "QualityControlRule"
+      ],
+      "end_entity_types": [
+        "Evidence"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "recommendation_has_time_window",
+      "name_cn": "推荐时间窗关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "recommendation_requires_severity_grade",
+      "name_cn": "推荐严重度关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "recommendation_requires_volume_status",
+      "name_cn": "推荐容量状态关联",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "recommends_action",
+      "name_cn": "推荐动作",
+      "registered": true,
+      "instance_count": 980,
+      "start_entity_types": [
+        "ClinicalRule",
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "Drug",
+        "ExamItem",
+        "FollowUp",
+        "LabItem",
+        "Procedure",
+        "TreatmentItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "records_nursing_item",
+      "name_cn": "护理记录项",
+      "registered": true,
+      "instance_count": 24,
+      "start_entity_types": [
+        "NursingAssessment",
+        "NursingIntervention"
+      ],
+      "end_entity_types": [
+        "NursingRecordItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "requires_exclusion_exam",
+      "name_cn": "排除检查关联",
+      "registered": true,
+      "instance_count": 232,
+      "start_entity_types": [
+        "ClinicalRule",
+        "DifferentialDiagnosis"
+      ],
+      "end_entity_types": [
+        "ExamItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "requires_exclusion_lab",
+      "name_cn": "排除检验关联",
+      "registered": true,
+      "instance_count": 70,
+      "start_entity_types": [
+        "ClinicalRule",
+        "DifferentialDiagnosis"
+      ],
+      "end_entity_types": [
+        "LabItem",
+        "LabSubitem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "requires_pre_treatment_exam",
+      "name_cn": "治疗前检查",
+      "registered": true,
+      "instance_count": 426,
+      "start_entity_types": [
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "ExamItem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "requires_pre_treatment_lab",
+      "name_cn": "治疗前检验",
+      "registered": true,
+      "instance_count": 636,
+      "start_entity_types": [
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "LabItem",
+        "LabSubitem"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "restricts_nursing_intervention",
+      "name_cn": "约束护理措施",
+      "registered": true,
+      "instance_count": 2,
+      "start_entity_types": [
+        "NursingContraindication"
+      ],
+      "end_entity_types": [
+        "NursingIntervention"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "risk_stratification_uses_family_history",
+      "name_cn": "风险分层用家族史",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "risk_stratification_uses_target_organ_damage",
+      "name_cn": "风险分层用靶器官损害",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "stage_has_available_action",
+      "name_cn": "阶段可选动作",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "supported_by_evidence",
+      "name_cn": "证据支持",
+      "registered": true,
+      "instance_count": 92408,
+      "start_entity_types": [
+        "AssessmentActionRule",
+        "AssessmentItem",
+        "AssessmentScoreRule",
+        "ClinicalRule",
+        "Complication",
+        "Contraindication",
+        "Definition",
+        "DefinitionComponent",
+        "DiagnosisCriteria",
+        "DiagnosisCriteriaComponent",
+        "DifferentialDiagnosis",
+        "Disease",
+        "Drug",
+        "Epidemiology",
+        "Etiology",
+        "ExamItem",
+        "ExamObservation",
+        "FollowUp",
+        "InpatientClinicalPathway",
+        "LabItem",
+        "LabSample",
+        "LabSubitem",
+        "NursingAssessment",
+        "NursingAssessmentItem",
+        "NursingCarePlan",
+        "NursingContraindication",
+        "NursingDiagnosis",
+        "NursingGrade",
+        "NursingIntervention",
+        "NursingOrderCheckRule",
+        "NursingOutcome",
+        "NursingRecordItem",
+        "Pathophysiology",
+        "PathwayExitCriteria",
+        "PathwayStage",
+        "PathwayVariationReason",
+        "Prevention",
+        "Procedure",
+        "Prognosis",
+        "QualityControlRule",
+        "RecommendationStatement",
+        "RiskFactor",
+        "RiskStratification",
+        "Sign",
+        "Symptom",
+        "ThresholdRule",
+        "TreatmentItem",
+        "TreatmentPlan",
+        "VitalSignItem"
+      ],
+      "end_entity_types": [
+        "Evidence"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "supports_risk_stratification",
+      "name_cn": "支撑风险分层",
+      "registered": true,
+      "instance_count": 3,
+      "start_entity_types": [
+        "AssessmentResultLevel"
+      ],
+      "end_entity_types": [
+        "RiskStratification"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "targets_differential_diagnosis",
+      "name_cn": "服务于鉴别",
+      "registered": true,
+      "instance_count": 0,
+      "start_entity_types": [],
+      "end_entity_types": [],
+      "status": "结构已定义·实例未落地",
+      "is_extension_slot": true
+    },
+    {
+      "type": "targets_nursing_outcome",
+      "name_cn": "护理结局目标",
+      "registered": true,
+      "instance_count": 10,
+      "start_entity_types": [
+        "NursingDiagnosis"
+      ],
+      "end_entity_types": [
+        "NursingOutcome"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "triggers_assessment_action",
+      "name_cn": "触发结果动作",
+      "registered": true,
+      "instance_count": 12,
+      "start_entity_types": [
+        "AssessmentResultLevel"
+      ],
+      "end_entity_types": [
+        "AssessmentActionRule"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "triggers_recommendation",
+      "name_cn": "触发推荐",
+      "registered": true,
+      "instance_count": 567,
+      "start_entity_types": [
+        "ClinicalRule"
+      ],
+      "end_entity_types": [
+        "RecommendationStatement"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "uses_assessment_scale",
+      "name_cn": "复用量表",
+      "registered": true,
+      "instance_count": 2,
+      "start_entity_types": [
+        "NursingAssessment"
+      ],
+      "end_entity_types": [
+        "AssessmentScale"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "uses_lab_sample",
+      "name_cn": "检验标本",
+      "registered": true,
+      "instance_count": 8,
+      "start_entity_types": [
+        "LabSubitem"
+      ],
+      "end_entity_types": [
+        "LabSample"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "uses_primary_guideline",
+      "name_cn": "主依据指南",
+      "registered": true,
+      "instance_count": 572,
+      "start_entity_types": [
+        "RecommendationStatement"
+      ],
+      "end_entity_types": [
+        "Guideline"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    },
+    {
+      "type": "uses_source_section",
+      "name_cn": "使用来源章节",
+      "registered": true,
+      "instance_count": 128,
+      "start_entity_types": [
+        "Definition",
+        "Disease"
+      ],
+      "end_entity_types": [
+        "SourceSection"
+      ],
+      "status": "实例已存在",
+      "is_extension_slot": false
+    }
+  ],
+  "unregistered_entity_types": [],
+  "unregistered_relation_types": [],
+  "note": "注册表基准=代码内V4.1 ENTITY_NAME_MAP/REL_NAME_MAP；端点为Neo4j实际观测值；未注册=库中存在但注册表未定义（需复核）；扩展槽位=注册表已定义、实例待批次落地"
+}

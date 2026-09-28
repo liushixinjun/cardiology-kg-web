@@ -10,7 +10,7 @@ import time
 import socket
 
 # 读取本地配置
-cfg_path = r"e:\Trae CN\AI专科知识图谱生成TraeCN\kg-test-page\.server-config.json"
+cfg_path = r"D:\Trae CN\AI专科知识图谱生成TraeCN\AI专科知识图谱生成TraeCN\kg-test-page\.server-config.json"
 with open(cfg_path, "r", encoding="utf-8") as f:
     cfg = json.load(f)
 

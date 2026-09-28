@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 数据总览</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=20260913">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026092813">
 <style>
 /* ====== Page ====== */
 .page{width:100%;padding:24px 32px;box-sizing:border-box}
@@ -288,7 +288,7 @@
       <a class="nav-card" href="explore.html">
         <div class="nc-icon">&#x1f9ed;</div>
         <h3>图谱探索</h3>
-        <p>查看专病<span class="dcp">17</span>维度详情、关系网络和实体清单</p>
+        <p>查看专病<span class="dcp">17</span>维度详情、CDSS诊疗链路、可用/受阻推荐</p>
       </a>
       <a class="nav-card" href="network.html">
         <div class="nc-icon">&#x1f578;&#xfe0f;</div>
@@ -297,33 +297,38 @@
       </a>
       <a class="nav-card" href="heatmap.html">
         <div class="nc-icon">&#x1f52c;</div>
-        <h3>专病诊疗框架覆盖分析</h3>
-        <p>按疾病→路径→阶段→规则→推荐链路分析就绪程度</p>
+        <h3>数据覆盖分析</h3>
+        <p>结构/实例/审核/可用四层覆盖矩阵，按疾病分析就绪程度</p>
       </a>
-      <a class="nav-card" href="specialty-cdss-prototype.html">
-        <div class="nc-icon">&#x1fa7a;</div>
-        <h3>专科辅助诊疗</h3>
-        <p>临床决策支持：路径→阶段→规则→推荐→证据全链路推荐与模拟</p>
-      </a>
-      <a class="nav-card" href="instances.html">
-        <div class="nc-icon">&#x1f50d;</div>
-        <h3>图谱实例检索</h3>
-        <p>按实体类型、关系类型和关键词检索图谱实例</p>
+      <a class="nav-card" href="review.html">
+        <div class="nc-icon">&#x2705;</div>
+        <h3>临床审核</h3>
+        <p>推荐陈述审核工作台：审核基线、G6/G8状态、受阻清单</p>
       </a>
       <a class="nav-card" href="schema.html">
         <div class="nc-icon">&#x1f4d0;</div>
-        <h3>图谱数据审核</h3>
-        <p>医学专员审核工作台：疾病全链路审核、维度视角、字典对比、影响范围预览</p>
+        <h3>图谱数据字典</h3>
+        <p>实体/关系结构注册表与实例检索（数据维护与结构字典）</p>
+      </a>
+      <a class="nav-card" href="standard.html">
+        <div class="nc-icon">&#x1f4d8;</div>
+        <h3>Schema标准</h3>
+        <p>建模标准、字段约束和质量规则定义</p>
+      </a>
+      <a class="nav-card" href="guideline.html">
+        <div class="nc-icon">&#x1f4da;</div>
+        <h3>指南库</h3>
+        <p>指南与来源资料库，按疾病关联浏览</p>
       </a>
       <a class="nav-card" href="terminology.html">
         <div class="nc-icon">&#x1f9ec;</div>
         <h3>医学术语库</h3>
         <p>按维度浏览所有医学术语，支持搜索与分类筛选</p>
       </a>
-      <a class="nav-card" href="standard.html">
-        <div class="nc-icon">&#x1f4d8;</div>
-        <h3>Schema标准</h3>
-        <p>建模标准、字段约束和质量规则定义</p>
+      <a class="nav-card" href="specialty-cdss-prototype.html">
+        <div class="nc-icon">&#x1fa7a;</div>
+        <h3>专科辅助诊疗</h3>
+        <p>临床决策支持：路径→阶段→规则→推荐→证据全链路推荐与模拟</p>
       </a>
     </div>
   </section>
@@ -335,8 +340,8 @@
 <div class="modal" id="modal"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=20260913"></script>
-<script src="dashboard.js?v=20260913"></script>
+<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="dashboard.js?v=2026092813"></script>
 <script>
 injectDimCount();renderNav('index');
 /* Dashboard 只需要 disease list + stats + dim_counts，不需要全量维度数据 */
