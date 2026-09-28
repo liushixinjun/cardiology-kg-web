@@ -288,61 +288,67 @@
 .std-arch-dia-l4b.std-layer-link{color:#9b6dff}
 .std-arch-dia-l5.std-layer-link{color:#ff9f43}
 
-/* ====== 分层结构图浮层 ====== */
-.ld-mask{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;display:none;padding:26px 18px;overflow-y:auto;background:rgba(5,7,12,.8);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+/* ====== 分层结构图浮层（明亮医疗风：白底 · 高对比 · 每层加深主色） ====== */
+.ld-mask{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;display:none;padding:26px 18px;overflow-y:auto;background:rgba(12,26,45,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .ld-mask.show{display:block;animation:ldFade .18s ease}
 @keyframes ldFade{from{opacity:0}to{opacity:1}}
-.ld-panel{--ld:#4f8cff;position:relative;max-width:1140px;margin:0 auto;background:#0f1220;border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;box-shadow:0 32px 90px rgba(0,0,0,.66);animation:ldRise .22s cubic-bezier(.2,.8,.3,1)}
+.ld-panel{--ld:#1c6fd6;position:relative;max-width:1140px;margin:0 auto;background:#fff;border:1px solid #d8e1ee;border-radius:16px;overflow:hidden;box-shadow:0 26px 70px rgba(15,35,60,.28),0 2px 8px rgba(15,35,60,.08);animation:ldRise .22s cubic-bezier(.2,.8,.3,1);color:#12263f}
+.ld-panel[data-layer="catalog"]{--ld:#5b6b7f}
+.ld-panel[data-layer="diagnosis"]{--ld:#1c6fd6}
+.ld-panel[data-layer="medical"]{--ld:#b45309}
+.ld-panel[data-layer="cdss"]{--ld:#1f7a3d}
+.ld-panel[data-layer="app"]{--ld:#7048e8}
+.ld-panel[data-layer="evidence"]{--ld:#0b7285}
 @keyframes ldRise{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
-.ld-panel::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:34px 34px}
-.ld-head{position:relative;display:flex;align-items:center;gap:15px;padding:19px 22px 17px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ld-head{position:relative;display:flex;align-items:center;gap:15px;padding:19px 22px 17px;border-bottom:1px solid #e3eaf4;background:linear-gradient(180deg,#f7fafd,#fff)}
 .ld-head::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ld)}
-.ld-head-num{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#0b0e17;background:var(--ld);flex-shrink:0;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.ld-head-num{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;background:var(--ld);flex-shrink:0;box-shadow:0 5px 14px rgba(15,35,60,.18)}
 .ld-head-main{flex:1;min-width:0}
-.ld-head-title{font-size:20px;font-weight:800;color:#eef1f8;line-height:1.25}
-.ld-head-sub{font-size:12px;color:#8f97ad;margin-top:3px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;letter-spacing:.02em}
-.ld-head-role{font-size:12.5px;color:#a8b0c4;margin-top:5px;line-height:1.55}
-.ld-head-q{flex-shrink:0;max-width:330px;font-size:12.5px;line-height:1.6;color:#c9d0e0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:9px 13px}
-.ld-head-q b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ld);margin-bottom:3px}
-.ld-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04);color:#a9b1c5;font-size:15px;line-height:1;cursor:pointer;transition:all .15s}
-.ld-close:hover{background:rgba(255,255,255,.12);color:#fff}
-.ld-tabs{position:relative;display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.014)}
-.ld-tab{font-size:12px;font-weight:700;padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.11);background:transparent;color:#939bb1;cursor:pointer;transition:all .15s;white-space:nowrap}
-.ld-tab:hover{color:#eef1f8;border-color:rgba(255,255,255,.3)}
-.ld-tab.active{background:var(--ld);border-color:var(--ld);color:#0b0e17}
-.ld-body{position:relative;padding:20px 22px 24px}
-.ld-block{margin-bottom:20px}
+.ld-head-title{font-size:21px;font-weight:800;color:#0f2744;line-height:1.25}
+.ld-head-sub{font-size:12px;color:#5f6f86;font-family:'SF Mono','Cascadia Code','Consolas',monospace;letter-spacing:.02em}
+.ld-head-role{font-size:13px;color:#42566f;margin-top:5px;line-height:1.6}
+.ld-head-q{flex-shrink:0;max-width:330px;font-size:13px;line-height:1.6;color:#1d3a5c;background:#f2f7fe;border:1px solid #d3e3f8;border-radius:10px;padding:9px 13px}
+.ld-head-q b{display:block;font-size:10px;letter-spacing:.1em;color:var(--ld);margin-bottom:3px}
+.ld-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #d8e1ee;background:#fff;color:#5b6b7f;font-size:15px;line-height:1;cursor:pointer;transition:all .15s}
+.ld-close:hover{background:#eef3f9;color:#0f2744;border-color:#b9c9dd}
+.ld-tabs{position:relative;display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;border-bottom:1px solid #e8eef7;background:#fbfdff}
+.ld-tab{font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid #d3dded;background:#fff;color:#4a5c76;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ld-tab:hover{color:#0f2744;border-color:#9fb6d4;background:#f4f8fd}
+.ld-tab.active{background:var(--ld);border-color:var(--ld);color:#fff;box-shadow:0 3px 9px rgba(15,35,60,.16)}
+.ld-body{position:relative;padding:20px 22px 24px;background:#fff}
+.ld-block{margin-bottom:22px}
 .ld-block:last-child{margin-bottom:0}
-.ld-block-title{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7e879d;margin-bottom:10px}
-.ld-block-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.1),transparent)}
-.ld-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:8px}
-.ld-card{position:relative;border:1px solid rgba(255,255,255,.085);border-radius:10px;padding:10px 12px 10px 14px;background:rgba(255,255,255,.022)}
-.ld-card::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--ld);opacity:.55}
-.ld-card-zh{font-size:13px;font-weight:700;color:#eef1f8;line-height:1.4}
-.ld-card-en{font-size:10.5px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#8f97ad;margin-top:3px;word-break:break-all}
-.ld-card-note{font-size:11.5px;color:#939bb1;margin-top:6px;line-height:1.6}
-.ld-chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 13px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.018);margin-bottom:8px}
+.ld-block-title{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:800;letter-spacing:.13em;color:#4a5c76;margin-bottom:11px}
+.ld-block-title::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--ld);flex-shrink:0}
+.ld-block-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#dde5f0,transparent)}
+.ld-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:9px}
+.ld-card{position:relative;border:1px solid #e0e8f3;border-radius:10px;padding:11px 13px 11px 15px;background:#fbfdff}
+.ld-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--ld)}
+.ld-card-zh{font-size:13.5px;font-weight:700;color:#0f2744;line-height:1.4}
+.ld-card-en{font-size:11px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#5f6f86;margin-top:3px;word-break:break-all}
+.ld-card-note{font-size:12px;color:#4a5c76;margin-top:6px;line-height:1.62}
+.ld-chain{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:12px 14px;border:1px solid #e4ebf5;border-radius:10px;background:#f7fafd;margin-bottom:9px}
 .ld-chain:last-child{margin-bottom:0}
-.ld-n{display:inline-flex;flex-direction:column;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid;line-height:1.35;white-space:nowrap}
-.ld-n small{font-size:9.5px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-weight:600;opacity:.72;margin-top:2px}
-.ld-n.type{color:#ccd4e5;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
-.ld-n.key{color:#0b0e17;background:var(--ld);border-color:var(--ld)}
-.ld-n.key small{opacity:.7}
-.ld-n.eg{color:#eef1f8;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.075)}
-.ld-n.act{color:#69db7c;border-color:rgba(81,207,102,.42);background:rgba(81,207,102,.1)}
-.ld-n.warn{color:#ff8787;border-color:rgba(250,82,82,.42);background:rgba(250,82,82,.1)}
-.ld-a{font-size:11px;color:#8f97ad;white-space:nowrap;letter-spacing:.01em}
+.ld-chain-label{min-width:104px;font-weight:800;font-size:12.5px;color:#33455c}
+.ld-n{display:inline-flex;flex-direction:column;font-size:13px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid;line-height:1.35;white-space:nowrap}
+.ld-n small{font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-weight:600;opacity:.8;margin-top:2px}
+.ld-n.type{color:#1c3350;border-color:#cfdae9;background:#fff}
+.ld-n.key{color:#fff;background:var(--ld);border-color:var(--ld);box-shadow:0 2px 7px rgba(15,35,60,.16)}
+.ld-n.eg{color:#123a63;border-color:#bdd2ee;background:#eef5ff}
+.ld-n.act{color:#1f7a3a;border-color:#a9ddb9;background:#e9f8ee}
+.ld-n.warn{color:#b52d20;border-color:#f2b8b0;background:#fdecea}
+.ld-a{font-size:11.5px;color:#55647c;white-space:nowrap;letter-spacing:.01em}
 .ld-a b{color:var(--ld);font-weight:800;margin:0 1px}
-.ld-ami{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px dashed rgba(255,255,255,.16);background:linear-gradient(135deg,rgba(255,255,255,.035),transparent)}
-.ld-ami-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0b0e17;background:var(--ld);border-radius:5px;padding:3px 8px;margin-top:1px}
-.ld-ami-text{font-size:12.5px;color:#c3cbdd;line-height:1.75}
-.ld-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:8px}
-.ld-rule{display:flex;gap:9px;font-size:12.5px;color:#b9c1d4;line-height:1.68;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:10px 12px}
+.ld-ami{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:10px;border:1px dashed #c3d3e8;background:linear-gradient(135deg,#f4f9ff,#fbfdff)}
+.ld-ami-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--ld);border-radius:5px;padding:4px 9px;margin-top:1px}
+.ld-ami-text{font-size:13px;color:#1d3a5c;line-height:1.78}
+.ld-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:9px}
+.ld-rule{display:flex;gap:10px;font-size:13px;color:#2c3f58;line-height:1.7;background:#fbfdff;border:1px solid #e0e8f3;border-radius:9px;padding:11px 13px}
 .ld-rule i{font-style:normal;color:var(--ld);font-weight:800;flex-shrink:0}
-.ld-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.014);font-size:11.5px;color:#7e879d}
+.ld-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid #e8eef7;background:#fbfdff;font-size:11.5px;color:#5f6f86}
 @media(max-width:860px){
-  .ld-mask{padding:0}
-  .ld-panel{border-radius:0;min-height:100vh}
+  .ld-mask{padding:0;background:#fff}
+  .ld-panel{border-radius:0;min-height:100vh;box-shadow:none;border:0}
   .ld-head{flex-wrap:wrap}
   .ld-head-q{max-width:none;width:100%;order:5}
   .ld-grid{grid-template-columns:1fr 1fr}
@@ -1798,7 +1804,7 @@ function toggleAllCollapse(btn) {
    样式：type 普通 / key 本层主角 / eg AMI 实例 / act 动作 / warn 禁忌阻断。 */
 var LAYER_DIAGRAMS = {
   catalog: {
-    num: '1', name: '目录层', en: 'Catalog Layer · Specialty / Category / Subcategory', color: '#8b90a0',
+    num: '1', name: '目录层', en: 'Catalog Layer · Specialty / Category / Subcategory', color: '#5b6b7f',
     role: '图谱的骨架与页面导航层：定义学科归属和疾病分组，只做目录，不承担诊断与治疗语义。',
     q: '属于哪个专科、哪个疾病大类',
     entities: [
@@ -1822,7 +1828,7 @@ var LAYER_DIAGRAMS = {
     ]
   },
   diagnosis: {
-    num: '2', name: '临床诊断层', en: 'Diagnosis Layer · Disease / StandardDiagnosis', color: '#4f8cff',
+    num: '2', name: '临床诊断层', en: 'Diagnosis Layer · Disease / StandardDiagnosis', color: '#1c6fd6',
     role: '回答「患者可能或确定患什么病」：待分型疾病与具体分型统一为 Disease，编码由标准诊断承载。',
     q: '患者可能或确定患什么病',
     entities: [
@@ -1862,7 +1868,7 @@ var LAYER_DIAGRAMS = {
     ]
   },
   medical: {
-    num: '3', name: '医学知识层', en: 'Medical Knowledge Layer · Facts / Exams / Treatment', color: '#ff922b',
+    num: '3', name: '医学知识层', en: 'Medical Knowledge Layer · Facts / Exams / Treatment', color: '#b45309',
     role: '回答「这个病是什么、有何表现、如何检查治疗」：疾病挂载全部医学事实，方案作为策略容器中转。',
     q: '这个病是什么、有何表现、如何检查治疗',
     entities: [
@@ -1922,7 +1928,7 @@ var LAYER_DIAGRAMS = {
     ]
   },
   cdss: {
-    num: '4', name: 'CDSS决策层', en: 'CDSS Decision Layer · Rule / Recommendation / Contraindication', color: '#51cf66',
+    num: '4', name: 'CDSS决策层', en: 'CDSS Decision Layer · Rule / Recommendation / Contraindication', color: '#1f7a3d',
     role: '回答「当前患者何时触发、推荐什么、为什么」：规则命中后由推荐陈述承载展示与审核，再落到可执行动作。',
     q: '当前患者何时触发、推荐什么、为什么',
     entities: [
@@ -1967,7 +1973,7 @@ var LAYER_DIAGRAMS = {
     ]
   },
   app: {
-    num: '5', name: '专科应用结构层', en: 'Specialty Application Layer · Scale / Nursing / Pathway / QC', color: '#9b6dff',
+    num: '5', name: '专科应用结构层', en: 'Specialty Application Layer · Scale / Nursing / Pathway / QC', color: '#7048e8',
     role: 'V4.0 新增层：把评估评分、护理、路径、质控四类应用模板建成可计算结构，是专科 CDSS 的落地骨架。',
     q: '这个病种的评估怎么算分、护理怎么做、路径怎么走、质量怎么控',
     entities: [
@@ -2020,7 +2026,7 @@ var LAYER_DIAGRAMS = {
     ]
   },
   evidence: {
-    num: '6', name: '证据治理层', en: 'Evidence Governance Layer · Guideline / SourceSection / Evidence', color: '#ff9f43',
+    num: '6', name: '证据治理层', en: 'Evidence Governance Layer · Guideline / SourceSection / Evidence', color: '#0b7285',
     role: '回答「推荐依据是哪份指南哪一页」：指南按章节拆证据，推荐与知识实体反向回指，保证全链可追溯。',
     q: '推荐依据是哪份指南哪一页',
     entities: [
@@ -2105,7 +2111,7 @@ function openLayerDiagram(key, tabIdx) {
   h += '<div class="ld-block"><div class="ld-block-title">' + (multi ? tab.t + ' · 关系链路' : tab.t) + '</div>';
   (tab.chains || []).forEach(function (c) {
     h += '<div class="ld-chain">';
-    if (c.t) h += '<span class="ld-a" style="min-width:104px;font-weight:700;color:#b9c1d4">' + c.t + '</span>';
+    if (c.t) h += '<span class="ld-chain-label">' + c.t + '</span>';
     h += ldSeq(c.seq) + '</div>';
   });
   h += '</div>';
@@ -2124,7 +2130,7 @@ function openLayerDiagram(key, tabIdx) {
   h += '<div class="ld-foot"><span>口径来源：图谱架构规范 第1章「六层结构」＋第2章实体类型与关系标准（schema-map.js 同源）</span><span>Esc 或点击空白处关闭</span></div>';
 
   var panel = document.getElementById('layerPanel');
-  panel.style.setProperty('--ld', d.color);
+  panel.setAttribute('data-layer', key);
   panel.innerHTML = h;
   document.getElementById('layerDiagram').classList.add('show');
   document.body.style.overflow = 'hidden';
