@@ -3,80 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>专科知识图谱 · 心血管内科 - 专病诊疗框架覆盖分析</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<title>专科知识图谱 · 心血管内科 - 数据建设进度</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 .cov-page{padding:24px}
-.cov-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.cov-stat{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:16px;text-align:center}
-.cov-stat-num{font-size:28px;font-weight:800;color:var(--accent)}
-.cov-stat-label{font-size:11px;color:var(--muted);margin-top:4px}
 .cov-section{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px;margin-bottom:20px}
-.cov-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px;position:relative}
+.cov-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .cov-section-desc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .cov-table{width:100%;border-collapse:collapse;font-size:12px}
-.cov-table th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);border-bottom:2px solid var(--rule);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.cov-table th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);border-bottom:2px solid var(--rule);white-space:nowrap}
 .cov-table td{padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
 .cov-table tr.cov-row{cursor:pointer;transition:background .1s}
 .cov-table tr.cov-row:hover{background:rgba(79,140,255,.06)}
 .cov-table tr.cov-row.expanded{background:rgba(79,140,255,.04)}
 .cov-table .disease-name{font-weight:600;color:var(--ink)}
-.cov-table .disease-name:hover{color:var(--accent)}
-.cov-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
-.cov-badge.ready{background:#d3f9d8;color:#2b8a3e}
+.cov-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.cov-badge.ready{background:var(--green-bg);color:var(--green-text,#2f9e44)}
 .cov-badge.reviewed{background:#d0ebff;color:#1971c2}
-.cov-badge.partial{background:#fff3bf;color:#e67700}
-.cov-badge.struct{background:#e9ecef;color:#495057}
+.cov-badge.partial{background:var(--warn-bg);color:var(--warn-ink)}
+.cov-badge.struct{background:var(--neutral-bg);color:var(--muted)}
 .cov-badge.none{background:var(--bg3);color:var(--muted)}
-/* 4001整改：四层覆盖点 */
-.cov-layer-cell{text-align:center;min-width:34px}
-.cov-dot{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;font-size:11px;font-weight:800;cursor:help}
-.cov-dot.yes{background:rgba(81,207,102,.15);color:#51cf66}
-.cov-dot.no{background:var(--bg3);color:var(--muted);opacity:.45}
 .cov-num{font-weight:700;color:var(--accent);min-width:20px;display:inline-block;text-align:center}
 .cov-num.zero{color:var(--muted);opacity:.5}
 .cov-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 .cov-filter label{font-size:12px;color:var(--muted)}
 .cov-filter select,.cov-filter input{font-size:12px;padding:4px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--bg3);color:var(--ink);outline:none}
 .cov-filter select:focus,.cov-filter input:focus{border-color:var(--accent)}
-.cov-chain{display:flex;align-items:center;gap:4px;margin:12px 0;font-size:12px;color:var(--muted);flex-wrap:wrap}
-.cov-chain-step{padding:4px 10px;border-radius:6px;background:var(--bg3);border:1px solid var(--rule);font-weight:600}
-.cov-chain-arrow{color:var(--accent)}
 .cov-empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
 
-/* 展开行 */
-.cov-expand-row td{padding:0!important;border-bottom:1px solid var(--rule)}
-.cov-expand{padding:16px 24px;background:var(--bg3);animation:covSlideIn .2s ease}
-@keyframes covSlideIn{from{opacity:0;max-height:0}to{opacity:1;max-height:2000px}}
-.cov-expand-loading{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+/* 建设漏斗 */
+.cov-funnel{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fn-step{flex:1;min-width:150px;background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px 12px;text-align:center;position:relative}
+.fn-step.hot{border-color:var(--green,#2f9e44)}
+.fn-num{font-size:30px;font-weight:800;line-height:1.1}
+.fn-label{font-size:12px;font-weight:700;color:var(--ink);margin-top:6px}
+.fn-pct{font-size:10px;color:var(--muted);margin-top:4px}
+.fn-arrow{display:flex;align-items:center;padding:0 6px;font-size:18px;color:var(--muted);font-weight:700}
+.fn-note{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6}
 
-.cov-pw{margin-bottom:16px}
-.cov-pw-head{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.cov-pw-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
-
-.cov-stage{margin-left:16px;margin-bottom:10px}
-.cov-stage-head{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.cov-stage-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
-
-.cov-rule{margin-left:16px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
-.cov-rule:last-child{border-bottom:none}
-.cov-rule-head{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.cov-rule-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
-
-.cov-rec-card{background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
-.cov-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(79,140,255,.12)}
-.cov-rec-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.cov-rec-lvl{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px}
-.cov-rec-lvl.yes{background:#d3f9d8;color:#2b8a3e}
-.cov-rec-lvl.no{background:var(--bg3);color:var(--muted)}
-.cov-rec-text{font-size:12px;color:var(--ink);line-height:1.6}
-.cov-rec-meta{font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+/* 建设进度圆点 */
+.pdot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;margin-right:3px;background:var(--bg3);color:var(--muted);border:1px solid var(--rule)}
+.pdot.on{background:var(--green-bg);color:var(--green-text,#2f9e44);border-color:var(--green,#2f9e44)}
+.pdot-num{font-size:10px;color:var(--muted);margin-left:4px;white-space:nowrap}
 
 /* 瓶颈分析 */
 .cov-bottleneck{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .cov-bn-card{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px;position:relative;overflow:hidden}
 .cov-bn-card.critical{border-color:var(--accent2)}
-.cov-bn-card.good{border-color:#51cf66}
+.cov-bn-card.good{border-color:var(--green,#2f9e44)}
 .cov-bn-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .cov-bn-title{font-size:13px;font-weight:700;color:var(--ink)}
 .cov-bn-count{font-size:20px;font-weight:800}
@@ -84,49 +58,68 @@
 .cov-bn-bar-fill{height:100%;border-radius:2px;transition:width .3s}
 .cov-bn-desc{font-size:11px;color:var(--muted);margin-top:6px}
 
-/* 帮助提示 */
-.cov-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--bg3);border:1px solid var(--rule);color:var(--muted);font-size:11px;font-weight:700;cursor:help;margin-left:6px;vertical-align:middle;transition:all .15s;flex-shrink:0}
-.cov-help:hover{border-color:var(--accent);color:var(--accent)}
-.cov-help-panel{position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:16px 20px;font-size:12px;color:var(--ink);line-height:1.8;width:480px;max-width:90vw;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s}
-.cov-help-panel h4{font-size:13px;font-weight:700;color:var(--accent);margin:0 0 8px}
-.cov-help-panel .cov-help-item{display:flex;gap:8px;padding:3px 0}
-.cov-help-panel .cov-help-key{font-weight:700;color:var(--accent);min-width:130px;flex-shrink:0}
-.cov-help-panel .cov-help-val{color:var(--ink);flex:1}
-.cov-help.active .cov-help-panel{opacity:1;pointer-events:auto}
-.page-header{position:relative}
+/* 展开行 */
+.cov-expand-row td{padding:0!important;border-bottom:1px solid var(--rule)}
+.cov-expand{padding:16px 24px;background:var(--bg3);animation:covSlideIn .2s ease}
+@keyframes covSlideIn{from{opacity:0;max-height:0}to{opacity:1;max-height:2000px}}
+.cov-expand-loading{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+.cov-pw{margin-bottom:16px}
+.cov-pw-head{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cov-pw-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-stage{margin-left:16px;margin-bottom:10px}
+.cov-stage-head{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cov-stage-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-rule{margin-left:16px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.cov-rule:last-child{border-bottom:none}
+.cov-rule-head{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cov-rule-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-rec-card{background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.cov-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px var(--accent-bg)}
+.cov-rec-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.cov-rec-lvl{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px}
+.cov-rec-lvl.yes{background:var(--green-bg);color:var(--green-text,#2f9e44)}
+.cov-rec-lvl.no{background:var(--bg3);color:var(--muted)}
+.cov-rec-text{font-size:12px;color:var(--ink);line-height:1.6}
+.cov-rec-meta{font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:900px){.fn-arrow{display:none}.fn-step{margin-bottom:8px}}
 </style>
 </head>
 <body>
 <div class="nav"></div>
 <div class="cov-page">
   <div class="page-header">
-    <h1>🔬 专病诊疗框架覆盖分析<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>指标说明</h4><div class="cov-help-item"><span class="cov-help-key">框架疾病 Disease</span><span class="cov-help-val">已建立临床路径的疾病数。全库疾病含未建路径的，与首页一致</span></div><div class="cov-help-item"><span class="cov-help-key">四层覆盖（4001整改）</span><span class="cov-help-val">结构已定义=存在专科诊疗路径；实例已存在=存在推荐陈述实例；审核已通过=存在clinical_ready推荐；可正式使用=存在formal_cdss_ready=true推荐（逐层递进）</span></div><div class="cov-help-item"><span class="cov-help-key">状态 Status</span><span class="cov-help-val">取该疾病达到的最高层：可正式使用/审核已通过·待发布/实例已存在·待审核/结构已定义·无实例/无覆盖。不再用"推荐≥5且证据≥3"的数量阈值判定</span></div><div class="cov-help-item"><span class="cov-help-key">推荐陈述 Rec.</span><span class="cov-help-val">临床推荐条目总数（RecommendationStatement），另单列审核通过数与受阻数</span></div><div class="cov-help-item"><span class="cov-help-key">推荐动作 Action</span><span class="cov-help-val">推荐关联的具体医嘱/操作数（recommends_action + blocks_action）</span></div><div class="cov-help-item"><span class="cov-help-key">关联证据 Evidence</span><span class="cov-help-val">推荐陈述直接关联的证据条目数，全库证据含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">关联指南 Guideline</span><span class="cov-help-val">推荐陈述直接关联的指南数，全库指南含未关联推荐的</span></div><div class="cov-help-item"><span class="cov-help-key">20维度覆盖 Dimension</span><span class="cov-help-val">20个核心临床维度（17基础+3护理）的平均覆盖率，与首页/图谱探索一致（CORE_DIM_KEYS）</span></div></div></span></h1>
-    <div class="subtitle">按 疾病 Disease → 临床路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation → 动作/证据/指南 Actions/Evidence/Guidelines 链路，以 结构/实例/审核/可用 四层覆盖分析每个疾病的专病诊疗框架就绪程度（4001整改：删除数量阈值误判），同时展示20核心维度知识覆盖（与首页/图谱探索一致）。</div>
+    <h1>📈 数据建设进度</h1>
+    <div class="subtitle">一眼看懂每个疾病的诊疗知识建设到哪一步：建立路径 → 写好推荐 → 审核通过 → 可正式使用，四步递进。点开任意疾病可查看完整内容。</div>
   </div>
 
-  <!-- 总览统计 -->
-  <div class="cov-summary" id="cov-summary"></div>
-
-  <!-- 瓶颈分析 -->
+  <!-- 建设进度总览（漏斗） -->
   <div class="cov-section">
-    <div class="cov-section-title">🎯 瓶颈分析<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>瓶颈分析说明</h4><div class="cov-help-item"><span class="cov-help-key">数据来源</span><span class="cov-help-val">基于 CDSS 覆盖数据，统计每个链路层（路径/阶段/规则/推荐/动作/证据/指南）中有数据的疾病数量</span></div><div class="cov-help-item"><span class="cov-help-key">断点含义</span><span class="cov-help-val">某层有 0 条数据的疾病即为"断在该层"。例如某疾病有路径但没有阶段，则断在"阶段"层</span></div><div class="cov-help-item"><span class="cov-help-key">优先级判断</span><span class="cov-help-val">红色 = 超过 30% 疾病缺数据，需优先补齐；绿色 = 缺口≤10%，覆盖良好；黄色 = 介于两者之间</span></div><div class="cov-help-item"><span class="cov-help-key">知识维度</span><span class="cov-help-val">20 核心临床维度（与首页一致），反映疾病知识层而非决策链路的数据完整度</span></div><div class="cov-help-item"><span class="cov-help-key">使用场景</span><span class="cov-help-val">补数据时先看断点最多的层。例如"动作"缺得多，说明推荐有了但还没落地到具体医嘱</span></div></div></span></div>
-    <div class="cov-section-desc">每一层有多少疾病断在这一层。断点越多的层，是优先补齐的方向。</div>
+    <div class="cov-section-title">🏥 建设进度总览</div>
+    <div class="cov-section-desc">全库疾病的诊疗知识建设进度，从左到右层层递进，数字表示达到该步骤的疾病数。</div>
+    <div class="cov-funnel" id="cov-funnel"></div>
+    <div class="fn-note" id="cov-funnel-note"></div>
+  </div>
+
+  <!-- 缺口分析 -->
+  <div class="cov-section">
+    <div class="cov-section-title">🎯 下一步补什么</div>
+    <div class="cov-section-desc">每个环节有多少疾病还缺数据。<b style="color:var(--accent2)">红色</b> = 缺口最大、最该优先补的环节；<b style="color:var(--green,#2f9e44)">绿色</b> = 覆盖良好。</div>
     <div class="cov-bottleneck" id="cov-bottleneck"></div>
   </div>
 
-  <!-- 筛选 -->
+  <!-- 疾病明细 -->
   <div class="cov-section">
-    <div class="cov-section-title">📊 疾病覆盖明细<span class="cov-help" onclick="event.stopPropagation();toggleHelp(this)">?<div class="cov-help-panel"><h4>疾病覆盖明细说明</h4><div class="cov-help-item"><span class="cov-help-key">20维度列</span><span class="cov-help-val">与首页/图谱探索一致（CORE_DIM_KEYS），如 20/20 表示该疾病20个核心维度全部有数据</span></div><div class="cov-help-item"><span class="cov-help-key">链路列</span><span class="cov-help-val">路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Rec. → 动作 Action → 证据 Evidence → 指南 Guideline，数字为该疾病在此层的节点数</span></div><div class="cov-help-item"><span class="cov-help-key">四层矩阵列（4001整改）</span><span class="cov-help-val">结构/实例/审核/可用 四列，✓=该层已达到，·=未达到；逐层递进</span></div><div class="cov-help-item"><span class="cov-help-key">状态判定</span><span class="cov-help-val">可正式使用=存在formal_cdss_ready推荐；审核已通过·待发布=存在clinical_ready推荐但未正式发布；实例已存在·待审核=有推荐但临床审核未通过；结构已定义·无实例=仅有路径骨架</span></div><div class="cov-help-item"><span class="cov-help-key">展开链路</span><span class="cov-help-val">点击任意行展开，查看该疾病的完整 路径→阶段→规则→推荐 树状链路，点击推荐卡片可跳转到诊疗流程页</span></div><div class="cov-help-item"><span class="cov-help-key">与首页关系</span><span class="cov-help-val">首页统计全库疾病的知识维度覆盖；本页只统计有临床路径的疾病，同时增加决策链路与四层覆盖维度</span></div></div></span></div>
-    <div class="cov-section-desc">📊 20维度列与首页/图谱探索一致（CORE_DIM_KEYS）。四层矩阵列（结构/实例/审核/可用）为4001整改新增。点击任意行展开查看 路径 Pathway → 阶段 Stage → 规则 Rule → 推荐 Recommendation 完整链路，点击推荐卡片可跳转到诊疗流程页。</div>
+    <div class="cov-section-title">📋 各疾病建设明细</div>
+    <div class="cov-section-desc">点击任意行展开该疾病的完整内容（路径 → 阶段 → 规则 → 推荐意见），点击推荐卡片可跳到图谱探索查看详情。</div>
     <div class="cov-filter">
       <label>筛选：</label>
       <select id="cov-status-filter" onchange="renderCoverageTable()">
         <option value="">全部状态</option>
         <option value="usable">✅ 可正式使用</option>
-        <option value="reviewed">🟢 审核已通过·待发布</option>
-        <option value="instance">🟡 实例已存在·待审核</option>
-        <option value="structure">⚪ 结构已定义·无实例</option>
-        <option value="none">🔴 无覆盖</option>
+        <option value="reviewed">✅ 审核通过·待发布</option>
+        <option value="instance">🟡 有推荐·待审核</option>
+        <option value="structure">⚪ 只有路径骨架</option>
+        <option value="none">🔴 尚无建设</option>
       </select>
       <select id="cov-category-filter" onchange="renderCoverageTable()">
         <option value="">全部大类</option>
@@ -136,7 +129,8 @@
     <div id="cov-table-container"></div>
   </div>
 </div>
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 renderNav('heatmap');
 var COV_DATA = [];
@@ -172,12 +166,11 @@ Promise.all([
     var g = parseParentCode(d.parent_code).group;
     if (!CATEGORIES[g]) CATEGORIES[g] = 0;
     CATEGORIES[g]++;
-    /* 合并知识维度覆盖到 COV_DATA */
     var dimInfo = DISEASE_DIMS[d.disease_code] || {dimCount: 0, pct: 0};
     d.dim_count = dimInfo.dimCount;
     d.dim_pct = dimInfo.pct;
   });
-  renderSummary();
+  renderFunnel();
   renderBottleneck();
   renderCategoryFilter();
   renderCoverageTable();
@@ -186,95 +179,56 @@ Promise.all([
   document.getElementById('cov-table-container').innerHTML = '<div class="cov-empty">加载失败: ' + e.message + '</div>';
 });
 
-function renderSummary(){
-  var cdssTotal = COV_DATA.length;
+/* ============ 建设进度漏斗 ============ */
+function renderFunnel(){
   var globalDiseases = GLOBAL_STATS.disease_count || 0;
-  /* 4001整改：四层覆盖统计（结构→实例→审核→可用，逐层递进） */
-  var structureN = COV_DATA.filter(function(d){return d.structure_ready}).length;
-  var instanceN = COV_DATA.filter(function(d){return d.instance_ready}).length;
-  var reviewedN = COV_DATA.filter(function(d){return d.review_ready}).length;
-  var usableN = COV_DATA.filter(function(d){return d.usable_ready}).length;
-  var blockedRecs = 0, reviewedRecs = 0;
-  COV_DATA.forEach(function(d){
-    blockedRecs += (d.blocked_rec_count || 0);
-    reviewedRecs += (d.reviewed_count || 0);
+  var steps = [
+    {key:'structure_ready', icon:'🗺️', label:'建了路径', cls:''},
+    {key:'instance_ready',  icon:'📄', label:'有推荐意见', cls:''},
+    {key:'review_ready',    icon:'✅', label:'审核通过', cls:''},
+    {key:'usable_ready',    icon:'🚀', label:'可正式使用', cls:'hot'}
+  ];
+  var h = '';
+  steps.forEach(function(s, i){
+    if (i > 0) h += '<div class="fn-arrow">→</div>';
+    var n = COV_DATA.filter(function(d){return d[s.key]}).length;
+    var pct = globalDiseases > 0 ? Math.round(n / globalDiseases * 100) : 0;
+    h += '<div class="fn-step' + (s.cls ? ' ' + s.cls : '') + '">';
+    h += '<div class="fn-num">' + s.icon + ' ' + n + '</div>';
+    h += '<div class="fn-label">第' + (i+1) + '步 · ' + s.label + '</div>';
+    h += '<div class="fn-pct">占全库疾病 ' + pct + '%</div>';
+    h += '</div>';
   });
-  var totalRecs = 0, totalEvs = 0, totalGls = 0, totalActions = 0;
-  COV_DATA.forEach(function(d){
-    totalRecs += d.rec_count;
-    totalEvs += d.evidence_count;
-    totalGls += d.guideline_count;
-    totalActions += d.action_count;
-  });
-  /* 全库统计（与首页一致） */
-  var globalEvidence = GLOBAL_STATS.evidence_count || 0;
-  var globalGuidelines = GLOBAL_STATS._guideline_count || 0;
-  /* 20维度平均覆盖率（与首页 dashboard.js 逻辑一致） */
+  h += '<div class="fn-arrow">＋</div>';
+  /* 20维度平均覆盖 */
   var dimSum = 0;
   COV_DATA.forEach(function(d){ dimSum += (d.dim_pct || 0); });
-  var avgDimPct = cdssTotal > 0 ? Math.round(dimSum / cdssTotal) : 0;
+  var avgDimPct = COV_DATA.length > 0 ? Math.round(dimSum / COV_DATA.length) : 0;
+  h += '<div class="fn-step"><div class="fn-num">📊 ' + avgDimPct + '%</div><div class="fn-label">知识维度平均覆盖</div><div class="fn-pct">20个知识维度（与首页一致）</div></div>';
+  document.getElementById('cov-funnel').innerHTML = h;
 
-  var h = '';
-  /* 第一行：疾病数 + 四层覆盖（4001整改） */
-  h += statCardDual(cdssTotal, globalDiseases, '框架疾病 Disease', '全库疾病');
-  h += statCard(structureN, '结构已定义 Structure', '#8b90a0');
-  h += statCard(instanceN, '实例已存在 Instance', '#ffd43b');
-  h += statCard(reviewedN, '审核已通过 Reviewed', '#4f8cff');
-  h += statCard(usableN, '可正式使用 Usable', '#51cf66');
-  /* 第二行：CDSS链路统计 */
-  h += statCardDual(totalRecs, reviewedRecs, '推荐陈述 Rec.', '审核通过');
-  h += statCard(totalActions, '推荐动作 Action', '#22b8cf');
-  h += statCard(blockedRecs, '受阻推荐 Blocked', '#ff6b6b');
-  h += statCardDual(totalEvs, globalEvidence, '关联证据 Evidence', '全库证据');
-  h += statCardDual(totalGls, globalGuidelines, '关联指南 Guideline', '全库指南');
-  /* 20维度覆盖 */
-  h += statCard(avgDimPct + '%', '20维度覆盖 Dimension', '#51cf66');
-  document.getElementById('cov-summary').innerHTML = h;
+  var usableN = COV_DATA.filter(function(d){return d.usable_ready}).length;
+  document.getElementById('cov-funnel-note').innerHTML =
+    '全库共 <b>' + globalDiseases + '</b> 个疾病，其中 <b>' + COV_DATA.length + '</b> 个已建立诊疗路径；目前 <b>' + usableN + '</b> 个疾病的知识已审核通过并正式发布，可供临床使用。';
 }
 
-function statCard(num, label, color){
-  var style = color ? 'style="color:'+color+'"' : '';
-  return '<div class="cov-stat"><div class="cov-stat-num" '+style+'>'+num+'</div><div class="cov-stat-label">'+label+'</div></div>';
-}
-
-function statCardDual(primary, secondary, primaryLabel, secondaryLabel){
-  var h = '<div class="cov-stat">';
-  h += '<div class="cov-stat-num">' + primary + '</div>';
-  h += '<div class="cov-stat-label">' + primaryLabel + '</div>';
-  h += '<div style="font-size:10px;color:var(--muted);margin-top:2px;border-top:1px solid var(--rule);padding-top:2px">' + secondaryLabel + ': ' + secondary + '</div>';
-  h += '</div>';
-  return h;
-}
-
-function toggleHelp(el){
-  document.querySelectorAll('.cov-help.active').forEach(function(e){ if(e!==el) e.classList.remove('active'); });
-  el.classList.toggle('active');
-}
-
-/* 点击页面其他位置关闭帮助提示 */
-document.addEventListener('click', function(e){
-  if (!e.target.closest('.cov-help')) {
-    document.querySelectorAll('.cov-help.active').forEach(function(e){ e.classList.remove('active'); });
-  }
-});
-
+/* ============ 缺口分析 ============ */
 function renderBottleneck(){
   var layers = [
-    {key:'dim_count', label:'知识维度 Dimension', icon:'📊', desc:'20维度有数据的疾病', isDim:true},
-    {key:'pathway_count', label:'路径 Pathway', icon:'🗺️', desc:'有临床路径的疾病'},
-    {key:'stage_count', label:'阶段 Stage', icon:'📋', desc:'有路径阶段的疾病'},
-    {key:'rule_count', label:'规则 Rule', icon:'⚙️', desc:'有临床规则的疾病'},
-    {key:'rec_count', label:'推荐 Recommendation', icon:'📄', desc:'有推荐陈述的疾病'},
-    {key:'action_count', label:'动作 Action', icon:'💊', desc:'有推荐动作的疾病'},
-    {key:'evidence_count', label:'证据 Evidence', icon:'📖', desc:'有证据支撑的疾病'},
-    {key:'guideline_count', label:'指南 Guideline', icon:'📚', desc:'有指南来源的疾病'}
+    {key:'dim_count', label:'知识维度', icon:'📊', desc:'20个知识维度有数据', isDim:true},
+    {key:'pathway_count', label:'诊疗路径', icon:'🗺️', desc:'已建立诊疗路径'},
+    {key:'stage_count', label:'路径阶段', icon:'📋', desc:'路径划分了就诊阶段'},
+    {key:'rule_count', label:'临床规则', icon:'⚙️', desc:'定义了适用规则'},
+    {key:'rec_count', label:'推荐意见', icon:'📄', desc:'写出了推荐意见'},
+    {key:'action_count', label:'具体措施', icon:'💊', desc:'推荐落到具体医嘱/操作'},
+    {key:'evidence_count', label:'证据支撑', icon:'📖', desc:'推荐有文献证据支撑'},
+    {key:'guideline_count', label:'指南来源', icon:'📚', desc:'推荐标注了指南出处'}
   ];
   var total = COV_DATA.length;
   var h = '';
   layers.forEach(function(layer){
     var has;
     if (layer.isDim) {
-      /* 知识维度：dim_count > 0 即有覆盖 */
       has = COV_DATA.filter(function(d){return (d.dim_count || 0) > 0}).length;
     } else {
       has = COV_DATA.filter(function(d){return d[layer.key] > 0}).length;
@@ -284,15 +238,15 @@ function renderBottleneck(){
     var isCritical = missing > total * 0.3;
     var isGood = missing <= total * 0.1;
     var cls = isCritical ? 'critical' : (isGood ? 'good' : '');
-    var barColor = isCritical ? '#ff6b6b' : (isGood ? '#51cf66' : '#ffd43b');
+    var barColor = isCritical ? cssVar('--accent2','#ff6b6b') : (isGood ? cssVar('--green','#51cf66') : cssVar('--yellow','#ffd43b'));
     h += '<div class="cov-bn-card ' + cls + '">';
     h += '<div class="cov-bn-header">';
     h += '<span class="cov-bn-title">' + layer.icon + ' ' + layer.label + '</span>';
     h += '<span class="cov-bn-count" style="color:' + barColor + '">' + missing + '</span>';
     h += '</div>';
-    h += '<div style="font-size:11px;color:var(--muted)">' + (layer.desc || '缺数据的疾病数') + '</div>';
+    h += '<div style="font-size:11px;color:var(--muted)">' + layer.desc + '</div>';
     h += '<div class="cov-bn-bar"><div class="cov-bn-bar-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
-    h += '<div class="cov-bn-desc">' + has + '/' + total + ' 疾病有' + layer.label + '（' + pct + '%）</div>';
+    h += '<div class="cov-bn-desc">' + has + '/' + total + ' 疾病已覆盖（' + pct + '%）</div>';
     h += '</div>';
   });
   document.getElementById('cov-bottleneck').innerHTML = h;
@@ -308,6 +262,7 @@ function renderCategoryFilter(){
   });
 }
 
+/* ============ 疾病明细表（7列） ============ */
 function renderCoverageTable(){
   var status = document.getElementById('cov-status-filter').value;
   var cat = document.getElementById('cov-category-filter').value;
@@ -321,70 +276,61 @@ function renderCoverageTable(){
 
   var h = '<table class="cov-table">';
   h += '<thead><tr>';
-  h += '<th></th><th>疾病 Disease</th><th>大类 Category</th>';
-  h += '<th>📊 20维度</th>';
-  h += '<th>🗺️ 路径 Pathway</th><th>📋 阶段 Stage</th><th>⚙️ 规则 Rule</th>';
-  h += '<th>📄 推荐 Rec.</th><th>💊 动作 Action</th><th>📖 证据 Evidence</th><th>📚 指南 Guideline</th>';
-  /* 4001整改：四层覆盖矩阵 */
-  h += '<th title="结构已定义：存在专科诊疗路径">结构</th>';
-  h += '<th title="实例已存在：存在推荐陈述实例">实例</th>';
-  h += '<th title="审核已通过：存在clinical_ready推荐">审核</th>';
-  h += '<th title="可正式使用：存在formal_cdss_ready推荐">可用</th>';
-  h += '<th>状态 Status</th>';
+  h += '<th></th><th>疾病</th><th>大类</th>';
+  h += '<th title="20个核心知识维度中有数据的维度数，与首页一致">知识维度</th>';
+  h += '<th title="推荐意见条数（悬停看审核通过/受阻明细）">推荐意见</th>';
+  h += '<th title="1建路径 2有推荐 3审核通过 4可正式使用，实心=已完成">建设进度</th>';
+  h += '<th>当前状态</th>';
   h += '</tr></thead><tbody>';
   var STATUS_CLS = { usable: 'ready', reviewed: 'reviewed', instance: 'partial', structure: 'struct', none: 'none' };
-  var STATUS_ICON = { usable: '✅', reviewed: '🟢', instance: '🟡', structure: '⚪', none: '🔴' };
+  var STATUS_ICON = { usable: '🚀', reviewed: '✅', instance: '🟡', structure: '⚪', none: '🔴' };
   rows.forEach(function(d, i){
     var g = parseParentCode(d.parent_code).group;
     var st = d.status || 'none';
     var badge = '<span class="cov-badge ' + (STATUS_CLS[st] || 'none') + '">' + (STATUS_ICON[st] || '') + ' ' + escHtml(d.status_label || st) + '</span>';
     var expanded = EXPANDED_ROW === d.disease_code;
-    /* 20维度覆盖率显示（与首页/explore一致：dimCount/20） */
     var dimCount = d.dim_count || 0;
     var dimPct = d.dim_pct || 0;
     var dimCls = dimPct >= 80 ? 'cov-badge ready' : dimPct >= 50 ? 'cov-badge partial' : 'cov-badge none';
     h += '<tr class="cov-row' + (expanded ? ' expanded' : '') + '" onclick="toggleRow(\'' + d.disease_code + '\')">';
     h += '<td style="width:20px;font-size:10px;color:var(--muted)">' + (expanded ? '▼' : '▶') + '</td>';
-    h += '<td><span class="disease-name">' + escHtml(d.disease_name) + '</span></td>';
+    h += '<td><a class="disease-name" style="color:var(--accent);text-decoration:none;cursor:pointer" title="在图谱探索中查看 ' + escHtml(d.disease_name) + '" onclick="event.stopPropagation();location.href=\'explore.html?code=' + d.disease_code + '\'">' + escHtml(d.disease_name) + '</a></td>';
     h += '<td style="color:var(--muted);font-size:11px">' + escHtml(g) + '</td>';
-    h += '<td><span class="' + dimCls + '" title="' + dimCount + '/' + CORE_DIM_KEYS.length + ' 维度">' + dimCount + '/' + CORE_DIM_KEYS.length + '</span></td>';
-    h += '<td>' + numCell(d.pathway_count) + '</td>';
-    h += '<td>' + numCell(d.stage_count) + '</td>';
-    h += '<td>' + numCell(d.rule_count) + '</td>';
-    h += '<td>' + numCell(d.rec_count) + '</td>';
-    h += '<td>' + numCell(d.action_count) + '</td>';
-    h += '<td>' + numCell(d.evidence_count) + '</td>';
-    h += '<td>' + numCell(d.guideline_count) + '</td>';
-    /* 四层覆盖矩阵（4001整改） */
-    h += '<td class="cov-layer-cell">' + layerDot(d.structure_ready, '结构已定义：存在专科诊疗路径') + '</td>';
-    h += '<td class="cov-layer-cell">' + layerDot(d.instance_ready, '实例已存在：存在' + (d.rec_count || 0) + '条推荐') + '</td>';
-    h += '<td class="cov-layer-cell">' + layerDot(d.review_ready, '审核已通过：' + (d.reviewed_count || 0) + '条clinical_ready') + '</td>';
-    h += '<td class="cov-layer-cell">' + layerDot(d.usable_ready, '可正式使用：' + (d.ready_count || 0) + '条formal_cdss_ready') + '</td>';
+    h += '<td><span class="' + dimCls + '" title="' + dimCount + '/' + CORE_DIM_KEYS.length + ' 个知识维度">' + dimCount + '/' + CORE_DIM_KEYS.length + '</span></td>';
+    h += '<td><span class="cov-num' + (d.rec_count === 0 ? ' zero' : '') + '" title="共 ' + (d.rec_count||0) + ' 条 · 审核通过 ' + (d.reviewed_count||0) + ' 条 · 受阻 ' + (d.blocked_rec_count||0) + ' 条">' + (d.rec_count || 0) + '</span></td>';
+    h += '<td>' + progressDots(d) + '</td>';
     h += '<td>' + badge + '</td>';
     h += '</tr>';
     if (expanded) {
-      h += '<tr class="cov-expand-row"><td colspan="16"><div class="cov-expand" id="expand-' + d.disease_code + '">';
+      h += '<tr class="cov-expand-row"><td colspan="7"><div class="cov-expand" id="expand-' + d.disease_code + '">';
       if (CHAIN_CACHE[d.disease_code]) {
         h += renderChainHTML(CHAIN_CACHE[d.disease_code]);
       } else {
-        h += '<div class="cov-expand-loading">加载链路数据...</div>';
+        h += '<div class="cov-expand-loading">加载中...</div>';
       }
       h += '</div></td></tr>';
     }
   });
   h += '</tbody></table>';
+  if (rows.length === 0) h = '<div class="cov-empty">没有符合条件的疾病</div>';
   document.getElementById('cov-table-container').innerHTML = h;
-  // 如果有展开行且无缓存，加载数据
   if (EXPANDED_ROW && !CHAIN_CACHE[EXPANDED_ROW]) {
     loadChain(EXPANDED_ROW);
   }
 }
 
-/* 4001整改：四层覆盖点（✓/·） */
-function layerDot(ok, tip){
-  return ok
-    ? '<span class="cov-dot yes" title="' + escHtml(tip || '') + '">✓</span>'
-    : '<span class="cov-dot no" title="' + escHtml(tip ? '未达到：' + tip : '未达到') + '">·</span>';
+/* 建设进度 4 步圆点 */
+function progressDots(d){
+  var steps = [d.structure_ready, d.instance_ready, d.review_ready, d.usable_ready];
+  var tips = ['建立路径', '有推荐意见', '审核通过', '可正式使用'];
+  var n = 0;
+  var h = '';
+  for (var i = 0; i < 4; i++) {
+    if (steps[i]) n++;
+    h += '<span class="pdot' + (steps[i] ? ' on' : '') + '" title="第' + (i+1) + '步 ' + tips[i] + (steps[i] ? '：已完成' : '：未达到') + '">' + (i+1) + '</span>';
+  }
+  h += '<span class="pdot-num">' + n + '/4</span>';
+  return h;
 }
 
 function toggleRow(code){
@@ -408,13 +354,13 @@ function loadChain(code){
     });
 }
 
+/* 展开行：完整链路（路径 → 阶段 → 规则 → 推荐意见） */
 function renderChainHTML(data){
   if (!data.pathways || data.pathways.length === 0) {
-    return '<div class="cov-expand-loading">该疾病暂无专病诊疗框架数据</div>';
+    return '<div class="cov-expand-loading">该疾病暂无诊疗框架数据</div>';
   }
   var diseaseCode = data.disease ? data.disease.code : '';
   var h = '';
-  // 只显示有推荐的路径
   data.pathways.forEach(function(pw){
     var totalRecs = 0;
     (pw.stages||[]).forEach(function(s){
@@ -422,33 +368,29 @@ function renderChainHTML(data){
     });
     if (totalRecs === 0) return;
 
-    // 路径层
     h += '<div class="cov-pw">';
-    h += '<div class="cov-pw-head"><span class="cov-lvl">路径 Pathway</span> 🗺️ ' + escHtml(pw.name || pw.code) + '</div>';
+    h += '<div class="cov-pw-head"><span class="cov-lvl">诊疗路径</span> 🗺️ ' + escHtml(pw.name || pw.code) + '</div>';
 
     (pw.stages||[]).forEach(function(stage){
-      // 阶段层
       h += '<div class="cov-stage">';
-      h += '<div class="cov-stage-head"><span class="cov-lvl">阶段 Stage</span> 📋 ' + escHtml(stage.name || stage.code) + '</div>';
+      h += '<div class="cov-stage-head"><span class="cov-lvl">就诊阶段</span> 📋 ' + escHtml(stage.name || stage.code) + '</div>';
 
       (stage.rules||[]).forEach(function(rule){
-        // 规则层
         h += '<div class="cov-rule">';
-        h += '<div class="cov-rule-head"><span class="cov-lvl">规则 Rule</span> ⚙️ ' + escHtml(rule.name || rule.code) + '</div>';
+        h += '<div class="cov-rule-head"><span class="cov-lvl">适用规则</span> ⚙️ ' + escHtml(rule.name || rule.code) + '</div>';
 
         (rule.recommendations||[]).forEach(function(rec){
-          // 推荐层 - 卡片
           var cls = rec.recommendation_class || '';
           var lvl = rec.evidence_level || '';
           var hasGrade = cls && cls.indexOf('未') === -1;
-          h += '<div class="cov-rec-card" onclick="event.stopPropagation();window.open(\'explore.html?code=' + diseaseCode + '&view=cdss\',\'_blank\')">';
+          h += '<div class="cov-rec-card" onclick="event.stopPropagation();location.href=\'explore.html?code=' + diseaseCode + '&view=cdss\'">';
           h += '<div class="cov-rec-head">';
-          h += '<span class="cov-lvl ' + (hasGrade ? 'yes' : 'no') + '">推荐 Recommendation</span>';
+          h += '<span class="cov-rec-lvl ' + (hasGrade ? 'yes' : 'no') + '">推荐意见</span>';
           if (cls) h += '<span style="font-size:10px;color:var(--accent);font-weight:700">等级 ' + escHtml(cls) + '</span>';
           if (lvl) h += '<span style="font-size:10px;color:var(--muted)">证据 ' + escHtml(lvl) + '</span>';
+          h += '<span style="font-size:10px;color:var(--muted)">点击查看详情 →</span>';
           h += '</div>';
           h += '<div class="cov-rec-text">' + escHtml(rec.statement_text || rec.code) + '</div>';
-          // 动作 + 来源
           var metas = [];
           if (rec.actions && rec.actions.length > 0) {
             var actNames = rec.actions.slice(0,3).map(function(a){return a.name||a.code});
@@ -465,20 +407,15 @@ function renderChainHTML(data){
           h += '</div>';
         });
 
-        h += '</div>'; // rule
+        h += '</div>';
       });
 
-      h += '</div>'; // stage
+      h += '</div>';
     });
 
-    h += '</div>'; // pw
+    h += '</div>';
   });
   return h;
-}
-
-function numCell(n){
-  if (n === 0) return '<span class="cov-num zero">0</span>';
-  return '<span class="cov-num">' + n + '</span>';
 }
 
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

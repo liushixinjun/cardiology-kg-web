@@ -1,0 +1,28 @@
+/* Scoped addition below the existing six-node network. */
+.evidence-chain{margin-top:24px;padding-top:20px;border-top:1px solid #d7e5ed;container-type:inline-size;color:#284a60}
+.evidence-chain header h3{font-size:16px}
+.evidence-chain header p{line-height:1.7;margin-bottom:12px}
+.evidence-chain-head,.evidence-chain-list>li{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.2fr;gap:12px}
+.evidence-chain-head{font-size:12px;color:#55768a;padding:8px 10px}
+.evidence-chain-list{list-style:none;margin:0;padding:0}
+.evidence-chain-list>li{padding:14px 10px;border:1px solid #dce7ef;border-radius:8px;margin-bottom:10px;background:#fff;align-items:start;font-size:12px;line-height:1.7}
+.evidence-chain-list>li>*{min-width:0;overflow-wrap:anywhere}
+.evidence-chain button{font:inherit;cursor:pointer;color:inherit;text-align:left;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.evidence-chain-source small{display:block;color:#647e90}
+.evidence-chain-source button{padding:4px 0;border:0;background:transparent;text-decoration:underline;text-decoration-color:#c7dce9;text-underline-offset:3px}
+.evidence-chain-fact{width:100%;border:1px solid #bbd8eb;background:#f0f8fd;padding:10px;border-radius:7px}
+.evidence-chain-fact strong,.evidence-chain-fact span,.evidence-chain-fact small{display:block}
+.evidence-chain-fact small{color:#527387;margin-top:5px}
+.evidence-chain button:focus-visible,.evidence-chain summary:focus-visible,.evidence-chain-fact[aria-pressed=true]{outline:2px solid #187dc2;outline-offset:2px}
+.evidence-chain details summary{cursor:pointer;line-height:1.7}
+.evidence-chain details summary small{display:block;color:#816029;margin-top:4px}
+.evidence-chain details p{margin:8px 0;line-height:1.7;overflow-wrap:anywhere}
+.evidence-chain-explanation{border-left:3px solid #e1cb9c;padding-left:10px}
+.evidence-source-detail{padding:14px;background:#f3f8fc;border-left:3px solid #1995d0;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.evidence-source-detail p,.evidence-chain-originals p{white-space:pre-wrap;overflow-wrap:anywhere}
+.evidence-source-detail mark{background:#ffedaf;color:#343b43;padding:1px 2px}
+.evidence-chain-originals{margin:12px 0;font-size:12px}
+.evidence-chain-originals h4{margin:12px 0 0}
+.evidence-chain-boundary,.evidence-chain-empty{font-size:12px;line-height:1.8;color:#657e8e}
+@container (max-width:700px){.evidence-chain-head{display:none}.evidence-chain-list>li{grid-template-columns:repeat(2,minmax(0,1fr))}.evidence-chain-list>li>:nth-child(1)::before{content:'① 原文';display:block;color:#647e90}.evidence-chain-list>li>:nth-child(2)::before{content:'② 提取事实';display:block;color:#647e90}.evidence-chain-list>li>:nth-child(3)::before{content:'③ 知识关联';display:block;color:#647e90}.evidence-chain-list>li>:nth-child(4)::before{content:'④ 建议解释';display:block;color:#647e90}}
+@container (max-width:420px){.evidence-chain-list>li{grid-template-columns:minmax(0,1fr)}}

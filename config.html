@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 系统设置</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 /* ========== Layout ========== */
 .cfg-wrap{display:flex;height:calc(100vh - 60px);margin:0}
@@ -57,7 +57,7 @@
 .cfg-result.show{display:block}
 .cfg-result.ok{background:rgba(81,207,102,.1);color:#51cf66;border:1px solid rgba(81,207,102,.2)}
 .cfg-result.err{background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.2)}
-.cfg-result.info{background:rgba(79,140,255,.1);color:var(--accent);border:1px solid rgba(79,140,255,.2)}
+.cfg-result.info{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-bg)}
 
 /* Menu config */
 .cfg-menu-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--rule)}
@@ -137,7 +137,7 @@
 .audit-item-badge.healthy{background:rgba(81,207,102,.12);color:#51cf66}
 .audit-item-badge.warning{background:rgba(255,212,59,.12);color:#ffd43b}
 .audit-item-badge.danger{background:rgba(255,107,107,.12);color:#ff6b6b}
-.audit-item-badge.info{background:rgba(79,140,255,.12);color:var(--accent)}
+.audit-item-badge.info{background:var(--accent-bg);color:var(--accent)}
 .audit-item-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 .audit-stat-mini{display:flex;flex-direction:column;gap:2px}
 .audit-stat-mini-val{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -201,6 +201,11 @@
         <div class="cfg-card-title">📊 系统状态</div>
         <div class="cfg-card-desc">当前图谱数据概况，数据来源为Neo4j实时查询。</div>
         <div class="cfg-stat-grid" id="sys-stats"></div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-card-title">🏷️ 版本信息</div>
+        <div class="cfg-card-desc">全站版本口径统一在此查看（原页面顶部版本条已移至页脚与设置页，v1.3.8 起生效）。</div>
+        <div id="version-detail"></div>
       </div>
       <div class="cfg-card">
         <div class="cfg-card-title">💡 使用提示</div>
@@ -358,7 +363,8 @@
   </div>
 </div>
 
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 /* ===== 状态 ===== */
 var _prevStats = null;
@@ -379,7 +385,7 @@ var MENU_ITEMS = [
   {id:'index', label:'数据总览', icon:'📊', desc:'图谱整体数据概况', defaultOn:true},
   {id:'explore', label:'图谱探索', icon:'🧭', desc:'疾病浏览与诊疗流程', defaultOn:true},
   {id:'network', label:'网络探索', icon:'🕸️', desc:'关系网络可视化', defaultOn:true},
-  {id:'heatmap', label:'专病诊疗框架覆盖分析', icon:'🔬', desc:'专病诊疗框架覆盖与瓶颈', defaultOn:true},
+  {id:'heatmap', label:'数据建设进度', icon:'📈', desc:'四步建设进度与缺口分析', defaultOn:true},
   {id:'review', label:'临床审核', icon:'✅', desc:'审核推荐方案', defaultOn:true},
   {id:'schema', label:'图谱数据审核', icon:'📐', desc:'医学专员审核工作台：疾病全链路审核、维度视角、字典对比、影响范围预览', defaultOn:true},
   {id:'standard', label:'图谱架构规范', icon:'📘', desc:'图谱数据结构定义', defaultOn:true},
@@ -432,6 +438,42 @@ function refreshStats() {
     showResult('sync-result', '刷新失败: ' + e.message, 'err');
   });
 }
+
+/* ===== 版本信息（v1.3.8：原顶部版本条迁移至此） ===== */
+function renderVersionDetail() {
+  var el = document.getElementById('version-detail');
+  if (!el) return;
+  var draw = function(v) {
+    if (!v) {
+      el.innerHTML = '<div class="cfg-value err">⚠ 版本信息获取失败（API不可达）</div>';
+      return;
+    }
+    var consistent = v.instance_version_consistent;
+    var instVer = consistent
+      ? '统一 ' + (Object.keys(v.instance_schema_versions || {})[0] || '-')
+      : '混合 · 待迁移复核';
+    var rows = [
+      ['Schema 标准', v.schema_standard_version || '-'],
+      ['实例版本', instVer, consistent ? 'ok' : 'err'],
+      ['解析 Skill', v.skill_version || '-'],
+      ['G8 回读时间', v.g8_readback_time ? String(v.g8_readback_time).replace('T',' ').slice(0,19) : '无记录'],
+      ['数据最后更新', v.data_updated_at ? String(v.data_updated_at).replace('T',' ').slice(0,19) : '-'],
+      ['前端版本', 'v' + (v.app_version || '-')],
+      ['API 版本', v.api_version || '-'],
+      ['最近批次', v.latest_batch_id || '-'],
+      ['生成时间', v.generated_at ? String(v.generated_at).replace('T',' ').slice(0,19) : '-']
+    ];
+    var h = '';
+    rows.forEach(function(r) {
+      h += '<div class="cfg-row"><span class="cfg-label">' + r[0] + '</span><span class="cfg-value' + (r[2] ? ' ' + r[2] : '') + '">' + r[1] + '</span></div>';
+    });
+    if (v.version_label) h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">口径说明：' + v.version_label + '</div>';
+    el.innerHTML = h;
+  };
+  if (window.KG_VERSION_INFO) { draw(window.KG_VERSION_INFO); return; }
+  fetch('/api/kg/version?v=' + Date.now()).then(function(r){return r.json()}).then(draw).catch(function(){ draw(null); });
+}
+renderVersionDetail();
 
 /* ===== 数据库 ===== */
 function renderDbInfo() {

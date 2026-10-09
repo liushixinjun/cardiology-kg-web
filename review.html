@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>临床审核 - 专科知识图谱</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 /* ===== 页面布局 ===== */
 html, body { height: 100%; overflow: hidden; margin: 0; }
@@ -52,7 +52,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 .rv-tab:hover { background: var(--bg3); color: var(--ink); }
 .rv-tab.active { color: var(--accent); background: rgba(79,140,255,.06); border-bottom-color: var(--accent); }
 .rv-tab-badge {
-  background: rgba(79,140,255,.15); color: var(--accent);
+  background: var(--accent-bg); color: var(--accent);
   font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 700;
 }
 
@@ -93,7 +93,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 .rv-badge-high { background: rgba(255,107,107,.12); color: var(--accent2); }
 .rv-badge-mid { background: rgba(255,146,43,.12); color: var(--orange); }
 .rv-badge-low { background: rgba(81,207,102,.12); color: var(--green); }
-.rv-badge-blue { background: rgba(79,140,255,.12); color: var(--accent); }
+.rv-badge-blue { background: var(--accent-bg); color: var(--accent); }
 .rv-badge-purple { background: rgba(204,93,232,.12); color: var(--purple); }
 .rv-badge-cyan { background: rgba(34,184,207,.12); color: var(--cyan); }
 .rv-badge-pink { background: rgba(255,107,138,.12); color: #ff6b8a; }
@@ -106,7 +106,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
   display: inline-block; padding: 4px 10px; border-radius: 6px;
   font-size: 11px; font-weight: 600; margin: 2px 3px; line-height: 1.4;
 }
-.rv-chip-target { background: rgba(79,140,255,.1); color: var(--accent); border: 1px solid rgba(79,140,255,.2); }
+.rv-chip-target { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-bg); }
 .rv-chip-missing { background: rgba(255,107,107,.1); color: var(--accent2); border: 1px solid rgba(255,107,107,.2); }
 .rv-chip-warning { background: rgba(255,210,59,.1); color: var(--yellow); border: 1px solid rgba(255,210,59,.2); }
 
@@ -119,10 +119,10 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 }
 .rv-toggle-btn:last-child { border-right: none; }
 .rv-toggle-btn:hover { background: var(--bg4); color: var(--ink); }
-.rv-toggle-btn.active-green { background: rgba(81,207,102,.15); color: var(--green); }
-.rv-toggle-btn.active-yellow { background: rgba(255,210,59,.15); color: var(--yellow); }
-.rv-toggle-btn.active-red { background: rgba(255,107,107,.15); color: var(--accent2); }
-.rv-toggle-btn.active-blue { background: rgba(79,140,255,.15); color: var(--accent); }
+.rv-toggle-btn.active-green { background: var(--green-bg); color: var(--green); }
+.rv-toggle-btn.active-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.rv-toggle-btn.active-red { background: var(--red-bg); color: var(--accent2); }
+.rv-toggle-btn.active-blue { background: var(--accent-bg); color: var(--accent); }
 
 /* ===== 评论框 ===== */
 .rv-comment {
@@ -216,7 +216,7 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
   padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
   white-space: nowrap; text-align: center; line-height: 1.3;
 }
-.rv-flow-disease { background: rgba(79,140,255,.12); color: var(--accent); border: 1px solid rgba(79,140,255,.25); }
+.rv-flow-disease { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(79,140,255,.25); }
 .rv-flow-arrow {
   margin: 0 8px; color: var(--muted); font-size: 18px; flex-shrink: 0;
   display: flex; align-items: center;
@@ -232,14 +232,14 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 /* 缺失字段提示 */
 .rv-missing-bar {
   margin: 8px 16px; padding: 10px 14px; background: rgba(255,107,107,.05);
-  border: 1px solid rgba(255,107,107,.15); border-radius: 8px;
+  border: 1px solid var(--red-bg); border-radius: 8px;
 }
 .rv-missing-title { font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
 
 /* 审核重点 */
 .rv-focus-box {
   margin: 8px 16px; padding: 10px 14px; background: rgba(255,210,59,.05);
-  border: 1px solid rgba(255,210,59,.15); border-radius: 8px;
+  border: 1px solid var(--yellow-bg); border-radius: 8px;
   font-size: 12px; color: var(--yellow); font-weight: 600;
 }
 
@@ -362,7 +362,8 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 </button>
 
 <!-- 加载共享导航 -->
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -489,10 +490,10 @@ function loadReviewData() {
 /* ===== KPI 指标 ===== */
 function renderKPI(summary) {
   var kpis = [
-    { num: summary.disease_review_count, label: '待审核疾病', icon: '&#127973;', bg: 'rgba(79,140,255,.1)', color: 'var(--accent)', detail: '按疾病维度评估' },
-    { num: summary.scenario_card_count, label: '待审核场景', icon: '&#128203;', bg: 'rgba(34,184,207,.1)', color: 'var(--cyan)', detail: '按推荐关系评估' },
-    { num: summary.pharmacist_item_count, label: '药师专项', icon: '&#128138;', bg: 'rgba(204,93,232,.1)', color: 'var(--purple)', detail: '药物专项审核' },
-    { num: summary.detail_item_count, label: '边级追溯', icon: '&#128269;', bg: 'rgba(255,146,43,.1)', color: 'var(--orange)', detail: '边级证据回溯' }
+    { num: summary.disease_review_count, label: '待审核疾病', icon: '&#127973;', bg: 'rgba(79,140,255,.1)', color: cssVar('--accent','#4f8cff'), detail: '按疾病维度评估' },
+    { num: summary.scenario_card_count, label: '待审核场景', icon: '&#128203;', bg: 'rgba(34,184,207,.1)', color: cssVar('--cyan','#22b8cf'), detail: '按推荐关系评估' },
+    { num: summary.pharmacist_item_count, label: '药师专项', icon: '&#128138;', bg: 'rgba(204,93,232,.1)', color: cssVar('--purple','#cc5de8'), detail: '药物专项审核' },
+    { num: summary.detail_item_count, label: '边级追溯', icon: '&#128269;', bg: 'rgba(255,146,43,.1)', color: cssVar('--orange','#ff922b'), detail: '边级证据回溯' }
   ];
   var h = '';
   kpis.forEach(function(k) {
@@ -606,7 +607,7 @@ function renderDiseaseSummaryCard(key, group, icon, countLabel, borderColor) {
   h += '<div class="rv-disease-summary" id="dsum-' + safeKey + '" onclick="toggleDiseaseExpand(\'' + safeKey + '\')">';
   h += '<div class="rv-disease-summary-left">';
   h += '<div class="rv-disease-summary-name">' + group.disease_name + '</div>';
-  h += '<div class="rv-disease-summary-code">' + group.disease_code + '</div>';
+  h += '<div class="rv-disease-summary-code">' + group.disease_code + ' <a href="explore.html?code=' + encodeURIComponent(group.disease_code) + '" onclick="event.stopPropagation()" title="在图谱探索中查看该疾病" style="font-size:10px;color:var(--accent);text-decoration:none;font-weight:500">图谱探索 →</a></div>';
   h += '</div>';
   h += '<div class="rv-disease-summary-meta">';
   h += '<span class="rv-badge rv-badge-blue" style="font-size:10px">' + batchShort + '</span>';
@@ -673,7 +674,7 @@ function renderScenarioPanel(items) {
   h += '<div id="sc-groups">';
   grouped.order.forEach(function(key) {
     var g = grouped.groups[key];
-    h += renderDiseaseSummaryCard(key, g, '&#128203;', '项场景', 'var(--cyan)');
+    h += renderDiseaseSummaryCard(key, g, '&#128203;', '项场景', cssVar('--cyan','#22b8cf'));
   });
   h += '</div>';
 
@@ -816,7 +817,7 @@ function renderPharmacistPanel(items) {
   h += '<div id="ph-groups">';
   grouped.order.forEach(function(key) {
     var g = grouped.groups[key];
-    h += renderDiseaseSummaryCard(key, g, '&#128138;', '项药物', 'var(--purple)');
+    h += renderDiseaseSummaryCard(key, g, '&#128138;', '项药物', cssVar('--purple','#cc5de8'));
   });
   h += '</div>';
 
@@ -948,7 +949,7 @@ function renderDetailPanel(items) {
   h += '<div id="dt-groups">';
   grouped.order.forEach(function(key) {
     var g = grouped.groups[key];
-    h += renderDiseaseSummaryCard(key, g, '&#128269;', '项边级', 'var(--orange)');
+    h += renderDiseaseSummaryCard(key, g, '&#128269;', '项边级', cssVar('--orange','#ff922b'));
   });
   h += '</div>';
 
@@ -1283,7 +1284,7 @@ function renderSkeletonPanel(data) {
   var allPass = gate.all_pass;
 
   // 硬闸门状态
-  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : 'var(--yellow)') + '">';
+  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : cssVar('--yellow','#ffd43b')) + '">';
   h += '<span>' + (allPass ? '&#9989;' : '&#9888;') + '</span>';
   h += '<span>教材骨架硬闸门：' + (allPass ? '全部通过' : '存在未通过项') + '</span>';
   h += '</div>';
@@ -1291,14 +1292,14 @@ function renderSkeletonPanel(data) {
   // KPI
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
   var kpis = [
-    { num: data.textbook_node_total, label: '教材来源节点', color: 'var(--accent)', icon: '&#128218;' },
-    { num: gate.textbook_without_knowledge_layer, label: '缺knowledge_layer', color: gate.textbook_without_knowledge_layer > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128202;' },
-    { num: gate.textbook_core_without_skeleton_slot, label: '缺skeleton_slot', color: gate.textbook_core_without_skeleton_slot > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128203;' },
-    { num: gate.textbook_without_section_path, label: '缺章节路径', color: gate.textbook_without_section_path > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128196;' },
-    { num: gate.textbook_without_page, label: '缺页码', color: gate.textbook_without_page > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128209;' },
-    { num: gate.textbook_without_anchor, label: '缺文本锚点', color: gate.textbook_without_anchor > 0 ? '#ff6b6b' : '#52c41a', icon: '&#128279;' },
-    { num: gate.relation_with_skeleton_slot, label: '关系级skeleton_slot', color: 'var(--accent)', icon: '&#128279;' },
-    { num: gate.relation_with_knowledge_layer, label: '关系级knowledge_layer', color: 'var(--accent)', icon: '&#128279;' },
+    { num: data.textbook_node_total, label: '教材来源节点', color: cssVar('--accent','#4f8cff'), icon: '&#128218;' },
+    { num: gate.textbook_without_knowledge_layer, label: '缺knowledge_layer', color: gate.textbook_without_knowledge_layer > 0 ? cssVar('--accent2','#ff6b6b') : '#52c41a', icon: '&#128202;' },
+    { num: gate.textbook_core_without_skeleton_slot, label: '缺skeleton_slot', color: gate.textbook_core_without_skeleton_slot > 0 ? cssVar('--accent2','#ff6b6b') : '#52c41a', icon: '&#128203;' },
+    { num: gate.textbook_without_section_path, label: '缺章节路径', color: gate.textbook_without_section_path > 0 ? cssVar('--accent2','#ff6b6b') : '#52c41a', icon: '&#128196;' },
+    { num: gate.textbook_without_page, label: '缺页码', color: gate.textbook_without_page > 0 ? cssVar('--accent2','#ff6b6b') : '#52c41a', icon: '&#128209;' },
+    { num: gate.textbook_without_anchor, label: '缺文本锚点', color: gate.textbook_without_anchor > 0 ? cssVar('--accent2','#ff6b6b') : '#52c41a', icon: '&#128279;' },
+    { num: gate.relation_with_skeleton_slot, label: '关系级skeleton_slot', color: cssVar('--accent','#4f8cff'), icon: '&#128279;' },
+    { num: gate.relation_with_knowledge_layer, label: '关系级knowledge_layer', color: cssVar('--accent','#4f8cff'), icon: '&#128279;' },
   ];
   kpis.forEach(function(k) {
     h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
@@ -1310,9 +1311,9 @@ function renderSkeletonPanel(data) {
 
   // 分布表格
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-  h += renderDistTable('skeleton_slot 分布', data.skeleton_slot_distribution, '#ffd43b');
-  h += renderDistTable('knowledge_layer 分布', data.knowledge_layer_distribution, '#22b8cf');
-  h += renderDistTable('source_type 分布', data.source_type_distribution, '#cc5de8');
+  h += renderDistTable('skeleton_slot 分布', data.skeleton_slot_distribution, cssVar('--yellow','#ffd43b'));
+  h += renderDistTable('knowledge_layer 分布', data.knowledge_layer_distribution, cssVar('--cyan','#22b8cf'));
+  h += renderDistTable('source_type 分布', data.source_type_distribution, cssVar('--purple','#cc5de8'));
   h += '</div>';
 
   panel.innerHTML = h;
@@ -1352,9 +1353,9 @@ function renderCDSSPanel(data, ver) {
   h += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">📋 审核基线（clinical_review_status）</div>';
   var bl = [
     { k: 'clinical_ready', n: '审核通过', c: '#52c41a' },
-    { k: 'blocked', n: '审核受阻', c: '#ff6b6b' },
-    { k: 'pending', n: '待审核', c: '#ffd43b' },
-    { k: '未设置', n: '未设置', c: '#8b90a0' },
+    { k: 'blocked', n: '审核受阻', c: cssVar('--accent2','#ff6b6b') },
+    { k: 'pending', n: '待审核', c: cssVar('--yellow','#ffd43b') },
+    { k: '未设置', n: '未设置', c: cssVar('--muted','#8b90a0') },
   ];
   bl.forEach(function(x) {
     var v = cr[x.k] || 0;
@@ -1372,7 +1373,7 @@ function renderCDSSPanel(data, ver) {
   h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
   h += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">🔄 生产流水线状态（G6/G8）</div>';
   function gRow(name, val, ok, warn) {
-    var col = ok ? '#52c41a' : (warn ? '#ffd43b' : '#ff6b6b');
+    var col = ok ? '#52c41a' : (warn ? cssVar('--yellow','#ffd43b') : cssVar('--accent2','#ff6b6b'));
     h += '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px">';
     h += '<span style="color:var(--muted)">' + name + '</span><span style="color:' + col + ';font-weight:700">' + val + '</span>';
     h += '</div>';
@@ -1398,7 +1399,7 @@ function renderCDSSPanel(data, ver) {
   // 硬闸门状态
   var gate = data.gate_check || {};
   var allPass = gate.all_have_action && gate.all_have_evidence && gate.all_have_guideline;
-  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : 'var(--yellow)') + '">';
+  h += '<div class="rv-warning" style="background:' + (allPass ? 'rgba(82,196,26,.06)' : 'rgba(255,210,59,.06)') + ';border-color:' + (allPass ? 'rgba(82,196,26,.25)' : 'rgba(255,210,59,.25)') + ';color:' + (allPass ? '#52c41a' : cssVar('--yellow','#ffd43b')) + '">';
   h += '<span>' + (allPass ? '&#9989;' : '&#9888;') + '</span>';
   h += '<span>全库硬闸门：' + (allPass ? '全部通过' : '存在未通过项') + '</span>';
   h += '</div>';
@@ -1406,15 +1407,15 @@ function renderCDSSPanel(data, ver) {
   // KPI 指标（4001整改：口径标注）
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
   var kpis = [
-    { num: data.total, label: 'RS总数', color: 'var(--accent)', icon: '&#128203;' },
+    { num: data.total, label: 'RS总数', color: cssVar('--accent','#4f8cff'), icon: '&#128203;' },
     { num: data.formal_cdss_ready, label: '正式可用(formal_ready)', color: '#52c41a', icon: '&#9989;' },
-    { num: data.formal_cdss_not_ready, label: '发布受阻(formal_blocked)', color: '#ff6b6b', icon: '&#9888;' },
+    { num: data.formal_cdss_not_ready, label: '发布受阻(formal_blocked)', color: cssVar('--accent2','#ff6b6b'), icon: '&#9888;' },
     { num: cr.clinical_ready || 0, label: '临床审核通过', color: '#52c41a', icon: '&#128100;' },
-    { num: cr.blocked || 0, label: '临床审核受阻', color: '#ff6b6b', icon: '&#128683;' },
-    { num: data.inconsistent_status_count || 0, label: '状态矛盾记录', color: '#ffd43b', icon: '&#9888;' },
-    { num: data.no_action_count, label: '无动作RS', color: '#ffd43b', icon: '&#128269;' },
-    { num: data.no_evidence_count, label: '无证据RS', color: '#ffd43b', icon: '&#128214;' },
-    { num: data.no_guideline_count, label: '无指南RS', color: '#ffd43b', icon: '&#128220;' },
+    { num: cr.blocked || 0, label: '临床审核受阻', color: cssVar('--accent2','#ff6b6b'), icon: '&#128683;' },
+    { num: data.inconsistent_status_count || 0, label: '状态矛盾记录', color: cssVar('--yellow','#ffd43b'), icon: '&#9888;' },
+    { num: data.no_action_count, label: '无动作RS', color: cssVar('--yellow','#ffd43b'), icon: '&#128269;' },
+    { num: data.no_evidence_count, label: '无证据RS', color: cssVar('--yellow','#ffd43b'), icon: '&#128214;' },
+    { num: data.no_guideline_count, label: '无指南RS', color: cssVar('--yellow','#ffd43b'), icon: '&#128220;' },
   ];
   kpis.forEach(function(k) {
     h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px">';
@@ -1428,7 +1429,7 @@ function renderCDSSPanel(data, ver) {
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
 
   // clinical_review_status 分布
-  h += renderDistTable('审核状态分布', data.clinical_review_status, 'var(--accent)');
+  h += renderDistTable('审核状态分布', data.clinical_review_status, cssVar('--accent','#4f8cff'));
 
   // cdss_use_status 分布（4001整改新增）
   h += renderDistTable('CDSS使用状态分布（cdss_use_status）', data.cdss_use_status || {}, '#fa5252');
@@ -1437,10 +1438,10 @@ function renderCDSSPanel(data, ver) {
   h += renderDistTable('推荐等级分布', data.recommendation_class, '#52c41a');
 
   // evidence_level 分布
-  h += renderDistTable('证据等级分布', data.evidence_level, '#22b8cf');
+  h += renderDistTable('证据等级分布', data.evidence_level, cssVar('--cyan','#22b8cf'));
 
   // recommendation_type 分布
-  h += renderDistTable('推荐类型分布', data.recommendation_type, '#cc5de8');
+  h += renderDistTable('推荐类型分布', data.recommendation_type, cssVar('--purple','#cc5de8'));
 
   h += '</div>';
 

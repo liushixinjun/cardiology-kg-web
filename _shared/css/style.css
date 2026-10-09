@@ -1,10 +1,31 @@
 /* === Shared Styles for KG Test Pages === */
+/* v1.4.1 双主题：默认浅色医疗风；html[data-theme="dark"] 为原深色科技风（大屏模式）。
+   切换由 _shared/js/theme.js 控制（localStorage 记忆，默认浅色）。 */
 :root {
+  /* 浅色 · 医疗风 */
+  --bg: #f5f7fa; --bg2: #ffffff; --bg3: #eef1f5; --bg4: #e3e7ee;
+  --ink: #1e293b; --muted: #64748b; --rule: #dde3ec;
+  --accent: #1668dc; --accent2: #e03131; --green: #2f9e44; --yellow: #d99400;
+  --orange: #e8590c; --purple: #9c36b5; --cyan: #0c8599; --pink: #d6336c;
+  /* 语义色浅底版本（tag/badge 背景，替代原写死的 rgba） */
+  --green-bg: rgba(47,158,68,.12); --accent-bg: rgba(22,104,220,.10);
+  --yellow-bg: rgba(217,148,0,.14); --red-bg: rgba(224,49,49,.10);
+  --shadow: 0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.05);
+
+  --tip-bg:#ffffff; --tip-ink:#1e293b; --tip-line:rgba(22,104,220,.18);
+  --green-text:#15803d; --yellow-text:#b45309; --red-text:#c92a2a;}
+html[data-theme="dark"] {
+  /* 深色 · 科技风（原配色，适合大屏/投影展示） */
   --bg: #0f1117; --bg2: #1a1d27; --bg3: #242836; --bg4: #2e3348;
   --ink: #e8eaf0; --muted: #8b90a0; --rule: #2e3348;
   --accent: #4f8cff; --accent2: #ff6b6b; --green: #51cf66; --yellow: #ffd43b;
   --orange: #ff922b; --purple: #cc5de8; --cyan: #22b8cf; --pink: #f06595;
-}
+  --green-bg: rgba(81,207,102,.15); --accent-bg: rgba(79,140,255,.15);
+  --yellow-bg: rgba(255,210,59,.15); --red-bg: rgba(255,107,107,.15);
+  --shadow: none;
+
+  --tip-bg:#1f2b3d; --tip-ink:#f0f4f8; --tip-line:rgba(255,255,255,.1);
+  --green-text:#51cf66; --yellow-text:#ffd43b; --red-text:#ff6b6b;}
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; font-size:15px; line-height:1.5; }
 a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
@@ -20,6 +41,15 @@ a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:under
 .nav-stats { font-size:13px; color:var(--muted); }
 .nav-config-btn { font-size:13px; padding:5px 12px; background:var(--bg3); border:1px solid var(--rule); border-radius:4px; color:var(--muted); cursor:pointer; }
 .nav-config-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ====== v1.4.3 导航分组（浏览蓝/治理绿/标准紫/应用橙） ====== */
+.nav-sep { width:1px; height:18px; background:var(--rule); margin:0 6px; align-self:center; flex-shrink:0; }
+.nav-g-browse { --nav-g: var(--accent); }
+.nav-g-gov { --nav-g: var(--green); }
+.nav-g-std { --nav-g: var(--purple); }
+.nav-g-app { --nav-g: var(--orange); }
+.nav-link:hover { color:var(--ink); border-bottom-color:var(--nav-g,var(--accent)); }
+.nav-link.active { border-bottom-color:var(--nav-g,var(--accent)); }
 
 /* Page container */
 .page { width:100%; padding:24px 32px; box-sizing:border-box; }
@@ -44,10 +74,10 @@ a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:under
 
 /* Tags */
 .tag { display:inline-block; font-size:12px; padding:4px 10px; border-radius:4px; font-weight:600; }
-.tag-green { background:rgba(81,207,102,.15); color:var(--green); }
-.tag-blue { background:rgba(79,140,255,.15); color:var(--accent); }
-.tag-yellow { background:rgba(255,210,59,.15); color:var(--yellow); }
-.tag-red { background:rgba(255,107,107,.15); color:var(--accent2); }
+.tag-green { background:var(--green-bg); color:var(--green); }
+.tag-blue { background:var(--accent-bg); color:var(--accent); }
+.tag-yellow { background:var(--yellow-bg); color:var(--yellow); }
+.tag-red { background:var(--red-bg); color:var(--accent2); }
 
 /* Table */
 .table-wrap { overflow-x:auto; max-height:600px; overflow-y:auto; }
@@ -85,14 +115,65 @@ textarea.input { min-height:120px; resize:vertical; font-family:inherit; }
 .modal-value { font-size:14px; color:var(--ink); word-break:break-all; }
 
 /* Coverage badges */
-.cov-full { background:rgba(81,207,102,.15); color:var(--green); }
-.cov-good { background:rgba(79,140,255,.15); color:var(--accent); }
-.cov-mid { background:rgba(255,210,59,.15); color:var(--yellow); }
-.cov-low { background:rgba(255,107,107,.15); color:var(--accent2); }
+.cov-full { background:var(--green-bg); color:var(--green); }
+.cov-good { background:var(--accent-bg); color:var(--accent); }
+.cov-mid { background:var(--yellow-bg); color:var(--yellow); }
+.cov-low { background:var(--red-bg); color:var(--accent2); }
 
 /* Responsive */
 @media(max-width:768px) {
   .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; }
   .nav-links { overflow-x:auto; }
   .page { padding:16px; }
+}
+
+
+/* ====== v1.4.4 导航组色竖条（静态可见的分组色标识） ====== */
+.nav-link { border-left: 3px solid transparent; padding-left: 11px; }
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .nav-link { border-left-color: color-mix(in srgb, var(--nav-g, var(--accent)) 28%, transparent); }
+}
+.nav-link:hover, .nav-link.active { border-left-color: var(--nav-g, var(--accent)); }
+
+/* ====== v1.4.4 响应式增强 ====== */
+@media (max-width: 1100px) {
+  .nav { padding: 0 12px; }
+  .nav-brand { margin-right: 14px; font-size: 15px; }
+  .nav-link { padding-left: 9px; padding-right: 10px; font-size: 12.5px; }
+  .nav-sep { margin: 0 4px; }
+}
+@media (max-width: 768px) {
+  .nav-stats { display: none; }
+  .nav-config-btn { padding: 4px 8px; }
+  .page-header h1 { font-size: 22px; }
+  table { font-size: 13px; }
+  th, td { padding: 8px 10px; }
+}
+
+
+/* ====== v1.4.7 维度色板 + CDSS 徽章双主题变量（左中右配色协调） ====== */
+:root{
+  --dim-lab:#5f3dc4;            /* 检验检查族：ExamObservation / LabItem / LabSubitem */
+  --dim-patho:#4263eb;          /* 机制类：Pathophysiology / Definition / CDSS 渐变尾色 */
+  --dim-clinical-rule:#1971c2;  /* 临床规则 ClinicalRule / 通路图主色 */
+  --dim-evidence:#2f9e44;       /* 证据 Evidence */
+  --dim-guideline:#9a6700;      /* 指南 Guideline */
+  --dim-threshold:#087f5b;      /* 阈值规则 ThresholdRule / Prevention */
+  --dim-nursing:#2b8a3e;        /* 护理三维度 */
+  --ok-bg:#d3f9d8; --ok-ink:#2b8a3e; --ok-line:rgba(47,158,68,.35); --ok-bg-faint:rgba(47,158,68,.07);
+  --warn-bg:#fff3bf; --warn-ink:#9a6700; --warn-line:rgba(217,148,0,.4); --warn-bg-faint:rgba(217,148,0,.07);
+  --bad-bg:#ffe3e3; --bad-ink:#c92a2a; --bad-line:rgba(224,49,49,.35); --bad-bg-faint:rgba(224,49,49,.04);
+  --neutral-bg:rgba(33,37,41,.06); --neutral-line:rgba(33,37,41,.15);
+  --row-hover:rgba(22,104,220,.07);
+  --orange-bg:rgba(232,89,12,.09); --orange-line:rgba(232,89,12,.35);
+}
+html[data-theme="dark"]{
+  --dim-lab:#845ef7; --dim-patho:#748ffc; --dim-clinical-rule:#339af0;
+  --dim-evidence:#40c057; --dim-guideline:#fab005; --dim-threshold:#20c997; --dim-nursing:#38d9a9;
+  --ok-bg:rgba(64,192,87,.16); --ok-ink:#69db7c; --ok-line:rgba(81,207,102,.4); --ok-bg-faint:rgba(81,207,102,.08);
+  --warn-bg:rgba(250,176,5,.16); --warn-ink:#fab005; --warn-line:rgba(250,173,20,.4); --warn-bg-faint:rgba(250,173,20,.08);
+  --bad-bg:rgba(250,82,82,.16); --bad-ink:#ff8787; --bad-line:rgba(250,82,82,.4); --bad-bg-faint:rgba(250,82,82,.05);
+  --neutral-bg:rgba(255,255,255,.05); --neutral-line:rgba(139,146,165,.22);
+  --row-hover:rgba(79,140,255,.08);
+  --orange-bg:rgba(255,146,43,.12); --orange-line:rgba(255,146,43,.4);
 }

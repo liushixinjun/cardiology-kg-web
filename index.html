@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 数据总览</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026092813">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 /* ====== Page ====== */
 .page{width:100%;padding:24px 32px;box-sizing:border-box}
@@ -15,8 +15,8 @@
 /* ====== Hero ====== */
 .hero{
   position:relative;overflow:hidden;border-radius:20px;
-  padding:40px 44px 36px;margin-bottom:28px;
-  background:linear-gradient(135deg,#0c1426 0%,#111b33 40%,#0f2027 100%);
+  padding:26px 40px 22px;margin-bottom:22px;
+  background:var(--hero-grad);
   border:1px solid rgba(79,140,255,.18);
   box-shadow:0 0 80px rgba(79,140,255,.08),inset 0 1px 0 rgba(255,255,255,.04);
 }
@@ -48,55 +48,60 @@
 .hero-left{flex:1;min-width:0}
 .hero-badge{
   display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;border-radius:999px;font-size:11px;font-weight:700;
-  background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.25);
-  color:#74c0fc;margin-bottom:14px;letter-spacing:.03em;
+  padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
+  background:var(--accent-bg);border:1px solid rgba(79,140,255,.25);
+  color:var(--hero-blue);margin-bottom:10px;letter-spacing:.03em;
 }
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#51cf66;animation:badgePulse 2s infinite}
 @keyframes badgePulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hero h1{
-  font-size:34px;font-weight:900;margin:0 0 10px;
-  background:linear-gradient(135deg,#e8eaf0 30%,#74c0fc 100%);
+  font-size:26px;font-weight:900;margin:0 0 8px;
+  background:linear-gradient(135deg,var(--ink) 30%,var(--hero-blue) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;line-height:1.2;
 }
-.hero-sub{font-size:14px;color:#8b90a0;line-height:1.8;max-width:640px}
-.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:640px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .hero-tag{
   font-size:11px;padding:4px 12px;border-radius:8px;font-weight:600;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  color:#8b90a0;
+  background:var(--glass);border:1px solid var(--glass-line);
+  color:var(--muted);
 }
 
 /* ====== Hero KPIs ====== */
 .hero-kpis{
   display:flex;gap:14px;flex-shrink:0;position:relative;z-index:1;
-  margin-left:32px;align-self:center;
+  margin-left:24px;align-self:center;
 }
 .hero-kpi{
-  text-align:center;padding:14px 18px;border-radius:14px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
-  backdrop-filter:blur(10px);min-width:90px;
+  text-align:center;padding:10px 16px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--glass-line2);
+  backdrop-filter:blur(10px);min-width:84px;
   transition:all .25s;position:relative;overflow:hidden;
 }
-.hero-kpi:hover{background:rgba(79,140,255,.1);border-color:rgba(79,140,255,.3);transform:translateY(-2px)}
+.hero-kpi:hover{background:var(--accent-bg);border-color:rgba(79,140,255,.3);transform:translateY(-2px)}
 .hero-kpi::after{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--accent),transparent);
   opacity:0;transition:opacity .25s;
 }
 .hero-kpi:hover::after{opacity:1}
+a.hero-kpi{cursor:pointer;text-decoration:none;color:inherit}
+.hero-kpi-label::after{content:'\2192';margin-left:4px;opacity:0;font-weight:400;transition:opacity .2s}
+a.hero-kpi:hover .hero-kpi-label::after{opacity:.75}
+a.hero-tag{cursor:pointer;text-decoration:none;transition:color .2s,background .2s,border-color .2s}
+a.hero-tag:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-bg)}
 .hero-kpi-num{
-  font-size:26px;font-weight:900;line-height:1;
-  background:linear-gradient(180deg,#e8eaf0 20%,#4f8cff 100%);
+  font-size:22px;font-weight:900;line-height:1;
+  background:linear-gradient(180deg,var(--ink) 20%,var(--accent) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
-.hero-kpi-label{font-size:10px;color:#64748b;margin-top:6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.hero-kpi-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 
 /* ====== 响应式 Hero ====== */
 @media(max-width:960px){
-  .hero-kpis{margin-left:0;margin-top:20px;justify-content:center}
+  .hero-kpis{margin-left:0;margin-top:14px;justify-content:center}
   .hero-top{flex-direction:column;align-items:center;text-align:center}
   .hero-sub{max-width:100%}
   .hero-tags{justify-content:center}
@@ -106,14 +111,14 @@
 .section{margin-bottom:24px}
 .section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .section-head h2{font-size:18px;font-weight:800;color:var(--ink)}
-.section-head .section-tag{font-size:11px;color:var(--accent);background:rgba(79,140,255,.1);padding:3px 10px;border-radius:999px;font-weight:700}
+.section-head .section-tag{font-size:11px;color:var(--accent);background:var(--accent-bg);padding:3px 10px;border-radius:999px;font-weight:700}
 
 /* ====== Panel ====== */
 .panel{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px;position:relative;overflow:hidden}
 .panel-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.panel-help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(79,140,255,.12);color:var(--accent);font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none}
+.panel-help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent-bg);color:var(--accent);font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none}
 .panel-help:hover{background:rgba(79,140,255,.25);transform:scale(1.1)}
-.panel-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:700;background:rgba(81,207,102,.12);color:#51cf66;letter-spacing:.02em}
+.panel-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:700;background:var(--green-bg);color:var(--green-text);letter-spacing:.02em}
 .panel-help.active{background:var(--accent);color:#fff}
 .panel-note{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;display:none}
 .panel-note.show{display:block}
@@ -137,7 +142,7 @@
 .dim-off{background:var(--bg4)}
 .dt-btn{font-size:12px;color:var(--accent);font-weight:700;cursor:pointer}
 .dt-toggle{text-align:center;padding:10px;font-size:13px;color:var(--accent);font-weight:700;cursor:pointer;transition:color .2s}
-.dt-toggle:hover{color:#74c0fc}
+.dt-toggle:hover{color:var(--hero-blue)}
 
 /* ====== Bottom Grid (Dim Chart + Gaps) ====== */
 .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
@@ -156,10 +161,10 @@
 
 /* ====== Tag (coverage badges) ====== */
 .tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;font-weight:700}
-.cov-full{background:rgba(81,207,102,.15);color:#51cf66}
-.cov-good{background:rgba(79,140,255,.15);color:#4f8cff}
-.cov-mid{background:rgba(255,212,59,.15);color:#ffd43b}
-.cov-low{background:rgba(255,107,107,.15);color:#ff6b6b}
+.cov-full{background:var(--green-bg);color:var(--green-text)}
+.cov-good{background:var(--accent-bg);color:var(--accent)}
+.cov-mid{background:var(--yellow-bg);color:var(--yellow-text)}
+.cov-low{background:var(--red-bg);color:var(--red-text)}
 
 /* ====== Nav Grid (功能入口) ====== */
 .nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
@@ -202,10 +207,25 @@
   .fb-line{width:28px}
 }
 @media(max-width:560px){
-  .hero h1{font-size:22px}
+  .hero h1{font-size:20px}
   .nav-grid{grid-template-columns:1fr}
   .modal-grid{grid-template-columns:1fr}
   .gap-list{grid-template-columns:1fr}
+}
+/* ====== v1.4.2 hero/玻璃卡片双主题变量 ====== */
+:root{
+  --hero-grad:linear-gradient(135deg,#dceafa 0%,#eef4fd 40%,#e8f1f7 100%);
+  --hero-blue:#1668dc;
+  --glass:rgba(255,255,255,.55);
+  --glass-line:rgba(22,104,220,.16);
+  --glass-line2:rgba(22,104,220,.12);
+}
+html[data-theme="dark"]{
+  --hero-grad:linear-gradient(135deg,#0c1426 0%,#111b33 40%,#0f2027 100%);
+  --hero-blue:#74c0fc;
+  --glass:rgba(255,255,255,.04);
+  --glass-line:rgba(255,255,255,.08);
+  --glass-line2:rgba(255,255,255,.06);
 }
 </style>
 </head>
@@ -221,18 +241,18 @@
       <div class="hero-left">
         <div class="hero-badge"><span class="hero-badge-dot"></span> NEO4J 实时图谱</div>
         <h1>心血管内科 · 专科知识图谱</h1>
-        <div class="hero-sub">以心血管内科为主线，按疾病大类组织专病知识，汇总症状、体征、检查、检验、药物、治疗方案等<span class="dcp">17</span>个知识维度，帮助快速了解图谱覆盖范围和建设质量。</div>
+        <div class="hero-sub">以心血管内科为主线，按疾病大类组织专病知识，汇总症状、体征、检查、检验、药物、治疗方案等<span class="dcp">20</span>个核心知识维度，帮助快速了解图谱覆盖范围和建设质量。</div>
         <div class="hero-tags">
           <span class="hero-tag">🏥 心血管内科</span>
-          <span class="hero-tag">📊 <span class="dcp">17</span>知识维度</span>
+          <span class="hero-tag">📊 <span class="dcp">20</span>核心知识维度</span>
           <span class="hero-tag">🔍 检索 · 可视化 · 质量审计</span>
         </div>
       </div>
       <div class="hero-kpis" id="hero-kpis">
-        <div class="hero-kpi"><div class="hero-kpi-num" id="k-groups">-</div><div class="hero-kpi-label">疾病大类</div></div>
-        <div class="hero-kpi"><div class="hero-kpi-num" id="k-diseases">-</div><div class="hero-kpi-label">专病</div></div>
-        <div class="hero-kpi"><div class="hero-kpi-num" id="k-entities">-</div><div class="hero-kpi-label">可视化实体</div></div>
-        <div class="hero-kpi"><div class="hero-kpi-num" id="k-relations">-</div><div class="hero-kpi-label">关系</div></div>
+        <a class="hero-kpi" href="explore.html" title="疾病树按大类组织，点开即见专病（图谱探索）"><div class="hero-kpi-num" id="k-groups">-</div><div class="hero-kpi-label">疾病大类</div></a>
+        <a class="hero-kpi" href="explore.html" title="按疾病浏览专病与20维度详情（图谱探索）"><div class="hero-kpi-num" id="k-diseases">-</div><div class="hero-kpi-label">专病</div></a>
+        <a class="hero-kpi" href="network.html" title="实体全景网络（网络探索）"><div class="hero-kpi-num" id="k-entities">-</div><div class="hero-kpi-label">可视化实体</div></a>
+        <a class="hero-kpi" href="network.html" title="关系连线与路径查找（网络探索）"><div class="hero-kpi-num" id="k-relations">-</div><div class="hero-kpi-label">关系</div></a>
       </div>
     </div>
   </section>
@@ -296,9 +316,9 @@
         <p>交互式知识图谱，点击展开关联、路径查找、全屏浏览</p>
       </a>
       <a class="nav-card" href="heatmap.html">
-        <div class="nc-icon">&#x1f52c;</div>
-        <h3>数据覆盖分析</h3>
-        <p>结构/实例/审核/可用四层覆盖矩阵，按疾病分析就绪程度</p>
+        <div class="nc-icon">&#x1f4c8;</div>
+        <h3>数据建设进度</h3>
+        <p>每个疾病的知识建设到哪一步：建路径→写推荐→审核→可用</p>
       </a>
       <a class="nav-card" href="review.html">
         <div class="nc-icon">&#x2705;</div>
@@ -340,8 +360,9 @@
 <div class="modal" id="modal"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=2026092813"></script>
-<script src="dashboard.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
+<script src="dashboard.js?v=2026100901"></script>
 <script>
 injectDimCount();renderNav('index');
 /* Dashboard 只需要 disease list + stats + dim_counts，不需要全量维度数据 */

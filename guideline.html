@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 临床指南库</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 .g-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .g-search { display: flex; gap: 12px; margin-bottom: 14px; }
@@ -23,7 +23,7 @@
 .g-card-level { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 4px; background: var(--bg3); color: var(--muted); margin-bottom: 6px; }
 .g-card-diseases { display: flex; flex-wrap: wrap; gap: 4px; }
 .g-card-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: rgba(79,140,255,.1); color: var(--accent); cursor: pointer; transition: background .15s; }
-.g-card-tag:hover { background: rgba(79,140,255,.2); }
+.g-card-tag:hover { background: var(--accent-bg); }
 .g-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
 .g-group-wrapper { margin-bottom: 4px; }
 @media(max-width:768px){ .g-stats { grid-template-columns: repeat(2, 1fr); } .g-list { grid-template-columns: 1fr; } }
@@ -42,7 +42,8 @@
   </div>
   <div id="gContent"></div>
 </div>
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 renderNav('guideline');
 var ALL_GUIDELINES = [];
@@ -111,7 +112,7 @@ function renderCard(g) {
   if(g.diseases && g.diseases.length > 0){
     h += '<div class="g-card-diseases">';
     g.diseases.forEach(function(d){
-      h += '<span class="g-card-tag" onclick="event.stopPropagation();location.href=\'explore.html?disease=' + encodeURIComponent(d.code) + '\'">' + d.name + '</span>';
+      h += '<span class="g-card-tag" onclick="event.stopPropagation();location.href=\'explore.html?code=' + encodeURIComponent(d.code) + '\'">' + d.name + '</span>';
     });
     h += '</div>';
   }

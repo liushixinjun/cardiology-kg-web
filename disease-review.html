@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>疾病审核详情 - 专科知识图谱</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 html,body{height:100%;overflow:hidden;margin:0}
 
@@ -68,11 +68,11 @@ html,body{height:100%;overflow:hidden;margin:0}
 .dr-scene-item-meta{font-size:11px;color:var(--muted)}
 .dr-scene-item-badge{
   font-size:9px;padding:1px 6px;border-radius:999px;
-  background:rgba(255,210,59,.15);color:var(--yellow);font-weight:700;
+  background:var(--yellow-bg);color:var(--yellow);font-weight:700;
 }
 .dr-scene-item-done{
   font-size:9px;padding:1px 6px;border-radius:999px;
-  background:rgba(81,207,102,.15);color:var(--green);font-weight:700;
+  background:var(--green-bg);color:var(--green);font-weight:700;
 }
 
 /* ===== 右侧：审核主区 ===== */
@@ -110,7 +110,7 @@ html,body{height:100%;overflow:hidden;margin:0}
   font-weight:700;white-space:nowrap;
 }
 .dr-flow-disease{
-  background:rgba(79,140,255,.12);color:var(--accent);
+  background:var(--accent-bg);color:var(--accent);
   border:1px solid rgba(79,140,255,.25);
 }
 .dr-flow-relation{
@@ -139,8 +139,8 @@ html,body{height:100%;overflow:hidden;margin:0}
 .dr-chips{display:flex;flex-wrap:wrap;gap:6px}
 .dr-chip{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
 .dr-chip-target{
-  background:rgba(79,140,255,.1);color:var(--accent);
-  border:1px solid rgba(79,140,255,.2);
+  background:var(--accent-bg);color:var(--accent);
+  border:1px solid var(--accent-bg);
 }
 .dr-chip-missing{
   background:rgba(255,107,107,.1);color:var(--accent2);
@@ -192,19 +192,19 @@ html,body{height:100%;overflow:hidden;margin:0}
 .dr-toggle-btn:last-child{border-right:none}
 .dr-toggle-btn:hover{background:var(--bg4);color:var(--ink)}
 .dr-toggle-btn.active-green{
-  background:rgba(81,207,102,.15);color:var(--green);
+  background:var(--green-bg);color:var(--green);
   border-color:rgba(81,207,102,.3);
 }
 .dr-toggle-btn.active-blue{
-  background:rgba(79,140,255,.15);color:var(--accent);
+  background:var(--accent-bg);color:var(--accent);
   border-color:rgba(79,140,255,.3);
 }
 .dr-toggle-btn.active-yellow{
-  background:rgba(255,210,59,.15);color:var(--yellow);
+  background:var(--yellow-bg);color:var(--yellow);
   border-color:rgba(255,210,59,.3);
 }
 .dr-toggle-btn.active-red{
-  background:rgba(255,107,107,.15);color:var(--accent2);
+  background:var(--red-bg);color:var(--accent2);
   border-color:rgba(255,107,107,.3);
 }
 .dr-comment-input{
@@ -230,6 +230,8 @@ html,body{height:100%;overflow:hidden;margin:0}
   .dr-flow{flex-wrap:wrap}
 }
 </style>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 </head>
 <body>
 <div class="nav"></div>
@@ -292,7 +294,7 @@ html,body{height:100%;overflow:hidden;margin:0}
 
 <script>
 /* =================================================================
- * disease-review.html — 疾病审核详情页（完全独立，不依赖 app.js）
+ * disease-review.html — 疾病审核详情页（v1.4.9 起导航复用 app.js 统一导航，其余逻辑独立）
  * ================================================================= */
 var DR = (function () {
   'use strict';
@@ -374,14 +376,14 @@ var DR = (function () {
   };
 
   var COLOR_VAR_MAP = {
-    cyan: 'var(--cyan)',
-    purple: 'var(--purple)',
-    pink: 'var(--pink)',
-    blue: 'var(--accent)',
-    yellow: 'var(--yellow)',
-    red: 'var(--accent2)',
-    green: 'var(--green)',
-    muted: 'var(--muted)'
+    cyan: cssVar('--cyan','#22b8cf'),
+    purple: cssVar('--purple','#cc5de8'),
+    pink: cssVar('--pink','#f06595'),
+    blue: cssVar('--accent','#4f8cff'),
+    yellow: cssVar('--yellow','#ffd43b'),
+    red: cssVar('--accent2','#ff6b6b'),
+    green: cssVar('--green','#51cf66'),
+    muted: cssVar('--muted','#8b90a0')
   };
 
   var MISSING_FIELD_LABELS = {
@@ -523,7 +525,7 @@ var DR = (function () {
     for (var i = 0; i < _scenarios.length; i++) {
       var sc = _scenarios[i];
       var colorKey = SCENE_COLORS[sc.scenario_type] || 'blue';
-      var colorVar = COLOR_VAR_MAP[colorKey] || 'var(--accent)';
+      var colorVar = COLOR_VAR_MAP[colorKey] || cssVar('--accent','#4f8cff');
       var dec = _decisions[sc.review_id];
       var badge = '';
       if (dec && dec.decision) {
@@ -592,7 +594,7 @@ var DR = (function () {
     var relLabel = RELATION_LABELS[sc.relation_type] || sc.relation_type;
     var tgtLabel = TARGET_TYPE_LABELS[sc.target_type] || sc.target_type;
     var colorKey = SCENE_COLORS[sc.scenario_type] || 'blue';
-    var colorVar = COLOR_VAR_MAP[colorKey] || 'var(--accent)';
+    var colorVar = COLOR_VAR_MAP[colorKey] || cssVar('--accent','#4f8cff');
 
     /* 查找该场景下的药师条目 */
     var relatedPharm = _pharmacistItems.filter(function (p) {
@@ -946,30 +948,18 @@ var DR = (function () {
   }
 
   /* ============================================
-   *  导航栏渲染（独立，不依赖 app.js）
+   *  导航栏：v1.4.9 修订——复用全站统一导航（app.js renderNav）
+   *  此前本页自带一套旧版菜单（缺 AI图谱解析/Schema标准/指南库，含已作废的"临床诊断"，
+   *  且无分组配色），点击疾病进入本页后顶部样式突变，现与全站一致。
    * ============================================ */
   function _renderNav() {
+    if (typeof renderNav === 'function') { renderNav('review'); return; }
+    /* 兜底：app.js 加载失败时退回简单返回条 */
     var nav = q('.nav');
     if (!nav) return;
-    var pages = [
-      { id: 'index', label: '数据总览', icon: '' },
-      { id: 'explore', label: '图谱探索', icon: '' },
-      { id: 'network', label: '网络探索', icon: '' },
-      { id: 'heatmap', label: '数据覆盖', icon: '' },
-      { id: 'diagnosis', label: '临床诊断', icon: '' },
-      { id: 'review', label: '临床审核', icon: '' },
-      { id: 'schema', label: '数据字典', icon: '' },
-      { id: 'terminology', label: '术语库', icon: '' }
-    ];
-    var h = '<a class="nav-brand" href="index.html">专科知识图谱 · 心血管内科</a>';
-    h += '<div class="nav-links">';
-    for (var i = 0; i < pages.length; i++) {
-      var p = pages[i];
-      var cls = (p.id === 'review') ? ' active' : '';
-      h += '<a class="nav-link' + cls + '" href="' + p.id + '.html">' + (p.icon ? p.icon + ' ' : '') + p.label + '</a>';
-    }
-    h += '</div>';
-    nav.innerHTML = h;
+    nav.innerHTML = '<a class="nav-brand" href="index.html">🏥 专科知识图谱 · 心血管内科</a>' +
+      '<div class="nav-links"><a class="nav-link active" href="review.html">✅ 临床审核</a></div><div class="nav-right"></div>';
+    if (typeof mountThemeToggle === 'function') mountThemeToggle();
   }
 
   /* ============================================

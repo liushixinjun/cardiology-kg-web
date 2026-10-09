@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 图谱数据字典</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026092813">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -22,12 +22,12 @@
 .si-type-item{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;cursor:pointer;font-size:12px;color:var(--ink);border-left:3px solid transparent;transition:all .15s}
 .si-type-desc{display:none}
 .si-type-item:hover{background:var(--bg3)}
-.si-type-item.active{background:rgba(79,140,255,.1);border-left-color:var(--accent);color:var(--accent)}
+.si-type-item.active{background:var(--accent-bg);border-left-color:var(--accent);color:var(--accent)}
 .si-type-item .cnt{font-size:10px;background:var(--bg3);border-radius:999px;padding:1px 7px;color:var(--muted);font-weight:600}
 .si-type-item.si-slot{opacity:.55}
 .si-type-item.si-slot .cnt{background:rgba(206,212,218,.4);color:var(--muted)}
 .si-type-item.si-slot.active{opacity:.85}
-.si-type-item.active .cnt{background:rgba(79,140,255,.15);color:var(--accent)}
+.si-type-item.active .cnt{background:var(--accent-bg);color:var(--accent)}
 .si-dim-list{padding:4px 0}
 .si-dim-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer}
 .si-dim-item:hover{color:var(--ink)}
@@ -145,7 +145,7 @@
 .si-entity-type-badge.Symptom{background:rgba(81,207,102,.12);color:#51cf66}
 .si-entity-type-badge.Medication{background:rgba(255,159,64,.12);color:#ff9f40}
 .si-entity-type-badge.Drug{background:rgba(255,159,64,.12);color:#ff9f40}
-.si-entity-type-badge.ExamItem{background:rgba(79,140,255,.12);color:var(--accent)}
+.si-entity-type-badge.ExamItem{background:var(--accent-bg);color:var(--accent)}
 .si-entity-type-badge.LabItem{background:rgba(153,102,255,.12);color:#9966ff}
 .si-entity-type-badge.DiagnosisCriteria{background:rgba(255,212,59,.15);color:#bcc02e}
 .si-entity-type-badge.StandardDiagnosis{background:rgba(255,146,43,.12);color:#ff922b}
@@ -191,7 +191,7 @@
 .si-search-table tr:hover td{background:rgba(79,140,255,.04)}
 .si-search-table .t-name{font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
 .si-search-table .t-name:hover{color:var(--accent);text-decoration:underline}
-.si-search-table .t-type{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(79,140,255,.1);color:var(--accent);white-space:nowrap}
+.si-search-table .t-type{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--accent-bg);color:var(--accent);white-space:nowrap}
 .si-search-table .t-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
 .si-search-table .t-aliases{font-size:11px;color:var(--muted)}
 .si-search-table .t-ops{display:flex;gap:4px;white-space:nowrap}
@@ -205,7 +205,7 @@
 .si-cascade select{background:var(--bg3);border:1px solid var(--rule);border-radius:6px;padding:6px 10px;color:var(--ink);font-size:13px;outline:none;min-width:120px}
 .si-cascade select:focus{border-color:var(--accent)}
 
-.si-network-box{background:#1a1d27;border:1px solid var(--rule);border-radius:12px;overflow:hidden;position:relative}
+.si-network-box{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;overflow:hidden;position:relative}
 #si-network{width:100%;height:calc(100vh - 140px);min-height:500px}
 .si-network-legend{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.75);border:1px solid var(--rule);border-radius:8px;padding:10px 14px;font-size:11px;color:#ccc;z-index:10;max-width:200px}
 .si-network-legend .lg-title{font-weight:700;color:#fff;margin-bottom:4px;font-size:10px;text-transform:uppercase}
@@ -250,8 +250,8 @@
 .si-loading{text-align:center;color:var(--muted);padding:40px;font-size:13px}
 .si-notify{position:fixed;top:60px;right:20px;z-index:2000;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
 .si-notify.show{opacity:1;transform:translateY(0)}
-.si-notify.ok{background:rgba(81,207,102,.15);color:#51cf66;border:1px solid rgba(81,207,102,.3)}
-.si-notify.err{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid rgba(255,107,107,.3)}
+.si-notify.ok{background:var(--green-bg);color:#51cf66;border:1px solid rgba(81,207,102,.3)}
+.si-notify.err{background:var(--red-bg);color:#ff6b6b;border:1px solid rgba(255,107,107,.3)}
 .si-xl-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center}
 .si-xl-modal-overlay.show{display:flex}
 .si-xl-modal{background:var(--bg2);border:1px solid var(--rule);border-radius:14px;width:94%;max-width:1400px;height:88vh;display:flex;flex-direction:column;overflow:hidden}
@@ -413,7 +413,8 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -433,15 +434,15 @@ var SI_STATE = {
 
 var ENTITY_TYPES = [
   /* 第一层：疾病知识层 — 目录与疾病 */
-  {code:'Specialty',cn:'学科',icon:'🏥',color:'#4f8cff',shape:'dot',desc:'多学科根目录，如心血管内科'},
+  {code:'Specialty',cn:'学科',icon:'🏥',color:cssVar('--accent','#4f8cff'),shape:'dot',desc:'多学科根目录，如心血管内科'},
   {code:'DiseaseCategory',cn:'疾病大类',icon:'📂',color:'#748ffc',shape:'square',desc:'组织一组相关疾病，如冠心病'},
   {code:'DiseaseSubcategory',cn:'疾病亚类',icon:'📁',color:'#91a7ff',shape:'square',desc:'仅展示分组，不参与诊断、不回填EMR（has_subcategory）'},
-  {code:'Disease',cn:'疾病',icon:'🫀',color:'#ff6b6b',shape:'dot',desc:'临床疾病实体，可作为诊断'},
+  {code:'Disease',cn:'疾病',icon:'🫀',color:cssVar('--accent2','#ff6b6b'),shape:'dot',desc:'临床疾病实体，可作为诊断'},
   /* 第一层：疾病知识层 — 定义与基础医学 */
   {code:'Definition',cn:'定义',icon:'📖',color:'#748ffc',shape:'dot',desc:'疾病定义和基本概念'},
   {code:'DefinitionComponent',cn:'定义明细',icon:'📖',color:'#91a7ff',shape:'dot',desc:'定义中的独立要点，可单独追溯'},
-  {code:'Symptom',cn:'症状',icon:'🩺',color:'#51cf66',shape:'dot',desc:'患者主观感受，如胸痛、呼吸困难'},
-  {code:'Sign',cn:'体征',icon:'👁️',color:'#94d82d',shape:'dot',desc:'医生客观观察，如心脏杂音'},
+  {code:'Symptom',cn:'症状',icon:'🩺',color:cssVar('--green','#51cf66'),shape:'dot',desc:'患者主观感受，如胸痛、呼吸困难'},
+  {code:'Sign',cn:'体征',icon:'👁️',color:cssVar('--green','#94d82d'),shape:'dot',desc:'医生客观观察，如心脏杂音'},
   {code:'Etiology',cn:'病因',icon:'🧬',color:'#5c7cfa',shape:'dot',desc:'导致疾病发生的根本原因'},
   {code:'Pathophysiology',cn:'病理生理',icon:'📖',color:'#7950f2',shape:'dot',desc:'疾病发生发展的内在机制'},
   {code:'Epidemiology',cn:'流行病学',icon:'🌐',color:'#868e96',shape:'dot',desc:'疾病在人群中的分布规律'},
@@ -451,34 +452,34 @@ var ENTITY_TYPES = [
   {code:'Prevention',cn:'预防',icon:'🛡️',color:'#20c997',shape:'square',desc:'一级/二级预防和患者教育'},
   /* 第一层：疾病知识层 — 检查与检验（V4.1：ExamPlan 中转方案） */
   {code:'ExamPlan',cn:'检查检验方案',icon:'📋',color:'#4dabf7',shape:'square',desc:'疾病下的检查/检验方案中转节点（has_exam_plan）'},
-  {code:'ExamItem',cn:'检查项目',icon:'🔬',color:'#4f8cff',shape:'square',desc:'影像、心电、超声等检查项目'},
-  {code:'ExamObservation',cn:'检查发现',icon:'📏',color:'#74c0fc',shape:'dot',desc:'检查报告中的结构化发现'},
+  {code:'ExamItem',cn:'检查项目',icon:'🔬',color:cssVar('--accent','#4f8cff'),shape:'square',desc:'影像、心电、超声等检查项目'},
+  {code:'ExamObservation',cn:'检查发现',icon:'📏',color:getTheme() === 'light' ? '#1668dc' : '#74c0fc',shape:'dot',desc:'检查报告中的结构化发现'},
   {code:'LabItem',cn:'检验项目',icon:'🧪',color:'#9966ff',shape:'diamond',desc:'血液、生化、标志物等检验项目'},
   {code:'LabSubitem',cn:'检验细项',icon:'🔬',color:'#b197fc',shape:'dot',desc:'检验项目下的具体可报告指标'},
   {code:'LabSample',cn:'检验标本',icon:'🧫',color:'#b197fc',shape:'dot',desc:'血清、血浆等检验标本（uses_lab_sample）'},
   {code:'VitalSignItem',cn:'生命体征项',icon:'💓',color:'#ff8787',shape:'dot',desc:'体温、血压、心率等生命体征条目'},
-  {code:'ThresholdRule',cn:'阈值规则',icon:'⚖️',color:'#fcc419',shape:'diamond',desc:'检验检查指标的临界值判定规则'},
+  {code:'ThresholdRule',cn:'阈值规则',icon:'⚖️',color:cssVar('--yellow','#fcc419'),shape:'diamond',desc:'检验检查指标的临界值判定规则'},
   /* 第一层：疾病知识层 — 诊断与风险 */
-  {code:'DiagnosisCriteria',cn:'诊断标准',icon:'📋',color:'#ffd43b',shape:'square',desc:'疾病诊断需要满足的条件'},
+  {code:'DiagnosisCriteria',cn:'诊断标准',icon:'📋',color:cssVar('--yellow','#ffd43b'),shape:'square',desc:'疾病诊断需要满足的条件'},
   {code:'DiagnosisCriteriaComponent',cn:'诊断标准明细',icon:'📋',color:'#ffe066',shape:'dot',desc:'诊断标准中的独立可判断条件'},
-  {code:'DifferentialDiagnosis',cn:'鉴别诊断',icon:'🔍',color:'#ea7ccc',shape:'dot',desc:'需要与当前疾病区分的相似疾病'},
+  {code:'DifferentialDiagnosis',cn:'鉴别诊断',icon:'🔍',color:cssVar('--pink','#ea7ccc'),shape:'dot',desc:'需要与当前疾病区分的相似疾病'},
   {code:'RiskStratification',cn:'风险分层',icon:'📈',color:'#fd7e14',shape:'square',desc:'根据患者特征分为不同风险等级'},
-  {code:'ClinicalRule',cn:'临床规则',icon:'📐',color:'#a9e34b',shape:'diamond',desc:'触发、适用、排除、禁忌逻辑'},
+  {code:'ClinicalRule',cn:'临床规则',icon:'📐',color:cssVar('--green','#a9e34b'),shape:'diamond',desc:'触发、适用、排除、禁忌逻辑'},
   /* 第一层：疾病知识层 — 治疗与管理（V4.1：药品实体统一 Drug） */
   {code:'Drug',cn:'药品',icon:'💊',color:'#ff9f40',shape:'triangle',desc:'心血管疾病治疗的核心药品（V4.1 统一命名）'},
-  {code:'Procedure',cn:'手术/操作',icon:'🔧',color:'#f06595',shape:'triangle',desc:'外科手术或介入操作'},
-  {code:'TreatmentPlan',cn:'治疗方案',icon:'📝',color:'#22b8cf',shape:'square',desc:'针对特定疾病的系统治疗策略（includes_drug 含药品）'},
-  {code:'TreatmentItem',cn:'治疗项目',icon:'💊',color:'#66d9e8',shape:'square',desc:'非药品、非手术的标准治疗'},
-  {code:'Contraindication',cn:'禁忌',icon:'🚫',color:'#ff6b6b',shape:'dot',desc:'阻断推荐的临床原因'},
+  {code:'Procedure',cn:'手术/操作',icon:'🔧',color:cssVar('--pink','#f06595'),shape:'triangle',desc:'外科手术或介入操作'},
+  {code:'TreatmentPlan',cn:'治疗方案',icon:'📝',color:cssVar('--cyan','#22b8cf'),shape:'square',desc:'针对特定疾病的系统治疗策略（includes_drug 含药品）'},
+  {code:'TreatmentItem',cn:'治疗项目',icon:'💊',color:cssVar('--cyan','#66d9e8'),shape:'square',desc:'非药品、非手术的标准治疗'},
+  {code:'Contraindication',cn:'禁忌',icon:'🚫',color:cssVar('--accent2','#ff6b6b'),shape:'dot',desc:'阻断推荐的临床原因'},
   {code:'FollowUp',cn:'随访',icon:'🔄',color:'#20c997',shape:'square',desc:'出院后定期复查和追踪管理（has_followup）'},
   /* 专科应用结构层 — 评估五件套（V4.1） */
   {code:'AssessmentScale',cn:'评估量表',icon:'📊',color:'#e599f7',shape:'square',desc:'如 GRACE、CHA₂DS₂-VASc 评分量表'},
-  {code:'AssessmentItem',cn:'评估评分项',icon:'📝',color:'#da77f2',shape:'dot',desc:'量表中的具体评分条目'},
-  {code:'AssessmentScoreRule',cn:'计分规则',icon:'⚖️',color:'#cc5de8',shape:'diamond',desc:'条目分值与总分计算规则'},
+  {code:'AssessmentItem',cn:'评估评分项',icon:'📝',color:cssVar('--purple','#da77f2'),shape:'dot',desc:'量表中的具体评分条目'},
+  {code:'AssessmentScoreRule',cn:'计分规则',icon:'⚖️',color:cssVar('--purple','#cc5de8'),shape:'diamond',desc:'条目分值与总分计算规则'},
   {code:'AssessmentResultLevel',cn:'评分结果等级',icon:'📈',color:'#be4bdb',shape:'dot',desc:'分值区间对应的风险等级'},
   {code:'AssessmentActionRule',cn:'结果动作规则',icon:'⚡',color:'#ae3ec9',shape:'diamond',desc:'等级触发的临床动作'},
   /* 专科应用结构层 — 护理十件套（V4.1） */
-  {code:'NursingAssessment',cn:'护理评估',icon:'🩺',color:'#63e6be',shape:'square',desc:'护理视角的患者评估'},
+  {code:'NursingAssessment',cn:'护理评估',icon:'🩺',color:cssVar('--cyan','#63e6be'),shape:'square',desc:'护理视角的患者评估'},
   {code:'NursingAssessmentItem',cn:'护理评估条目',icon:'📋',color:'#38d9a9',shape:'dot',desc:'护理评估的具体条目'},
   {code:'NursingDiagnosis',cn:'护理诊断',icon:'🏷️',color:'#20c997',shape:'dot',desc:'护理问题诊断'},
   {code:'NursingIntervention',cn:'护理措施',icon:'💉',color:'#0ca678',shape:'dot',desc:'护理干预措施'},
@@ -510,24 +511,24 @@ var ENTITY_TYPES = [
   {code:'Gene',cn:'基因',icon:'🧬',color:'#b197fc',shape:'dot',desc:'与疾病相关的基因（disease_associated_gene）'},
   {code:'GeneticVariant',cn:'基因变异',icon:'🧬',color:'#9775fa',shape:'dot',desc:'基因的具体变异位点'},
   {code:'SecondaryCause',cn:'继发病因',icon:'🔁',color:'#e599f7',shape:'dot',desc:'需排除的继发性病因（disease_needs_secondary_cause_exclusion）'},
-  {code:'HemodynamicIndicator',cn:'血流动力学指标',icon:'🌊',color:'#66d9e8',shape:'dot',desc:'诊断标准使用的血流动力学指标'},
+  {code:'HemodynamicIndicator',cn:'血流动力学指标',icon:'🌊',color:cssVar('--cyan','#66d9e8'),shape:'dot',desc:'诊断标准使用的血流动力学指标'},
   {code:'TargetOrganDamage',cn:'靶器官损害',icon:'🎯',color:'#4dabf7',shape:'dot',desc:'高血压等疾病导致的靶器官损害'},
-  {code:'BloodPressureGrade',cn:'血压分级',icon:'🩸',color:'#74c0fc',shape:'dot',desc:'血压水平分级（disease_has_blood_pressure_grade）'},
+  {code:'BloodPressureGrade',cn:'血压分级',icon:'🩸',color:getTheme() === 'light' ? '#1668dc' : '#74c0fc',shape:'dot',desc:'血压水平分级（disease_has_blood_pressure_grade）'},
   {code:'VolumeStatus',cn:'容量状态',icon:'💧',color:'#3bc9db',shape:'dot',desc:'推荐动作依赖的患者容量状态'},
   {code:'SeverityGrade',cn:'严重程度',icon:'⚠️',color:'#ffe066',shape:'dot',desc:'推荐动作适用的严重程度分级'},
   {code:'TimeWindow',cn:'时间窗',icon:'⏱️',color:'#fab005',shape:'dot',desc:'推荐动作适用的时间窗（recommendation_has_time_window）'},
-  {code:'Device',cn:'器械设备',icon:'🛠️',color:'#fcc419',shape:'dot',desc:'手术或操作使用的器械（procedure_uses_device）'},
-  {code:'DeviceParameter',cn:'设备参数',icon:'⚙️',color:'#ffd43b',shape:'dot',desc:'器械设备的参数（device_has_parameter）'},
-  {code:'AblationTarget',cn:'消融靶点',icon:'🎯',color:'#ff922b',shape:'dot',desc:'电生理消融的目标位置（procedure_targets_ablation_site）'},
-  {code:'ValveAnatomy',cn:'瓣膜部位',icon:'🫀',color:'#ff6b6b',shape:'dot',desc:'瓣膜病变的解剖部位（disease_has_valve_anatomy）'},
+  {code:'Device',cn:'器械设备',icon:'🛠️',color:cssVar('--yellow','#fcc419'),shape:'dot',desc:'手术或操作使用的器械（procedure_uses_device）'},
+  {code:'DeviceParameter',cn:'设备参数',icon:'⚙️',color:cssVar('--yellow','#ffd43b'),shape:'dot',desc:'器械设备的参数（device_has_parameter）'},
+  {code:'AblationTarget',cn:'消融靶点',icon:'🎯',color:cssVar('--orange','#ff922b'),shape:'dot',desc:'电生理消融的目标位置（procedure_targets_ablation_site）'},
+  {code:'ValveAnatomy',cn:'瓣膜部位',icon:'🫀',color:cssVar('--accent2','#ff6b6b'),shape:'dot',desc:'瓣膜病变的解剖部位（disease_has_valve_anatomy）'},
   {code:'ValveLesionType',cn:'瓣膜病变类型',icon:'🫀',color:'#e8590c',shape:'dot',desc:'瓣膜病变的类型（disease_has_valve_lesion_type）'},
-  {code:'VascularTerritory',cn:'冠脉供血区域',icon:'🗺️',color:'#f06595',shape:'dot',desc:'心电图检查提示的冠脉供血区域'},
+  {code:'VascularTerritory',cn:'冠脉供血区域',icon:'🗺️',color:cssVar('--pink','#f06595'),shape:'dot',desc:'心电图检查提示的冠脉供血区域'},
   /* 第二层：CDSS标准主数据层 */
-  {code:'StandardDiagnosis',cn:'标准诊断',icon:'🏷️',color:'#ff922b',shape:'dot',desc:'CDSS标准诊断字典，含ICD-10编码'},
-  {code:'StandardProcedure',cn:'标准手术',icon:'🔧',color:'#f06595',shape:'dot',desc:'CDSS标准手术字典（V4.1 起并入 Procedure.standard_code）'},
+  {code:'StandardDiagnosis',cn:'标准诊断',icon:'🏷️',color:cssVar('--orange','#ff922b'),shape:'dot',desc:'CDSS标准诊断字典，含ICD-10编码'},
+  {code:'StandardProcedure',cn:'标准手术',icon:'🔧',color:cssVar('--pink','#f06595'),shape:'dot',desc:'CDSS标准手术字典（V4.1 起并入 Procedure.standard_code）'},
   /* 第三层：临床决策层 */
-  {code:'RecommendationStatement',cn:'推荐陈述',icon:'📄',color:'#51cf66',shape:'square',desc:'医生推荐卡根实体'},
-  {code:'SourceAdjudication',cn:'来源裁决',icon:'⚖️',color:'#cc5de8',shape:'dot',desc:'记录主依据、支持依据、冲突和理由'},
+  {code:'RecommendationStatement',cn:'推荐陈述',icon:'📄',color:cssVar('--green','#51cf66'),shape:'square',desc:'医生推荐卡根实体'},
+  {code:'SourceAdjudication',cn:'来源裁决',icon:'⚖️',color:cssVar('--purple','#cc5de8'),shape:'dot',desc:'记录主依据、支持依据、冲突和理由'},
   {code:'Evidence',cn:'证据',icon:'📄',color:'#adb5bd',shape:'dot',desc:'循证医学证据来源'},
   {code:'Guideline',cn:'指南',icon:'📕',color:'#c92a2a',shape:'square',desc:'临床实践指南或专家共识'},
   /* 内部管理 */
@@ -1090,6 +1091,26 @@ function siSwitchView(view){
   }
 }
 
+
+/* v1.4.5 主题热切换：数据字典页图表就地重绘（主网络图/弹窗图/维度图按当前视图） */
+window.onThemeChange = function() {
+  if (typeof refreshDimColors === 'function') refreshDimColors();
+  var modal = document.getElementById('si-entity-modal');
+  var modalOpen = modal && modal.classList.contains('show');
+  if (modalOpen && SI_MODAL_STATE.tab === 'network' && SI_MODAL_STATE.code) {
+    siInitModalNetwork(SI_MODAL_STATE.code);
+    return;
+  }
+  var dimView = document.getElementById('si-dim-view');
+  if (dimView && dimView.style.display !== 'none' && typeof SI_DIM_CENTER !== 'undefined' && SI_DIM_CENTER) {
+    siRenderDimNetwork(SI_DIM_CENTER.center, SI_DIM_CENTER.diseases, SI_DIM_CENTER.others);
+    return;
+  }
+  var netView = document.getElementById('si-network-view');
+  if (netView && netView.style.display !== 'block') return;
+  if (SI_STATE.currentCode) siInitNetwork(SI_STATE.currentCode);
+};
+
 function siInitNetwork(code){
   // 销毁旧实例
   if(SI_STATE.echartsChart){
@@ -1101,7 +1122,8 @@ function siInitNetwork(code){
   SI_STATE.echartsEdges = {};
 
   var container = document.getElementById('si-network');
-  SI_STATE.echartsChart = echarts.init(container, null, {renderer:'canvas'});
+  SI_STATE.echartsChart = echarts.init(container, null, {renderer:'canvas', devicePixelRatio:kgDpr()});
+  container.setAttribute('role','img'); container.setAttribute('aria-label','实体关系子图');
 
   // 事件绑定
   SI_STATE.echartsChart.off('click');
@@ -1126,10 +1148,11 @@ function siInitNetwork(code){
   // 加载中心节点
   siExpandNode(code, true);
 
-  // 窗口resize
-  window.addEventListener('resize', function(){
+  // 窗口resize（v1.4.4 防抖；顺带覆盖维度网络图 SI_DIM_CHART）
+  window.addEventListener('resize', kgDebounce(function(){
     if(SI_STATE.echartsChart) SI_STATE.echartsChart.resize();
-  });
+    if(typeof SI_DIM_CHART !== 'undefined' && SI_DIM_CHART) SI_DIM_CHART.resize();
+  },150));
 }
 
 function siExpandNode(code, isCenter){
@@ -1155,7 +1178,7 @@ function siExpandNode(code, isCenter){
           shadowBlur: isCenter ? 20 : 0,
           shadowColor: 'rgba(0,0,0,0.3)'
         },
-        label: {show: true, fontSize: isCenter ? 14 : 11, fontWeight: isCenter ? 'bold' : 'normal', color: '#e8eaf0'}
+        label: {show: true, fontSize: isCenter ? 14 : 11, fontWeight: isCenter ? 'bold' : 'normal', color: cssVar('--ink','#e8eaf0')}
       };
       SI_STATE.echartsNodes[c.code] = node;
     }
@@ -1172,14 +1195,14 @@ function siExpandNode(code, isCenter){
           itemType: n.entityType,
           code: n.code,
           itemStyle: {color: nt.color, opacity: 0.85},
-          label: {show: true, fontSize: 9, color: '#c0c8d8'}
+          label: {show: true, fontSize: 9, color: cssVar('--muted','#64748b')}
         };
       }
       // 添加边
       var edgeId = n.rel_dir === 'out' ? code+'-'+n.rel_type+'-'+n.code : n.code+'-'+n.rel_type+'-'+code;
       if(!SI_STATE.echartsEdges[edgeId]){
         var relLabel = REL_DIM_MAP[n.rel_type] || n.rel_type;
-        var relColor = '#555';
+        var relColor = cssVar('--muted','#8b90a0');
         // 尝试从关系映射获取颜色
         var dimKey = null;
         for(var k in REL_DIM_MAP){ if(REL_DIM_MAP[k] === relLabel){dimKey = k; break;} }
@@ -1238,7 +1261,7 @@ function siRenderEChartsGraph(){
         shadowBlur: isCenter ? 20 : 0,
         shadowColor: 'rgba(0,0,0,0.3)'
       };
-      n.label = {show: true, fontSize: isCenter ? 14 : (n.symbolSize > 30 ? 11 : 9), fontWeight: isCenter ? 'bold' : 'normal', color: isCenter ? '#fff' : '#c0c8d8'};
+      n.label = {show: true, fontSize: isCenter ? 14 : (n.symbolSize > 30 ? 11 : 9), fontWeight: isCenter ? 'bold' : 'normal', color: isCenter ? '#fff' : cssVar('--muted','#64748b')};
     }
     nodes.push(n);
   });
@@ -1263,17 +1286,17 @@ function siRenderEChartsGraph(){
   SI_STATE.echartsChart.setOption({
     tooltip: {
       trigger: 'item',
-      backgroundColor: '#1a1d27',
-      borderColor: '#2e3348',
-      textStyle: {color: '#e8eaf0', fontSize: 12},
+      backgroundColor: cssVar('--bg2','#1a1d27'),
+      borderColor: cssVar('--rule','#2e3348'),
+      textStyle: {color: cssVar('--ink','#e8eaf0'), fontSize: 12},
       formatter: function(p){
         if(p.dataType === 'edge'){
-          return p.data.source + ' → ' + p.data.target + '<br><span style="color:#8b90a0">' + (p.data.value || '') + '</span>';
+          return p.data.source + ' → ' + p.data.target + '<br><span style="color:'+cssVar('--muted','#8b90a0')+'">' + (p.data.value || '') + '</span>';
         }
         var nd = SI_STATE.echartsNodes[p.data.id];
         if(!nd) return p.name;
         var t = TYPE_MAP[nd.itemType] || {cn:nd.itemType};
-        return '<b>' + p.name + '</b><br><span style="color:#8b90a0">' + t.cn + '</span>';
+        return '<b>' + p.name + '</b><br><span style="color:'+cssVar('--muted','#8b90a0')+'">' + t.cn + '</span>';
       }
     },
     animationDuration: 800,
@@ -1290,7 +1313,7 @@ function siRenderEChartsGraph(){
         show: true,
         position: 'right',
         fontSize: 10,
-        color: '#e8eaf0'
+        color: cssVar('--ink','#e8eaf0')
       },
       lineStyle: {
         curveness: 0.12,
@@ -1709,7 +1732,8 @@ function siInitModalNetwork(code){
   var expandedSet = new Set();
 
   var container = document.getElementById('si-modal-network');
-  SI_MODAL_STATE.echartsChart = echarts.init(container, null, {renderer:'canvas'});
+  SI_MODAL_STATE.echartsChart = echarts.init(container, null, {renderer:'canvas', devicePixelRatio:kgDpr()});
+  container.setAttribute('role','img'); container.setAttribute('aria-label','实体关系网络图');
 
   // 渲染图例
   var legendHtml = '<div class="lg-title">实体类别</div>';
@@ -1731,11 +1755,13 @@ function siInitModalNetwork(code){
   // 加载中心节点
   siModalExpandNode(code, expandedSet, true);
 
-  // resize监听
-  var resizeHandler = function(){
-    if(SI_MODAL_STATE.echartsChart) SI_MODAL_STATE.echartsChart.resize();
-  };
-  window.addEventListener('resize', resizeHandler);
+  // resize监听（v1.4.4：防抖 + 只绑定一次，修复弹窗多次打开监听器泄漏）
+  if(!window.__siModalResizeBound){
+    window.__siModalResizeBound = true;
+    window.addEventListener('resize', kgDebounce(function(){
+      if(SI_MODAL_STATE.echartsChart) SI_MODAL_STATE.echartsChart.resize();
+    },150));
+  }
 }
 
 function siModalExpandNode(code, expandedSet, isCenter){
@@ -1753,7 +1779,7 @@ function siModalExpandNode(code, expandedSet, isCenter){
         symbolSize: isCenter ? 56 : 30,
         category: c.entityType, itemType: c.entityType, code: c.code,
         itemStyle: {color: t.color, shadowBlur: isCenter?20:0, shadowColor:'rgba(0,0,0,0.3)'},
-        label: {show:true, fontSize:isCenter?14:10, fontWeight:isCenter?'bold':'normal', color:isCenter?'#fff':'#c0c8d8'}
+        label: {show:true, fontSize:isCenter?14:10, fontWeight:isCenter?'bold':'normal', color:isCenter?'#fff':cssVar('--muted','#64748b')}
       };
     }
 
@@ -1764,7 +1790,7 @@ function siModalExpandNode(code, expandedSet, isCenter){
           id: n.code, name: n.name,
           symbolSize: 18, category: n.entityType, itemType: n.entityType, code: n.code,
           itemStyle: {color: nt.color, opacity: 0.85},
-          label: {show:true, fontSize:9, color:'#c0c8d8'}
+          label: {show:true, fontSize:9, color:cssVar('--muted','#64748b')}
         };
       }
       var edgeId = n.rel_dir==='out' ? code+'-'+n.rel_type+'-'+n.code : n.code+'-'+n.rel_type+'-'+code;
@@ -1773,7 +1799,7 @@ function siModalExpandNode(code, expandedSet, isCenter){
           source: n.rel_dir==='out'?code:n.code,
           target: n.rel_dir==='out'?n.code:code,
           value: REL_DIM_MAP[n.rel_type]||n.rel_type,
-          lineStyle: {color:'#555', width:1.2, curveness:0.12, opacity:0.5}
+          lineStyle: {color:cssVar('--muted','#8b90a0'), width:1.2, curveness:0.12, opacity:0.5}
         };
       }
     });
@@ -1798,21 +1824,21 @@ function siRenderModalECharts(){
 
   SI_MODAL_STATE.echartsChart.setOption({
     tooltip: {
-      trigger:'item', backgroundColor:'#1a1d27', borderColor:'#2e3348',
-      textStyle:{color:'#e8eaf0',fontSize:12},
+      trigger:'item', backgroundColor:cssVar('--bg2','#1a1d27'), borderColor:cssVar('--rule','#2e3348'),
+      textStyle:{color:cssVar('--ink','#e8eaf0'),fontSize:12},
       formatter:function(p){
-        if(p.dataType==='edge') return p.data.source+' → '+p.data.target+'<br><span style="color:#8b90a0">'+(p.data.value||'')+'</span>';
+        if(p.dataType==='edge') return p.data.source+' → '+p.data.target+'<br><span style="color:'+cssVar('--muted','#8b90a0')+'">'+(p.data.value||'')+'</span>';
         var nd = SI_MODAL_STATE.echartsNodes[p.data.id];
         if(!nd) return p.name;
         var t = TYPE_MAP[nd.itemType]||{cn:nd.itemType};
-        return '<b>'+p.name+'</b><br><span style="color:#8b90a0">'+t.cn+'</span>';
+        return '<b>'+p.name+'</b><br><span style="color:'+cssVar('--muted','#8b90a0')+'">'+t.cn+'</span>';
       }
     },
     animationDuration:800, animationEasingUpdate:'quinticInOut',
     series:[{
       type:'graph', layout:'force', data:nodes, links:links, categories:categories,
       roam:true, draggable:true,
-      label:{show:true, position:'right', fontSize:10, color:'#e8eaf0'},
+      label:{show:true, position:'right', fontSize:10, color:cssVar('--ink','#e8eaf0')},
       lineStyle:{curveness:0.12, opacity:0.6},
       emphasis:{focus:'adjacency', lineStyle:{width:4}},
       force:{repulsion:280, gravity:0.06, edgeLength:[70,180], friction:0.6, layoutAnimation:true}
@@ -2441,17 +2467,19 @@ function siRenderDimDetail(data){
   html += '<div id="si-dim-network"></div>';
   html += '</div>';
   document.getElementById('si-dim-view').innerHTML = html;
+  window.SI_DIM_CENTER = { center: c, diseases: diseases, others: others };
   siRenderDimNetwork(c, diseases, others);
 }
 function siRenderDimNetwork(center, diseases, others){
   if(SI_DIM_CHART){ SI_DIM_CHART.dispose(); SI_DIM_CHART = null; }
   var container = document.getElementById('si-dim-network');
   if(!container) return;
-  SI_DIM_CHART = echarts.init(container, null, {renderer:'canvas'});
+  SI_DIM_CHART = echarts.init(container, null, {renderer:'canvas', devicePixelRatio:kgDpr()});
+  container.setAttribute('role','img'); container.setAttribute('aria-label','维度关联网络图');
   var categories = [{name:'当前实体'},{name:'关联疾病'},{name:'其他实体'}];
   var nodes = [];
   var links = [];
-  var ct = TYPE_MAP[center.entityType] || {color:'#4f8cff'};
+  var ct = TYPE_MAP[center.entityType] || {color:cssVar('--accent','#4f8cff')};
   var centerId = center.code || 'center';
   nodes.push({
     id:centerId, name:cleanName(center), symbolSize:50, category:0,
@@ -2463,8 +2491,8 @@ function siRenderDimNetwork(center, diseases, others){
     var did = d.code || ('d_'+d.name);
     if(diseaseIds[did]) return;
     diseaseIds[did] = true;
-    nodes.push({id:did, name:d.name, symbolSize:30, category:1, itemStyle:{color:'#ff6b6b', opacity:0.85}, label:{show:true, fontSize:10, color:'#e8eaf0'}});
-    links.push({source:centerId, target:did, lineStyle:{color:'#ff6b6b', width:2, opacity:0.5, curveness:0.1}});
+    nodes.push({id:did, name:d.name, symbolSize:30, category:1, itemStyle:{color:cssVar('--accent2','#ff6b6b'), opacity:0.85}, label:{show:true, fontSize:10, color:cssVar('--ink','#e8eaf0')}});
+    links.push({source:centerId, target:did, lineStyle:{color:cssVar('--accent2','#ff6b6b'), width:2, opacity:0.5, curveness:0.1}});
   });
   var seen = {};
   var otherCnt = 0;
@@ -2474,23 +2502,23 @@ function siRenderDimNetwork(center, diseases, others){
     if(seen[oid]) return;
     seen[oid] = true; otherCnt++;
     var ot = TYPE_MAP[o.entityType] || {color:'#888'};
-    nodes.push({id:oid, name:cleanName(o), symbolSize:16, category:2, itemStyle:{color:ot.color, opacity:0.7}, label:{show:true, fontSize:8, color:'#c0c8d8'}});
-    links.push({source:centerId, target:oid, lineStyle:{color:'#555', width:1, opacity:0.4, curveness:0.12}});
+    nodes.push({id:oid, name:cleanName(o), symbolSize:16, category:2, itemStyle:{color:ot.color, opacity:0.7}, label:{show:true, fontSize:10, color:cssVar('--muted','#64748b')}});
+    links.push({source:centerId, target:oid, lineStyle:{color:cssVar('--muted','#8b90a0'), width:1, opacity:0.4, curveness:0.12}});
   });
   SI_DIM_CHART.setOption({
-    tooltip:{trigger:'item', backgroundColor:'#1a1d27', borderColor:'#2e3348', textStyle:{color:'#e8eaf0', fontSize:12},
+    tooltip:{trigger:'item', backgroundColor:cssVar('--bg2','#1a1d27'), borderColor:cssVar('--rule','#2e3348'), textStyle:{color:cssVar('--ink','#e8eaf0'), fontSize:12},
       formatter:function(p){
         if(p.dataType==='edge') return siEsc(p.data.source)+' → '+siEsc(p.data.target);
         var ci = p.data.category;
         var cn = (categories[ci]||{}).name || '';
-        return '<b>'+siEsc(p.name)+'</b><br><span style="color:#8b90a0">'+siEsc(cn)+'</span>';
+        return '<b>'+siEsc(p.name)+'</b><br><span style="color:'+cssVar('--muted','#8b90a0')+'">'+siEsc(cn)+'</span>';
       }},
-    legend:{data:categories.map(function(c){return c.name}), textStyle:{color:'#8b90a0', fontSize:11}, top:0},
+    legend:{data:categories.map(function(c){return c.name}), textStyle:{color:cssVar('--muted','#8b90a0'), fontSize:11}, top:0},
     animationDuration:800, animationEasingUpdate:'quinticInOut',
     series:[{
       type:'graph', layout:'force', data:nodes, links:links, categories:categories,
       roam:true, draggable:true,
-      label:{show:true, position:'right', fontSize:9, color:'#e8eaf0'},
+      label:{show:true, position:'right', fontSize:9, color:cssVar('--ink','#e8eaf0')},
       lineStyle:{curveness:0.12, opacity:0.5},
       emphasis:{focus:'adjacency', lineStyle:{width:3}},
       force:{repulsion:200, gravity:0.08, edgeLength:[60,160], friction:0.6, layoutAnimation:true}

@@ -4138,6 +4138,22 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
 class KGHandler(http.server.SimpleHTTPRequestHandler):
     """自定义HTTP处理器：API路由 + 静态文件"""
 
+    def end_headers(self):
+        # 缓存策略（2026-09-30，v1.3.9 发版后浏览器仍见旧页的根因修复）：
+        # 全站唯一的 Cache-Control 出口，静态分支与 _json_response 不再单独发缓存头。
+        #   带 ?v=版本戳 的静态资产 → 长缓存一年（发版换戳即换新 URL，天然失效）；
+        #   其余（HTML 页面 / API JSON）→ no-cache，每次发版即时生效，
+        #   配合 Last-Modified 走 304 再验证，不浪费带宽。
+        try:
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path or '').query)
+            if 'v' in q:
+                self.send_header('Cache-Control', 'public, max-age=31536000')
+            else:
+                self.send_header('Cache-Control', 'no-cache')
+        except Exception:
+            pass
+        super().end_headers()
+
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
@@ -5511,7 +5527,6 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404, 'File not found')
             return
         self.send_response(200)
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
         if True:
@@ -5537,7 +5552,6 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
         # gzip 压缩 JSON 响应

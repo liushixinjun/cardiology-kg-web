@@ -237,9 +237,12 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
 function renderGraph(groups) {
   var el = document.getElementById('chart-graph');
   if (!el || typeof echarts === 'undefined') return;
-  var ch = echarts.init(el, null, { renderer: 'svg' });
+  var ch = echarts.getInstanceByDom(el) || echarts.init(el, null, { renderer: 'svg' });
+  el.setAttribute('role', 'img'); el.setAttribute('aria-label', '疾病知识网络力导向图');
   var nodes = [], links = [];
-  var catColors = ['#dc2626','#ec4899','#8b5cf6','#f472b6','#14b8a6','#ef4444','#38bdf8','#a78bfa','#f97316','#fbbf24','#f87171','#94a3b8'];
+  var catColors = getTheme() === 'light'
+    ? ['#dc2626','#db2777','#7c3aed','#be185d','#0f766e','#ea580c','#0369a1','#6d28d9','#c2410c','#a16207','#b91c1c','#475569']
+    : ['#dc2626','#ec4899','#8b5cf6','#f472b6','#14b8a6','#ef4444','#38bdf8','#a78bfa','#f97316','#fbbf24','#f87171','#94a3b8'];
   /* 预收集所有大类名，避免疾病名与大类名冲突导致 ECharts 重复节点崩溃 */
   var groupNames = {};
   getGroupOrder(groups).forEach(function(g) { if (groups[g]) groupNames[g] = true; });
@@ -267,47 +270,49 @@ function renderGraph(groups) {
   ch.setOption({
     animation: true, animationDuration: 1500,
     tooltip: {
-      trigger: 'item', backgroundColor: '#1f2b3d', borderColor: 'rgba(255,255,255,.1)',
-      textStyle: { color: '#f0f4f8', fontSize: 12 },
+      trigger: 'item', backgroundColor: cssVar('--tip-bg', '#1f2b3d'), borderColor: cssVar('--tip-line', 'rgba(255,255,255,.1)'),
+      textStyle: { color: cssVar('--tip-ink', '#f0f4f8'), fontSize: 12 },
       formatter: function(p) {
         if (p.dataType === 'edge') return '';
         var cat = p.data.category;
         if (cat === 2) return p.data.name + ' (专科)';
         if (cat === 0) return p.data.name + ' (大类 ' + p.data.value + '种)';
-        return p.data.name + '<br/>覆盖率: <b>' + p.data.value + '%</b>';
+        return p.data.name + '<br/>覆盖率: <b>' + p.data.value + '%</b><br/><span style="opacity:.65">点击进入图谱探索 →</span>';
       }
     },
     series: [{
       type: 'graph', layout: 'force', roam: true, draggable: true,
       force: { repulsion: 350, edgeLength: [50, 120], gravity: 0.12, friction: 0.6 },
       label: {
-        show: true, fontSize: 10, color: '#f0f4f8', fontWeight: 600,
+        show: true, fontSize: 10, color: cssVar('--ink','#1e293b'), fontWeight: 600,
         formatter: function(p) {
           if (p.data.category === 2) return '{bold|' + p.data.name + '}';
           if (p.data.category === 0) return '{bold|' + p.data.name + '}';
           return p.data.name + '\n{pct|' + p.data.value + '%}';
         },
         rich: {
-          bold: { fontSize: 12, fontWeight: 800, color: '#f0f4f8' },
-          pct: { fontSize: 9, color: '#74c0fc', padding: [2, 0, 0, 0] }
+          bold: { fontSize: 12, fontWeight: 800, color: cssVar('--ink','#1e293b') },
+          pct: { fontSize: 9, color: cssVar('--accent','#1668dc'), padding: [2, 0, 0, 0] }
         }
       },
-      lineStyle: { color: 'source', curveness: 0.15, width: 1.2, opacity: 0.4 },
-      emphasis: { focus: 'adjacency', lineStyle: { width: 3 }, itemStyle: { borderWidth: 3, borderColor: '#fff' } },
+      lineStyle: { color: 'source', curveness: 0.15, width: getTheme() === 'light' ? 1.5 : 1.2, opacity: getTheme() === 'light' ? 0.55 : 0.4 },
+      emphasis: { focus: 'adjacency', lineStyle: { width: 3 }, itemStyle: { borderWidth: 3, borderColor: cssVar('--bg2','#ffffff') } },
       categories: [
         { name: '大类', itemStyle: { color: '#dc2626' } },
         { name: '专病', itemStyle: { color: '#3b82f6' } },
         { name: '专科', itemStyle: { color: '#3b82f6' } }
       ],
-      data: nodes, links: links,
-      click: function(p) {
-        if (p.data && p.data.category === 1 && p.data.diseaseCode) {
-          window.location.href = 'explore.html?code=' + p.data.diseaseCode;
-        }
-      }
+      data: nodes, links: links
     }]
   });
-  window.addEventListener('resize', function() { ch.resize(); });
+  /* v1.4.8 修复：ECharts 点击事件必须在实例上注册（series 内的 click 属性无效，此前点击专病节点跳转从未生效） */
+  ch.off('click');
+  ch.on('click', function(p) {
+    if (p.dataType === 'node' && p.data && p.data.category === 1 && p.data.diseaseCode) {
+      window.location.href = 'explore.html?code=' + p.data.diseaseCode;
+    }
+  });
+  window.addEventListener('resize', kgDebounce(function() { ch.resize(); }, 150));
 }
 
 /* ====== ECharts 雷达图 ====== */
@@ -315,7 +320,8 @@ function renderGraph(groups) {
 function renderRadar() {
   var el = document.getElementById('chart-radar');
   if (!el || typeof echarts === 'undefined') return;
-  var ch = echarts.init(el, null, { renderer: 'canvas' });
+  var ch = echarts.init(el, null, { renderer: 'canvas', devicePixelRatio: kgDpr() });
+  el.setAttribute('role', 'img'); el.setAttribute('aria-label', '核心维度覆盖率雷达图');
   var ds = KG_DATA.diseases, total = Object.keys(ds).length;
   var indicators = [], values = [];
   CORE_DIM_KEYS.forEach(function(k) {
@@ -327,26 +333,30 @@ function renderRadar() {
     values.push(total > 0 ? Math.round(filled / total * 100) : 0);
   });
   ch.setOption({
-    tooltip: {},
+    tooltip: {
+      backgroundColor: cssVar('--tip-bg', '#ffffff'),
+      borderColor: cssVar('--tip-line', 'rgba(22,104,220,.18)'),
+      textStyle: { color: cssVar('--tip-ink', '#1e293b'), fontSize: 12 }
+    },
     radar: {
       indicator: indicators,
       shape: 'polygon',
       splitNumber: 5,
-      axisName: { color: '#8b90a0', fontSize: 10 },
-      splitLine: { lineStyle: { color: '#2e3348' } },
+      axisName: { color: cssVar('--muted','#8b90a0'), fontSize: 11 },
+      splitLine: { lineStyle: { color: cssVar('--rule','#2e3348'), width: 1 } },
       splitArea: { areaStyle: { color: ['rgba(79,140,255,0.02)', 'rgba(79,140,255,0.05)'] } },
-      axisLine: { lineStyle: { color: '#2e3348' } }
+      axisLine: { lineStyle: { color: cssVar('--rule','#2e3348') } }
     },
     series: [{
       type: 'radar',
       data: [{ value: values, name: '维度覆盖率 (%)',
         areaStyle: { color: 'rgba(79,140,255,0.2)' },
-        lineStyle: { color: '#4f8cff', width: 2 },
-        itemStyle: { color: '#4f8cff' }
+        lineStyle: { color: cssVar('--accent','#4f8cff'), width: 2 },
+        itemStyle: { color: cssVar('--accent','#4f8cff') }
       }]
     }]
   });
-  window.addEventListener('resize', function() { ch.resize(); });
+  window.addEventListener('resize', kgDebounce(function() { ch.resize(); }, 150));
 }
 
 /* ====== ECharts 柱状图 ====== */
@@ -354,7 +364,8 @@ function renderRadar() {
 function renderDimChart() {
   var el = document.getElementById('chart-dim');
   if (!el || typeof echarts === 'undefined') return;
-  var ch = echarts.init(el, null, { renderer: 'canvas' });
+  var ch = echarts.init(el, null, { renderer: 'canvas', devicePixelRatio: kgDpr() });
+  el.setAttribute('role', 'img'); el.setAttribute('aria-label', '核心维度实体量柱状图');
   var ds = KG_DATA.diseases, totals = {}, filled = {};
   CORE_DIM_KEYS.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
   Object.keys(ds).forEach(function(code) {
@@ -368,6 +379,9 @@ function renderDimChart() {
   ch.setOption({
     tooltip: {
       trigger: 'axis',
+      backgroundColor: cssVar('--tip-bg', '#ffffff'),
+      borderColor: cssVar('--tip-line', 'rgba(22,104,220,.18)'),
+      textStyle: { color: cssVar('--tip-ink', '#1e293b'), fontSize: 12 },
       formatter: function(ps) {
         var p = ps[0], k = CORE_DIM_KEYS[p.dataIndex];
         return (DIM_NAMES[k] || k) + '<br/>有数据疾病: ' + filled[k] + '/' + total + '<br/>实体总量: ' + totals[k];
@@ -377,11 +391,11 @@ function renderDimChart() {
     xAxis: {
       type: 'category',
       data: CORE_DIM_KEYS.map(function(k) { return DIM_NAMES[k] || k; }),
-      axisLabel: { rotate: 45, fontSize: 10, color: '#8b90a0' }
+      axisLabel: { rotate: 45, fontSize: 10, color: cssVar('--muted','#8b90a0') }
     },
     yAxis: {
       type: 'value', max: total,
-      axisLabel: { fontSize: 10, color: '#8b90a0' }
+      axisLabel: { fontSize: 10, color: cssVar('--muted','#8b90a0') }
     },
     series: [{
       name: '有数据疾病数', type: 'bar',
@@ -389,16 +403,28 @@ function renderDimChart() {
       itemStyle: {
         color: function(p) {
           var v = p.value / total;
-          return v >= 0.8 ? '#51cf66' : v >= 0.6 ? '#4f8cff' : v >= 0.4 ? '#ffd43b' : '#ff6b6b';
+          return v >= 0.8 ? cssVar('--green','#51cf66') : v >= 0.6 ? cssVar('--accent','#4f8cff') : v >= 0.4 ? cssVar('--yellow','#ffd43b') : cssVar('--accent2','#ff6b6b');
         }
       },
       barMaxWidth: 24
     }]
   });
-  window.addEventListener('resize', function() { ch.resize(); });
+  window.addEventListener('resize', kgDebounce(function() { ch.resize(); }, 150));
 }
 
 /* ====== 质量缺口列表 ====== */
+
+/* ====== v1.4.5 主题热切换：切肤后图表就地重绘（免整页刷新，免重载1.4MB数据） ====== */
+window.onThemeChange = function() {
+  if (!window.KG_DATA || !KG_DATA.diseases) return;
+  if (typeof refreshDimColors === 'function') refreshDimColors();
+  var groups = buildGroupStats();
+  _cachedGroups = groups;
+  renderGraph(groups);
+  renderRadar();
+  renderDimChart();
+  renderGaps();
+};
 
 function renderGaps() {
   var el = document.getElementById('gap-list');
@@ -416,7 +442,7 @@ function renderGaps() {
   sorted.forEach(function(k) {
     var m = missing[k];
     var pct = Math.round((total - m) / total * 100);
-    var color = pct >= 80 ? '#51cf66' : pct >= 60 ? '#4f8cff' : pct >= 40 ? '#ffd43b' : '#ff6b6b';
+    var color = pct >= 80 ? cssVar('--green','#51cf66') : pct >= 60 ? cssVar('--accent','#4f8cff') : pct >= 40 ? cssVar('--yellow','#ffd43b') : cssVar('--accent2','#ff6b6b');
     html += '<div class="gap-row">';
     html += '<div class="gap-label">' + (DIM_NAMES[k] || k) + '</div>';
     html += '<div class="gap-track"><div class="gap-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';

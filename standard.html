@@ -5,31 +5,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 图谱架构规范（产品PRD）</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 .std-layout{display:grid;grid-template-columns:270px 1fr;gap:24px}
 .std-side{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px;height:max-content;position:sticky;top:76px;max-height:calc(100vh - 90px);overflow-y:auto}
-.std-side-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.std-side-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
 .std-anchor{display:block;padding:10px 12px;border-radius:8px;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:4px;transition:all .2s}
 .std-anchor:hover,.std-anchor.active{background:var(--bg3);color:var(--accent);text-decoration:none}
 .std-content{min-width:0}
 .std-section{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:22px}
 .std-section h2{font-size:21px;font-weight:700;color:var(--ink);margin-bottom:8px}
-.std-section h3{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:8px;margin-top:26px}
-.std-section-desc{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:18px}
+.std-section h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;margin-top:26px}
+.std-section-desc{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:18px}
 .std-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .std-card{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:18px}
 .std-card-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px}
 .std-card-desc{font-size:14px;color:var(--muted);line-height:1.75}
 .std-table-wrap{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--bg3)}
-.std-table{width:100%;border-collapse:collapse;font-size:13.5px}
-.std-table th{padding:12px 14px;text-align:left;color:var(--muted);background:var(--bg4);font-size:11px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.std-table{width:100%;border-collapse:collapse;font-size:13px}
+.std-table th{padding:12px 14px;text-align:left;color:var(--muted);background:var(--bg4);font-size:12px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .std-table td{padding:12px 14px;border-top:1px solid var(--rule);vertical-align:top;color:var(--muted);line-height:1.6}
 .std-table .name{font-weight:700;color:var(--ink);white-space:nowrap}
 .std-table .code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent);font-size:12px;white-space:nowrap}
 .std-table .rel{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent2);font-size:12px;white-space:nowrap}
-.std-table .example{font-size:12.5px;color:#8b90a0;line-height:1.55}
-.std-table .require{font-size:12.5px;color:var(--muted);line-height:1.6}
+.std-table .example{font-size:12px;color:var(--muted);line-height:1.55}
+.std-table .require{font-size:12px;color:var(--muted);line-height:1.6}
 .std-table th:first-child{width:42px;text-align:center}
 .std-table td:first-child{text-align:center;color:var(--muted);font-weight:600}
 .std-flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:14px}
@@ -37,16 +37,16 @@
 .std-flow-arrow{color:var(--muted);font-size:13px}
 .std-rule-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
 .std-rule{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:14px}
-.std-rule-title{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:6px}
-.std-rule-text{font-size:13.5px;color:var(--muted);line-height:1.75}
-.std-note{background:var(--bg3);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13.5px;color:var(--muted);line-height:1.75}
+.std-rule-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.std-rule-text{font-size:13px;color:var(--muted);line-height:1.75}
+.std-note{background:var(--bg3);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--muted);line-height:1.75}
 .std-note.warn{border-left-color:var(--yellow)}
 .std-note.danger{border-left-color:var(--accent2)}
 .std-example{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin:10px 0;font-size:13px;color:var(--muted);line-height:1.75;font-family:'SF Mono','Cascadia Code','Consolas',monospace}
-.std-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;margin-left:6px}
-.std-badge-ver{background:rgba(79,140,255,.15);color:var(--accent)}
-.std-badge-new{background:rgba(81,207,102,.15);color:var(--green)}
-.std-badge-dep{background:rgba(255,107,107,.15);color:var(--accent2)}
+.std-badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:4px;font-weight:700;margin-left:6px}
+.std-badge-ver{background:var(--accent-bg);color:var(--accent)}
+.std-badge-new{background:var(--green-bg);color:var(--green)}
+.std-badge-dep{background:var(--red-bg);color:var(--accent2)}
 .std-toc-sub{padding-left:12px}
 .std-toc-sub .std-anchor{font-size:12px;padding:6px 12px}
 .std-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
@@ -57,14 +57,14 @@
 @media(max-width:900px){.std-layout{grid-template-columns:1fr}.std-side{position:static}.std-grid,.std-rule-list{grid-template-columns:1fr}}
 
 /* ====== 可展开/收缩组件 ====== */
-.std-expand-btn{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;user-select:none;margin-top:6px;padding:2px 8px;border-radius:5px;background:rgba(79,140,255,.08);border:1px solid rgba(79,140,255,.15);transition:all .15s}
-.std-expand-btn:hover{background:rgba(79,140,255,.18)}
-.std-expand-btn .arrow{display:inline-block;transition:transform .2s;font-size:9px}
+.std-expand-btn{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;user-select:none;margin-top:6px;padding:2px 8px;border-radius:5px;background:rgba(79,140,255,.08);border:1px solid var(--accent-bg);transition:all .15s}
+.std-expand-btn:hover{background:var(--accent-bg)}
+.std-expand-btn .arrow{display:inline-block;transition:transform .2s;font-size:10px}
 .std-expand-btn.active .arrow{transform:rotate(90deg)}
 .std-expand-body{display:none;margin-top:8px;padding:10px 12px;background:var(--bg4);border-radius:8px;border-left:3px solid var(--accent)}
 .std-expand-body.show{display:block}
 .std-case{font-size:13px;color:var(--muted);line-height:1.7}
-.std-case-label{font-size:11px;font-weight:700;color:#51cf66;margin-right:4px}
+.std-case-label{font-size:12px;font-weight:700;color:#51cf66;margin-right:4px}
 /* 硬闸门可展开条目 */
 .std-rule-collapsible{cursor:pointer}
 .std-rule-collapsible .std-rule-title{display:flex;align-items:center;gap:6px}
@@ -77,12 +77,12 @@
 .std-tri-group{padding:14px 0 10px;border-bottom:1px dashed var(--rule)}
 .std-tri-group:first-of-type{padding-top:6px}
 .std-tri-group:last-of-type{border-bottom:none}
-.std-tri-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.22);border-radius:5px;padding:2px 10px;margin-bottom:8px}
+.std-tri-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-bg);border:1px solid rgba(79,140,255,.22);border-radius:5px;padding:2px 10px;margin-bottom:8px}
 .std-tri-note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:5px}
 .std-tri-note code{background:var(--bg4);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent);font-family:'SF Mono','Cascadia Code','Consolas',monospace}
 .std-tri-props{margin-top:16px;background:var(--bg4);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
-.std-tri-props-label{font-size:12.5px;font-weight:700;color:var(--accent);margin-bottom:10px}
-.std-tri-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12.5px;line-height:1.8;color:var(--ink);white-space:pre;overflow-x:auto;margin:0}
+.std-tri-props-label{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px}
+.std-tri-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12px;line-height:1.8;color:var(--ink);white-space:pre;overflow-x:auto;margin:0}
 .std-tri-code .field{color:#ff922b;font-weight:600}
 .std-tri-code .value{color:var(--green)}
 .std-tri-code .comment{color:var(--muted);font-style:italic}
@@ -92,8 +92,8 @@
 .std-term{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;transition:border-color .2s}
 .std-term:hover{border-color:rgba(79,140,255,.35)}
 .std-term-name{font-size:16px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.std-term-en{font-size:11px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);padding:1px 8px;border-radius:4px;font-family:'SF Mono','Cascadia Code','Consolas',monospace}
-.std-term-def{font-size:13.5px;color:var(--muted);line-height:1.7;margin-top:8px}
+.std-term-en{font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-bg);padding:1px 8px;border-radius:4px;font-family:'SF Mono','Cascadia Code','Consolas',monospace}
+.std-term-def{font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px}
 .std-term-eg{margin-top:10px;font-size:12px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent);background:var(--bg4);border-radius:6px;padding:7px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .std-term-eg .eg-label{color:var(--muted);font-style:italic;font-family:inherit;margin-right:6px}
 
@@ -105,8 +105,8 @@
 
 /* ====== 一键展开/收起 ====== */
 .std-toggle-all{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;user-select:none;padding:4px 12px;border-radius:6px;background:rgba(79,140,255,.08);border:1px solid rgba(79,140,255,.18);transition:all .15s}
-.std-toggle-all:hover{background:rgba(79,140,255,.18)}
-.std-toggle-all .arrow{font-size:9px}
+.std-toggle-all:hover{background:var(--accent-bg)}
+.std-toggle-all .arrow{font-size:10px}
 .std-section-historical{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;background:rgba(255,159,67,.15);color:#ff9f43;margin-left:6px}
 
 /* ====== 子表折叠 ====== */
@@ -123,7 +123,7 @@
 
 /* ====== Part分区标题 ====== */
 .std-part-divider{display:flex;align-items:center;gap:12px;margin:34px 0 22px}
-.std-part-num{font-size:12px;font-weight:800;color:var(--accent);background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.2);border-radius:6px;padding:4px 10px;white-space:nowrap}
+.std-part-num{font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-bg);border-radius:6px;padding:4px 10px;white-space:nowrap}
 .std-part-title{font-size:18px;font-weight:700;color:var(--ink)}
 .std-part-line{flex:1;height:1px;background:var(--rule)}
 
@@ -138,21 +138,21 @@
 .std-section.collapsed > *:not(h2){display:none}
 
 /* ====== 侧边栏Part分组 ====== */
-.std-side-part{font-size:11px;font-weight:700;color:var(--accent);padding:10px 10px 4px;border-top:1px solid var(--rule);margin-top:8px}
+.std-side-part{font-size:12px;font-weight:700;color:var(--accent);padding:10px 10px 4px;border-top:1px solid var(--rule);margin-top:8px}
 .std-side-part:first-of-type{border-top:none;margin-top:0;padding-top:0}
 
-/* ====== 阅读指引：五层卡片与流向 ====== */
+/* ====== 阅读指引：架构卡片与流向 ====== */
 .std-arch-overview{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:16px 0}
 .std-arch-layer{border-radius:12px;padding:18px;border:2px solid;position:relative;overflow:hidden}
-.std-arch-layer.knowledge{background:rgba(79,140,255,.06);border-color:rgba(79,140,255,.2)}
+.std-arch-layer.knowledge{background:rgba(79,140,255,.06);border-color:var(--accent-bg)}
 .std-arch-layer.masterdata{background:rgba(255,146,43,.06);border-color:rgba(255,146,43,.2)}
 .std-arch-layer.decision{background:rgba(81,207,102,.06);border-color:rgba(81,207,102,.2)}
 .std-arch-layer-icon{font-size:28px;margin-bottom:8px}
-.std-arch-layer-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.std-arch-layer-desc{font-size:13.5px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.std-arch-layer-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.std-arch-layer-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:10px}
 .std-arch-layer-types{display:flex;flex-wrap:wrap;gap:4px}
-.std-arch-type-tag{font-size:11.5px;padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
-.std-arch-type-tag.knowledge{background:rgba(79,140,255,.12);color:var(--accent)}
+.std-arch-type-tag{font-size:12px;padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
+.std-arch-type-tag.knowledge{background:var(--accent-bg);color:var(--accent)}
 .std-arch-type-tag.masterdata{background:rgba(255,146,43,.12);color:#ff922b}
 .std-arch-type-tag.decision{background:rgba(81,207,102,.12);color:var(--green)}
 .std-arch-flow{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0;font-size:13px;color:var(--muted)}
@@ -161,41 +161,41 @@
 
 /* ====== 总体架构图 ====== */
 .std-arch-diagram{background:var(--bg3);border:1px solid var(--rule);border-radius:14px;padding:24px;margin:16px 0}
-.std-arch-dia-title{font-size:17px;font-weight:800;color:var(--ink);text-align:center}
+.std-arch-dia-title{font-size:16px;font-weight:800;color:var(--ink);text-align:center}
 .std-arch-dia-sub{font-size:13px;color:var(--muted);text-align:center;margin:6px 0 18px;line-height:1.6}
 .std-arch-pipeline{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:16px 12px;background:var(--bg4);border-radius:10px;margin-bottom:20px}
-.std-arch-pipe-node{font-size:13.5px;font-weight:700;color:var(--ink);background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:10px 16px;white-space:nowrap}
-.std-arch-pipe-node.core{color:#fff;background:linear-gradient(135deg,#4f8cff,#748ffc);border-color:transparent}
-.std-arch-pipe-arrow{font-size:17px;color:var(--accent);font-weight:700}
+.std-arch-pipe-node{font-size:13px;font-weight:700;color:var(--ink);background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:10px 16px;white-space:nowrap}
+.std-arch-pipe-node.core{color:#fff;background:linear-gradient(135deg,var(--accent),#748ffc);border-color:transparent}
+.std-arch-pipe-arrow{font-size:16px;color:var(--accent);font-weight:700}
 .std-arch-dia-row{display:grid;grid-template-columns:230px 1fr 300px;gap:12px;margin-bottom:12px}
 .std-arch-dia-row:last-of-type{margin-bottom:0}
 .std-arch-dia-layer{border-radius:10px;padding:14px 16px;border:2px solid;display:flex;gap:12px;align-items:center}
-.std-arch-dia-layer .num{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0}
+.std-arch-dia-layer .num{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0}
 .std-arch-dia-layer .lname{font-size:16px;font-weight:800;color:var(--ink);line-height:1.3}
-.std-arch-dia-layer .lq{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+.std-arch-dia-layer .lq{font-size:12px;color:var(--muted);line-height:1.5;margin-top:3px}
 .std-arch-dia-mid{background:var(--bg4);border-radius:10px;padding:12px 18px;display:flex;flex-direction:column;justify-content:center}
 .std-arch-dia-q{font-size:14px;font-weight:700;color:var(--ink);line-height:1.5}
 .std-arch-dia-types{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .std-arch-dia-types span{font-size:12px;padding:3px 10px;border-radius:5px;font-weight:700;white-space:nowrap}
-.std-arch-dia-types span i{font-style:normal;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:10.5px;font-weight:600;opacity:.7;margin-left:5px}
+.std-arch-dia-types span i{font-style:normal;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:10px;font-weight:600;opacity:.7;margin-left:5px}
 .std-arch-dia-eg{background:var(--bg4);border-radius:10px;padding:12px 18px;display:flex;align-items:center}
 .std-arch-dia-eg-in{font-size:13px;color:var(--muted);line-height:1.7}
 .std-arch-dia-eg-in strong{color:var(--ink)}
 .std-arch-dia-cross{margin-top:18px;padding:16px 20px;background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(81,207,102,.06));border:1px dashed rgba(79,140,255,.3);border-radius:10px;font-size:13px;color:var(--muted);line-height:1.8}
 .std-arch-dia-l1{background:rgba(139,144,160,.07);border-color:rgba(139,144,160,.3)}
-.std-arch-dia-l1 .num{background:rgba(139,144,160,.15);color:#8b90a0}
+.std-arch-dia-l1 .num{background:rgba(139,144,160,.15);color:var(--muted)}
 .std-arch-dia-l2{background:rgba(79,140,255,.07);border-color:rgba(79,140,255,.3)}
-.std-arch-dia-l2 .num{background:rgba(79,140,255,.15);color:var(--accent)}
+.std-arch-dia-l2 .num{background:var(--accent-bg);color:var(--accent)}
 .std-arch-dia-l3{background:rgba(255,146,43,.07);border-color:rgba(255,146,43,.3)}
 .std-arch-dia-l3 .num{background:rgba(255,146,43,.15);color:#ff922b}
 .std-arch-dia-l4{background:rgba(81,207,102,.07);border-color:rgba(81,207,102,.3)}
-.std-arch-dia-l4 .num{background:rgba(81,207,102,.15);color:var(--green)}
+.std-arch-dia-l4 .num{background:var(--green-bg);color:var(--green)}
 .std-arch-dia-l5{background:rgba(255,159,67,.07);border-color:rgba(255,159,67,.3)}
 .std-arch-dia-l5 .num{background:rgba(255,159,67,.15);color:#ff9f43}
 .std-arch-dia-l4b{background:rgba(155,109,255,.07);border-color:rgba(155,109,255,.3)}
 .std-arch-dia-l4b .num{background:rgba(155,109,255,.15);color:#9b6dff}
-.t-l1{background:rgba(139,144,160,.12);color:#8b90a0}
-.t-l2{background:rgba(79,140,255,.12);color:var(--accent)}
+.t-l1{background:rgba(139,144,160,.12);color:var(--muted)}
+.t-l2{background:var(--accent-bg);color:var(--accent)}
 .t-l3{background:rgba(255,146,43,.12);color:#ff922b}
 .t-l4{background:rgba(81,207,102,.12);color:var(--green)}
 .t-l4b{background:rgba(155,109,255,.12);color:#9b6dff}
@@ -205,7 +205,7 @@
 /* ====== entityType 概念框 ====== */
 .std-concept{background:var(--bg3);border:1px solid var(--rule);border-radius:12px;padding:20px;margin:16px 0}
 .std-concept-label{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.std-concept-text{font-size:15.5px;color:var(--ink);line-height:1.85}
+.std-concept-text{font-size:14px;color:var(--ink);line-height:1.85}
 .std-concept-text code{background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:14px;color:var(--accent);font-family:'SF Mono','Cascadia Code','Consolas',monospace}
 
 /* ====== 错误对比表 ====== */
@@ -220,7 +220,7 @@
 .std-data-demo{margin:14px 0;border:1px solid var(--rule);border-radius:12px;overflow:hidden}
 .std-data-demo-head{padding:12px 16px;background:var(--bg4);font-size:13px;font-weight:700;color:var(--ink);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;transition:background .15s}
 .std-data-demo-head:hover{background:rgba(79,140,255,.08)}
-.std-data-demo-head .arrow{display:inline-block;transition:transform .2s;font-size:9px;color:var(--accent)}
+.std-data-demo-head .arrow{display:inline-block;transition:transform .2s;font-size:10px;color:var(--accent)}
 .std-data-demo-head.active .arrow{transform:rotate(90deg)}
 .std-data-demo-body{padding:0;display:none}
 .std-data-demo-body.show{display:block}
@@ -230,7 +230,7 @@
 .std-data-cell:first-child{border-right:1px solid var(--rule)}
 .std-data-cell-label{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:4px}
 .std-data-cell-label.analogy{color:#ff922b}
-.std-data-cell-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12.5px;line-height:1.75;color:var(--ink);background:var(--bg3);border-radius:8px;padding:12px;white-space:pre;overflow-x:auto}
+.std-data-cell-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12px;line-height:1.75;color:var(--ink);background:var(--bg3);border-radius:8px;padding:12px;white-space:pre;overflow-x:auto}
 .std-data-cell-code .label{color:var(--accent);font-weight:600}
 .std-data-cell-code .field{color:#ff922b;font-weight:600}
 .std-data-cell-code .value{color:var(--green)}
@@ -240,7 +240,7 @@
 /* ====== 患者全周期应用场景 ====== */
 .std-qa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
 .std-qa{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:18px;border-top:3px solid var(--accent)}
-.std-qa-q{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.5}
+.std-qa-q{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.5}
 .std-qa-a{font-size:14px;color:var(--muted);line-height:1.8}
 .std-qa-a strong{color:var(--ink)}
 .std-patient-card{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(81,207,102,.05));border:1px solid rgba(79,140,255,.22);border-radius:12px;padding:16px;margin:12px 0}
@@ -251,14 +251,14 @@
 .std-step::before{content:'';position:absolute;left:14.5px;top:32px;bottom:0;width:1px;background:var(--rule)}
 .std-step:last-child::before{display:none}
 .std-step:last-child{padding-bottom:0}
-.std-step-num{width:30px;height:30px;border-radius:50%;background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.3);color:var(--accent);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.std-step-num{width:30px;height:30px;border-radius:50%;background:var(--accent-bg);border:1px solid rgba(79,140,255,.3);color:var(--accent);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .std-step-body{min-width:0}
-.std-step-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1.5}
-.std-step-desc{font-size:13.5px;color:var(--muted);line-height:1.75}
+.std-step-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1.5}
+.std-step-desc{font-size:13px;color:var(--muted);line-height:1.75}
 .std-chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
 .std-chain-node{font-size:13px;font-weight:700;border-radius:6px;padding:6px 12px;border:1px solid;line-height:1.4}
 .std-chain-node.data{background:rgba(255,146,43,.1);color:#ff922b;border-color:rgba(255,146,43,.28)}
-.std-chain-node.entity{background:rgba(79,140,255,.1);color:var(--accent);border-color:rgba(79,140,255,.28)}
+.std-chain-node.entity{background:var(--accent-bg);color:var(--accent);border-color:rgba(79,140,255,.28)}
 .std-chain-node.action{background:rgba(81,207,102,.1);color:var(--green);border-color:rgba(81,207,102,.28)}
 .std-chain-node.evidence{background:rgba(255,159,67,.1);color:#ff9f43;border-color:rgba(255,159,67,.28)}
 .std-chain-arrow{color:var(--muted);font-size:14px}
@@ -271,7 +271,7 @@
 @media(max-width:900px){.std-qa-grid{grid-template-columns:1fr}.std-patient-card{grid-template-columns:1fr}}
 
 /* ====== 分层结构图入口：左侧分层名称可点 ====== */
-.std-arch-dia-hint{font-size:12.5px;color:var(--muted);text-align:center;margin:-8px 0 18px;line-height:1.6}
+.std-arch-dia-hint{font-size:12px;color:var(--muted);text-align:center;margin:-8px 0 18px;line-height:1.6}
 .std-arch-dia-hint b{color:var(--accent)}
 .std-arch-dia-layer.std-layer-link{cursor:pointer;position:relative;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
 .std-arch-dia-layer.std-layer-link:hover{transform:translateX(3px);box-shadow:0 8px 22px rgba(0,0,0,.3)}
@@ -279,9 +279,9 @@
 .std-arch-dia-layer.std-layer-link .lname{position:relative;display:inline-block}
 .std-arch-dia-layer.std-layer-link .lname::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:currentColor;opacity:.4;transform:scaleX(0);transform-origin:left;transition:transform .2s ease}
 .std-arch-dia-layer.std-layer-link:hover .lname::after{transform:scaleX(1)}
-.std-arch-dia-open{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:20px;border:1px solid currentColor;opacity:.62;white-space:nowrap;transition:opacity .16s ease}
+.std-arch-dia-open{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:20px;border:1px solid currentColor;opacity:.62;white-space:nowrap;transition:opacity .16s ease}
 .std-arch-dia-layer.std-layer-link:hover .std-arch-dia-open{opacity:1}
-.std-arch-dia-l1.std-layer-link{color:#8b90a0}
+.std-arch-dia-l1.std-layer-link{color:var(--muted)}
 .std-arch-dia-l2.std-layer-link{color:var(--accent)}
 .std-arch-dia-l3.std-layer-link{color:#ff922b}
 .std-arch-dia-l4.std-layer-link{color:var(--green)}
@@ -302,34 +302,34 @@
 @keyframes ldRise{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
 .ld-head{position:relative;display:flex;align-items:center;gap:15px;padding:19px 22px 17px;border-bottom:1px solid #e3eaf4;background:linear-gradient(180deg,#f7fafd,#fff)}
 .ld-head::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ld)}
-.ld-head-num{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;background:var(--ld);flex-shrink:0;box-shadow:0 5px 14px rgba(15,35,60,.18)}
+.ld-head-num{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#fff;background:var(--ld);flex-shrink:0;box-shadow:0 5px 14px rgba(15,35,60,.18)}
 .ld-head-main{flex:1;min-width:0}
 .ld-head-title{font-size:21px;font-weight:800;color:#0f2744;line-height:1.25}
 .ld-head-sub{font-size:12px;color:#5f6f86;font-family:'SF Mono','Cascadia Code','Consolas',monospace;letter-spacing:.02em}
 .ld-head-role{font-size:13px;color:#42566f;margin-top:5px;line-height:1.6}
 .ld-head-q{flex-shrink:0;max-width:330px;font-size:13px;line-height:1.6;color:#1d3a5c;background:#f2f7fe;border:1px solid #d3e3f8;border-radius:10px;padding:9px 13px}
 .ld-head-q b{display:block;font-size:10px;letter-spacing:.1em;color:var(--ld);margin-bottom:3px}
-.ld-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #d8e1ee;background:#fff;color:#5b6b7f;font-size:15px;line-height:1;cursor:pointer;transition:all .15s}
+.ld-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #d8e1ee;background:#fff;color:#5b6b7f;font-size:14px;line-height:1;cursor:pointer;transition:all .15s}
 .ld-close:hover{background:#eef3f9;color:#0f2744;border-color:#b9c9dd}
 .ld-tabs{position:relative;display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;border-bottom:1px solid #e8eef7;background:#fbfdff}
-.ld-tab{font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid #d3dded;background:#fff;color:#4a5c76;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ld-tab{font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid #d3dded;background:#fff;color:#4a5c76;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ld-tab:hover{color:#0f2744;border-color:#9fb6d4;background:#f4f8fd}
 .ld-tab.active{background:var(--ld);border-color:var(--ld);color:#fff;box-shadow:0 3px 9px rgba(15,35,60,.16)}
 .ld-body{position:relative;padding:20px 22px 24px;background:#fff}
 .ld-block{margin-bottom:22px}
 .ld-block:last-child{margin-bottom:0}
-.ld-block-title{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:800;letter-spacing:.13em;color:#4a5c76;margin-bottom:11px}
+.ld-block-title{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;letter-spacing:.13em;color:#4a5c76;margin-bottom:11px}
 .ld-block-title::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--ld);flex-shrink:0}
 .ld-block-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#dde5f0,transparent)}
 .ld-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:9px}
 .ld-card{position:relative;border:1px solid #e0e8f3;border-radius:10px;padding:11px 13px 11px 15px;background:#fbfdff}
 .ld-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--ld)}
-.ld-card-zh{font-size:13.5px;font-weight:700;color:#0f2744;line-height:1.4}
-.ld-card-en{font-size:11px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#5f6f86;margin-top:3px;word-break:break-all}
+.ld-card-zh{font-size:13px;font-weight:700;color:#0f2744;line-height:1.4}
+.ld-card-en{font-size:12px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#5f6f86;margin-top:3px;word-break:break-all}
 .ld-card-note{font-size:12px;color:#4a5c76;margin-top:6px;line-height:1.62}
 .ld-chain{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:12px 14px;border:1px solid #e4ebf5;border-radius:10px;background:#f7fafd;margin-bottom:9px}
 .ld-chain:last-child{margin-bottom:0}
-.ld-chain-label{min-width:104px;font-weight:800;font-size:12.5px;color:#33455c}
+.ld-chain-label{min-width:104px;font-weight:800;font-size:12px;color:#33455c}
 .ld-n{display:inline-flex;flex-direction:column;font-size:13px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid;line-height:1.35;white-space:nowrap}
 .ld-n small{font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-weight:600;opacity:.8;margin-top:2px}
 .ld-n.type{color:#1c3350;border-color:#cfdae9;background:#fff}
@@ -337,7 +337,7 @@
 .ld-n.eg{color:#123a63;border-color:#bdd2ee;background:#eef5ff}
 .ld-n.act{color:#1f7a3a;border-color:#a9ddb9;background:#e9f8ee}
 .ld-n.warn{color:#b52d20;border-color:#f2b8b0;background:#fdecea}
-.ld-a{font-size:11.5px;color:#55647c;white-space:nowrap;letter-spacing:.01em}
+.ld-a{font-size:12px;color:#55647c;white-space:nowrap;letter-spacing:.01em}
 .ld-a b{color:var(--ld);font-weight:800;margin:0 1px}
 .ld-ami{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:10px;border:1px dashed #c3d3e8;background:linear-gradient(135deg,#f4f9ff,#fbfdff)}
 .ld-ami-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--ld);border-radius:5px;padding:4px 9px;margin-top:1px}
@@ -345,7 +345,7 @@
 .ld-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:9px}
 .ld-rule{display:flex;gap:10px;font-size:13px;color:#2c3f58;line-height:1.7;background:#fbfdff;border:1px solid #e0e8f3;border-radius:9px;padding:11px 13px}
 .ld-rule i{font-style:normal;color:var(--ld);font-weight:800;flex-shrink:0}
-.ld-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid #e8eef7;background:#fbfdff;font-size:11.5px;color:#5f6f86}
+.ld-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid #e8eef7;background:#fbfdff;font-size:12px;color:#5f6f86}
 @media(max-width:860px){
   .ld-mask{padding:0;background:#fff}
   .ld-panel{border-radius:0;min-height:100vh;box-shadow:none;border:0}
@@ -354,6 +354,115 @@
   .ld-grid{grid-template-columns:1fr 1fr}
   .ld-rules{grid-template-columns:1fr}
 }
+
+/* ====== 实体类型标准术语字典浮层（明亮医疗风：左分类导航 · 右术语字典） ====== */
+.ed-mask{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;display:none;padding:26px 18px;overflow-y:auto;background:rgba(12,26,45,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ed-mask.show{display:block;animation:ldFade .18s ease}
+.ed-panel{--ed:#1c6fd6;position:relative;max-width:1180px;margin:0 auto;background:#fff;border:1px solid #d8e1ee;border-radius:16px;overflow:hidden;box-shadow:0 26px 70px rgba(15,35,60,.28),0 2px 8px rgba(15,35,60,.08);animation:ldRise .22s cubic-bezier(.2,.8,.3,1);color:#12263f;display:flex;flex-direction:column;max-height:calc(100vh - 52px)}
+.ed-panel[data-cat="0"]{--ed:#5b6b7f}
+.ed-panel[data-cat="1"]{--ed:#b45309}
+.ed-panel[data-cat="2"]{--ed:#1c6fd6}
+.ed-panel[data-cat="3"]{--ed:#1f7a3d}
+.ed-panel[data-cat="4"]{--ed:#7048e8}
+.ed-panel[data-cat="5"]{--ed:#c2255c}
+.ed-panel[data-cat="6"]{--ed:#0b7285}
+.ed-panel[data-cat="7"]{--ed:#a61b1b}
+.ed-head{position:relative;display:flex;align-items:center;gap:15px;padding:18px 22px 16px;border-bottom:1px solid #e3eaf4;background:linear-gradient(180deg,#f7fafd,#fff);flex-shrink:0}
+.ed-head::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ed)}
+.ed-head-num{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#fff;background:var(--ed);flex-shrink:0;box-shadow:0 5px 14px rgba(15,35,60,.18)}
+.ed-head-main{flex:1;min-width:0}
+.ed-head-title{font-size:18px;font-weight:800;color:#0f2744;line-height:1.25}
+.ed-head-sub{font-size:12px;color:#5f6f86;font-family:'SF Mono','Cascadia Code','Consolas',monospace;letter-spacing:.02em}
+.ed-head-role{font-size:12px;color:#42566f;margin-top:5px;line-height:1.6}
+.ed-search{flex-shrink:0;display:flex;align-items:center;gap:7px;border:1px solid #d3dded;border-radius:9px;padding:7px 11px;background:#fff}
+.ed-search input{border:0;outline:0;font-size:13px;width:186px;color:#12263f;background:transparent;font-family:inherit}
+.ed-search input::placeholder{color:#9aa8bb}
+.ed-close{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #d8e1ee;background:#fff;color:#5b6b7f;font-size:14px;line-height:1;cursor:pointer;transition:all .15s}
+.ed-close:hover{background:#eef3f9;color:#0f2744;border-color:#b9c9dd}
+.ed-main{display:flex;flex:1;min-height:0}
+.ed-nav{width:292px;flex-shrink:0;border-right:1px solid #e8eef7;background:#fbfdff;overflow-y:auto;padding:10px 10px 16px}
+.ed-cat{margin-bottom:7px}
+.ed-cat-head{display:flex;align-items:center;gap:7px;padding:8px 9px 6px;font-size:12px;font-weight:800;letter-spacing:.06em;color:#5b6b7f}
+.ed-cat-head i{font-style:normal;font-size:10px;font-weight:700;color:var(--ed);background:#fff;border:1px solid #dbe5f1;border-radius:20px;padding:1px 7px;letter-spacing:0}
+.ed-type{display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:6px 9px;cursor:pointer;font-family:inherit;transition:all .12s}
+.ed-type:hover{background:#eff5fc;border-color:#dbe6f3}
+.ed-type.active{background:var(--ed);border-color:var(--ed);box-shadow:0 2px 8px rgba(15,35,60,.16)}
+.ed-type-zh{display:block;font-size:12px;font-weight:700;color:#1d3a5c;line-height:1.4}
+.ed-type-code{display:block;font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#7d8ba0;margin-top:1px;word-break:break-all}
+.ed-type.active .ed-type-zh,.ed-type.active .ed-type-code{color:#fff}
+.ed-type.active .ed-type-code{opacity:.82}
+.ed-body{padding:18px 22px 24px;overflow-y:auto;flex:1;min-width:0}
+.ed-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid #eaeff7}
+.ed-title-zh{font-size:18px;font-weight:800;color:#0f2744}
+.ed-chip{font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;border:1px solid;letter-spacing:.01em}
+.ed-chip.code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#1c3350;border-color:#cfdae9;background:#f6f9fd}
+.ed-chip.dict{color:#fff;background:var(--ed);border-color:var(--ed)}
+.ed-chip.example{color:#8a5a12;background:#fdf5e6;border-color:#f0dcb4;display:none}
+.ed-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:9px;margin:14px 0 20px}
+.ed-meta-cell{border:1px solid #e4ebf5;border-radius:9px;background:#fbfdff;padding:9px 12px}
+.ed-meta-k{font-size:10px;font-weight:800;letter-spacing:.09em;color:#7d8ba0;margin-bottom:4px}
+.ed-meta-v{font-size:13px;color:#1d3a5c;line-height:1.6;word-break:break-word}
+.ed-meta-v.mono{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12px}
+.ed-block{margin-bottom:20px}
+.ed-block:last-child{margin-bottom:0}
+.ed-block-title{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;letter-spacing:.13em;color:#4a5c76;margin-bottom:11px}
+.ed-block-title::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--ed);flex-shrink:0}
+.ed-block-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#dde5f0,transparent)}
+.ed-terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.ed-term{position:relative;border:1px solid #e0e8f3;border-radius:9px;padding:9px 12px 9px 14px;background:#fbfdff}
+.ed-term::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:var(--ed)}
+.ed-term-n{font-size:13px;font-weight:700;color:#0f2744;line-height:1.45}
+.ed-term-e{font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#5f6f86;margin-top:3px;word-break:break-all}
+.ed-term-c{font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:#7d8ba0;margin-top:2px}
+.ed-samples{display:flex;flex-direction:column;gap:7px}
+.ed-sample{display:flex;gap:10px;font-size:13px;color:#2c3f58;line-height:1.7;background:#fbfdff;border:1px solid #e0e8f3;border-radius:9px;padding:9px 13px}
+.ed-sample i{font-style:normal;color:var(--ed);font-weight:800;flex-shrink:0}
+.ed-ami{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:10px;border:1px dashed #c3d3e8;background:linear-gradient(135deg,#f4f9ff,#fbfdff)}
+.ed-ami-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--ed);border-radius:5px;padding:4px 9px;margin-top:1px}
+.ed-ami-text{font-size:13px;color:#1d3a5c;line-height:1.78}
+.ed-empty{font-size:13px;color:#7d8ba0;padding:12px 0}
+.ed-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 22px;border-top:1px solid #e8eef7;background:#fbfdff;font-size:12px;color:#5f6f86;flex-shrink:0}
+/* 表格「中文名称」可点击入口 */
+.std-table .name.ed-link{color:#1c6fd6;cursor:pointer;border-bottom:1px dashed rgba(28,111,214,.45);padding-bottom:1px;position:relative;white-space:nowrap}
+.std-table .name.ed-link::after{content:'↗';font-size:10px;font-weight:700;color:#7ba7e0;margin-left:4px;position:relative;top:-3px}
+.std-table .name.ed-link:hover{color:#0f4c9c;border-bottom-color:#0f4c9c;background:#eef5ff}
+.std-table .name.ed-link:focus-visible{outline:2px solid #1c6fd6;outline-offset:2px;border-radius:3px}
+@media(max-width:860px){
+  .ed-mask{padding:0;background:#fff}
+  .ed-panel{border-radius:0;max-height:100vh;min-height:100vh;box-shadow:none;border:0}
+  .ed-head{flex-wrap:wrap}
+  .ed-search{width:100%}
+  .ed-search input{width:100%}
+  .ed-main{flex-direction:column}
+  .ed-nav{width:100%;max-height:210px;border-right:0;border-bottom:1px solid #e8eef7}
+  .ed-terms{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .ed-terms{grid-template-columns:1fr}
+}
+
+/* ====== 速览入口：一图看懂 ====== */
+.std-hero{background:linear-gradient(135deg,rgba(79,140,255,.10),rgba(155,109,255,.06));border:1px solid rgba(79,140,255,.28);border-radius:14px;padding:24px 26px;margin-bottom:20px}
+.std-hero-title{font-size:21px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.std-hero-sub{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:14px}
+.std-hero-lead{font-size:14px;color:var(--ink);line-height:1.95;margin-bottom:16px}
+.std-hero-lead strong{color:var(--accent);font-weight:800}
+.std-hero-lead .js-nodes,.std-hero-lead .js-rels{color:var(--accent);font-weight:800}
+.std-hero .std-overview{margin-bottom:0}
+.std-q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.std-q-card{display:block;text-decoration:none;transition:border-color .18s,transform .18s}
+.std-q-card:hover{border-color:rgba(79,140,255,.5);transform:translateY(-2px);text-decoration:none}
+.std-q-card.wide{grid-column:1/-1}
+.std-q-go{font-size:12px;font-weight:700;color:var(--accent);margin-top:10px}
+
+/* ====== 硬闸门：人话解读表 ====== */
+.std-gate-hint{margin-bottom:16px}
+.std-view-tech .std-gate-hint{display:none}
+.std-table .plain{font-size:13px;color:var(--ink);line-height:1.7}
+.std-table .conseq{font-size:12px;color:#e8a35c;line-height:1.65}
+.std-table .std-tech-col{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:12px;color:#98a0b2;line-height:1.6}
+
+@media(max-width:900px){.std-q-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -366,15 +475,58 @@
     </div>
     <span class="std-toggle-all" onclick="toggleAllCollapse(this)" style="padding:6px 16px;font-size:12px;white-space:nowrap"><span class="arrow">▸</span> 展开全部折叠内容</span>
   </div>
+
+  <style>
+.qr-panel{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin:0 0 16px}
+.qr-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.qr-oneline{font-size:13px;color:var(--ink);line-height:1.7;margin-bottom:12px;padding:8px 12px;background:var(--bg3);border-left:3px solid var(--accent);border-radius:6px}
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:10px}
+.qr-card{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:10px 12px}
+.qr-q{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:5px}
+.qr-a{font-size:12px;color:var(--ink);line-height:1.75}
+.qr-a b{color:var(--ink)}
+.qr-a a{color:var(--accent)}
+.qr-terms summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink);padding:6px 0}
+.qr-terms summary:hover{color:var(--accent)}
+.qr-terms dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:6px 18px;margin:6px 0 2px}
+.qr-terms dt{font-size:12px;font-weight:700;color:var(--accent2);margin-top:4px}
+.qr-terms dd{font-size:12px;color:var(--muted);line-height:1.65;margin:1px 0 0}
+</style>
+<div class="qr-panel" id="qrTop">
+  <div class="qr-title">⏱️ 3分钟看懂本页（不看完整目录也能明白）</div>
+  <div class="qr-oneline">本页是这份图谱产品的<b>「建筑图纸 + 验收标准」</b>：规定系统里能存哪些医学知识、用什么格式存、达到什么质量才允许给医生用。不需要从头读到尾——看懂下面 4 个问题就够了。</div>
+  <div class="qr-grid">
+    <div class="qr-card"><div class="qr-q">① 现在建到什么程度了？</div><div class="qr-a">已覆盖<b>心血管内科 132 种疾病</b>：约 <b>3.5 万</b>个知识节点、<b>14 万</b>条关系。相当于把每种疾病的知识全部拆成机器可计算的「知识卡片」，每张卡都能追到教材/指南的<b>章节页码</b>。</div></div>
+    <div class="qr-card"><div class="qr-q">② 质量怎么保证？</div><div class="qr-a">入库前有 <b>28 道硬闸门</b>（相当于出厂质检），任何一条不过，整批数据不允许标记「正式可用」；给医生看的每条正式推荐，必须同时挂<b>证据 + 指南出处</b>。</div></div>
+    <div class="qr-card"><div class="qr-q">③ 看不懂的词怎么办？</div><div class="qr-a">先记住三个词：<b>实体</b>=名词（疾病/药物/检查）、<b>关系</b>=动词（导致/禁忌/推荐）、<b>三元组</b>=「名词+动词+名词」组成的一条知识。其余点开下方术语速查。</div></div>
+  </div>
+  <details class="qr-terms"><summary>📖 术语速查（点开看人话对照）</summary><dl>
+    <dt>三元组</dt><dd>一条知识的最小单位，如「急性心肌梗死 —典型症状→ 胸骨后压榨性疼痛」</dd>
+    <dt>实体类型（63 种）</dt><dd>图谱里允许出现的「名词」类别：疾病、症状、药物、检查、证据等</dd>
+    <dt>关系类型（122 种）</dt><dd>名词之间允许的「动词」：导致、禁忌、支持、推荐等</dd>
+    <dt>闸门</dt><dd>质检关卡——数据不过关就不能进入下一环节</dd>
+    <dt>formal_cdss_ready</dt><dd>「正式可用于临床」的标记，必须经审核签署后才允许置真</dd>
+    <dt>CDSS 标准字典</dt><dd>药品/检验/检查的标准名称表，保证口径统一（不会一个写阿司匹林、一个写阿斯匹林）</dd>
+    <dt>四层疾病结构</dt><dd>疾病大类 → 疑似诊断 → 具体分型 → 标准诊断，层层收窄、不得断链</dd>
+    <dt>证据模型</dt><dd>每条推荐的出处：教材章节页码、指南名称与推荐等级</dd>
+  </dl></details>
+</div>
+
+  <div class="std-view" id="stdView">
   <div class="std-layout">
     <aside class="std-side">
       <div class="std-side-title">目录</div>
       <div class="std-side-part">第1章 · 架构与原则</div>
-      <a class="std-anchor active" href="#guide">总览</a>
+      <a class="std-anchor active" href="#overview">速览</a>
+      <div class="std-toc-sub">
+        <a class="std-anchor" href="#overview-path">一条知识走完全程</a>
+        <a class="std-anchor" href="#overview-map">四个问题看懂骨架</a>
+      </div>
+      <a class="std-anchor" href="#guide">总览</a>
       <div class="std-toc-sub">
         <a class="std-anchor" href="#guide-triple">三元组</a>
         <a class="std-anchor" href="#guide-terms">术语速查</a>
-        <a class="std-anchor" href="#arch-diagram">五层架构图</a>
+        <a class="std-anchor" href="#arch-diagram">六层架构图</a>
         <a class="std-anchor" href="#guide-scene">专科业务全景</a>
         <a class="std-anchor" href="#principles">核心原则</a>
         <a class="std-anchor" href="#arch-boundary">四层边界</a>
@@ -416,18 +568,66 @@
 
       <div class="std-part-divider"><span class="std-part-num">第1章</span><span class="std-part-title">架构与原则 · 心血管内科知识图谱总览</span><span class="std-part-line"></span></div>
 
+      <!-- 0. 速览：一图看懂 -->
+      <section class="std-section" id="overview">
+        <h2>速览：一页看懂这张图谱</h2>
+        <div class="std-section-desc">先用一页讲清楚「这是什么、为谁服务、怎么用」；细节在第2、3章按需查阅。</div>
+
+<div class="std-hero">
+          <div class="std-hero-title">把心血管内科的医学知识，变成医生能用的推荐</div>
+          <div class="std-hero-sub">一句话：教材搭骨架 → 指南补决策 → 图谱存关系 → CDSS 出推荐</div>
+          <div class="std-hero-lead">
+            这张图谱收录心血管内科 <strong>15 个疾病大类、132 种疾病</strong>，现有 <span class="js-nodes">35,606</span> 个节点、<span class="js-rels">140,349</span> 条关系。
+            它只做一件事：把散落在教材和指南里的知识，整理成<strong>机器能推理的结构</strong>，让医生端在问诊当下拿到「疑似诊断、该做什么检查、怎么治、何时入路径」的提示。
+            节点是「名词」，关系是「句子」，两者合起来就是一条知识——所以图谱的最小单元叫「三元组」。
+          </div>
+          <div class="std-overview">
+            <div class="std-overview-stat"><div class="std-overview-num js-nodes">35,606</div><div class="std-overview-label">知识节点</div></div>
+            <div class="std-overview-stat"><div class="std-overview-num js-rels">140,349</div><div class="std-overview-label">知识关系</div></div>
+            <div class="std-overview-stat"><div class="std-overview-num">15 / 132</div><div class="std-overview-label">疾病大类 / 疾病</div></div>
+            <div class="std-overview-stat"><div class="std-overview-num">63</div><div class="std-overview-label">实体类型</div></div>
+            <div class="std-overview-stat"><div class="std-overview-num">122</div><div class="std-overview-label">关系类型</div></div>
+            <div class="std-overview-stat"><div class="std-overview-num">28</div><div class="std-overview-label">质量硬闸门</div></div>
+          </div>
+        </div>
+
+        <h3 id="overview-path">一条知识走完全程（急性心肌梗死示例）</h3>
+        <div class="std-section-desc">把「一条知识怎么产生、怎么被用上」压缩成一条线；左侧是业务口径，右侧是对应的技术落点。</div>
+        <div class="std-table-wrap"><table class="std-table"><thead><tr><th>步骤</th><th>产品视角：发生了什么</th><th>技术视角：图谱里是什么</th></tr></thead><tbody>
+          <tr><td>1</td><td class="name">教材搭骨架</td><td class="example">《内科学》给出 AMI 的定义、症状、病因总原则</td></tr>
+          <tr><td>2</td><td class="name">指南补决策</td><td class="example">2025 ACS 指南给出「PCI 延迟且无禁忌 → 溶栓」的触发条件与推荐等级</td></tr>
+          <tr><td>3</td><td class="name">结构化入图</td><td class="require"><code>:KGNode:Disease</code> <code>code="DIS-CARD-CAD-AMI"</code>，关系 <code>has_symptom</code> 指向 <code>胸痛</code></td></tr>
+          <tr><td>4</td><td class="name">医生问诊</td><td class="example">一诉五史命中「胸痛+出汗+呼吸困难」等 26 项症状</td></tr>
+          <tr><td>5</td><td class="name">疑似诊断推荐</td><td class="require">按症状命中数排序，只返回 <code>diagnostic_role=suspected_parent</code> 的疾病</td></tr>
+          <tr><td>6</td><td class="name">检查检验与鉴别</td><td class="require">推荐 <code>ExamItem</code>（心电图）、<code>LabItem</code>（肌钙蛋白），并列出鉴别对象</td></tr>
+          <tr><td>7</td><td class="name">确诊分型</td><td class="require">确认后落到 <code>specific_subtype</code>，映射标准诊断 <code>I21.900</code></td></tr>
+          <tr><td>8</td><td class="name">正式推荐与入径</td><td class="require">经推荐陈述下发动作，携带 <code>primary_evidence_code</code> 溯源到指南原文</td></tr>
+        </tbody></table></div>
+        <div class="std-note">完整链路见 <a href="#patient-scenario" style="color:var(--accent)">附录 · 患者全周期应用场景</a>；推荐陈述的字段定义见 <a href="#adjudication" style="color:var(--accent)">推荐陈述字段</a>。</div>
+
+        <h3 id="overview-map">四个问题，看懂骨架</h3>
+        <div class="std-section-desc">同事们反馈最多的是「不知道从哪看起」。其实整份规范只回答四个问题，按需点开对应章节即可。</div>
+        <div class="std-q-grid">
+          <a class="std-card std-q-card" href="#architecture"><div class="std-card-title">一、图谱长什么样？</div><div class="std-card-desc">六层结构：目录层定归属、诊断层管疾病、知识层放事实、决策层给推荐、应用层做模板、证据层留出处。每层回答一个临床问题。</div><div class="std-q-go">看第1章 · 总体架构 ↘</div></a>
+          <a class="std-card std-q-card" href="#nodes"><div class="std-card-title">二、节点和关系有哪些？</div><div class="std-card-desc">63 种实体类型定义了「图谱里能有哪些名词」，122 种关系类型定义了「名词之间能说哪些话」；关系两端类型必须匹配。</div><div class="std-q-go">看第2章 · 实体类型与关系 ↘</div></a>
+          <a class="std-card std-q-card" href="#howto"><div class="std-card-title">三、数据怎么生产出来？</div><div class="std-card-desc">从教材/指南到入图的一条生产流水线，含字典来源规则、推荐陈述的建模过程、以及必须落地的字段。</div><div class="std-q-go">看第3章 · 数据生成实例 ↘</div></a>
+          <a class="std-card std-q-card" href="#quality"><div class="std-card-title">四、怎么保证不出错？</div><div class="std-card-desc">28 条数据质量硬闸门，分六组校验：命名、诊断、检查治疗、正式推荐与证据、应用模板、数据边界；不过闸门不入库。</div><div class="std-q-go">看第3章 · 数据质量硬闸门 ↘</div></a>
+          <a class="std-card std-q-card wide" href="#patient-scenario"><div class="std-card-title">附：医生端到底怎么用？</div><div class="std-card-desc">以 AMI 与肥厚型心肌病两个真实案例，走完「问诊 → 疑似诊断 → 鉴别 → 确诊分型 → 推荐 → 入径 → 随访」的患者全周期，每一步对应图谱里的哪段结构。</div><div class="std-q-go">看附录 · 患者全周期应用场景 ↘</div></a>
+        </div>
+      </section>
+
       <!-- 1. 阅读指引 -->
       <section class="std-section" id="guide">
         <h2>阅读指引</h2>
         <div class="std-section-desc">
-          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 <span class="js-nodes">32,229</span> 节点、<span class="js-rels">139,696</span> 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
+          本规范定义<strong>心血管内科知识图谱的节点构成、关系连接与字段标准</strong>。当前图谱包含 <span class="js-nodes">35,606</span> 节点、<span class="js-rels">140,349</span> 关系，支撑医生端 CDSS 的疑似诊断推荐、检查检验推荐、治疗方案推荐与专病路径管理。
           本章首先介绍三元组、术语速查与业务全景三个基础模块，理解后即可阅读后续全部章节。
         </div>
 
         <h3 id="guide-triple">三元组：图谱最小的知识单元</h3>
         <div class="std-section-desc">图谱中所有医学知识均以「节点 -[关系]-> 节点」的三元组存储：节点带属性，关系带方向与类型编码。以下四组三元组全部取自当前库真实数据，均可直接用 Cypher 复核。</div>
         <div class="std-concept">
-          <div class="std-concept-label">真实三元组（急性心肌梗死 · 当前库 <span class="js-nodes">32,229</span> 节点 / <span class="js-rels">139,696</span> 关系）</div>
+          <div class="std-concept-label">真实三元组（急性心肌梗死 · 当前库 <span class="js-nodes">35,606</span> 节点 / <span class="js-rels">140,349</span> 关系）</div>
 
           <div class="std-tri-group">
             <span class="std-tri-tag">① 医学事实</span>
@@ -482,7 +682,7 @@
 
           <div class="std-concept-text" style="margin-top:14px">
             <strong>节点</strong>：知识条目，携带 code、entityType、name 等属性，涵盖疾病、症状、药品、检查项目、证据、推荐陈述等类型；<strong>关系</strong>：节点间带方向的医学关联，编码统一小写下划线（<code>has_symptom</code>、<code>recommends_action</code>），同一编码全局语义唯一；<strong>属性</strong>：节点或关系上的字段，如上例疾病节点的 code 与 aliases，推荐陈述的 trigger_condition 与 primary_evidence_code。<br><br>
-            整个图谱即由 <span class="js-nodes">32,229</span> 个节点、<span class="js-rels">139,696</span> 条此类三元组关系连接构成（其中涉及证据的关系 91,136 条，Evidence 节点 18,924 个）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2章）；数据如何生产与质量控制（第3章）</strong>。
+            整个图谱即由 <span class="js-nodes">35,606</span> 个节点、<span class="js-rels">140,349</span> 条此类三元组关系连接构成（其中涉及证据的关系 91,136 条，Evidence 节点 18,924 个）。本规范后续章节回答两个核心问题：<strong>节点如何定义与连接（第2章）；数据如何生产与质量控制（第3章）</strong>。
           </div>
         </div>
 
@@ -491,12 +691,12 @@
         <div class="std-term-grid">
           <div class="std-term">
             <div class="std-term-name">节点<span class="std-term-en">Node / Entity</span></div>
-            <div class="std-term-def">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等。每个节点有全局唯一编码，当前库 32,229 个。</div>
+            <div class="std-term-def">图谱中的知识条目：疾病、症状、药品、检查项目、证据、推荐陈述等。每个节点有全局唯一编码，当前库 35,606 个。</div>
             <div class="std-term-eg"><span class="eg-label">真实示例</span>DIS-CARD-CAD-AMI 急性心肌梗死</div>
           </div>
           <div class="std-term">
             <div class="std-term-name">关系<span class="std-term-en">Relationship</span></div>
-            <div class="std-term-def">节点之间带方向的医学关联，同一编码全局语义唯一。当前库 <span class="js-rels">139,696</span> 条。</div>
+            <div class="std-term-def">节点之间带方向的医学关联，同一编码全局语义唯一。当前库 <span class="js-rels">140,349</span> 条。</div>
             <div class="std-term-eg"><span class="eg-label">真实示例</span>has_symptom = 有症状</div>
           </div>
           <div class="std-term">
@@ -546,7 +746,7 @@
           <tr><td class="name">专病路径管理</td><td class="require">分型确认后入径，按阶段推进</td><td class="example">STEMI路径6阶段：疑诊->诊断->再灌注->抗栓->并发症->二级预防</td></tr>
           <tr><td class="name">证据溯源</td><td class="require">推荐直连主证据与主依据指南</td><td class="example">2018 STEMI院前溶栓共识 + 4th Universal Definition of MI</td></tr>
         </tbody></table></div>
-        <div class="std-note">全库 <span class="js-nodes">32,229</span> 节点 / <span class="js-rels">139,696</span> 关系。其中核心节点：Evidence 18,924、ClinicalRule 7,792、RecommendationStatement 572、PathwayStage 455（其余为疾病、症状、药品、检查等临床实体）。诊断角色分布：独立诊断 76 种、具体分型 46 种、待分型 10 种。</div>
+        <div class="std-note">全库 <span class="js-nodes">35,606</span> 节点 / <span class="js-rels">140,349</span> 关系。其中核心节点：Evidence 18,924、ClinicalRule 7,792、RecommendationStatement 572、PathwayStage 455（其余为疾病、症状、药品、检查等临床实体）。诊断角色分布：独立诊断 76 种、具体分型 46 种、待分型 10 种。</div>
 
 
       </section>
@@ -683,7 +883,7 @@
       <div class="std-part-divider"><span class="std-part-num">第2章</span><span class="std-part-title">数据模型 · Schema 完整定义</span><span class="std-part-line"></span></div>
 
       <!-- 0. entityType：节点的类型标识 -->
-      <section class="std-section" id="entity-type">
+      <section class="std-section std-tech-only" id="entity-type">
         <h2>entityType：节点的类型标识</h2>
         <div class="std-section-desc">
           图谱中所有节点统一标记为 <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--accent)">:KGNode</code>，由 <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--accent)">entityType</code> 字段声明具体类型。系统据此区分疾病、症状、药品，并决定查询、展示与推荐行为；本章实体类型表中的每个编码，都是 entityType 的合法取值。
@@ -746,7 +946,7 @@
       </section>
 
       <!-- 3. 实体类型 -->
-      <section class="std-section" id="nodes">
+      <section class="std-section std-tech-only" id="nodes">
         <h2>标准实体类型<span class="std-badge std-badge-ver">63种</span></h2>
         <div class="std-section-desc">
           以下是全部 63 种标准实体类型的详细说明。每种类型都有一个 <strong>entityType 编码</strong>（供系统使用）和一个 <strong>中文名称</strong>（供医生端展示）。
@@ -757,119 +957,124 @@
 
         <div class="std-sub-head" id="nodes-dir" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">目录、疾病和标准诊断</span><span class="std-badge std-badge-ver">6种</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">顶层学科</td><td class="code">Specialty</td><td class="require">多学科根节点；code 全局唯一；战略保留，不得因低频删除</td><td class="example">心血管内科</td></tr>
-          <tr><td>2</td><td class="name">疾病大类</td><td class="code">DiseaseCategory</td><td class="require">目录实体，不保存诊断编码，不写入病历系统</td><td class="example">冠心病</td></tr>
-          <tr><td>3</td><td class="name">疾病亚类/展示分组</td><td class="code">DiseaseSubcategory</td><td class="require">可选；仅用于展示；不参与诊断、不写入病历系统</td><td class="example">急性冠脉综合征</td></tr>
-          <tr><td>4</td><td class="name">临床疾病</td><td class="code">Disease</td><td class="require">待分型疾病和具体分型统一使用该类型</td><td class="example">急性心肌梗死、STEMI、NSTEMI</td></tr>
-          <tr><td>5</td><td class="name">CDSS 标准诊断</td><td class="code">StandardDiagnosis</td><td class="require">一条实体对应一条经二次校验通过的系统诊断记录；保留原始系统编号</td><td class="example">I21.900 急性心肌梗死</td></tr>
-          <tr><td>6</td><td class="name">疾病分型/分类（停用）</td><td class="code">DiseaseClassification</td><td class="require">V2.0停止新增；迁移为疾病（Disease）或疾病亚类（DiseaseSubcategory）</td><td class="example">STEMI（已迁为疾病Disease）</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「顶层学科」的标准术语字典举例" onclick="openEntityDict(0,0)" onkeydown="edKey(event,0,0)">顶层学科</td><td class="code">Specialty</td><td class="require">多学科根节点；code 全局唯一；战略保留，不得因低频删除</td><td class="example">心血管内科</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「疾病大类」的标准术语字典举例" onclick="openEntityDict(0,1)" onkeydown="edKey(event,0,1)">疾病大类</td><td class="code">DiseaseCategory</td><td class="require">目录实体，不保存诊断编码，不写入病历系统</td><td class="example">冠心病</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「疾病亚类/展示分组」的标准术语字典举例" onclick="openEntityDict(0,2)" onkeydown="edKey(event,0,2)">疾病亚类/展示分组</td><td class="code">DiseaseSubcategory</td><td class="require">可选；仅用于展示；不参与诊断、不写入病历系统</td><td class="example">急性冠脉综合征</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「临床疾病」的标准术语字典举例" onclick="openEntityDict(0,3)" onkeydown="edKey(event,0,3)">临床疾病</td><td class="code">Disease</td><td class="require">待分型疾病和具体分型统一使用该类型</td><td class="example">急性心肌梗死、STEMI、NSTEMI</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「CDSS 标准诊断」的标准术语字典举例" onclick="openEntityDict(0,4)" onkeydown="edKey(event,0,4)">CDSS 标准诊断</td><td class="code">StandardDiagnosis</td><td class="require">一条实体对应一条经二次校验通过的系统诊断记录；保留原始系统编号</td><td class="example">I21.900 急性心肌梗死</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「疾病分型/分类（停用）」的标准术语字典举例" onclick="openEntityDict(0,5)" onkeydown="edKey(event,0,5)">疾病分型/分类（停用）</td><td class="code">DiseaseClassification</td><td class="require">V2.0停止新增；迁移为疾病（Disease）或疾病亚类（DiseaseSubcategory）</td><td class="example">STEMI（已迁为疾病Disease）</td></tr>
         </tbody></table></div>
         <div class="std-example"><strong>标准诊断链示例：</strong>心血管内科 -[包含疾病大类]-&gt; 冠心病 -[包含疾病]-&gt; 急性心肌梗死（待分型） -[包含分型]-&gt; ST段抬高型心肌梗死（具体分型）</div></div>
 
         <div class="std-sub-head" id="nodes-med" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">疾病医学事实</span><span class="std-badge std-badge-ver">20种</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">疾病定义</td><td class="code">Definition</td><td class="require">疾病概述原文或忠实摘要；不得只写标题</td><td class="example">急性心肌梗死定义</td></tr>
-          <tr><td>2</td><td class="name">定义明细</td><td class="code">DefinitionComponent</td><td class="require">定义中的独立要点，可单独追溯</td><td class="example">急性心肌缺血导致心肌坏死</td></tr>
-          <tr><td>3</td><td class="name">病因</td><td class="code">Etiology</td><td class="require">标准化短语</td><td class="example">斑块破裂继发血栓形成</td></tr>
-          <tr><td>4</td><td class="name">病理生理</td><td class="code">Pathophysiology</td><td class="require">机制和病理过程</td><td class="example">冠脉闭塞导致持续心肌缺血</td></tr>
-          <tr><td>5</td><td class="name">流行病学</td><td class="code">Epidemiology</td><td class="require">数值必须带时间、人群、单位和来源</td><td class="example">AMI 发病率变化</td></tr>
-          <tr><td>6</td><td class="name">症状</td><td class="code">Symptom</td><td class="require">患者主观感受；与体征分开</td><td class="example">持续胸痛</td></tr>
-          <tr><td>7</td><td class="name">体征</td><td class="code">Sign</td><td class="require">医生客观观察结果；与症状分开</td><td class="example">心包摩擦音、低血压</td></tr>
-          <tr><td>8</td><td class="name">危险因素</td><td class="code">RiskFactor</td><td class="require">增加患病或不良结局风险的因素</td><td class="example">吸烟、高血压、糖尿病</td></tr>
-          <tr><td>9</td><td class="name">并发症</td><td class="code">Complication</td><td class="require">疾病导致的并发问题</td><td class="example">心力衰竭、心源性休克</td></tr>
-          <tr><td>10</td><td class="name">阈值规则</td><td class="code">ThresholdRule</td><td class="require">数值、单位、方向和时间窗必须齐全</td><td class="example">肌钙蛋白超过第 99 百分位并动态变化</td></tr>
-          <tr><td>11</td><td class="name">诊断标准</td><td class="code">DiagnosisCriteria</td><td class="require">诊断标准总标题，必须继续下钻明细</td><td class="example">急性心肌梗死诊断标准</td></tr>
-          <tr><td>12</td><td class="name">诊断标准明细</td><td class="code">DiagnosisCriteriaComponent</td><td class="require">可判断的独立条件</td><td class="example">缺血症状、心电图改变、肌钙蛋白动态升高</td></tr>
-          <tr><td>13</td><td class="name">鉴别诊断</td><td class="code">DifferentialDiagnosis</td><td class="require">鉴别对象必须连接鉴别要点、排除检查或规则</td><td class="example">主动脉夹层、肺栓塞</td></tr>
-          <tr><td>14</td><td class="name">风险分层</td><td class="code">RiskStratification</td><td class="require">评分或分层工具</td><td class="example">GRACE 评分</td></tr>
-          <tr><td>15</td><td class="name">辅助检查方案</td><td class="code">ExamPlan</td><td class="require">组织一组检查和检验策略；不是检查项目，不可直接开医嘱</td><td class="example">AMI 首诊辅助检查方案</td></tr>
-          <tr><td>16</td><td class="name">治疗方案</td><td class="code">TreatmentPlan</td><td class="require">疾病治疗策略；必须下钻到场景、规则、动作和证据</td><td class="example">STEMI 再灌注方案</td></tr>
-          <tr><td>17</td><td class="name">随访</td><td class="code">FollowUp</td><td class="require">说明频率、时点或触发条件</td><td class="example">出院后复诊和心功能随访</td></tr>
-          <tr><td>18</td><td class="name">预后</td><td class="code">Prognosis</td><td class="require">结局、复发和死亡风险</td><td class="example">再梗死风险</td></tr>
-          <tr><td>19</td><td class="name">预防</td><td class="code">Prevention</td><td class="require">一级/二级预防和患者教育</td><td class="example">戒烟和血脂管理</td></tr>
-          <tr><td>20</td><td class="name">禁忌/排除条件</td><td class="code">Contraindication</td><td class="require">阻断推荐的临床原因；必须有证据</td><td class="example">活动性出血阻断溶栓</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「疾病定义」的标准术语字典举例" onclick="openEntityDict(1,0)" onkeydown="edKey(event,1,0)">疾病定义</td><td class="code">Definition</td><td class="require">疾病概述原文或忠实摘要；不得只写标题</td><td class="example">急性心肌梗死定义</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「定义明细」的标准术语字典举例" onclick="openEntityDict(1,1)" onkeydown="edKey(event,1,1)">定义明细</td><td class="code">DefinitionComponent</td><td class="require">定义中的独立要点，可单独追溯</td><td class="example">急性心肌缺血导致心肌坏死</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「病因」的标准术语字典举例" onclick="openEntityDict(1,2)" onkeydown="edKey(event,1,2)">病因</td><td class="code">Etiology</td><td class="require">标准化短语</td><td class="example">斑块破裂继发血栓形成</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「病理生理」的标准术语字典举例" onclick="openEntityDict(1,3)" onkeydown="edKey(event,1,3)">病理生理</td><td class="code">Pathophysiology</td><td class="require">机制和病理过程</td><td class="example">冠脉闭塞导致持续心肌缺血</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「流行病学」的标准术语字典举例" onclick="openEntityDict(1,4)" onkeydown="edKey(event,1,4)">流行病学</td><td class="code">Epidemiology</td><td class="require">数值必须带时间、人群、单位和来源</td><td class="example">AMI 发病率变化</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「症状」的标准术语字典举例" onclick="openEntityDict(1,5)" onkeydown="edKey(event,1,5)">症状</td><td class="code">Symptom</td><td class="require">患者主观感受；与体征分开</td><td class="example">持续胸痛</td></tr>
+          <tr><td>7</td><td class="name ed-link" role="button" tabindex="0" title="查看「体征」的标准术语字典举例" onclick="openEntityDict(1,6)" onkeydown="edKey(event,1,6)">体征</td><td class="code">Sign</td><td class="require">医生客观观察结果；与症状分开</td><td class="example">心包摩擦音、低血压</td></tr>
+          <tr><td>8</td><td class="name ed-link" role="button" tabindex="0" title="查看「危险因素」的标准术语字典举例" onclick="openEntityDict(1,7)" onkeydown="edKey(event,1,7)">危险因素</td><td class="code">RiskFactor</td><td class="require">增加患病或不良结局风险的因素</td><td class="example">吸烟、高血压、糖尿病</td></tr>
+          <tr><td>9</td><td class="name ed-link" role="button" tabindex="0" title="查看「并发症」的标准术语字典举例" onclick="openEntityDict(1,8)" onkeydown="edKey(event,1,8)">并发症</td><td class="code">Complication</td><td class="require">疾病导致的并发问题</td><td class="example">心力衰竭、心源性休克</td></tr>
+          <tr><td>10</td><td class="name ed-link" role="button" tabindex="0" title="查看「阈值规则」的标准术语字典举例" onclick="openEntityDict(1,9)" onkeydown="edKey(event,1,9)">阈值规则</td><td class="code">ThresholdRule</td><td class="require">数值、单位、方向和时间窗必须齐全</td><td class="example">肌钙蛋白超过第 99 百分位并动态变化</td></tr>
+          <tr><td>11</td><td class="name ed-link" role="button" tabindex="0" title="查看「诊断标准」的标准术语字典举例" onclick="openEntityDict(1,10)" onkeydown="edKey(event,1,10)">诊断标准</td><td class="code">DiagnosisCriteria</td><td class="require">诊断标准总标题，必须继续下钻明细</td><td class="example">急性心肌梗死诊断标准</td></tr>
+          <tr><td>12</td><td class="name ed-link" role="button" tabindex="0" title="查看「诊断标准明细」的标准术语字典举例" onclick="openEntityDict(1,11)" onkeydown="edKey(event,1,11)">诊断标准明细</td><td class="code">DiagnosisCriteriaComponent</td><td class="require">可判断的独立条件</td><td class="example">缺血症状、心电图改变、肌钙蛋白动态升高</td></tr>
+          <tr><td>13</td><td class="name ed-link" role="button" tabindex="0" title="查看「鉴别诊断」的标准术语字典举例" onclick="openEntityDict(1,12)" onkeydown="edKey(event,1,12)">鉴别诊断</td><td class="code">DifferentialDiagnosis</td><td class="require">鉴别对象必须连接鉴别要点、排除检查或规则</td><td class="example">主动脉夹层、肺栓塞</td></tr>
+          <tr><td>14</td><td class="name ed-link" role="button" tabindex="0" title="查看「风险分层」的标准术语字典举例" onclick="openEntityDict(1,13)" onkeydown="edKey(event,1,13)">风险分层</td><td class="code">RiskStratification</td><td class="require">评分或分层工具</td><td class="example">GRACE 评分</td></tr>
+          <tr><td>15</td><td class="name ed-link" role="button" tabindex="0" title="查看「辅助检查方案」的标准术语字典举例" onclick="openEntityDict(1,14)" onkeydown="edKey(event,1,14)">辅助检查方案</td><td class="code">ExamPlan</td><td class="require">组织一组检查和检验策略；不是检查项目，不可直接开医嘱</td><td class="example">AMI 首诊辅助检查方案</td></tr>
+          <tr><td>16</td><td class="name ed-link" role="button" tabindex="0" title="查看「治疗方案」的标准术语字典举例" onclick="openEntityDict(1,15)" onkeydown="edKey(event,1,15)">治疗方案</td><td class="code">TreatmentPlan</td><td class="require">疾病治疗策略；必须下钻到场景、规则、动作和证据</td><td class="example">STEMI 再灌注方案</td></tr>
+          <tr><td>17</td><td class="name ed-link" role="button" tabindex="0" title="查看「随访」的标准术语字典举例" onclick="openEntityDict(1,16)" onkeydown="edKey(event,1,16)">随访</td><td class="code">FollowUp</td><td class="require">说明频率、时点或触发条件</td><td class="example">出院后复诊和心功能随访</td></tr>
+          <tr><td>18</td><td class="name ed-link" role="button" tabindex="0" title="查看「预后」的标准术语字典举例" onclick="openEntityDict(1,17)" onkeydown="edKey(event,1,17)">预后</td><td class="code">Prognosis</td><td class="require">结局、复发和死亡风险</td><td class="example">再梗死风险</td></tr>
+          <tr><td>19</td><td class="name ed-link" role="button" tabindex="0" title="查看「预防」的标准术语字典举例" onclick="openEntityDict(1,18)" onkeydown="edKey(event,1,18)">预防</td><td class="code">Prevention</td><td class="require">一级/二级预防和患者教育</td><td class="example">戒烟和血脂管理</td></tr>
+          <tr><td>20</td><td class="name ed-link" role="button" tabindex="0" title="查看「禁忌/排除条件」的标准术语字典举例" onclick="openEntityDict(1,19)" onkeydown="edKey(event,1,19)">禁忌/排除条件</td><td class="code">Contraindication</td><td class="require">阻断推荐的临床原因；必须有证据</td><td class="example">活动性出血阻断溶栓</td></tr>
         </tbody></table></div></div>
 
         <div class="std-sub-head" id="nodes-std" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">CDSS 标准临床主数据</span><span class="std-badge std-badge-ver">13种</span></div>
         <div class="std-sub-body"><div class="std-section-desc">以下 14 类必须明确，不使用"其他""等"代替。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>标准来源或建设要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">标准诊断</td><td class="code">StandardDiagnosis</td><td class="require">CDSS 有效诊断记录进入候选池，经编码、名称和权威来源二次校验后使用</td><td class="example">I21.900 急性心肌梗死</td></tr>
-          <tr><td>2</td><td class="name">症状</td><td class="code">Symptom</td><td class="require">优先 CDSS 症状字典</td><td class="example">胸痛</td></tr>
-          <tr><td>3</td><td class="name">体征</td><td class="code">Sign</td><td class="require">症状和体征必须分开；缺少标准表时进入体征字典建设队列</td><td class="example">心包摩擦音</td></tr>
-          <tr><td>4</td><td class="name">检查项目</td><td class="code">ExamItem</td><td class="require">影像、心电、超声、功能检查项目</td><td class="example">常规心电图</td></tr>
-          <tr><td>5</td><td class="name">检查发现/观察指标</td><td class="code">ExamObservation</td><td class="require">检查报告中的结构化发现，不是检查项目</td><td class="example">ST 段抬高、病理性 Q 波</td></tr>
-          <tr><td>6</td><td class="name">检验项目</td><td class="code">LabItem</td><td class="require">一组检验或可开立检验项目</td><td class="example">心肌损伤标志物检测</td></tr>
-          <tr><td>7</td><td class="name">检验细项</td><td class="code">LabSubitem</td><td class="require">检验项目包含的具体可报告指标</td><td class="example">心肌肌钙蛋白 I、肌酸激酶同工酶</td></tr>
-          <tr><td>8</td><td class="name">检验标本</td><td class="code">LabSpecimen</td><td class="require">使用 CDSS 检验标本字典</td><td class="example">血清、血浆</td></tr>
-          <tr><td>9</td><td class="name">药品</td><td class="code">Drug</td><td class="require">使用 CDSS 药品通用字典；标准全称为主名，缩写放别名</td><td class="example">阿司匹林</td></tr>
-          <tr><td>10</td><td class="name">操作/手术</td><td class="code">Procedure</td><td class="require">临床知识动作；必须可映射到 CDSS 标准手术</td><td class="example">经皮冠状动脉介入治疗</td></tr>
-          <tr><td>11</td><td class="name">操作/手术标准编码</td><td class="code">Procedure.standard_code</td><td class="require">手术编码通过 Procedure 节点的 standard_code / standard_code_system 字段承载，不再单独建 StandardProcedure 实体</td><td class="example">PCI → 00.6600（ICD-9-CM-3）</td></tr>
-          <tr><td>12</td><td class="name">治疗项目</td><td class="code">TreatmentItem</td><td class="require">非药品、非手术的标准治疗项目</td><td class="example">氧疗</td></tr>
-          <tr><td>13</td><td class="name">生命体征项目</td><td class="code">VitalSignItem</td><td class="require">使用 CDSS 生命体征标准表</td><td class="example">心率、收缩压</td></tr>
-          <tr><td>14</td><td class="name">医学术语与别名</td><td class="code">MedicalTerm, MedicalTermAlias</td><td class="require">标准术语、缩写、旧称、中文简称统一管理</td><td class="example">急性心肌梗死；别名 AMI、急性心梗</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「标准诊断」的标准术语字典举例" onclick="openEntityDict(2,0)" onkeydown="edKey(event,2,0)">标准诊断</td><td class="code">StandardDiagnosis</td><td class="require">CDSS 有效诊断记录进入候选池，经编码、名称和权威来源二次校验后使用</td><td class="example">I21.900 急性心肌梗死</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「症状」的标准术语字典举例" onclick="openEntityDict(2,1)" onkeydown="edKey(event,2,1)">症状</td><td class="code">Symptom</td><td class="require">优先 CDSS 症状字典</td><td class="example">胸痛</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「体征」的标准术语字典举例" onclick="openEntityDict(2,2)" onkeydown="edKey(event,2,2)">体征</td><td class="code">Sign</td><td class="require">症状和体征必须分开；缺少标准表时进入体征字典建设队列</td><td class="example">心包摩擦音</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「检查项目」的标准术语字典举例" onclick="openEntityDict(2,3)" onkeydown="edKey(event,2,3)">检查项目</td><td class="code">ExamItem</td><td class="require">影像、心电、超声、功能检查项目</td><td class="example">常规心电图</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「检查发现/观察指标」的标准术语字典举例" onclick="openEntityDict(2,4)" onkeydown="edKey(event,2,4)">检查发现/观察指标</td><td class="code">ExamObservation</td><td class="require">检查报告中的结构化发现，不是检查项目</td><td class="example">ST 段抬高、病理性 Q 波</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「检验项目」的标准术语字典举例" onclick="openEntityDict(2,5)" onkeydown="edKey(event,2,5)">检验项目</td><td class="code">LabItem</td><td class="require">一组检验或可开立检验项目</td><td class="example">心肌损伤标志物检测</td></tr>
+          <tr><td>7</td><td class="name ed-link" role="button" tabindex="0" title="查看「检验细项」的标准术语字典举例" onclick="openEntityDict(2,6)" onkeydown="edKey(event,2,6)">检验细项</td><td class="code">LabSubitem</td><td class="require">检验项目包含的具体可报告指标</td><td class="example">心肌肌钙蛋白 I、肌酸激酶同工酶</td></tr>
+          <tr><td>8</td><td class="name ed-link" role="button" tabindex="0" title="查看「检验标本」的标准术语字典举例" onclick="openEntityDict(2,7)" onkeydown="edKey(event,2,7)">检验标本</td><td class="code">LabSpecimen</td><td class="require">使用 CDSS 检验标本字典</td><td class="example">血清、血浆</td></tr>
+          <tr><td>9</td><td class="name ed-link" role="button" tabindex="0" title="查看「药品」的标准术语字典举例" onclick="openEntityDict(2,8)" onkeydown="edKey(event,2,8)">药品</td><td class="code">Drug</td><td class="require">使用 CDSS 药品通用字典；标准全称为主名，缩写放别名</td><td class="example">阿司匹林</td></tr>
+          <tr><td>10</td><td class="name ed-link" role="button" tabindex="0" title="查看「操作/手术」的标准术语字典举例" onclick="openEntityDict(2,9)" onkeydown="edKey(event,2,9)">操作/手术</td><td class="code">Procedure</td><td class="require">临床知识动作；必须可映射到 CDSS 标准手术</td><td class="example">经皮冠状动脉介入治疗</td></tr>
+          <tr><td>11</td><td class="name ed-link" role="button" tabindex="0" title="查看「操作/手术标准编码」的标准术语字典举例" onclick="openEntityDict(2,10)" onkeydown="edKey(event,2,10)">操作/手术标准编码</td><td class="code">Procedure.standard_code</td><td class="require">手术编码通过 Procedure 节点的 standard_code / standard_code_system 字段承载，不再单独建 StandardProcedure 实体</td><td class="example">PCI → 00.6600（ICD-9-CM-3）</td></tr>
+          <tr><td>12</td><td class="name ed-link" role="button" tabindex="0" title="查看「治疗项目」的标准术语字典举例" onclick="openEntityDict(2,11)" onkeydown="edKey(event,2,11)">治疗项目</td><td class="code">TreatmentItem</td><td class="require">非药品、非手术的标准治疗项目</td><td class="example">氧疗</td></tr>
+          <tr><td>13</td><td class="name ed-link" role="button" tabindex="0" title="查看「生命体征项目」的标准术语字典举例" onclick="openEntityDict(2,12)" onkeydown="edKey(event,2,12)">生命体征项目</td><td class="code">VitalSignItem</td><td class="require">使用 CDSS 生命体征标准表</td><td class="example">心率、收缩压</td></tr>
+          <tr><td>14</td><td class="name ed-link" role="button" tabindex="0" title="查看「医学术语与别名」的标准术语字典举例" onclick="openEntityDict(2,13)" onkeydown="edKey(event,2,13)">医学术语与别名</td><td class="code">MedicalTerm, MedicalTermAlias</td><td class="require">标准术语、缩写、旧称、中文简称统一管理</td><td class="example">急性心肌梗死；别名 AMI、急性心梗</td></tr>
         </tbody></table></div></div>
 
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">来源、证据和 CDSS 决策实体</span><span class="std-badge std-badge-ver">9种</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">指南/教材/共识</td><td class="code">Guideline</td><td class="require">名称、年份、版本、来源类型必须齐全</td><td class="example">2023 ESC 急性冠脉综合征指南</td></tr>
-          <tr><td>2</td><td class="name">来源章节</td><td class="code">SourceSection</td><td class="require">保存章节、小标题、页码范围</td><td class="example">STEMI 再灌注章节</td></tr>
-          <tr><td>3</td><td class="name">证据片段</td><td class="code">Evidence</td><td class="require">保留原文、页码/段落和来源；同一原文不按疾病重复建</td><td class="example">PCI 推荐原文</td></tr>
-          <tr><td>4</td><td class="name">专科诊疗路径</td><td class="code">SpecialtyCarePathway</td><td class="require">专科 CDSS 业务入口，不是治疗方案</td><td class="example">AMI 急诊诊疗路径</td></tr>
-          <tr><td>5</td><td class="name">路径阶段</td><td class="code">PathwayStage</td><td class="require">疑似、确诊、分型、治疗、随访阶段</td><td class="example">STEMI 再灌注决策阶段</td></tr>
-          <tr><td>6</td><td class="name">临床规则</td><td class="code">ClinicalRule</td><td class="require">触发、适用、排除、禁忌和阈值逻辑</td><td class="example">发病 12 小时内且 PCI 可及</td></tr>
-          <tr><td>7</td><td class="name">推荐陈述</td><td class="code">RecommendationStatement</td><td class="require">医生推荐卡根实体，必须连接动作和证据；主证据、主依据指南和冲突状态直接保存在本节点字段上</td><td class="example">推荐急诊 PCI</td></tr>
-          <tr><td>8</td><td class="name">患者状态</td><td class="code">PatientState</td><td class="require">复杂条件或路径状态</td><td class="example">急性期、出血高风险</td></tr>
-          <tr><td>9</td><td class="name">临床事件</td><td class="code">ClinicalEvent</td><td class="require">路径流转、结局或复发事件</td><td class="example">再梗死、心源性休克</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「指南/教材/共识」的标准术语字典举例" onclick="openEntityDict(3,0)" onkeydown="edKey(event,3,0)">指南/教材/共识</td><td class="code">Guideline</td><td class="require">名称、年份、版本、来源类型必须齐全</td><td class="example">2023 ESC 急性冠脉综合征指南</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「来源章节」的标准术语字典举例" onclick="openEntityDict(3,1)" onkeydown="edKey(event,3,1)">来源章节</td><td class="code">SourceSection</td><td class="require">保存章节、小标题、页码范围</td><td class="example">STEMI 再灌注章节</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「证据片段」的标准术语字典举例" onclick="openEntityDict(3,2)" onkeydown="edKey(event,3,2)">证据片段</td><td class="code">Evidence</td><td class="require">保留原文、页码/段落和来源；同一原文不按疾病重复建</td><td class="example">PCI 推荐原文</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「专科诊疗路径」的标准术语字典举例" onclick="openEntityDict(3,3)" onkeydown="edKey(event,3,3)">专科诊疗路径</td><td class="code">SpecialtyCarePathway</td><td class="require">专科 CDSS 业务入口，不是治疗方案</td><td class="example">AMI 急诊诊疗路径</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「路径阶段」的标准术语字典举例" onclick="openEntityDict(3,4)" onkeydown="edKey(event,3,4)">路径阶段</td><td class="code">PathwayStage</td><td class="require">疑似、确诊、分型、治疗、随访阶段</td><td class="example">STEMI 再灌注决策阶段</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「临床规则」的标准术语字典举例" onclick="openEntityDict(3,5)" onkeydown="edKey(event,3,5)">临床规则</td><td class="code">ClinicalRule</td><td class="require">触发、适用、排除、禁忌和阈值逻辑</td><td class="example">发病 12 小时内且 PCI 可及</td></tr>
+          <tr><td>7</td><td class="name ed-link" role="button" tabindex="0" title="查看「推荐陈述」的标准术语字典举例" onclick="openEntityDict(3,6)" onkeydown="edKey(event,3,6)">推荐陈述</td><td class="code">RecommendationStatement</td><td class="require">医生推荐卡根实体，必须连接动作和证据；主证据、主依据指南和冲突状态直接保存在本节点字段上</td><td class="example">推荐急诊 PCI</td></tr>
+          <tr><td>8</td><td class="name ed-link" role="button" tabindex="0" title="查看「患者状态」的标准术语字典举例" onclick="openEntityDict(3,7)" onkeydown="edKey(event,3,7)">患者状态</td><td class="code">PatientState</td><td class="require">复杂条件或路径状态</td><td class="example">急性期、出血高风险</td></tr>
+          <tr><td>9</td><td class="name ed-link" role="button" tabindex="0" title="查看「临床事件」的标准术语字典举例" onclick="openEntityDict(3,8)" onkeydown="edKey(event,3,8)">临床事件</td><td class="code">ClinicalEvent</td><td class="require">路径流转、结局或复发事件</td><td class="example">再梗死、心源性休克</td></tr>
         </tbody></table></div></div>
 
         <div class="std-sub-head" id="nodes-assess" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">评估评分（可计算风险分层）</span><span class="std-badge std-badge-new">新增 · 5种</span></div>
         <div class="std-sub-body"><div class="std-section-desc">五类实体缺一不可，串起来才能让 CDSS 真正"算分"。只有 RiskStratification 名称、没有这五类实体落地的评分，不得发布为可计算评分。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">评估量表/评分表</td><td class="code">AssessmentScale</td><td class="require">量表名称、适用病种、适用分型、适用阶段、版本和来源</td><td class="example">GRACE 缺血风险评估量表</td></tr>
-          <tr><td>2</td><td class="name">评估评分项</td><td class="code">AssessmentItem</td><td class="require">评分项目、取数来源、单位、缺失处理和取值类型</td><td class="example">年龄、心率、收缩压、肌酐等 9 项</td></tr>
-          <tr><td>3</td><td class="name">计分规则</td><td class="code">AssessmentScoreRule</td><td class="require">单项计分、汇总算法、计算条件和排除条件</td><td class="example">年龄 ≥80 岁记 3 分</td></tr>
-          <tr><td>4</td><td class="name">评分结果等级</td><td class="code">AssessmentResultLevel</td><td class="require">等级名称、分数区间、阈值条件、临床解释和风险颜色</td><td class="example">高危：&gt;140 分（红）</td></tr>
-          <tr><td>5</td><td class="name">结果动作规则</td><td class="code">AssessmentActionRule</td><td class="require">不同等级对应的补查、提醒、质控、安全锁、路径或随访动作</td><td class="example">高危 → 提示 24h 内介入</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「评估量表/评分表」的标准术语字典举例" onclick="openEntityDict(4,0)" onkeydown="edKey(event,4,0)">评估量表/评分表</td><td class="code">AssessmentScale</td><td class="require">量表名称、适用病种、适用分型、适用阶段、版本和来源</td><td class="example">GRACE 缺血风险评估量表</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「评估评分项」的标准术语字典举例" onclick="openEntityDict(4,1)" onkeydown="edKey(event,4,1)">评估评分项</td><td class="code">AssessmentItem</td><td class="require">评分项目、取数来源、单位、缺失处理和取值类型</td><td class="example">年龄、心率、收缩压、肌酐等 9 项</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「计分规则」的标准术语字典举例" onclick="openEntityDict(4,2)" onkeydown="edKey(event,4,2)">计分规则</td><td class="code">AssessmentScoreRule</td><td class="require">单项计分、汇总算法、计算条件和排除条件</td><td class="example">年龄 ≥80 岁记 3 分</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「评分结果等级」的标准术语字典举例" onclick="openEntityDict(4,3)" onkeydown="edKey(event,4,3)">评分结果等级</td><td class="code">AssessmentResultLevel</td><td class="require">等级名称、分数区间、阈值条件、临床解释和风险颜色</td><td class="example">高危：&gt;140 分（红）</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「结果动作规则」的标准术语字典举例" onclick="openEntityDict(4,4)" onkeydown="edKey(event,4,4)">结果动作规则</td><td class="code">AssessmentActionRule</td><td class="require">不同等级对应的补查、提醒、质控、安全锁、路径或随访动作</td><td class="example">高危 → 提示 24h 内介入</td></tr>
         </tbody></table></div>
         <div class="std-example"><strong>五类实体怎么串起来算分（GRACE）：</strong>AssessmentScale（量表） -[includes_assessment_item]-&gt; AssessmentItem（9 个评分项） -[has_score_rule]-&gt; AssessmentScoreRule（单项计分）；量表 -[has_result_level]-&gt; AssessmentResultLevel（分数区间与颜色）；等级 -[triggers_assessment_action]-&gt; AssessmentActionRule（等级对应动作）。患者数据只对接评分项，系统按计分规则汇总，落在哪个等级就触发哪个动作。</div></div>
 
         <div class="std-sub-head" id="nodes-nursing" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">护理知识</span><span class="std-badge std-badge-new">新增 · 10种</span></div>
         <div class="std-sub-body"><div class="std-section-desc">护理知识必须能形成「评估 → 诊断 → 计划 → 措施 → 结局」闭环，每个护理对象必须绑定疾病、适用阶段和证据来源。优先使用院内护理规范，NANDA-I/NIC/NOC 只作为有来源时的候选映射。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">护理评估维度</td><td class="code">NursingAssessment</td><td class="require">绑定疾病、分型、路径阶段和评估来源</td><td class="example">胸痛评估</td></tr>
-          <tr><td>2</td><td class="name">护理评估条目</td><td class="code">NursingAssessmentItem</td><td class="require">评估项、取值方式、分值和异常判断</td><td class="example">疼痛评分 0-10 分</td></tr>
-          <tr><td>3</td><td class="name">护理诊断</td><td class="code">NursingDiagnosis</td><td class="require">优先院内护理诊断规范</td><td class="example">疼痛（急性胸痛）</td></tr>
-          <tr><td>4</td><td class="name">护理措施</td><td class="code">NursingIntervention</td><td class="require">优先院内护理措施或专科护理规范</td><td class="example">绝对卧床、心电监护</td></tr>
-          <tr><td>5</td><td class="name">护理结局</td><td class="code">NursingOutcome</td><td class="require">优先护理敏感质量指标或院内结局指标</td><td class="example">胸痛缓解、再灌注后稳定</td></tr>
-          <tr><td>6</td><td class="name">护理计划</td><td class="code">NursingCarePlan</td><td class="require">承接评估、诊断、措施和结局四要素</td><td class="example">AMI 急性期护理计划</td></tr>
-          <tr><td>7</td><td class="name">护理分级</td><td class="code">NursingGrade</td><td class="require">绑定 WS/T 431-2023 条款</td><td class="example">特级护理（再灌注期）</td></tr>
-          <tr><td>8</td><td class="name">护理禁忌</td><td class="code">NursingContraindication</td><td class="require">约束护理操作；不与医生端治疗禁忌混用</td><td class="example">溶栓后避免动静脉穿刺</td></tr>
-          <tr><td>9</td><td class="name">护理记录条目</td><td class="code">NursingRecordItem</td><td class="require">支撑护理文书结构化记录和交接</td><td class="example">再灌注后 30 分钟评估记录</td></tr>
-          <tr><td>10</td><td class="name">护理医嘱核对规则</td><td class="code">NursingOrderCheckRule</td><td class="require">必须指向药品、手术或护理措施，不得指向自由文本</td><td class="example">溶栓药滴速核对</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理评估维度」的标准术语字典举例" onclick="openEntityDict(5,0)" onkeydown="edKey(event,5,0)">护理评估维度</td><td class="code">NursingAssessment</td><td class="require">绑定疾病、分型、路径阶段和评估来源</td><td class="example">胸痛评估</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理评估条目」的标准术语字典举例" onclick="openEntityDict(5,1)" onkeydown="edKey(event,5,1)">护理评估条目</td><td class="code">NursingAssessmentItem</td><td class="require">评估项、取值方式、分值和异常判断</td><td class="example">疼痛评分 0-10 分</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理诊断」的标准术语字典举例" onclick="openEntityDict(5,2)" onkeydown="edKey(event,5,2)">护理诊断</td><td class="code">NursingDiagnosis</td><td class="require">优先院内护理诊断规范</td><td class="example">疼痛（急性胸痛）</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理措施」的标准术语字典举例" onclick="openEntityDict(5,3)" onkeydown="edKey(event,5,3)">护理措施</td><td class="code">NursingIntervention</td><td class="require">优先院内护理措施或专科护理规范</td><td class="example">绝对卧床、心电监护</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理结局」的标准术语字典举例" onclick="openEntityDict(5,4)" onkeydown="edKey(event,5,4)">护理结局</td><td class="code">NursingOutcome</td><td class="require">优先护理敏感质量指标或院内结局指标</td><td class="example">胸痛缓解、再灌注后稳定</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理计划」的标准术语字典举例" onclick="openEntityDict(5,5)" onkeydown="edKey(event,5,5)">护理计划</td><td class="code">NursingCarePlan</td><td class="require">承接评估、诊断、措施和结局四要素</td><td class="example">AMI 急性期护理计划</td></tr>
+          <tr><td>7</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理分级」的标准术语字典举例" onclick="openEntityDict(5,6)" onkeydown="edKey(event,5,6)">护理分级</td><td class="code">NursingGrade</td><td class="require">绑定 WS/T 431-2023 条款</td><td class="example">特级护理（再灌注期）</td></tr>
+          <tr><td>8</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理禁忌」的标准术语字典举例" onclick="openEntityDict(5,7)" onkeydown="edKey(event,5,7)">护理禁忌</td><td class="code">NursingContraindication</td><td class="require">约束护理操作；不与医生端治疗禁忌混用</td><td class="example">溶栓后避免动静脉穿刺</td></tr>
+          <tr><td>9</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理记录条目」的标准术语字典举例" onclick="openEntityDict(5,8)" onkeydown="edKey(event,5,8)">护理记录条目</td><td class="code">NursingRecordItem</td><td class="require">支撑护理文书结构化记录和交接</td><td class="example">再灌注后 30 分钟评估记录</td></tr>
+          <tr><td>10</td><td class="name ed-link" role="button" tabindex="0" title="查看「护理医嘱核对规则」的标准术语字典举例" onclick="openEntityDict(5,9)" onkeydown="edKey(event,5,9)">护理医嘱核对规则</td><td class="code">NursingOrderCheckRule</td><td class="require">必须指向药品、手术或护理措施，不得指向自由文本</td><td class="example">溶栓药滴速核对</td></tr>
         </tbody></table></div></div>
 
         <div class="std-sub-head" id="nodes-pathway" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">诊疗路径</span><span class="std-badge std-badge-new">新增 · 6种</span></div>
         <div class="std-sub-body"><div class="std-section-desc">专科诊疗路径（CDSS 决策链路）和住院临床路径（国家版/院内标准）必须分实体维护；路径阶段必须能下钻到路径任务，任务必须指向具体动作、评估表或护理措施，不得只保存任务标题。</div>
         <div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">专科诊疗路径</td><td class="code">SpecialtyCarePathway</td><td class="require">面向专科 CDSS 的诊疗决策链路，覆盖门急诊、住院、外院转入和复诊</td><td class="example">AMI 急诊诊疗路径</td></tr>
-          <tr><td>2</td><td class="name">住院临床路径</td><td class="code">InpatientClinicalPathway</td><td class="require">面向住院阶段的国家版或院内标准临床路径</td><td class="example">AMI 住院临床路径（国家版）</td></tr>
-          <tr><td>3</td><td class="name">路径阶段</td><td class="code">PathwayStage</td><td class="require">入径、评估、检查、治疗、术后/治疗后、出院或离院阶段</td><td class="example">再灌注决策阶段</td></tr>
-          <tr><td>4</td><td class="name">路径任务</td><td class="code">PathwayTask</td><td class="require">指向具体检查、检验、评估、治疗、护理、质控动作</td><td class="example">90 分钟内完成心电图</td></tr>
-          <tr><td>5</td><td class="name">路径变异原因</td><td class="code">PathwayVariationReason</td><td class="require">病情变化、禁忌证、患者拒绝、资源不可及等</td><td class="example">PCI 不可及转溶栓</td></tr>
-          <tr><td>6</td><td class="name">路径结束及就诊转换条件</td><td class="code">PathwayExitCriteria</td><td class="require">按类型独立维护完成、提前出径、出院、就诊结束、随访入口；出径不等于出院</td><td class="example">成功再灌注且无并发症</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「专科诊疗路径」的标准术语字典举例" onclick="openEntityDict(6,0)" onkeydown="edKey(event,6,0)">专科诊疗路径</td><td class="code">SpecialtyCarePathway</td><td class="require">面向专科 CDSS 的诊疗决策链路，覆盖门急诊、住院、外院转入和复诊</td><td class="example">AMI 急诊诊疗路径</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「住院临床路径」的标准术语字典举例" onclick="openEntityDict(6,1)" onkeydown="edKey(event,6,1)">住院临床路径</td><td class="code">InpatientClinicalPathway</td><td class="require">面向住院阶段的国家版或院内标准临床路径</td><td class="example">AMI 住院临床路径（国家版）</td></tr>
+          <tr><td>3</td><td class="name ed-link" role="button" tabindex="0" title="查看「路径阶段」的标准术语字典举例" onclick="openEntityDict(6,2)" onkeydown="edKey(event,6,2)">路径阶段</td><td class="code">PathwayStage</td><td class="require">入径、评估、检查、治疗、术后/治疗后、出院或离院阶段</td><td class="example">再灌注决策阶段</td></tr>
+          <tr><td>4</td><td class="name ed-link" role="button" tabindex="0" title="查看「路径任务」的标准术语字典举例" onclick="openEntityDict(6,3)" onkeydown="edKey(event,6,3)">路径任务</td><td class="code">PathwayTask</td><td class="require">指向具体检查、检验、评估、治疗、护理、质控动作</td><td class="example">90 分钟内完成心电图</td></tr>
+          <tr><td>5</td><td class="name ed-link" role="button" tabindex="0" title="查看「路径变异原因」的标准术语字典举例" onclick="openEntityDict(6,4)" onkeydown="edKey(event,6,4)">路径变异原因</td><td class="code">PathwayVariationReason</td><td class="require">病情变化、禁忌证、患者拒绝、资源不可及等</td><td class="example">PCI 不可及转溶栓</td></tr>
+          <tr><td>6</td><td class="name ed-link" role="button" tabindex="0" title="查看「路径结束及就诊转换条件」的标准术语字典举例" onclick="openEntityDict(6,5)" onkeydown="edKey(event,6,5)">路径结束及就诊转换条件</td><td class="code">PathwayExitCriteria</td><td class="require">按类型独立维护完成、提前出径、出院、就诊结束、随访入口；出径不等于出院</td><td class="example">成功再灌注且无并发症</td></tr>
         </tbody></table></div></div>
 
         <div class="std-sub-head" id="nodes-qc" onclick="toggleFold(this)"><span class="std-sub-arrow">▸</span><span class="std-sub-title">质量控制</span><span class="std-badge std-badge-new">新增 · 2种</span></div>
         <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th>序号</th><th>中文名称</th><th>实体类型编码</th><th>使用要求</th><th>AMI 示例</th></tr></thead><tbody>
-          <tr><td>1</td><td class="name">质控点</td><td class="code">QualityControlPoint</td><td class="require">某病种、分型、诊疗阶段或路径节点需要控制的质量要点</td><td class="example">D2B 时间 ≤90 分钟</td></tr>
-          <tr><td>2</td><td class="name">质控规则</td><td class="code">QualityControlRule</td><td class="require">必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td><td class="example">D2B 超时 → 提示升级介入</td></tr>
+          <tr><td>1</td><td class="name ed-link" role="button" tabindex="0" title="查看「质控点」的标准术语字典举例" onclick="openEntityDict(7,0)" onkeydown="edKey(event,7,0)">质控点</td><td class="code">QualityControlPoint</td><td class="require">某病种、分型、诊疗阶段或路径节点需要控制的质量要点</td><td class="example">D2B 时间 ≤90 分钟</td></tr>
+          <tr><td>2</td><td class="name ed-link" role="button" tabindex="0" title="查看「质控规则」的标准术语字典举例" onclick="openEntityDict(7,1)" onkeydown="edKey(event,7,1)">质控规则</td><td class="code">QualityControlRule</td><td class="require">必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td><td class="example">D2B 超时 → 提示升级介入</td></tr>
         </tbody></table></div></div>
 
         <div class="std-note">所有节点统一标记为知识节点，用 entityType 字段区分具体类型。每个节点都有全局唯一的编码。旧类型 ClinicalPathway 在 V4.0 拆分为 SpecialtyCarePathway（专科诊疗路径）与 InpatientClinicalPathway（住院临床路径）两类，新批次不再使用旧名。</div>
       </section>
 
+      <!-- 实体类型标准术语字典浮层：点击上方表格「中文名称」打开，左侧分类可切换 -->
+      <div class="ed-mask" id="entityDict" onclick="closeEntityDict(event)">
+        <div class="ed-panel" id="entityDictPanel"></div>
+      </div>
+
       <!-- 4. 关系类型 -->
-      <section class="std-section" id="relations">
+      <section class="std-section std-tech-only" id="relations">
         <h2>标准关系<span class="std-badge std-badge-ver">122种</span></h2>
         <div class="std-section-desc">关系表示"谁连接到谁"。中文关系名方便理解，编码供系统使用。以下分组列出高频核心关系；评估评分、护理、路径、质控另有配套关系（如 includes_assessment_item、has_score_rule、has_nursing_care_plan、has_pathway_task、has_quality_control_point），完整清单见《专科知识图谱Schema标准》第4章关系表。</div>
 
@@ -960,7 +1165,7 @@
       </section>
 
       <!-- 5. 字段标准 -->
-      <section class="std-section" id="fields">
+      <section class="std-section std-tech-only" id="fields">
         <h2>字段标准</h2>
         <div class="std-section-desc">所有节点和关系必须包含以下基础字段，保证数据可检索、可追溯、可审核。</div>
 
@@ -1021,7 +1226,7 @@
             <tr><td>5</td><td class="code">valid_flag</td><td class="name">有效标志</td><td class="require">只允许字典中表示"有效"的值；当前业务规则为 1=有效</td><td class="example">1</td></tr>
             <tr><td>6</td><td class="code">source_table</td><td class="name">来源表</td><td class="require">保存实际系统物理表名</td><td class="example">K_ICD10_DICT</td></tr>
             <tr><td>7</td><td class="code">dictionary_validation_status</td><td class="name">字典二次校验状态</td><td class="require">unverified、validated、conflict、rejected；只有 validated 可进入正式主数据</td><td class="example">validated</td></tr>
-            <tr><td>8</td><td class="code">dictionary_validation_sources</td><td class="name">二次校验来源</td><td class="require">字符串数组；不得填写"AI 工具"</td><td class="example">["official_code_standard","authoritative_textbook"]</td></tr>
+            <tr><td>8</td><td class="code">dictionary_validation_sources</td><td class="name">二次校验来源</td><td class="require">字符串数组；不得填写工具名称</td><td class="example">["official_code_standard","authoritative_textbook"]</td></tr>
           </tbody></table></div>
           <div class="std-note">标准手术补充规则：① 手术表示临床动作，标准手术表示系统中可对接的手术字典项目，两者通过对应关系连接。② 只有有效且校验通过的标准手术才能正式使用。③ 主名称必须是完整中文名称，PCI 等缩写只放在别名中。④ "手术治疗""介入治疗"等无法唯一对应一个手术编码的宽泛策略，应建为治疗项目或拆成多个具体动作。⑤ 字段名不得简写。</div>
         </div>
@@ -1056,7 +1261,7 @@
         </div>
 
         <div style="display:flex;gap:12px;margin-top:12px">
-          <button onclick="showJsonExample('node')" style="padding:10px 20px;background:linear-gradient(135deg,#4f8cff,#748ffc);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(79,140,255,.3)">
+          <button onclick="showJsonExample('node')" style="padding:10px 20px;background:linear-gradient(135deg,var(--accent),#748ffc);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(79,140,255,.3)">
             <span style="font-size:16px">📦</span> 节点最小示例
           </button>
           <button onclick="showJsonExample('relation')" style="padding:10px 20px;background:linear-gradient(135deg,#51cf66,#69db7c);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(81,207,102,.3)">
@@ -1068,7 +1273,7 @@
           <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg2);border:1px solid var(--rule);border-radius:16px;padding:24px;max-width:600px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4)">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
               <h4 id="jsonModalTitle" style="margin:0;font-size:16px;color:var(--ink)"></h4>
-              <button onclick="closeJsonModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:6px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">✕</button>
+              <button onclick="closeJsonModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:6px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">✕</button>
             </div>
             <pre id="jsonModalContent" style="background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:16px;font-size:13px;line-height:1.6;overflow-x:auto;color:var(--ink);margin:0;white-space:pre-wrap;word-break:break-all"></pre>
             <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
@@ -1266,58 +1471,59 @@
 { "exclusion_reviewed": true, "hard_stop_rule_codes": [], "required_confirmation_rule_codes": [],<br>
 &nbsp;&nbsp;"parallel_requirement_rule_codes": [], "recheck_rule_codes": [],<br>
 &nbsp;&nbsp;"unknown_handling": { "hard_stop": "block", "required_confirmation": "review", "parallel_requirement": "allow_with_prompt", "recheck": "review" } }</div>
-        <div class="std-note warn">空规则数组只有在 exclusion_reviewed=true 且 safety_review_status=reviewed 时才表示"已审查且无适用规则"，不得用空值冒充已审查。后续指南升级时不覆盖旧证据，用来源年份、版本、适用范围和冲突状态做裁决；新指南发布时只更新受影响的推荐、证据和冲突状态，不重建稳定的疾病骨架。AI 工具只能提取候选内容和证据，不能代替人工做最终裁决。</div>
+        <div class="std-note warn">空规则数组只有在 exclusion_reviewed=true 且 safety_review_status=reviewed 时才表示"已审查且无适用规则"，不得用空值冒充已审查。后续指南升级时不覆盖旧证据，用来源年份、版本、适用范围和冲突状态做裁决；新指南发布时只更新受影响的推荐、证据和冲突状态，不重建稳定的疾病骨架。工具只产候选知识和证据，不能代替人工做最终裁决。</div>
       </section>
 
       <!-- 硬闸门 -->
       <section class="std-section" id="quality">
         <h2>数据质量硬闸门<span class="std-badge std-badge-ver">28条</span></h2>
         <div class="std-section-desc">入库前和入库后都必须检查。以下任一项不通过，批次不得标记"正式 CDSS 可用"。按分组折叠展示，编号与《专科知识图谱Schema标准》第12章一致。</div>
+        <div class="std-note std-gate-hint"><strong>先看懂「闸门」两个字：</strong>把图谱当成一条入库流水线，这 28 条就是流水线上的 28 道关卡。数据走到关卡前，机器自动检查；<strong>只要有一条不合规，整批数据都进不了正式库</strong>，也就意味着医生端用不上。所以每条规则都可以反过来问一句："如果不管它，会发生什么？"——下面第二列就是这个问题的人话回答。<span class="std-tech-col">切到「技术视角」可查看每条规则的原始技术表述。</span></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">节点与命名（5条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>1</td><td class="require">所有临床业务节点必须有 entityType、code、name</td></tr>
-          <tr><td>2</td><td class="require">需要回填 CDSS 的实体必须绑定有效标准字典</td></tr>
-          <tr><td>13</td><td class="require">药品、手术、检查、检验、症状、体征不得使用口语名或缩写作主名称</td></tr>
-          <tr><td>14</td><td class="require">多症状、多药品、多检查合并短语必须拆分</td></tr>
-          <tr><td>15</td><td class="require">source 字段不得写项目版本或校验过程，必须写具体来源名称</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>1</td><td class="plain">每个医学概念都要写清楚<b>叫什么、唯一编号是多少、属于哪一类</b>，三样缺一不可</td><td class="conseq">系统认不出这个知识点，等于没录进去</td><td class="std-tech-col">所有临床业务节点必须有 entityType、code、name</td></tr>
+          <tr><td>2</td><td class="plain">凡是最终要推给医生看的内容，都必须挂到院内已启用的标准字典上</td><td class="conseq">医生端显示不出来，或显示成一个"孤立名词"</td><td class="std-tech-col">需要回填 CDSS 的实体必须绑定有效标准字典</td></tr>
+          <tr><td>13</td><td class="plain">药品、手术、检查、检验、症状、体征的<b>正式名称要用标准全称</b>；口语叫法和缩写只能放进"别名"里</td><td class="conseq">「心梗」「心电图」这类叫法机器认不出，会重复建点、推荐时漏掉</td><td class="std-tech-col">药品、手术、检查、检验、症状、体征不得使用口语名或缩写作主名称</td></tr>
+          <tr><td>14</td><td class="plain">一句话里塞了好几件事的要拆开，比如"胸痛伴出汗"拆成两条</td><td class="conseq">一条记录挂了两件事，命中统计算不准</td><td class="std-tech-col">多症状、多药品、多检查合并短语必须拆分</td></tr>
+          <tr><td>15</td><td class="plain">来源要写清楚具体是哪本书、哪个指南，<b>不能写项目版本号或校验过程</b></td><td class="conseq">医生追问"这条依据哪来的"，答不出来</td><td class="std-tech-col">source 字段不得写项目版本或校验过程，必须写具体来源名称</td></tr>
         </tbody></table></div></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">疾病与诊断（6条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>3</td><td class="require">疾病三层关系不得断链</td></tr>
-          <tr><td>4</td><td class="require">疑似诊断必须有具体分型入口或明确独立诊断身份</td></tr>
-          <tr><td>5</td><td class="require">具体分型诊断必须有标准诊断</td></tr>
-          <tr><td>6</td><td class="require">诊断标准必须有下钻明细</td></tr>
-          <tr><td>7</td><td class="require">鉴别诊断必须有对象和鉴别规则</td></tr>
-          <tr><td>17</td><td class="require">鉴别诊断必须能说明"鉴别谁、为什么鉴别、用什么检查检验鉴别、结果如何解释、依据来自哪里"</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>3</td><td class="plain">"疾病大类 → 疑似诊断 → 具体分型 → 标准诊断"这条链子<b>必须一环扣一环，不能中间断开</b></td><td class="conseq">医生从症状往下点，会走进死胡同</td><td class="std-tech-col">疾病三层关系不得断链</td></tr>
+          <tr><td>4</td><td class="plain">每个"疑似诊断"都得有出口：要么能继续往下分型，要么本身就是一个独立疾病</td><td class="conseq">医生点了"下一步"，界面没东西可看</td><td class="std-tech-col">疑似诊断必须有具体分型入口或明确独立诊断身份</td></tr>
+          <tr><td>5</td><td class="plain">每个具体分型都要能对应到一个国家标准诊断编码</td><td class="conseq">回写不了病历，进不了病案首页</td><td class="std-tech-col">具体分型诊断必须有标准诊断</td></tr>
+          <tr><td>6</td><td class="plain">不能只写"诊断标准"四个字，要把具体条件一条条列出来</td><td class="conseq">医生看到标题却点不开，等于没内容</td><td class="std-tech-col">诊断标准必须有下钻明细</td></tr>
+          <tr><td>7</td><td class="plain">鉴别诊断要写清两件事：<b>跟谁鉴别、怎么鉴别</b></td><td class="conseq">系统给不出"该排除什么"的建议</td><td class="std-tech-col">鉴别诊断必须有对象和鉴别规则</td></tr>
+          <tr><td>17</td><td class="plain">鉴别诊断要说全五件事：鉴别谁、为什么鉴别、做什么检查来鉴别、结果怎么看、依据在哪</td><td class="conseq">医生觉得不可靠，还是自己判断，等于没用上</td><td class="std-tech-col">鉴别诊断必须能说明"鉴别谁、为什么鉴别、用什么检查检验鉴别、结果如何解释、依据来自哪里"</td></tr>
         </tbody></table></div></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">检查检验与治疗（4条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>8</td><td class="require">检查项目必须能下钻到检查发现，若来源不覆盖则记录缺口</td></tr>
-          <tr><td>9</td><td class="require">检验项目必须能下钻到检验细项，若来源不覆盖则记录缺口</td></tr>
-          <tr><td>10</td><td class="require">治疗方案必须下钻到药品、手术或治疗项目</td></tr>
-          <tr><td>18</td><td class="require">治疗方案必须区分"方案标题"和"可执行动作"；方案标题不能直接替代医嘱动作</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>8</td><td class="plain">推荐做某项检查，还要能接着告诉医生<b>这项检查要看什么结果</b>；书上没写就如实记录缺口</td><td class="conseq">推荐了检查却不知道看哪个指标，医生还得自己翻书</td><td class="std-tech-col">检查项目必须能下钻到检查发现，若来源不覆盖则记录缺口</td></tr>
+          <tr><td>9</td><td class="plain">推荐做某项检验，也要能落到具体的检验细项上；书上没写就记录缺口</td><td class="conseq">同上，医生拿到的是空泛建议</td><td class="std-tech-col">检验项目必须能下钻到检验细项，若来源不覆盖则记录缺口</td></tr>
+          <tr><td>10</td><td class="plain">治疗方案不能停留在"怎么治"的标题，要落到<b>具体开什么药、做什么手术</b></td><td class="conseq">医生没法照着开医嘱</td><td class="std-tech-col">治疗方案必须下钻到药品、手术或治疗项目</td></tr>
+          <tr><td>18</td><td class="plain">"抗血小板治疗"这种是<b>方案标题</b>；"阿司匹林 300mg 嚼服"才是<b>可执行动作</b>，两者要分开存</td><td class="conseq">把标题当医嘱，医生点开发现执行不了</td><td class="std-tech-col">治疗方案必须区分"方案标题"和"可执行动作"；方案标题不能直接替代医嘱动作</td></tr>
         </tbody></table></div></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">正式推荐与证据（6条）</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>11</td><td class="require">正式推荐必须有推荐陈述、动作、禁忌或排除条件、主证据</td></tr>
-          <tr><td>12</td><td class="require">证据必须能追溯到具体来源名称、章节或页码</td></tr>
-          <tr><td>16</td><td class="require">检查、检验、药品、手术、治疗项目进入正式推荐时，关系必须有诊疗阶段、推荐目的、服务对象和优先级</td></tr>
-          <tr><td>26</td><td class="require">Evidence 不得以"第N/A页原文证据"等模板名作为正式证据主名称；缺页码时必须给出段落位置或缺口原因</td></tr>
-          <tr><td>27</td><td class="require">RecommendationStatement 发布前必须补齐临床场景、触发条件、推荐来源、规则来源、主证据和主指南；字段缺失只能进入待审核</td></tr>
-          <tr><td>28</td><td class="require">ClinicalRule 到 RecommendationStatement 的新关系必须使用 triggers_recommendation；旧 has_recommendation_statement 仅进入兼容迁移清单</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>11</td><td class="plain">一条正式推荐要齐四样：<b>什么情况推、推什么、什么情况不推、依据是什么</b></td><td class="conseq">推荐不可靠，可能给出该禁忌却仍在推的错误建议</td><td class="std-tech-col">正式推荐必须有推荐陈述、动作、禁忌或排除条件、主证据</td></tr>
+          <tr><td>12</td><td class="plain">每条推荐都要能翻回原书，说清是<b>哪本书的第几章、第几页</b></td><td class="conseq">无法追溯来源，临床评审过不了</td><td class="std-tech-col">证据必须能追溯到具体来源名称、章节或页码</td></tr>
+          <tr><td>16</td><td class="plain">推荐一项检查或用药时，要同时说清<b>什么时候做、为了什么、给谁做、有多紧急</b></td><td class="conseq">医生端排序混乱，最紧急的提示反而排在后面</td><td class="std-tech-col">检查、检验、药品、手术、治疗项目进入正式推荐时，关系必须有诊疗阶段、推荐目的、服务对象和优先级</td></tr>
+          <tr><td>26</td><td class="plain">证据名称不能写成"第N/A页原文证据"这类<b>万能套话</b></td><td class="conseq">分不清是哪条证据，重复冗余且无法核对</td><td class="std-tech-col">Evidence 不得以"第N/A页原文证据"等模板名作为正式证据主名称；缺页码时必须给出段落位置或缺口原因</td></tr>
+          <tr><td>27</td><td class="plain">推荐正式发布前，六项信息必须补齐；缺一项就<b>只能进待审核区，不能上线</b></td><td class="conseq">信息不全的推荐流到医生端，风险不可控</td><td class="std-tech-col">RecommendationStatement 发布前必须补齐临床场景、触发条件、推荐来源、规则来源、主证据和主指南；字段缺失只能进入待审核</td></tr>
+          <tr><td>28</td><td class="plain">"规则 → 推荐"之间的连线要用<b>新标准名</b>，旧名字只作为历史数据保留</td><td class="conseq">新旧混用，机器遍历时会漏掉部分推荐</td><td class="std-tech-col">ClinicalRule 到 RecommendationStatement 的新关系必须使用 triggers_recommendation；旧 has_recommendation_statement 仅进入兼容迁移清单</td></tr>
         </tbody></table></div></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">评估评分·护理·路径·质控（6条）</span><span class="std-badge std-badge-new">新增</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>19</td><td class="require">评估评分必须落地五类实体和关系（AssessmentScale、AssessmentItem、AssessmentScoreRule、AssessmentResultLevel、AssessmentActionRule）；只有 RiskStratification 名称不得发布为可计算评分</td></tr>
-          <tr><td>20</td><td class="require">护理知识必须能形成评估、诊断、计划、措施、结局闭环，且每个护理对象必须绑定疾病、适用阶段和证据来源</td></tr>
-          <tr><td>21</td><td class="require">护理医嘱核对规则必须指向 Drug、Procedure 或 NursingIntervention，不得指向自由文本</td></tr>
-          <tr><td>22</td><td class="require">专科诊疗路径和住院临床路径必须分实体维护，路径阶段必须能下钻到 PathwayTask</td></tr>
-          <tr><td>23</td><td class="require">路径任务必须指向具体动作、评估表或护理措施，不得只保存任务标题</td></tr>
-          <tr><td>24</td><td class="require">质控规则必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>19</td><td class="plain">一个评分要能<b>真正算出分</b>，必须凑齐五件套：评分表、评分条目、算分规则、结果分层、对应处理动作</td><td class="conseq">只挂了个评分名字却算不出结果，医生看到的是空壳</td><td class="std-tech-col">评估评分必须落地五类实体和关系（AssessmentScale、AssessmentItem、AssessmentScoreRule、AssessmentResultLevel、AssessmentActionRule）；只有 RiskStratification 名称不得发布为可计算评分</td></tr>
+          <tr><td>20</td><td class="plain">护理知识要能走完一圈：<b>评估 → 诊断 → 计划 → 措施 → 结局</b>，每个护理对象都要挂上疾病、适用阶段和依据</td><td class="conseq">护理建议"断头"，到了措施就没有下文</td><td class="std-tech-col">护理知识必须能形成评估、诊断、计划、措施、结局闭环，且每个护理对象必须绑定疾病、适用阶段和证据来源</td></tr>
+          <tr><td>21</td><td class="plain">护理医嘱的核对规则要指向<b>具体的药、操作或护理措施</b>，不能指向一段自由文字</td><td class="conseq">系统没法自动核对，只能靠人看</td><td class="std-tech-col">护理医嘱核对规则必须指向 Drug、Procedure 或 NursingIntervention，不得指向自由文本</td></tr>
+          <tr><td>22</td><td class="plain">"专科诊疗路径"和"住院临床路径"要<b>分开存</b>，每个路径阶段都要能展开到具体任务</td><td class="conseq">两种路径混在一起，没法按场景调用</td><td class="std-tech-col">专科诊疗路径和住院临床路径必须分实体维护，路径阶段必须能下钻到 PathwayTask</td></tr>
+          <tr><td>23</td><td class="plain">路径任务不能只写个标题，要指向<b>具体动作、评估表或护理措施</b></td><td class="conseq">医生看到任务名，却不知道具体该做什么</td><td class="std-tech-col">路径任务必须指向具体动作、评估表或护理措施，不得只保存任务标题</td></tr>
+          <tr><td>24</td><td class="plain">质控规则要说清五件事：<b>查什么、什么时候查、不合规怎么处理、在哪里用、依据是什么</b></td><td class="conseq">质控落不了地，只能停留在纸面</td><td class="std-tech-col">质控规则必须绑定质控点、触发条件、处理策略、应用场景和证据来源</td></tr>
         </tbody></table></div></div>
         <div class="std-sub-head" onclick="toggleFold(this)"><span class="std-sub-arrow">&#9656;</span><span class="std-sub-title">数据边界（1条）</span><span class="std-badge std-badge-new">新增</span></div>
-        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>规则</th></tr></thead><tbody>
-          <tr><td>25</td><td class="require">患者当次评估结果、路径执行记录、护理执行记录和质控缺陷记录不得写成 Neo4j 静态图谱节点（运行时数据由 CDSS 服务管理）</td></tr>
+        <div class="std-sub-body"><div class="std-table-wrap"><table class="std-table"><thead><tr><th style="width:42px">编号</th><th>这条闸门在说什么（人话）</th><th>不通过会怎样</th><th class="std-tech-col" style="width:230px">技术原文</th></tr></thead><tbody>
+          <tr><td>25</td><td class="plain">图谱只存<b>医学知识</b>，不存患者本人的当次数据（评估结果、路径执行、护理执行、质控缺陷都由业务系统自己管）</td><td class="conseq">图谱被患者数据撑爆、且涉及隐私合规风险</td><td class="std-tech-col">患者当次评估结果、路径执行记录、护理执行记录和质控缺陷记录不得写成 Neo4j 静态图谱节点（运行时数据由 CDSS 服务管理）</td></tr>
         </tbody></table></div></div>
         <div class="std-note">V4 批次审计入口：<code>scripts/audit_graph_instance.py --schema V4</code>；旧批次显式 <code>--schema legacy</code>。机器注册表为 schema_docs/图谱结构注册表.json，由脚本从 Schema 文档编译生成，不人工维护第二套白名单。</div>
       </section>
@@ -1354,7 +1560,7 @@
           <tr><td>5</td><td class="require">只有缩写的药品、手术、检查、检验实体</td><td class="require">缩写放 aliases，主名称用标准全称</td></tr>
           <tr><td>6</td><td class="require">把批次、哈希、路径、脚本版本、审核状态渲染为业务节点</td><td class="require">这些是属性，不是节点</td></tr>
           <tr><td>7</td><td class="require">直接写旧 Oracle 字典修名、合并、删除</td><td class="require">字典变更必须进入待审队列</td></tr>
-          <tr><td>8</td><td class="require">用大模型常识替代来源证据</td><td class="require">AI 只产候选，证据必须能回到原文</td></tr>
+          <tr><td>8</td><td class="require">用大模型常识替代来源证据</td><td class="require">只产候选知识，证据必须能回到原文</td></tr>
           <tr><td>9</td><td class="require">旧泛化关系 RECOMMEND_CHECK、RECOMMEND_LAB_CHECK、HAS_DRUG、RECOMMEND_OPERATION、RECOMMEND_TREATMENT</td><td class="require">改用正式推荐链关系</td></tr>
           <tr><td>10</td><td class="require">患者运行时记录节点：AssessmentResult、PathwayExecutionRecord、NursingExecutionRecord、QualityDefectRecord</td><td class="require">运行时数据不进静态图谱（对应硬闸门 25）</td></tr>
           <tr><td>11</td><td class="require">把 CCC 作为 V4.0 护理核心必填标准</td><td class="require">未取得完整码表和授权前，只作为候选映射来源记录</td></tr>
@@ -1721,15 +1927,20 @@
 
     </main>
   </div>
+  </div><!-- /.std-view -->
 </div>
 
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 loadData(function(){injectDimCount();renderNav('standard');});
 
 /* 页面加载后：子表格默认展开，补充说明（举例/硬闸门详情）保持收缩 */
 document.querySelectorAll('.std-sub-body').forEach(function(b){ b.classList.add('show'); });
 document.querySelectorAll('.std-sub-head').forEach(function(h){ h.classList.add('active'); });
+
+
+
 
 /* 统一折叠控制（替代原toggleExpand/toggleRule/toggleSubTable） */
 function toggleFold(el) {
@@ -2153,6 +2364,180 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeLayerDiagram();
 });
 
+
+/* ====== 实体类型标准术语字典：数据 + 浮层 ====== */
+var ED_META = {"types": 67, "rows": 72, "dict": 72, "kg": "在线知识图谱真实实体实例"};
+var ENTITY_DICT = {"cats":[{"t":"目录、疾病和标准诊断","b":"6种","desc":"","types":[{"zh":"顶层学科","code":"Specialty","req":"多学科根节点；code 全局唯一；战略保留，不得因低频删除","ami":"心血管内科","cnt":1,"dict":"","terms":[["心血管内科","",""]],"samples":[["心血管内科","","SPEC-CARD"]]},{"zh":"疾病大类","code":"DiseaseCategory","req":"目录实体，不保存诊断编码，不写入病历系统","ami":"冠心病","cnt":15,"dict":"","terms":[["冠心病","","CAT-CARD-CAD"],["心肌病","","CAT-CARD-CM"],["高血压","","CAT-CARD-HTN"],["心力衰竭","","CAT-CARD-HF"],["心包疾病","","CAT-CARD-PERICARD"],["心律失常","","CAT-CARD-ARR"],["心脏瓣膜病","","CAT-CARD-VHD"],["肺动脉高压","","CAT-CARD-PH"],["心血管神经症","","CAT-CARD-NEUROSIS"],["先天性心血管病","","CAT-CARD-CHD"]],"samples":[]},{"zh":"疾病亚类/展示分组","code":"DiseaseSubcategory","req":"可选；仅用于展示；不参与诊断、不写入病历系统","ami":"急性冠脉综合征","cnt":50,"dict":"","terms":[["高血压","","SUB-CARD-HTN-GENERAL"],["多瓣膜病","","MULTI"],["心力衰竭","","SUB-CARD-HF-GENERAL"],["心包疾病","","SUB-CARD-PERICARD-GENERAL"],["心律失常","","SUB-CARD-ARR-GENERAL"],["三尖瓣疾病","","TRICUSPID"],["二尖瓣疾病","","MITRAL"],["心房心肌病","","SUB-CARD-CM-ATRIAL"],["心脏瓣膜病","","SUB-CARD-VHD-GENERAL"],["肺动脉高压","","SUB-CARD-PH-GENERAL"]],"samples":[["按受累心腔分类","","SUB-CARD-HF-SIDE"],["按射血分数分类","","SUB-CARD-HF-EF"],["按病程与失代偿状态分类","","SUB-CARD-HF-COURSE"]]},{"zh":"临床疾病","code":"Disease","req":"待分型疾病和具体分型统一使用该类型","ami":"急性心肌梗死、STEMI、NSTEMI","cnt":132,"dict":"","terms":[["心包炎","Pericarditis","DIS-CARD-PERICARDITIS"],["心肌炎","Myocarditis","DIS-CARD-MYOCARDITIS"],["心肌病","","DIS-CARD-CM-GENERAL"],["高血压","Hypertension","DIS-CARD-HT"],["主动脉瘤","aortic aneurysm","DIS-CARD-AORTA-ANEURYSM"],["全心衰竭","Biventricular heart failure","DIS-CARD-HF-BIVENTRICULAR"],["右心衰竭","Right heart failure","DIS-CARD-HF-RIGHT"],["多瓣膜病","Multiple Valvular Heart Disease","DIS-CARD-VHD-MULTI"],["左心衰竭","Left heart failure","DIS-CARD-HF-LEFT"],["心力衰竭","","DIS-CARD-HF-GENERAL"]],"samples":[["慢性肾脏病合并高血压","Hypertension in chronic kidney disease","DIS-CARD-HT-CKD"],["射血分数保留的心力衰竭","Heart failure with preserved ejection fraction","DIS-CARD-HF-HFpEF"],["射血分数降低的心力衰竭","Heart failure with reduced ejection fraction","DIS-CARD-HF-HFrEF"],["射血分数轻度降低的心力衰竭","Heart failure with mildly reduced ejection fraction","DIS-CARD-HF-HFmrEF"]]},{"zh":"CDSS 标准诊断","code":"StandardDiagnosis","req":"一条实体对应一条经二次校验通过的系统诊断记录；保留原始系统编号","ami":"I21.900 急性心肌梗死","cnt":89,"dict":"K_ICD10_DICT","terms":[["心包炎","","STDDX-6c9c77a1c30846e40eb258801d191d0d"],["心肌炎","","STDDX-48d8556e94f3520e45a8ca0ab41794b2"],["心肌病","","STDDX-d4c92d7b4031091f475c20c62bffcd04"],["高血压","","STDDX-a928c01ab8b14b8ebbc1db5b8641cd5e"],["全心衰竭","","STDDX-f40bd3b067b967dd2f3deaee0c69f73f"],["右心衰竭","","STDDX-39e97afa2118cfbdfea770f284a40486"],["左心衰竭","","STDDX-003709945bb07a417e7946a1750a9ea4"],["心力衰竭","","STDDX-db94a5333fd9453dacae2eade4e74c1e"],["心房扑动","","STDDX-c666dc0f60205f7f4402e7f6133d8576"],["心房颤动","","STDDX-c0cfdedddfa6ebfb855672794ca27c6b"]],"samples":[["肥厚型心肌病，其他的","","STDDX-ea1b1eb42678ac3a529d11ad80675ab3"],["限制型心肌病，其他的","","STDDX-b7d272035cf77c861d90a33e00cce0e2"]]},{"zh":"疾病分型/分类（停用）","code":"DiseaseClassification","req":"V2.0停止新增；迁移为疾病（Disease）或疾病亚类（DiseaseSubcategory）","ami":"STEMI（已迁为疾病Disease）","cnt":null,"dict":"","terms":[["STEMI（已迁为疾病Disease）","",""]],"samples":[]}]},{"t":"疾病医学事实","b":"20种","desc":"","types":[{"zh":"疾病定义","code":"Definition","req":"疾病概述原文或忠实摘要；不得只写标题","ami":"急性心肌梗死定义","cnt":217,"dict":"","terms":[["概述定义","","CARD-SKELETON-20260709-DEFINITION-C94DE28B1F1C19C7"],["心包炎定义","","DEF-DIS-CARD-PERICARDITIS"],["心肌桥定义","","CARD-SKELETON-20260709-DEFINITION-3AD2FFC80CF7890B"],["心肌炎定义","","CARD-SKELETON-20260709-DEFINITION-B0ABE1153275D7C0"],["心肌病定义","","DEF-CDSSV2-078D03D1FFA68120"],["风湿热定义","","CARD-SKELETON-FULL-20260709-DEFINITION-60D652E814C21498"],["高血压定义","","DEF-HT-GENERAL"],["主动脉瘤定义","","DEF-CDSSV2-EE4DE3EDC8CCC32B"],["全心衰竭定义","","DEF-DIS-CARD-HF-BIVENTRICULAR"],["右心衰竭定义","","DEF-DIS-CARD-HF-RIGHT"]],"samples":[["慢性肾脏病合并高血压定义","","DEF-HT-CKD"],["肿瘤治疗相关的高血压定义","","CARD-SKELETON-FULL-20260709-DEFINITION-29A8DF3D94C4B3B7"],["射血分数保留的心力衰竭定义","","DEF-DIS-CARD-HF-HFpEF"],["射血分数降低的心力衰竭定义","","DEF-DIS-CARD-HF-HFrEF"],["肿瘤治疗相关的心律失常定义","","CARD-SKELETON-20260709-DEFINITION-970496AD37BF482C"],["抗心律失常药物的合理应用定义","","CARD-SKELETON-20260709-DEFINITION-E13BCA7C83CCD354"]]},{"zh":"定义明细","code":"DefinitionComponent","req":"定义中的独立要点，可单独追溯","ami":"急性心肌缺血导致心肌坏死","cnt":321,"dict":"","terms":[["冠心病定义","","DEF-COMP-CARD-CADREM-ACS-B602101E07"],["ACS基本定义","","DEF-COMP-CARD-CADREM-ACS-1F02398BAC"],["冠心病基本定义","","DEF-COMP-CARD-CADREM-ACS-641C9CA578"],["冠心病定义（续）","","DEF-COMP-CARD-CADREM-ACS-6CC4F5987D"],["STEMI基本定义","","DEF-COMP-CARD-CADREM-AMI-F85092ADAD"],["冠心病定义（续2）","","DEF-COMP-CARD-CADREM-CCS-C31A686B54"],["ACS临床综合征分型","","DEF-COMP-CARD-CADREM-ACS-712941A38C"],["指窦房结不能产生冲动","","CARD-SKELETON-20260709-DEFINITIONCOMPONENT-EC96256851296DF7"],["继发性供氧不足（续）","","DEF-COMP-CARD-CADREM-ACS-D57C640CB6"],["缺血性心肌病基本定义","","DEF-COMP-CARD-CADREM-ICM-4AEED8474C"]],"samples":[["导致1型PH","","CARD-SKELETON-FULL-20260709-DEFINITIONCOMPONENT-9772A9DD0B5E3028"],["导致5型PH","","CARD-SKELETON-FULL-20260709-DEFINITIONCOMPONENT-D385B0987609D25B"],["导致完全闭塞","","CARD-SKELETON-FULL-20260709-DEFINITIONCOMPONENT-76D30A05B359981E"],["引起窦性停搏","","CARD-SKELETON-20260709-DEFINITIONCOMPONENT-ED85C2E70D8CE6E4"],["引起管腔狭窄","","CARD-SKELETON-20260709-DEFINITIONCOMPONENT-F542D6E6559A2EC4"],["可以是初发心衰","","CARD-SKELETON-20260709-DISEASECLASSIFICATION-39F01C63BB11BB9B"]]},{"zh":"病因","code":"Etiology","req":"标准化短语","ami":"斑块破裂继发血栓形成","cnt":348,"dict":"","terms":[["炎症","","ETI-CARD-TEXT-0EC5F56F7B"],["心肌缺血","Myocardial ischemia","ETI-CARD-E0493CEDD1AF"],["心包炎病因","","ETI-CARD-FF1306D71E55"],["心肌炎病因","","ETI-CARD-2123AA07D325"],["电解质紊乱","Electrolyte disturbance","ETI-CARD-1047E258CA48"],["冠脉开口堵塞","","ETI-CARD-STEMI-5302E2D8D358"],["冠脉血栓栓塞","","ETI-CARD-STEMI-FBFC019CD01E"],["动脉粥样硬化","","ETI-CARD-TEXT-D6A8249236"],["多瓣膜病病因","","ETI-CARD-6E28DE104498"],["心力衰竭病因","","ETI-CARD-B43517A0126A"]],"samples":[["感染或炎症","Infection or inflammation","ETI-CARD-6F47A3347647"],["不能作为诊断依据","","CARD-SKELETON-20260709-ETIOLOGY-F132533A62547F91"],["又称为离子通道病","","CARD-SKELETON-20260709-ETIOLOGY-C1FD56A1B13B0877"],["应积极抗感染治疗","","CARD-SKELETON-20260709-ETIOLOGY-2BB6A71431CF629A"],["或系统性疾病累及","","CARD-SKELETON-FULL-20260709-ETIOLOGY-B12DC6EBDEDB6F7E"],["本病病因极为复杂","","CARD-SKELETON-FULL-20260709-ETIOLOGY-FAAC2BBA7130CF5F"]]},{"zh":"病理生理","code":"Pathophysiology","req":"机制和病理过程","ami":"冠脉闭塞导致持续心肌缺血","cnt":302,"dict":"","terms":[["心室重构","","PATH-CARD-FULLBOOK-A2FC4267EF"],["心肌缺血","","PATH-CARD-FULLBOOK-49867E5C1F"],["右心负荷增加","","PATH-CARD-FULLBOOK-9C398A672B"],["左前降支闭塞","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-779EDCFE828087C2"],["心律失常最常见","","CARD-SKELETON-20260709-PATHOPHYSIOLOGY-883913AACDCD4247"],["内腔狭小甚至闭塞","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-CA7B5A7F07273755"],["加重内皮功能不良","","CARD-SKELETON-20260709-PATHOPHYSIOLOGY-C5E0A3FCCAAFE5D9"],["可有炎症细胞浸润","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-78C9CC839D8EF8D5"],["吸气时呈轻度负压","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-9AB4B760EE18D2DD"],["心脏前负荷增加时","","CARD-SKELETON-20260709-PATHOPHYSIOLOGY-C915DB24E6537617"]],"samples":[["40%未检出变异","","CARD-SKELETON-20260709-PATHOPHYSIOLOGY-1D2DCD649682F023"],["但左心房排空受限","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-9F43BABF2ED11210"],["其本身不引起狭窄","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-EFB416E120EAFEBC"],["即可引起心脏受压","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-5EB1EB5EA803A48E"],["因舒张压迅速上升","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-D9133B381E3D9F11"],["导致肺动脉压增高","","CARD-SKELETON-FULL-20260709-PATHOPHYSIOLOGY-462C19E0026E2241"]]},{"zh":"流行病学","code":"Epidemiology","req":"数值必须带时间、人群、单位和来源","ami":"AMI 发病率变化","cnt":33,"dict":"","terms":[["发病率升高","","EPI-CARD-FULLBOOK-4EB46E87F7"],["高血压流行病学","","EPI-CARD-5311974DB8F9"],["心力衰竭流行病学","","EPI-CARD-75CFB9FFFA37"],["心房颤动流行病学","","EPI-CARD-C80796C63F1A"],["心脏骤停流行病学","","EPI-CARD-29DCD874C0FF"],["每年新增300万","","CARD-SKELETON-20260709-EPIDEMIOLOGY-B8B52892844F9804"],["血脂异常流行病学","","EPI-CARD-649B4EC7192B"],["卵圆孔未闭流行病学","","EPI-CARD-8A6B1A442B62"],["室间隔缺损流行病学","","EPI-CARD-1EA19B6E17A2"],["心脏性猝死流行病学","","EPI-CARD-D581D7B481A4"]],"samples":[["估计患病人数890万","","CARD-SKELETON-20260709-EPIDEMIOLOGY-94912FD4B02A6413"],["估计心衰病人1210万","","CARD-SKELETON-20260709-EPIDEMIOLOGY-6FF3B72B852B34A9"],["射血分数保留的心力衰竭流行病学","","EPI-CARD-B91D7497B34C"],["其中HFpEF所占比例接近50%","","CARD-SKELETON-20260709-EPIDEMIOLOGY-5CD083A1E1BC3ADF"],["西方成人心衰患病率约为1%～2%","","CARD-SKELETON-20260709-EPIDEMIOLOGY-FCF74AE14FEFF7BD"],["CHF）是心血管疾病的终末期阶段和最主要的死因","","CARD-SKELETON-20260709-EPIDEMIOLOGY-FCD9E5D338004C4E"]]},{"zh":"症状","code":"Symptom","req":"患者主观感受；与体征分开","ami":"持续胸痛","cnt":53,"dict":"K_SYMPTOM_DICT","terms":[["乏力","Fatigue","SYM-CARD-0ACC45EF4E60"],["出汗","","SYM-CARD-BC91622FC62F"],["发热","","SYM-CARD-TEXT-CBB30EA0F1"],["发绀","","SYM-CARD-STEMI-94A5C68D5173"],["呃逆","","SYM-CARD-STEMI-436709160213"],["呕吐","Vomiting","SYM-CARD-37D08FA41123"],["咯血","","SYM-CARD-DB87B8B091D1"],["咳嗽","","SYM-CARD-TEXT-24EDE9C876"],["头晕","Dizziness","SYM-CARD-6DA3580C8B73"],["头痛","Headache","SYM-CARD-3CB0D0DB56FA"]],"samples":[]},{"zh":"体征","code":"Sign","req":"医生客观观察结果；与症状分开","ami":"心包摩擦音、低血压","cnt":95,"dict":"","terms":[["休克","","SIGN-CARD-FULLBOOK-FCCBB5937E"],["发绀","","SIGN-CARD-TEXT-E67B99C5BD"],["啰音","","SIGN-CARD-0A792D8C690D"],["坏疽","","SIGN-CARD-PAD-GANGRENE"],["奇脉","","SIGN-CARD-FULLBOOK-5BEADE5F52"],["水肿","Edema","SIGN-CARD-52CC24CD4C33"],["肝大","","SIGN-CARD-53E089674EBD"],["低血压","Hypotension","SIGN-CARD-1FA3A83EF714"],["奔马律","","SIGN-CARD-75EFE91EFEED"],["无脉搏","Pulselessness","SIGN-CARD-37CB767EBBA3"]],"samples":[["心率低于60次/分","","SIGN-CARD-BRADY-HR-LOW"]]},{"zh":"危险因素","code":"RiskFactor","req":"增加患病或不良结局风险的因素","ami":"吸烟、高血压、糖尿病","cnt":91,"dict":"","terms":[["创伤","","RF-CARD-CCD18035D80D"],["吸烟","Smoking","RF-CARD-C5097AF85131"],["女性","","RISKCOMP-RISK-CARD-BD6FBD0D2712-女性"],["年龄","","RF-CARD-CADREM-UA-D06E58C8BA"],["感染","","RF-CARD-TEXT-C77DFF9EAC"],["手术","","RF-CARD-FULLBOOK-E79089C924"],["旁路","Accessory pathway","RF-CARD-51E145B5DA9D"],["肥胖","Obesity","RF-CARD-DEF5786467E6"],["肿瘤","","RF-CARD-FULLBOOK-C643050E31"],["贫血","","RF-CARD-CADREM-CCS-2196488858"]],"samples":[["合并疾病","","RISKCOMP-RISK-CARD-7A36CE5B521B-合并疾病"],["静息心率","","RISKCOMP-RISK-CARD-9566F1411AE9-静息心率"],["药物或饮酒","","RISKCOMP-RISK-CARD-E21D88A4688D-药物或饮酒"],["是否行血运重建","","RISKCOMP-RISK-CARD-9566F1411AE9-是否行血运重建"],["出血史或出血倾向","","RISKCOMP-RISK-CARD-E21D88A4688D-出血史或出血倾向"],["既往卒中或TIA","Prior stroke or TIA","RF-CARD-74D9386C0F45"]]},{"zh":"并发症","code":"Complication","req":"疾病导致的并发问题","ami":"心力衰竭、心源性休克","cnt":83,"dict":"","terms":[["出血","","COMP-CARD-FULLBOOK-F7077FB368"],["晕厥","Syncope","COMP-CARD-1B8FE5C591C8"],["猝死","","COMP-CARD-578BE2D590E3"],["冠心病","Coronary artery disease","COMP-CARD-16C17CD433EB"],["大出血","Major bleeding","COMP-CARD-B28E5DB9E514"],["心绞痛","Angina","COMP-CARD-8518D33440EE"],["肺栓塞","","COMP-CARD-FULLBOOK-3164DCDE50"],["肺水肿","","COMP-CARD-CADREM-AMI-779F6AD093"],["脑卒中","","COMP-CARD-2EDA47E727DD"],["心力衰竭","Heart failure","COMP-CARD-7CF202961681"]],"samples":[["心包炎并发症","","COMP-CARD-0F088A982ECB"],["心肌炎并发症","","COMP-CARD-CA76B364E8D9"],["多瓣膜病并发症","","COMP-CARD-DB0AC1FD3352"],["心房颤动并发症","","COMP-CARD-8C15FFA7A83C"],["血脂异常并发症","","COMP-CARD-E8662A144CA9"],["三尖瓣反流并发症","","COMP-CARD-68A5C8A7A1CE"]]},{"zh":"阈值规则","code":"ThresholdRule","req":"数值、单位、方向和时间窗必须齐全","ami":"肌钙蛋白超过第 99 百分位并动态变化","cnt":172,"dict":"","terms":[["BNP升高","","IND-CARD-LAB-BNP-ELEVATED"],["C反应蛋白升高","","IND-CARD-AMI-LAB-EB5597E7C61B"],["D-二聚体升高","","IND-CARD-AMI-LAB-5CFDDE34866E"],["白细胞计数升高","","IND-CARD-AMI-LAB-68B53FF37FA2"],["KillipⅠ级","","THR-CARD-STEMI-6F0EC0E56146"],["KillipⅡ级","","THR-CARD-STEMI-5DCF0E9A4F8C"],["KillipⅢ级","","THR-CARD-STEMI-6FC48CAF8C7F"],["KillipⅣ级","","THR-CARD-STEMI-FA5E083C35E8"],["心肌肌钙蛋白升高","","IND-CARD-AMI-LAB-2906F6AE1C62"],["红细胞沉降率增快","","IND-CARD-AMI-LAB-3D862E7F3F4E"]],"samples":[["发病时间 <= 3h（急性心肌梗死）","","THR-B736C0806B85FBB0"],["发病时间 <= 4h（急性心肌梗死）","","THR-F656E87190BEB461"],["发病时间 <= 2小时（急性心肌梗死）","","THR-343A546F75DB9222"],["发病时间 <= 3h（急性冠脉综合征）","","THR-430168CB4AA26ABA"],["发病时间 <= 4h（急性冠脉综合征）","","THR-01D125F90C9C72DE"],["发病时间 <= 6小时（急性心肌梗死）","","THR-61ED8742FC894B44"]]},{"zh":"诊断标准","code":"DiagnosisCriteria","req":"诊断标准总标题，必须继续下钻明细","ami":"急性心肌梗死诊断标准","cnt":115,"dict":"","terms":[["心包炎诊断标准","","DXC-CARD-FDE79AF8EC58"],["心肌炎诊断标准","","DXC-CARD-59058B9BAC7C"],["高血压诊断标准","Hypertension diagnostic criteria","DXC-CARD-AA96D71FB917"],["右心衰竭诊断标准","","DXC-CARD-FB1FD85809E5"],["多瓣膜病诊断标准","","DXC-CARD-21550FC060EE"],["左心衰竭诊断标准","","DXC-CARD-25510C02A8C8"],["心力衰竭诊断标准","","DXC-CARD-C9F14771A730"],["心房扑动诊断标准","","DXC-CARD-04B9595EC8CA"],["心房颤动诊断标准","","DXC-CARD-5996B55AA97D"],["心脏骤停诊断标准","","DXC-CARD-663B41A63239"]],"samples":[["CKD合并高血压诊断标准","","DXC-HT-CKD"],["射血分数保留的心力衰竭诊断标准","","DXC-CARD-2456E1DC2365"],["射血分数降低的心力衰竭诊断标准","","DXC-CARD-221AA46B58A3"],["CMR-LGE非缺血性瘢痕诊断依据","","DXC-CARD-CM-NDLVCM-CMR-LGE"],["先天性心脏病相关肺动脉高压诊断标准","","DXC-CARD-341738CD8C00"],["射血分数轻度降低的心力衰竭诊断标准","","DXC-CARD-28280DD401C8"]]},{"zh":"诊断标准明细","code":"DiagnosisCriteriaComponent","req":"可判断的独立条件","ami":"缺血症状、心电图改变、肌钙蛋白动态升高","cnt":656,"dict":"","terms":[["典型临床表现","","DXC-COMP-CARD-STEMI-F90AEF16248A"],["可发生房室分离","","CARD-SKELETON-20260709-DIAGNOSISCRITERIACOMPONENT-E034272A61552160"],["一般不难作出诊断","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-3180569AF24CAB4D"],["常规心电图分析原则","","CARD-SKELETON-20260709-DIAGNOSISCRITERIACOMPONENT-E590B6B025BB4383"],["多瓣膜病诊断标准明细","","DXCC-B5BB765D4F24"],["年长病人发现血脂异常","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-A932B022B68E0138"],["三尖瓣反流诊断标准明细","","DXCC-E0C0B0F7B2B2"],["主动脉夹层胸痛鉴别要点","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-202EDCADD697C1D8"],["二尖瓣反流诊断标准明细","","DXCC-218021B027E2"],["二尖瓣狭窄诊断标准明细","","DXCC-F9D7F13354C3"]],"samples":[["诊断标准","","CARD-SKELETON-20260709-DIAGNOSISCRITERIACOMPONENT-69AD1B6F56D95EE6"],["鉴别诊断","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-D55A2328689157B3"],["应考虑此诊断","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-9548E8613FE6B532"],["鉴别诊断首先","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-EB960A8A06D37667"],["也诊断为高血压","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-A54403E31B0840DB"],["z值＞2也可诊断","","CARD-SKELETON-FULL-20260709-DIAGNOSISCRITERIACOMPONENT-6C4F52FFDB88128D"]]},{"zh":"鉴别诊断","code":"DifferentialDiagnosis","req":"鉴别对象必须连接鉴别要点、排除检查或规则","ami":"主动脉夹层、肺栓塞","cnt":45,"dict":"","terms":[["癫痫","Epilepsy","DDX-CARD-E6C98B4ECF84"],["肺炎","","DDX-AUTO-7BE1B3F08024"],["贫血","","DDX-CARD-HF-ANEMIA"],["冠心病","Coronary heart disease","DDX-CARD-6AB732E54DB3"],["心绞痛","","DDX-CARD-STEMI-4DD215C51903"],["心肌炎","Myocarditis","DDX-CARD-A07BA907BDB0"],["急腹症","","DDX-CARD-STEMI-F118C9F80AE2"],["肺栓塞","Pulmonary embolism","DDX-CARD-881C77E90E42"],["心包疾病","","DDX-CARD-D9E23DFD1FF7"],["心房扑动","","DDX-CARD-ARR-AFL"]],"samples":[["慢阻肺或支气管哮喘","","DDX-CARD-HF-COPD-ASTHMA"],["肾功能不全或容量负荷过多","","DDX-CARD-HF-RENAL-VOLUME"],["D-二聚体升高提示肺栓塞线索但需结合临床","","DDX-AUTO-9BC262364DA5"]]},{"zh":"风险分层","code":"RiskStratification","req":"评分或分层工具","ami":"GRACE 评分","cnt":95,"dict":"","terms":[["“干暖”型","","CARD-SKELETON-20260709-DISEASECLASSIFICATION-BBA8E712A5F0D040"],["TIMI评分","TIMI risk score","RISK-CARD-638FD4C2210F"],["GRACE评分","GRACE risk score","RISK-CARD-9566F1411AE9"],["心包炎风险分层","","RISK-CARD-FB9C8FFCFC79"],["心肌炎风险分层","","RISK-CARD-4D9353FDA3DE"],["心肌病风险分层","","RISK-CARD-9734888A780E"],["心血管风险分层","Cardiovascular risk stratification","RISK-CARD-99938D33FB1A"],["靶器官损害评估","Target organ damage assessment","RISK-CARD-49455DA34117"],["高血压风险分层","","RISK-CARD-48D693E46C8B"],["EHRA症状分级","EHRA symptom score","RISK-CARD-6D5D70049DC7"]],"samples":[["≤108分为低危","","CLASS-CARD-CADREM-UA-B60FDF102A"],["109～140分为中危","","CARD-SKELETON-FULL-20260709-DISEASECLASSIFICATION-F163C6547508ABCC"],["GRACE评分＞140分为高危","","CLASS-CARD-CADREM-UA-44D099513F"],["按有无淤血分为“湿”和“干”型","","CARD-SKELETON-20260709-DISEASECLASSIFICATION-63303FD52837F56B"],["有无组织低灌注分为“冷”和“暖”型","","CARD-SKELETON-20260709-DISEASECLASSIFICATION-CF366EAA84BACA78"],["Braunwald不稳定型心绞痛分级","","RISK-CARD-CAD-UA-BRAUNWALD"]]},{"zh":"辅助检查方案","code":"ExamPlan","req":"组织一组检查和检验策略；不是检查项目，不可直接开医嘱","ami":"AMI 首诊辅助检查方案","cnt":130,"dict":"","terms":[["心包炎辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-PERICARDITIS"],["心肌炎辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-MYOCARDITIS"],["心肌病辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-CM-GENERAL"],["高血压辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HT"],["主动脉瘤辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-AORTA-ANEURYSM"],["全心衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-BIVENTRICULAR"],["右心衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-RIGHT"],["多瓣膜病辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-VHD-MULTI"],["左心衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-LEFT"],["心力衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-GENERAL"]],"samples":[["慢性肾脏病合并高血压辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HT-CKD"],["嗜铬细胞瘤和副神经节瘤辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HTN-PHEO"],["射血分数保留的心力衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-HFpEF"],["射血分数降低的心力衰竭辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-HF-HFrEF"],["尖端扭转型室性心动过速辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-ARR-TDP"],["非ST段抬高型心肌梗死辅助检查方案","","EXAMPLAN-MIG-DIS-CARD-CAD-NSTEMI"]]},{"zh":"治疗方案","code":"TreatmentPlan","req":"疾病治疗策略；必须下钻到场景、规则、动作和证据","ami":"STEMI 再灌注方案","cnt":164,"dict":"","terms":[["氧疗","","PLAN-CARD-FULLBOOK-BBA9C43055"],["极化液","","MED-CARD-STEMI-579132151037"],["复律治疗","","PLAN-CARD-TEXT-7CC38FBA6F"],["导管消融","Catheter ablation","PLAN-CARD-5C9E41087192"],["急救复苏","Resuscitation","PLAN-CARD-C23D6266C767"],["抗凝治疗","Anticoagulation therapy","PLAN-CARD-A1C4E6332D38"],["溶栓治疗","","PLAN-CARD-FULLBOOK-B87D3F557B"],["节律控制","Rhythm control","PLAN-CARD-40AB27F53C05"],["药物转复","Pharmacological cardioversion","PLAN-CARD-64B52A7B760E"],["血运重建","","PLAN-CARD-TEXT-EEF9C97B59"]],"samples":[["控制心室率","","PLAN-CARD-TEXT-655F4B37BC"],["生活方式干预","Lifestyle intervention","PLAN-CARD-2081B78ED14D"],["下位的潜在起搏点","","CARD-SKELETON-20260709-TREATMENTPLAN-BFCF60272E5E8F9F"],["治疗可参照病态窦房结综合征","","CARD-SKELETON-20260709-TREATMENTPLAN-9FCAC418A06FE88B"],["射血分数保留的心力衰竭治疗方案","","PLAN-CARD-71EEE6F12EA8"],["射血分数降低的心力衰竭治疗方案","","PLAN-CARD-4C0507593DD1"]]},{"zh":"随访","code":"FollowUp","req":"说明频率、时点或触发条件","ami":"出院后复诊和心功能随访","cnt":228,"dict":"","terms":[["血压随访","Blood pressure follow-up","FU-CARD-8923DA2A36E5"],["观察随访","","FOLLOWUP-CARD-OBSERVATION"],["INR监测","INR monitoring","FU-CARD-2F4E08DE8D22"],["起搏器随访","Pacemaker follow-up","FU-CARD-6C09408B2980"],["定期随诊观察","","PROC-CARD-SND-FOLLOW-OBSERVE"],["消融术后随访","Post-ablation follow-up","FU-CARD-027FF0B5347C"],["随访影像监测","","FU-CARD-AAS-FOLLOW-UP-IMAGING"],["心包炎随访方案","","FU-CARD-DAE1A5CD21DB"],["心肌炎随访方案","","FU-CARD-C277835C796D"],["高血压随访方案","","FU-CARD-67AAA3B7D885"]],"samples":[["如不及时手术干预","","CARD-SKELETON-FULL-20260709-FOLLOWUP-2BE19474E65D4109"],["病人预后明显改善","","CARD-SKELETON-FULL-20260709-FOLLOWUP-5F324408FF1132C9"],["症状轻者为42%","","CARD-SKELETON-FULL-20260709-FOLLOWUP-3BFD394DC5E56F7E"],["中、重度者为15%","","CARD-SKELETON-FULL-20260709-FOLLOWUP-5791A7305657381A"],["应减少液体负平衡量","","CARD-SKELETON-20260709-FOLLOWUP-CC0EE46BD50866DA"],["10年生存率为50%","","CARD-SKELETON-FULL-20260709-FOLLOWUP-E288AEBA03F87E34"]]},{"zh":"预后","code":"Prognosis","req":"结局、复发和死亡风险","ami":"再梗死风险","cnt":209,"dict":"","terms":[["复发风险","Recurrence risk","PROG-CARD-6B0D1B501299"],["猝死风险","Sudden death risk","PROG-CARD-5801926CCBB8"],["心包炎预后","","PROG-CARD-CFFD210FB2FA"],["心肌炎预后","","PROG-CARD-FF398BDF255E"],["高血压预后","","PROG-CARD-04C19C481B9D"],["全心衰竭预后","","PROG-CARD-B464D035C983"],["卒中风险升高","Increased stroke risk","PROG-CARD-72D3CDA1B433"],["右心衰竭预后","","PROG-CARD-7F16B709ACCF"],["多瓣膜病预后","","PROG-CARD-0A07E5B7C0B1"],["左心衰竭预后","","PROG-CARD-A80946F4AE1D"]],"samples":[["如不及时手术干预","","CARD-SKELETON-FULL-20260709-PROGNOSIS-BA1FE7907B60C368"],["病人预后明显改善","","CARD-SKELETON-FULL-20260709-PROGNOSIS-D48BB85E3E050064"],["症状轻者为42%","","CARD-SKELETON-FULL-20260709-PROGNOSIS-0988AA636D93C26B"],["中、重度者为15%","","CARD-SKELETON-FULL-20260709-PROGNOSIS-EE108F18A3B6CF15"],["10年生存率为50%","","CARD-SKELETON-FULL-20260709-PROGNOSIS-C88DDE565A1A385E"],["主要靶标是口腔链球菌","","CARD-SKELETON-FULL-20260709-PROGNOSIS-FFE54EACB4D80FD0"]]},{"zh":"预防","code":"Prevention","req":"一级/二级预防和患者教育","ami":"戒烟和血脂管理","cnt":150,"dict":"","terms":[["减重","","PROC-CARD-D44A6EDF0647"],["戒烟限酒","","PROC-CARD-7E3CF22F4DF0"],["冠心病一级预防","","PREV-CARD-STEMI-488107C4B59C"],["一般不需卧床休息","","CARD-SKELETON-20260709-PREVENTION-45E5DE0F37C077F6"],["保持适当体力活动","","CARD-SKELETON-20260709-PREVENTION-D46F7E488871117D"],["同时应提高免疫力","","CARD-SKELETON-FULL-20260709-PREVENTION-AC3E9D7238AB5175"],["往往提示预后不良","","CARD-SKELETON-20260709-PREVENTION-67DCB37EFA8DCDDF"],["慢性者无症状期长","","CARD-SKELETON-FULL-20260709-PREVENTION-6D8B349CC639E985"],["积极预防病毒感染","","CARD-SKELETON-FULL-20260709-PREVENTION-198CF186A8A58627"],["请参阅相关章节）","","CARD-SKELETON-20260709-PREVENTION-94154D73E974C327"]],"samples":[["如不及时手术干预","","CARD-SKELETON-FULL-20260709-PREVENTION-1DACF7F91D1F164B"],["病人预后明显改善","","CARD-SKELETON-FULL-20260709-PREVENTION-01B3A3031B3E1E7C"],["症状轻者为42%","","CARD-SKELETON-FULL-20260709-PREVENTION-35C9776CA35FDB69"],["中、重度者为15%","","CARD-SKELETON-FULL-20260709-PREVENTION-496377DE1AD940A4"],["如已发生应积极治疗","","CARD-SKELETON-20260709-PREVENTION-A12D32708DF48C00"],["对于超重和肥胖人群","","CARD-SKELETON-20260709-PREVENTION-E5F3BF808657A01E"]]},{"zh":"禁忌/排除条件","code":"Contraindication","req":"阻断推荐的临床原因；必须有证据","ami":"活动性出血阻断溶栓","cnt":19,"dict":"","terms":[["妊娠","Pregnancy","ENT-CARD-040D69EC360E"],["机械瓣膜","Mechanical heart valve","ENT-CARD-D9FD1242A8F1"],["严重低血压","Severe hypotension","ENT-CARD-E326DEF64FED"],["支气管哮喘","Bronchial asthma","ENT-CARD-E552089FC070"],["活动性出血","Active bleeding","ENT-CARD-08D5C1C1BB1C"],["近期外科大手术","","CONTRA-CARD-STEMI-7F180D2A686C"],["严重未控制高血压","","CONTRA-CARD-STEMI-EC1AC7E53A89"],["中重度二尖瓣狭窄","Moderate-to-severe mitral stenosis","ENT-CARD-9E6B121ADFE1"],["既往出血性脑卒中","","CONTRA-CARD-STEMI-78B3404C6D91"],["未排除主动脉夹层","","CONTRA-CARD-STEMI-522CCD87BF0F"]],"samples":[["预激合并房颤","Pre-excited atrial fibrillation","ENT-CARD-FCEE7105B80C"],["二度或三度房室传导阻滞","Second- or third-degree AV block","ENT-CARD-E2A280D1FC43"],["治疗剂量抗凝或已知出血倾向","","CONTRA-CARD-STEMI-59A3C6ADE5B9"],["近期创伤或较长时间心肺复苏","","CONTRA-CARD-STEMI-97555AFC829A"],["中枢神经系统受损或颅内肿瘤畸形","","CONTRA-CARD-STEMI-01D2358B76B0"],["6个月内缺血性脑卒中或脑血管事件","","CONTRA-CARD-STEMI-6E0A8E9C9FC3"]]}]},{"t":"CDSS 标准临床主数据","b":"13种","desc":"以下 14 类必须明确，不使用\"其他\"\"等\"代替。","types":[{"zh":"标准诊断","code":"StandardDiagnosis","req":"CDSS 有效诊断记录进入候选池，经编码、名称和权威来源二次校验后使用","ami":"I21.900 急性心肌梗死","cnt":89,"dict":"K_ICD10_DICT","terms":[["心包炎","","STDDX-6c9c77a1c30846e40eb258801d191d0d"],["心肌炎","","STDDX-48d8556e94f3520e45a8ca0ab41794b2"],["心肌病","","STDDX-d4c92d7b4031091f475c20c62bffcd04"],["高血压","","STDDX-a928c01ab8b14b8ebbc1db5b8641cd5e"],["全心衰竭","","STDDX-f40bd3b067b967dd2f3deaee0c69f73f"],["右心衰竭","","STDDX-39e97afa2118cfbdfea770f284a40486"],["左心衰竭","","STDDX-003709945bb07a417e7946a1750a9ea4"],["心力衰竭","","STDDX-db94a5333fd9453dacae2eade4e74c1e"],["心房扑动","","STDDX-c666dc0f60205f7f4402e7f6133d8576"],["心房颤动","","STDDX-c0cfdedddfa6ebfb855672794ca27c6b"]],"samples":[["肥厚型心肌病，其他的","","STDDX-ea1b1eb42678ac3a529d11ad80675ab3"],["限制型心肌病，其他的","","STDDX-b7d272035cf77c861d90a33e00cce0e2"]]},{"zh":"症状","code":"Symptom","req":"优先 CDSS 症状字典","ami":"胸痛","cnt":53,"dict":"K_SYMPTOM_DICT","terms":[["乏力","Fatigue","SYM-CARD-0ACC45EF4E60"],["出汗","","SYM-CARD-BC91622FC62F"],["发热","","SYM-CARD-TEXT-CBB30EA0F1"],["发绀","","SYM-CARD-STEMI-94A5C68D5173"],["呃逆","","SYM-CARD-STEMI-436709160213"],["呕吐","Vomiting","SYM-CARD-37D08FA41123"],["咯血","","SYM-CARD-DB87B8B091D1"],["咳嗽","","SYM-CARD-TEXT-24EDE9C876"],["头晕","Dizziness","SYM-CARD-6DA3580C8B73"],["头痛","Headache","SYM-CARD-3CB0D0DB56FA"]],"samples":[]},{"zh":"体征","code":"Sign","req":"症状和体征必须分开；缺少标准表时进入体征字典建设队列","ami":"心包摩擦音","cnt":95,"dict":"","terms":[["休克","","SIGN-CARD-FULLBOOK-FCCBB5937E"],["发绀","","SIGN-CARD-TEXT-E67B99C5BD"],["啰音","","SIGN-CARD-0A792D8C690D"],["坏疽","","SIGN-CARD-PAD-GANGRENE"],["奇脉","","SIGN-CARD-FULLBOOK-5BEADE5F52"],["水肿","Edema","SIGN-CARD-52CC24CD4C33"],["肝大","","SIGN-CARD-53E089674EBD"],["低血压","Hypotension","SIGN-CARD-1FA3A83EF714"],["奔马律","","SIGN-CARD-75EFE91EFEED"],["无脉搏","Pulselessness","SIGN-CARD-37CB767EBBA3"]],"samples":[["心率低于60次/分","","SIGN-CARD-BRADY-HR-LOW"]]},{"zh":"检查项目","code":"ExamItem","req":"影像、心电、超声、功能检查项目","ami":"常规心电图","cnt":99,"dict":"K_EXAM_ITEM_DICT","terms":[["X线","","CARD-SKELETON-20260709-EXAM-B66979D14041DD2B"],["心电图","Electrocardiogram","EXAM-ECG"],["CT检查","","EXAM-CARD-TEXT-9A031190AE"],["基因检测","Genetic testing","EXAM-GENETIC"],["病史采集","","EXAM-CLINICAL-HISTORY"],["眼底检查","Fundus examination","EXAM-CARD-AD3DCB35DE45"],["血管超声","","EXAM-CARD-FULLBOOK-27900FDADC"],["事件记录仪","Event recorder","EXAM-CARD-41BF81CAB3CE"],["冠脉CTA","Coronary CT angiography","EXAM-CARD-F60922D428D5"],["动态心电图","Holter Monitoring","EXAM-HOLTER"]],"samples":[["12导联心电图","12-lead electrocardiogram","EXAM-CARD-A80B855C8C77"],["Stanford B型主动脉夹层检查","","EXAM-CARD-272288934A19"]]},{"zh":"检查发现/观察指标","code":"ExamObservation","req":"检查报告中的结构化发现，不是检查项目","ami":"ST 段抬高、病理性 Q 波","cnt":175,"dict":"","terms":[["f波","Fibrillatory waves","DXC-CARD-62E58598E750"],["心律","","IND-EXAM-ECG-心律"],["心率","Heart Rate","IND-CARD-32AD16433929"],["脉压","","IND-EXAM-CARD-1F526A303B77-脉压"],["血栓","","IND-EXAM-CARD-F6AAC5622DEA-血栓"],["钙化","","IND-EXAM-CARD-F6AAC5622DEA-钙化"],["收缩压","Systolic blood pressure","IND-CARD-06FCC1FC835C"],["真假腔","","IND-EXAM-CARD-AORTA-CTA-CDSS-真假腔"],["肺水肿","","IND-EXAM-CARD-CHEST-IMAGING-CDSS-肺水肿"],["肺淤血","","IND-EXAM-CARD-CHEST-IMAGING-CDSS-肺淤血"]],"samples":[["占位或积液","","IND-EXAM-CARD-F6AAC5622DEA-占位或积液"],["24小时平均血压","24-hour mean blood pressure","IND-CARD-8EDA33C8602F"],["嗜酸性粒细胞减少或消失","","IND-CARD-AMI-LAB-027A760481F7"],["Ⅱ、Ⅲ、aVF导联ST段抬高提示下壁梗死","","IND-CARD-STEMI-0A05978707AA"],["D-二聚体升高提示肺栓塞鉴别线索但需结合临床","","IND-CARD-LAB-DDIMER-PE-ELEVATED-20260714"]]},{"zh":"检验项目","code":"LabItem","req":"一组检验或可开立检验项目","ami":"心肌损伤标志物检测","cnt":27,"dict":"K_LAB_ITEM_DICT","terms":[["血糖","Fasting plasma glucose","LAB-CARD-0C977E67C366"],["血脂","Lipid profile","LAB-CARD-C59B64C19ADD"],["利钠肽","Natriuretic peptide","EXAM-CARD-01C3182D129E"],["血培养","","LAB-CARD-TEXT-48E9A64933"],["血常规","","LAB-CARD-3F8D27CB7EC9"],["血清镁","Serum magnesium","LAB-CARD-DD19DD9B725F"],["凝血功能","Coagulation test","LAB-CARD-E0293B589260"],["肌红蛋白","","LAB-CARD-STEMI-4BA28B772105"],["肌酸激酶","","CARD-SKELETON-20260709-LABTEST-70C17E9844CB4791"],["血气分析","","LAB-CARD-FULLBOOK-5CE99AF138"]],"samples":[]},{"zh":"检验细项","code":"LabSubitem","req":"检验项目包含的具体可报告指标","ami":"心肌肌钙蛋白 I、肌酸激酶同工酶","cnt":23,"dict":"K_LAB_SUBITEM_DICT","terms":[["尿酸","Serum uric acid","LAB-CARD-F2BFB7EA8B44"],["血钾","","LABIND-LAB-CARD-RENAL-ELECTROLYTE-CDSS-血钾"],["血肌酐","","LABIND-LAB-CARD-RENAL-ELECTROLYTE-CDSS-血肌酐"],["肌红蛋白","","LABSUB-PROJ-LAB-CARD-STEMI-4BA28B772105"],["肌酸激酶","","LABSUB-PROJ-CARD-SKELETON-20260709-LABTEST-70C17E9844CB4791"],["肌钙蛋白","Cardiac troponin","LAB-CARD-A9EC1D4DA037"],["血红蛋白","","LABIND-LAB-CARD-CBC-HB-CDSS-血红蛋白"],["B型利钠肽","","LABIND-EXAM-CARD-01C3182D129E-BNP"],["CK-MB","","LABSUB-PROJ-LAB-CARD-960C7CE8E22B"],["C反应蛋白","C-reactive protein","LAB-CARD-BF2619C772EC"]],"samples":[]},{"zh":"检验标本","code":"LabSpecimen","req":"使用 CDSS 检验标本字典","ami":"血清、血浆","cnt":null,"dict":"","terms":[["血清","",""],["血浆","",""]],"samples":[]},{"zh":"药品","code":"Drug","req":"使用 CDSS 药品通用字典；标准全称为主名，缩写放别名","ami":"阿司匹林","cnt":139,"dict":"K_DRUG_DICT","terms":[["吗啡","","MED-CARD-STEMI-75149079D7F4"],["肝素","","MED-CARD-7717331EF136"],["腺苷","Adenosine","MED-CARD-33087B86B32A"],["钾剂","Potassium supplement","MED-CARD-CA961D8A62E7"],["利尿剂","Diuretics","MED-DIURETIC"],["呋塞米","","MED-CARD-391A89BD8790"],["哌替啶","","MED-CARD-STEMI-7DE6E08B5D55"],["地高辛","","MED-CARD-STD-62498B0FBD"],["尿激酶","","MED-CARD-BCBB6CBE03DA"],["氟卡尼","Flecainide","MED-CARD-66202C12C872"]],"samples":[["血管紧张素转换酶抑制剂或血管紧张素受体阻滞剂","","CARD-SKELETON-20260709-MEDICATION-7887433A96437926"]]},{"zh":"操作/手术","code":"Procedure","req":"临床知识动作；必须可映射到 CDSS 标准手术","ami":"经皮冠状动脉介入治疗","cnt":38,"dict":"K_OPERATION_HANDLE_DICT","terms":[["电除颤","Defibrillation","PROC-CARD-6CC6BC610CAE"],["心包穿刺","","PROC-CARD-TEXT-3F8DE37321"],["心肺复苏","Cardiopulmonary resuscitation","PROC-CARD-6A8C8F96D8A0"],["旁路消融","Accessory pathway ablation","PROC-CARD-21B8266C94B1"],["心脏移植术","Heart transplantation","PROC-HEART-TRANSPLANT"],["房室结消融","Atrioventricular node ablation","PROC-CARD-E8BB6CCDC727"],["肺静脉隔离","Pulmonary vein isolation","PROC-CARD-D9D7DDE63DCF"],["外科迷宫手术","Surgical maze procedure","PROC-CARD-1AB2CA8618BF"],["室间隔切除术","Septal myectomy","PROC-SEPTAL-MYECTOMY"],["左心耳封堵术","Left atrial appendage occlusion","PROC-CARD-0E182AB7B3BC"]],"samples":[]},{"zh":"操作/手术标准编码","code":"Procedure.standard_code","req":"手术编码通过 Procedure 节点的 standard_code / standard_code_system 字段承载，不再单独建 StandardProcedure 实体","ami":"PCI → 00.6600（ICD-9-CM-3）","cnt":38,"dict":"K_OPERATION_HANDLE_DICT","terms":[["电除颤","Defibrillation","PROC-CARD-6CC6BC610CAE"],["心包穿刺","","PROC-CARD-TEXT-3F8DE37321"],["心肺复苏","Cardiopulmonary resuscitation","PROC-CARD-6A8C8F96D8A0"],["旁路消融","Accessory pathway ablation","PROC-CARD-21B8266C94B1"],["心脏移植术","Heart transplantation","PROC-HEART-TRANSPLANT"],["房室结消融","Atrioventricular node ablation","PROC-CARD-E8BB6CCDC727"],["肺静脉隔离","Pulmonary vein isolation","PROC-CARD-D9D7DDE63DCF"],["外科迷宫手术","Surgical maze procedure","PROC-CARD-1AB2CA8618BF"],["室间隔切除术","Septal myectomy","PROC-SEPTAL-MYECTOMY"],["左心耳封堵术","Left atrial appendage occlusion","PROC-CARD-0E182AB7B3BC"]],"samples":[]},{"zh":"治疗项目","code":"TreatmentItem","req":"非药品、非手术的标准治疗项目","ami":"氧疗","cnt":22,"dict":"K_TREATMENT_DICT","terms":[["氧疗","","PROC-CARD-F1B0B84C6369"],["心理平衡","","TREAT-CARD-HT-LIFESTYLE-STRESS"],["戒烟限酒","","TREAT-CARD-HT-LIFESTYLE-SMOKE-ALCOHOL"],["支持治疗","","PROCEDURE-CARD-B80BBDCAFB42"],["溶栓治疗","Fibrinolytic therapy","PROC-CARD-DA0F467D4A30"],["病因治疗","","PROC-CARD-AVB1-CAUSE-TREATMENT"],["规律运动","","TREAT-CARD-HT-LIFESTYLE-EXERCISE"],["起搏器程控","Pacemaker Programming","PROC-CARD-F25D5945465C"],["危险因素管理","","PROC-CARD-99A6FF1BEB35"],["最佳药物治疗","","TRT-CARD-TBAD-BEST-MEDICAL-THERAPY"]],"samples":[["合理膳食","","TREAT-CARD-HT-LIFESTYLE-DIET"],["控制体重","","TREAT-CARD-HT-LIFESTYLE-WEIGHT"],["生活方式干预","","PROC-CARD-132F7104A781"],["心理与行为干预","","TRT-CARD-NEUROSIS-PSYCHOTHERAPY"]]},{"zh":"生命体征项目","code":"VitalSignItem","req":"使用 CDSS 生命体征标准表","ami":"心率、收缩压","cnt":6,"dict":"","terms":[["体温","","VITAL-CARD-TEMP"],["心率","","VITAL-CARD-HR"],["脉搏","","VITAL-CARD-PULSE"],["血压","","VITAL-CARD-BP"],["呼吸频率","","VITAL-CARD-RR"],["血氧饱和度","","VITAL-CARD-SPO2"]],"samples":[]},{"zh":"医学术语与别名","code":"MedicalTerm, MedicalTermAlias","req":"标准术语、缩写、旧称、中文简称统一管理","ami":"急性心肌梗死；别名 AMI、急性心梗","cnt":0,"dict":"","terms":[["急性心肌梗死","",""],["别名 AMI","",""],["急性心梗","",""]],"samples":[]}]},{"t":"来源、证据和 CDSS 决策实体","b":"9种","desc":"","types":[{"zh":"指南/教材/共识","code":"Guideline","req":"名称、年份、版本、来源类型必须齐全","ami":"2023 ESC 急性冠脉综合征指南","cnt":170,"dict":"","terms":[["PAD","","SRC-DOC-BDFDB765EACB4B6A"],["心力衰竭","","SRC-DOC-61F428FA760EC410"],["房颤知识","","SRC-DOC-F7FE6EEDE206B705"],["三尖瓣疾病","","SRC-DOC-C3B25101A6FF72E5"],["二尖瓣疾病","","SRC-DOC-307AB2E3245A2947"],["主动脉瓣疾病","","SRC-DOC-2B898DC879F4AA3B"],["肺动脉瓣疾病","","SRC-DOC-4D9A6613713AA725"],["认识瓣膜疾病","","SRC-DOC-5C5FF1CD150AD5BA"],["华法林用药须知","","SRC-DOC-6319D731D46D5899"],["内科学(第8版)","","SRC-DOC-6E44027E23077E48"]],"samples":[["房颤的诊断和治疗","","SRC-DOC-BB282C8639559C9D"],["心力衰竭的综合管理","","SRC-DOC-079C1061ED7DBF39"],["左心耳封堵术的出院指导","","SRC-DOC-CD28568B2980B483"],["左心耳封堵术的护理指导","","SRC-DOC-9C611A9BFCCDE7F1"],["永久起搏器植入的出院指导","","SRC-DOC-80FC2E647C61A0C4"],["2025ESC瓣膜指南 -","","SRC-DOC-56EC71F40F681B16"]]},{"zh":"来源章节","code":"SourceSection","req":"保存章节、小标题、页码范围","ami":"STEMI 再灌注章节","cnt":101,"dict":"","terms":[["心肌桥","","TXTSEC-CARD-5C68F09FFB663007"],["概 述","","TXTSEC-CARD-C01B46E5A2C15712"],["风湿热","","TXTSEC-CARD-0F3F1129A0D9863D"],["导管消融","","TXTSEC-CARD-97267F65B56F497F"],["心房扑动","","TXTSEC-CARD-A70372EC356F907B"],["心房颤动","","TXTSEC-CARD-E120715E6C956A53"],["心肌疾病","","TXTSEC-CARD-881F348325FABFC4"],["窦性停搏","","TXTSEC-CARD-D958E3E0D741EB85"],["冠状动脉瘘","","TXTSEC-CARD-02B9932AEBEADC04"],["微血管疾病","","TXTSEC-CARD-A46AD3BBA11C0EA0"]],"samples":[["诊断名称合并","","SEC-NURSING-TERMS"],["肿瘤治疗相关的高血压","","TXTSEC-CARD-8CF7C84F219C3CF7"],["肿瘤治疗相关的心律失常","","TXTSEC-CARD-C218D23E029B026A"],["抗心律失常药物的合理应用","","TXTSEC-CARD-AEF6ACB4A40C7EDA"],["肿瘤治疗相关的心功能不全","","TXTSEC-CARD-7197F7EAEF5BDB28"],["肿瘤治疗相关的血栓性疾病","","TXTSEC-CARD-626CB6E32CB16FAD"]]},{"zh":"证据片段","code":"Evidence","req":"保留原文、页码/段落和来源；同一原文不按疾病重复建","ami":"PCI 推荐原文","cnt":18980,"dict":"","terms":[["PCI 推荐原文","",""]],"samples":[]},{"zh":"专科诊疗路径","code":"SpecialtyCarePathway","req":"专科 CDSS 业务入口，不是治疗方案","ami":"AMI 急诊诊疗路径","cnt":142,"dict":"","terms":[["全心衰竭治疗路径","","PATHWAY-CARD-D2F1438BB7D4"],["右心衰竭治疗路径","","PATHWAY-CARD-D8694FD10E05"],["左心衰竭治疗路径","","PATHWAY-CARD-76327A0605BF"],["心力衰竭治疗路径","","PATHWAY-CARD-168E228D2992"],["心房扑动治疗路径","","PATHWAY-CARD-31AEF9651AEF"],["心房颤动治疗路径","","PATHWAY-CARD-EF8B93B288A6"],["心脏骤停治疗路径","","PATHWAY-CARD-7AB7CAC36944"],["心脏性猝死治疗路径","","PATHWAY-CARD-7E09B8ADECBE"],["预激综合征治疗路径","","PATHWAY-CARD-492A756A97A0"],["高血压专病诊疗路径","","PATH-HT-HT"]],"samples":[["射血分数保留的心力衰竭治疗路径","","PATHWAY-CARD-CCE233F593A6"],["射血分数降低的心力衰竭治疗路径","","PATHWAY-CARD-BCB6595E4A58"],["慢性肾脏病合并高血压专病诊疗路径","","PATH-HT-CKD"],["不稳定型心绞痛专病动态CDSS路径","","PATHWAY-CDSS-CAD-UA"],["室上性心动过速专病动态CDSS路径","","PATHWAY-CDSS-SVTAFL-ARR-SVT"],["射血分数轻度降低的心力衰竭治疗路径","","PATHWAY-CARD-1CF6B8F522CB"]]},{"zh":"路径阶段","code":"PathwayStage","req":"疑似、确诊、分型、治疗、随访阶段","ami":"STEMI 再灌注决策阶段","cnt":458,"dict":"","terms":[["心衰疑诊评估阶段","","STAGE-CARD-HF-01-SUSPECTED-ASSESSMENT"],["心衰诊断确认阶段","","STAGE-CARD-HF-02-DIAGNOSIS-CONFIRMATION"],["房颤急性控制阶段","","STAGE-CARD-ARR-AF-04-ACUTE-CONTROL"],["室上速急性终止阶段","","STAGE-CARD-ARR-SVT-AFL-03-ACUTE-TERMINATION"],["房颤心电图确认阶段","","STAGE-CARD-ARR-AF-01-ECG-CONFIRMATION"],["全心衰竭治疗决策阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-03-TREAT"],["全心衰竭诊断确认阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-01-DIAG"],["全心衰竭路径评估阶段","","STAGE-MIG-PATHWAY-CARD-D2F1438BB7D4-01-ASSESSMENT"],["全心衰竭随访管理阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-04-FOLLOW"],["全心衰竭风险分层阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-02-RISK"]],"samples":[["STEMI并发症监测阶段","","STAGE-CARD-CAD-STEMI-05-COMPLICATION-MONITORING"],["慢性肾脏病合并高血压治疗决策","","STAGE-HT-CKD-TX"],["慢性肾脏病合并高血压诊断确认","","STAGE-HT-CKD-DIAG"],["慢性肾脏病合并高血压随访管理","","STAGE-HT-CKD-FU"],["慢性肾脏病合并高血压风险评估","","STAGE-HT-CKD-RISK"],["ST段抬高型心肌梗死再灌注决策阶段","","STAGE-CDSS-CAD-STEMI-03-REPERFUSION"]]},{"zh":"临床规则","code":"ClinicalRule","req":"触发、适用、排除、禁忌和阈值逻辑","ami":"发病 12 小时内且 PCI 可及","cnt":7794,"dict":"","terms":[["UA诊断规则","","RULE-CDSS-CAD-UA-01-01-DIAG"],["UA风险分层规则","","RULE-CDSS-CAD-UA-02-01-RISK"],["ACM猝死风险规则","","RULE-CDSS-CM-ACM-02-01-RISK"],["ACS抗栓治疗规则","","RULE-CDSS-CAD-ACS-03-01-ANTITHROMBOTIC"],["AMI二级预防规则","","RULE-CDSS-CAD-AMI-03-01-PREVENT"],["AMI诊断确认规则","","RULE-CDSS-CAD-AMI-01-01-DIAG"],["CCS事件预防规则","","RULE-CDSS-CAD-CCS-02-02-PREVENT"],["CCS检查选择规则","","RULE-CDSS-CAD-CCS-01-01-TEST"],["DCM诊断确认规则","","RULE-CDSS-CM-DCM-01-01-DIAG"],["DCM随访复评规则","","RULE-CDSS-CM-DCM-03-01-FOLLOW"]],"samples":[["AST不再用于AMI诊断","","RULE-CARD-STEMI-CAFF1C11C765"],["LDH不再用于AMI诊断","","RULE-CARD-STEMI-C8D30F3127D6"],["STEMI与急性肺动脉栓塞鉴别规则","","RULE-DDX-D0B88EE88ED7"],["Brugada综合征治疗决策阶段规则","","RULE-CDSS-VASCD-ARR-BRUGADA-03-01-TREAT"],["Brugada综合征诊断确认阶段规则","","RULE-CDSS-VASCD-ARR-BRUGADA-01-01-DIAG"],["Brugada综合征路径治疗决策规则","","RULE-MIG-PATHWAY-CARD-F1B034D0D7A3-02-TREATMENT-DECISION"]]},{"zh":"推荐陈述","code":"RecommendationStatement","req":"医生推荐卡根实体，必须连接动作和证据；主证据、主依据指南和冲突状态直接保存在本节点字段上","ami":"推荐急诊 PCI","cnt":574,"dict":"","terms":[["AMI诊断标准推荐陈述","","RECST-CARD-AMI-SRCADJ-DX-20260717"],["AMI首诊心电图推荐陈述","","RECST-CARD-AMI-SRCADJ-ECG-20260717"],["STEMI溶栓治疗推荐陈述","","REC-CARD-STEMI-THROMBOLYSIS"],["STEMI直接PCI推荐陈述","","RECST-CARD-AMI-SRCADJ-PCI-20260717"],["内分泌性高血压：降压治疗推荐","","REC-HT-ENDOCRINE-TX-PLAN-CARD-BDE62A3BE028"],["STEMI溶栓禁忌阻断推荐陈述","","RECST-CARD-AMI-SRCADJ-FIB-CONTRA-20260717"],["原发性高血压：生活方式干预推荐","","REC-HT-PRIMARY-TX-PLAN-CARD-2081B78ED14D"],["原发性高血压：联合降压治疗推荐","","REC-HT-PRIMARY-TX-PLAN-CARD-0CDCF256C0E6"]],"samples":[["GRACE高危早期有创治疗策略评估","","REC-CARD-AMI-GRACE-HIGH-INVASIVE-24H"],["慢性肾脏病合并高血压：降压治疗推荐","","REC-HT-CKD-TX-PLAN-CARD-BDE62A3BE028"],["GRACE中危选择性有创治疗策略评估","","REC-CARD-AMI-GRACE-MEDIUM-INVASIVE-72H"],["原发性醛固酮增多症：联合降压治疗推荐","","REC-HT-PA-TX-PLAN-CARD-0CDCF256C0E6"],["原发性高血压：原发性高血压诊断标准推荐","","REC-HT-PRIMARY-DIAG-DXC-CARD-317486966B34"],["原发性高血压：原发性高血压随访方案推荐","","REC-HT-PRIMARY-FU-FU-CARD-D42E1520B05E"]]},{"zh":"患者状态","code":"PatientState","req":"复杂条件或路径状态","ami":"急性期、出血高风险","cnt":0,"dict":"","terms":[["急性期","",""],["出血高风险","",""]],"samples":[]},{"zh":"临床事件","code":"ClinicalEvent","req":"路径流转、结局或复发事件","ami":"再梗死、心源性休克","cnt":0,"dict":"","terms":[["再梗死","",""],["心源性休克","",""]],"samples":[]}]},{"t":"评估评分（可计算风险分层）","b":"新增 · 5种","desc":"五类实体缺一不可，串起来才能让 CDSS 真正\"算分\"。只有 RiskStratification 名称、没有这五类实体落地的评分，不得发布为可计算评分。","types":[{"zh":"评估量表/评分表","code":"AssessmentScale","req":"量表名称、适用病种、适用分型、适用阶段、版本和来源","ami":"GRACE 缺血风险评估量表","cnt":3,"dict":"","terms":[["GRACE 缺血风险评估量表","",""]],"samples":[["Morse跌倒风险评估量表","","SCALE-MORSE-LOCAL-2024"],["Braden压力性损伤风险评估量表","","SCALE-BRADEN-LOCAL-2024"],["GRACE风险评分（NSTE-ACS 2024 表3）","","SCALE-CARD-AMI-GRACE-NSTEACS-2024"]]},{"zh":"评估评分项","code":"AssessmentItem","req":"评分项目、取数来源、单位、缺失处理和取值类型","ami":"年龄、心率、收缩压、肌酐等 9 项","cnt":20,"dict":"","terms":[["年龄","","AI-GRACE-AGE"],["心率","","AI-GRACE-HR"],["步态","","AI-MORSE-GAIT"],["肌酐","","AI-GRACE-CREATININE"],["营养","","AI-BRADEN-NUTRITION"],["收缩压","","AI-GRACE-SBP"],["活动度","","AI-BRADEN-ACTIVITY"],["湿润度","","AI-BRADEN-MOISTURE"],["行动力","","AI-BRADEN-MOBILITY"],["跌倒史","","AI-MORSE-FALL-HISTORY"]],"samples":[]},{"zh":"计分规则","code":"AssessmentScoreRule","req":"单项计分、汇总算法、计算条件和排除条件","ami":"年龄 ≥80 岁记 3 分","cnt":23,"dict":"","terms":[["步态单项计分规则","","ASR-MORSE-GAIT"],["营养单项计分规则","","ASR-BRADEN-NUTRITION"],["活动度单项计分规则","","ASR-BRADEN-ACTIVITY"],["湿润度单项计分规则","","ASR-BRADEN-MOISTURE"],["行动力单项计分规则","","ASR-BRADEN-MOBILITY"],["跌倒史单项计分规则","","ASR-MORSE-FALL-HISTORY"],["次要诊断单项计分规则","","ASR-MORSE-SECONDARY-DIAGNOSIS"],["知觉感受单项计分规则","","ASR-BRADEN-SENSORY"],["精神状态单项计分规则","","ASR-MORSE-MENTAL-STATUS"],["行走辅助单项计分规则","","ASR-MORSE-WALKING-AID"]],"samples":[["Morse跌倒风险评估量表总分规则","","ASR-MORSE-LOCAL-2024"],["GRACE评分-入院时心脏骤停计分规则","","ASR-GRACE-CARDIAC_ARREST"],["GRACE评分-Killip分级计分规则","","ASR-GRACE-KILLIP"],["GRACE评分-心电图ST段改变计分规则","","ASR-GRACE-ST_CHANGE"],["Braden压力性损伤风险评估量表总分规则","","ASR-BRADEN-LOCAL-2024"],["GRACE评分-心肌坏死标志物升高计分规则","","ASR-GRACE-BIOMARKER_ELEVATED"]]},{"zh":"评分结果等级","code":"AssessmentResultLevel","req":"等级名称、分数区间、阈值条件、临床解释和风险颜色","ami":"高危：>140 分（红）","cnt":12,"dict":"","terms":[["中危","","ARL-BRADEN-MEDIUM"],["低危","","ARL-BRADEN-LOW"],["高危","","ARL-BRADEN-HIGH"],["中风险","","ARL-MORSE-MEDIUM"],["低风险","","ARL-MORSE-LOW"],["无风险","","ARL-MORSE-NONE"],["极高危","","ARL-BRADEN-VERY-HIGH"],["高风险","","ARL-MORSE-HIGH"],["未达风险分级阈值","","ARL-BRADEN-NOT-AT-RISK"],["GRACE评分中危","","ARL-GRACE-MEDIUM"]],"samples":[]},{"zh":"结果动作规则","code":"AssessmentActionRule","req":"不同等级对应的补查、提醒、质控、安全锁、路径或随访动作","ami":"高危 → 提示 24h 内介入","cnt":10,"dict":"","terms":[["GRACE评分中危动作","","AAR-GRACE-MEDIUM"],["GRACE评分低危动作","","AAR-GRACE-LOW"],["GRACE评分高危动作","","AAR-GRACE-HIGH"],["Morse基础预防动作","","AAR-MORSE-LOW"],["Braden中危预防动作","","AAR-BRADEN-MEDIUM"],["Braden低危预防动作","","AAR-BRADEN-LOW"],["Morse中风险预防动作","","AAR-MORSE-MEDIUM"],["Morse高风险预防动作","","AAR-MORSE-HIGH"],["Braden未达风险阈值处理","","AAR-BRADEN-NO-TIER-ACTION"],["Braden高危及极高危预防动作","","AAR-BRADEN-HIGH-VERY-HIGH"]],"samples":[]}]},{"t":"护理知识","b":"新增 · 10种","desc":"护理知识必须能形成「评估 → 诊断 → 计划 → 措施 → 结局」闭环，每个护理对象必须绑定疾病、适用阶段和证据来源。优先使用院内护理规范，NANDA-I/NIC/NOC 只作为有来源时的候选映射。","types":[{"zh":"护理评估维度","code":"NursingAssessment","req":"绑定疾病、分型、路径阶段和评估来源","ami":"胸痛评估","cnt":8,"dict":"","terms":[["住院患者护理分级评估","","NA-CARD-INPATIENT-NURSING-GRADE-WST431"],["住院患者跌倒风险评估","","NA-CARD-FALL-RISK"],["PCI术前护理安全评估","","NA-CARD-PCI-PRE"],["DCM心衰与容量状态评估","","NA-CARD-DCM-INPATIENT"],["HCM症状与心律失常评估","","NA-CARD-HCM-INPATIENT"],["AMI急性期病情与胸痛评估","","NA-CARD-AMI-ACUTE"],["PCI术后穿刺点与循环评估","","NA-CARD-PCI-POST"],["住院患者压力性损伤风险评估","","NA-CARD-PRESSURE-RISK"]],"samples":[]},{"zh":"护理评估条目","code":"NursingAssessmentItem","req":"评估项、取值方式、分值和异常判断","ami":"疼痛评分 0-10 分","cnt":10,"dict":"","terms":[["术后尿量与排尿情况","","NAI-PCI-POST-URINE"],["致命性心律失常表现","","NAI-HCM-ARRHYTHMIA"],["心律、心率、血压与尿量","","NAI-DCM-VITALS-URINE"],["呼吸困难、胸痛、心悸与晕厥","","NAI-HCM-SYMPTOM"],["双侧桡动脉与足背动脉搏动基线","","NAI-PCI-PRE-PULSE"],["心电、血压、血氧及恶性心律失常","","NAI-AMI-VITALS-RHYTHM"],["胸痛诱因、起病时间、程度及进展","","NAI-AMI-CHEST-PAIN"]],"samples":[["穿刺处出血、渗血或血肿","","NAI-PCI-POST-PUNCTURE"],["术肢动脉搏动、皮肤颜色、温度和感觉","","NAI-PCI-POST-CIRCULATION"],["术前血常规、凝血、肝肾功能和心电图完成情况","","NAI-PCI-PRE-LABS"]]},{"zh":"护理诊断","code":"NursingDiagnosis","req":"优先院内护理诊断规范","ami":"疼痛（急性胸痛）","cnt":7,"dict":"","terms":[["急性疼痛","","ND-LOCAL-ACUTE-PAIN"],["体液容积过量","","ND-LOCAL-FLUID-OVERLOAD"],["活动耐力减少","","ND-LOCAL-ACTIVITY-INTOLERANCE"],["潜在危险性出血","","ND-LOCAL-BLEEDING-RISK"],["潜在危险性成人跌倒","","ND-LOCAL-ADULT-FALL-RISK"],["潜在危险性心输出量减少","","ND-LOCAL-CARDIAC-OUTPUT-RISK"],["潜在危险性成人压力性损伤","","ND-LOCAL-ADULT-PRESSURE-INJURY-RISK"]],"samples":[]},{"zh":"护理措施","code":"NursingIntervention","req":"优先院内护理措施或专科护理规范","ami":"绝对卧床、心电监护","cnt":9,"dict":"","terms":[["溶栓期间疗效与出血观察","","NI-CARD-THROMBOLYSIS-OBS"],["AMI胸痛评估与休息护理","","NI-CARD-AMI-PAIN"],["PCI术前检查与交接核对","","NI-CARD-PCI-PRE-CHECK"],["AMI持续心电与生命体征监护","","NI-CARD-AMI-MONITOR"],["DCM心律、血压与尿量观察记录","","NI-CARD-DCM-OBS"],["HCM症状与致命性心律失常观察","","NI-CARD-HCM-OBS"],["PCI术后穿刺点与远端循环观察","","NI-CARD-PCI-POST-OBS"]],"samples":[["按跌倒风险分层实施预防措施","","NI-CARD-FALL-PREVENT"],["按压力性损伤风险实施减压与体位管理","","NI-CARD-PRESSURE-PREVENT"]]},{"zh":"护理结局","code":"NursingOutcome","req":"优先护理敏感质量指标或院内结局指标","ami":"胸痛缓解、再灌注后稳定","cnt":7,"dict":"","terms":[["胸痛缓解","",""],["再灌注后稳定","",""]],"samples":[["溶栓疗效及出血异常被及时识别","","NO-CARD-THROMBOLYSIS-SAFETY"],["AMI症状及循环恶化被及时识别","","NO-CARD-AMI-DETERIORATION-DETECTED"],["DCM心衰与容量状态变化被及时识别","","NO-CARD-DCM-STATUS-DETECTED"],["住院期间压力性损伤风险得到控制并留痕","","NO-CARD-PRESSURE-PREVENTION"],["住院期间可预防跌倒风险得到控制并留痕","","NO-CARD-FALL-PREVENTION"],["HCM晕厥及致命性心律失常风险被及时识别","","NO-CARD-HCM-RISK-DETECTED"]]},{"zh":"护理计划","code":"NursingCarePlan","req":"承接评估、诊断、措施和结局四要素","ami":"AMI 急性期护理计划","cnt":5,"dict":"","terms":[["DCM住院护理计划候选","","NCP-CARD-DCM-INPATIENT"],["HCM住院护理计划候选","","NCP-CARD-HCM-INPATIENT"],["AMI急性期护理计划候选","","NCP-CARD-AMI-ACUTE"],["PCI围术期护理计划候选","","NCP-CARD-PCI-PERIPROCEDURAL"],["心血管住院通用安全护理计划候选","","NCP-CARD-INPATIENT-SAFETY"]],"samples":[]},{"zh":"护理分级","code":"NursingGrade","req":"绑定 WS/T 431-2023 条款","ami":"特级护理（再灌注期）","cnt":4,"dict":"","terms":[["一级护理","","NGRADE-WST431-LEVEL1"],["三级护理","","NGRADE-WST431-LEVEL3"],["二级护理","","NGRADE-WST431-LEVEL2"],["特级护理","","NGRADE-WST431-SPECIAL"]],"samples":[]},{"zh":"护理禁忌","code":"NursingContraindication","req":"约束护理操作；不与医生端治疗禁忌混用","ami":"溶栓后避免动静脉穿刺","cnt":2,"dict":"","terms":[["溶栓后避免动静脉穿刺","",""]],"samples":[["肢端循环受影响时不可维持原压迫强度","","NC-CARD-PCI-COMPRESSION"],["血流动力学不稳定时避免快速大幅翻身","","NC-CARD-PRESSURE-HEMODYNAMIC"]]},{"zh":"护理记录条目","code":"NursingRecordItem","req":"支撑护理文书结构化记录和交接","ami":"再灌注后 30 分钟评估记录","cnt":8,"dict":"","terms":[["尿量记录","","NRI-CARD-URINE"],["胸痛观察记录","","NRI-CARD-CHEST-PAIN"],["穿刺点观察记录","","NRI-CARD-PUNCTURE-SITE"],["术肢远端循环记录","","NRI-CARD-DISTAL-CIRCULATION"],["PCI术前核对记录","","NRI-CARD-PCI-PRE-CHECK"],["跌倒风险及措施记录","","NRI-CARD-FALL-RISK"],["生命体征与心律观察记录","","NRI-CARD-VITALS-RHYTHM"],["皮肤与压力性损伤风险记录","","NRI-CARD-SKIN-PRESSURE"]],"samples":[]},{"zh":"护理医嘱核对规则","code":"NursingOrderCheckRule","req":"必须指向药品、手术或护理措施，不得指向自由文本","ami":"溶栓药滴速核对","cnt":2,"dict":"","terms":[["溶栓药滴速核对","",""]],"samples":[["华法林用药医嘱核对","","NOCHECK-CARD-WARFARIN-INR-20260911"],["介入治疗术前医嘱与交接核对","","NOCHECK-CARD-PCI-PRE-20260911"]]}]},{"t":"诊疗路径","b":"新增 · 6种","desc":"专科诊疗路径（CDSS 决策链路）和住院临床路径（国家版/院内标准）必须分实体维护；路径阶段必须能下钻到路径任务，任务必须指向具体动作、评估表或护理措施，不得只保存任务标题。","types":[{"zh":"专科诊疗路径","code":"SpecialtyCarePathway","req":"面向专科 CDSS 的诊疗决策链路，覆盖门急诊、住院、外院转入和复诊","ami":"AMI 急诊诊疗路径","cnt":142,"dict":"","terms":[["全心衰竭治疗路径","","PATHWAY-CARD-D2F1438BB7D4"],["右心衰竭治疗路径","","PATHWAY-CARD-D8694FD10E05"],["左心衰竭治疗路径","","PATHWAY-CARD-76327A0605BF"],["心力衰竭治疗路径","","PATHWAY-CARD-168E228D2992"],["心房扑动治疗路径","","PATHWAY-CARD-31AEF9651AEF"],["心房颤动治疗路径","","PATHWAY-CARD-EF8B93B288A6"],["心脏骤停治疗路径","","PATHWAY-CARD-7AB7CAC36944"],["心脏性猝死治疗路径","","PATHWAY-CARD-7E09B8ADECBE"],["预激综合征治疗路径","","PATHWAY-CARD-492A756A97A0"],["高血压专病诊疗路径","","PATH-HT-HT"]],"samples":[["射血分数保留的心力衰竭治疗路径","","PATHWAY-CARD-CCE233F593A6"],["射血分数降低的心力衰竭治疗路径","","PATHWAY-CARD-BCB6595E4A58"],["慢性肾脏病合并高血压专病诊疗路径","","PATH-HT-CKD"],["不稳定型心绞痛专病动态CDSS路径","","PATHWAY-CDSS-CAD-UA"],["室上性心动过速专病动态CDSS路径","","PATHWAY-CDSS-SVTAFL-ARR-SVT"],["射血分数轻度降低的心力衰竭治疗路径","","PATHWAY-CARD-1CF6B8F522CB"]]},{"zh":"住院临床路径","code":"InpatientClinicalPathway","req":"面向住院阶段的国家版或院内标准临床路径","ami":"AMI 住院临床路径（国家版）","cnt":1,"dict":"","terms":[["AMI 住院临床路径（国家版）","",""]],"samples":[["经导管主动脉瓣置换术住院临床路径","","IPATH-CARD-TAVR-2024"]]},{"zh":"路径阶段","code":"PathwayStage","req":"入径、评估、检查、治疗、术后/治疗后、出院或离院阶段","ami":"再灌注决策阶段","cnt":458,"dict":"","terms":[["心衰疑诊评估阶段","","STAGE-CARD-HF-01-SUSPECTED-ASSESSMENT"],["心衰诊断确认阶段","","STAGE-CARD-HF-02-DIAGNOSIS-CONFIRMATION"],["房颤急性控制阶段","","STAGE-CARD-ARR-AF-04-ACUTE-CONTROL"],["室上速急性终止阶段","","STAGE-CARD-ARR-SVT-AFL-03-ACUTE-TERMINATION"],["房颤心电图确认阶段","","STAGE-CARD-ARR-AF-01-ECG-CONFIRMATION"],["全心衰竭治疗决策阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-03-TREAT"],["全心衰竭诊断确认阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-01-DIAG"],["全心衰竭路径评估阶段","","STAGE-MIG-PATHWAY-CARD-D2F1438BB7D4-01-ASSESSMENT"],["全心衰竭随访管理阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-04-FOLLOW"],["全心衰竭风险分层阶段","","STAGE-CDSS-HF-HF-BIVENTRICULAR-02-RISK"]],"samples":[["STEMI并发症监测阶段","","STAGE-CARD-CAD-STEMI-05-COMPLICATION-MONITORING"],["慢性肾脏病合并高血压治疗决策","","STAGE-HT-CKD-TX"],["慢性肾脏病合并高血压诊断确认","","STAGE-HT-CKD-DIAG"],["慢性肾脏病合并高血压随访管理","","STAGE-HT-CKD-FU"],["慢性肾脏病合并高血压风险评估","","STAGE-HT-CKD-RISK"],["ST段抬高型心肌梗死再灌注决策阶段","","STAGE-CDSS-CAD-STEMI-03-REPERFUSION"]]},{"zh":"路径任务","code":"PathwayTask","req":"指向具体检查、检验、评估、治疗、护理、质控动作","ami":"90 分钟内完成心电图","cnt":2038,"dict":"","terms":[["90 分钟内完成心电图","",""]],"samples":[]},{"zh":"路径变异原因","code":"PathwayVariationReason","req":"病情变化、禁忌证、患者拒绝、资源不可及等","ami":"PCI 不可及转溶栓","cnt":3,"dict":"","terms":[["PCI 不可及转溶栓","",""]],"samples":[["无法完善术前增强CT","","PVAR-CARD-TAVR-CT-INCOMPLETE"],["入路或解剖条件限制","","PVAR-CARD-TAVR-ACCESS-ANATOMY"],["病情恶化或急危重症状态","","PVAR-CARD-TAVR-CRITICAL-STATUS"]]},{"zh":"路径结束及就诊转换条件","code":"PathwayExitCriteria","req":"按类型独立维护完成、提前出径、出院、就诊结束、随访入口；出径不等于出院","ami":"成功再灌注且无并发症","cnt":1,"dict":"","terms":[["成功再灌注且无并发症","",""]],"samples":[["TAVR术后状态平稳达到出院随访条件","","PEXIT-CARD-TAVR-STABLE-DISCHARGE"]]}]},{"t":"质量控制","b":"新增 · 2种","desc":"","types":[{"zh":"质控点","code":"QualityControlPoint","req":"某病种、分型、诊疗阶段或路径节点需要控制的质量要点","ami":"D2B 时间 ≤90 分钟","cnt":2,"dict":"","terms":[["D2B 时间 ≤90 分钟","",""]],"samples":[["住院患者跌倒预防质控","","QCP-CARD-FALL-PREVENT"],["住院患者压力性损伤预防质控","","QCP-CARD-PRESSURE-PREVENT"]]},{"zh":"质控规则","code":"QualityControlRule","req":"必须绑定质控点、触发条件、处理策略、应用场景和证据来源","ami":"D2B 超时 → 提示升级介入","cnt":4,"dict":"","terms":[["D2B 超时 → 提示升级介入","",""]],"samples":[["华法林用药INR监测质控规则","","QCR-CARD-WARFARIN-INR-CHECK"],["防跌措施落实与记录完整性检查","","QCR-CARD-FALL-MEASURE"],["介入治疗术前检查检验完整性质控规则","","QCR-CARD-PCI-PRE-EXAM-LAB-CHECK"],["压力性损伤集束化措施与记录完整性检查","","QCR-CARD-PRESSURE-MEASURE"]]}]}]};
+
+/* ====== 实体类型标准术语字典浮层 ====== */
+var edState = { c: 0, t: 0, q: '' };
+
+function edEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function openEntityDict(c, t) {
+  var D = ENTITY_DICT.cats;
+  if (!D || !D.length) return;
+  c = parseInt(c, 10); t = parseInt(t, 10);
+  if (!(c >= 0 && c < D.length)) c = 0;
+  if (!(t >= 0 && t < D[c].types.length)) t = 0;
+  edState.c = c; edState.t = t; edState.q = '';
+  var box = document.getElementById('edSearchInput');
+  if (box) box.value = '';
+  document.getElementById('entityDictPanel').innerHTML = edShell();
+  document.getElementById('entityDict').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  edScrollNav();
+}
+
+function edShell() {
+  var D = ENTITY_DICT.cats;
+  var h = '';
+  h += '<div class="ed-head">';
+  h += '<div class="ed-head-num">典</div>';
+  h += '<div class="ed-head-main"><div class="ed-head-title">实体类型标准术语字典<span class="ed-head-sub" style="margin-left:8px">ENTITY TYPE DICTIONARY</span></div>';
+  h += '<div class="ed-head-role">' + D.length + ' 大分类 · ' + ED_META.types + ' 种标准实体类型 · ' + ED_META.rows + ' 行条目；左侧点选分类或类型直接定位，术语取自 CDSS 标准字典与在线图谱真实实例（' + ED_META.kg + '）</div></div>';
+  h += '<div class="ed-search"><span style="color:#9aa8bb;font-size:13px">🔍</span><input id="edSearchInput" type="search" placeholder="搜索中文名称或 entityType" oninput="edFilter(this.value)"></div>';
+  h += '<button class="ed-close" onclick="closeEntityDict()" title="关闭（Esc）">✕</button>';
+  h += '</div>';
+  h += '<div class="ed-main"><div class="ed-nav" id="edNav">' + edNavHtml() + '</div><div class="ed-body" id="edBody">' + edBodyHtml() + '</div></div>';
+  h += '<div class="ed-foot"><span>口径来源：图谱架构规范 第3章「标准实体类型」实体类型表 ＋ 在线知识图谱实体实例，与页面表格同源</span><span>Esc 或点击空白处关闭</span></div>';
+  return h;
+}
+
+function edNavHtml() {
+  var D = ENTITY_DICT.cats;
+  var h = '<div class="ed-nav-inner" id="edNavInner">';
+  for (var c = 0; c < D.length; c++) {
+    var cat = D[c];
+    h += '<div class="ed-cat" data-cat="' + c + '">';
+    h += '<div class="ed-cat-head" data-cathead="' + c + '"><i>' + edEsc(cat.b || (cat.types.length + '种')) + '</i><span>' + edEsc(cat.t) + '</span></div>';
+    for (var t = 0; t < cat.types.length; t++) {
+      var ty = cat.types[t];
+      h += '<button class="ed-type' + (c === edState.c && t === edState.t ? ' active' : '') + '" data-c="' + c + '" data-t="' + t + '"';
+      h += ' data-key="' + edEsc((ty.zh + ' ' + ty.code).toLowerCase()) + '"';
+      h += ' onclick="edSelect(' + c + ',' + t + ')" title="' + edEsc(ty.zh) + ' · ' + edEsc(ty.code) + '">';
+      h += '<span class="ed-type-zh">' + edEsc(ty.zh) + '</span><span class="ed-type-code">' + edEsc(ty.code) + '</span></button>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function edBodyHtml() {
+  var D = ENTITY_DICT.cats, c = edState.c, cat = D[c], ty = cat.types[edState.t];
+  var h = '';
+  h += '<div class="ed-title"><span class="ed-title-zh">' + edEsc(ty.zh) + '</span>';
+  h += '<span class="ed-chip code">' + edEsc(ty.code) + '</span>';
+  h += '<span class="ed-chip dict">' + edEsc(ty.dict || '示例口径') + '</span></div>';
+
+  h += '<div class="ed-meta">';
+  h += '<div class="ed-meta-cell"><div class="ed-meta-k">所属分类</div><div class="ed-meta-v">' + edEsc(cat.t) + '</div></div>';
+  h += '<div class="ed-meta-cell"><div class="ed-meta-k">图谱实例数</div><div class="ed-meta-v">' + (ty.cnt == null ? '—' : ty.cnt) + ' 个</div></div>';
+  h += '<div class="ed-meta-cell"><div class="ed-meta-k">标准字典来源</div><div class="ed-meta-v mono">' + (ty.dict ? edEsc(ty.dict) : '示例口径 · 待建字典') + '</div></div>';
+  h += '<div class="ed-meta-cell"><div class="ed-meta-k">使用要求</div><div class="ed-meta-v">' + edEsc(ty.req) + '</div></div>';
+  h += '</div>';
+
+  var T = ty.terms || [];
+  h += '<div class="ed-block"><div class="ed-block-title">标准术语字典举例 · ' + T.length + ' 条</div>';
+  if (!T.length) {
+    h += '<div class="ed-empty">该类型当前没有可展示的标准术语，需先在 CDSS 字典中建设。</div>';
+  } else {
+    h += '<div class="ed-terms">';
+    for (var i = 0; i < T.length; i++) {
+      var t = T[i];
+      h += '<div class="ed-term"><div class="ed-term-n">' + edEsc(t[0]) + '</div>';
+      if (t[1]) h += '<div class="ed-term-e">' + edEsc(t[1]) + '</div>';
+      if (t[2]) h += '<div class="ed-term-c">' + edEsc(t[2]) + '</div>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+
+  var S = ty.samples || [];
+  if (S.length) {
+    h += '<div class="ed-block"><div class="ed-block-title">图谱真实实例 · ' + S.length + ' 条</div><div class="ed-samples">';
+    for (var j = 0; j < S.length; j++) {
+      h += '<div class="ed-sample"><i>' + ('0' + (j + 1)).slice(-2) + '</i><span>' + edEsc(S[j][0]) + '</span></div>';
+    }
+    h += '</div></div>';
+  }
+
+  h += '<div class="ed-block"><div class="ed-block-title">AMI 示例</div><div class="ed-ami"><span class="ed-ami-tag">AMI</span><div class="ed-ami-text">' + edEsc(ty.ami) + '</div></div></div>';
+  return h;
+}
+
+function edSelect(c, t) {
+  var D = ENTITY_DICT.cats;
+  if (!D || !D[c]) return;
+  edState.c = c;
+  edState.t = Math.max(0, Math.min(t, D[c].types.length - 1));
+  var nav = document.getElementById('edNav');
+  if (nav) {
+    var all = nav.querySelectorAll('.ed-type');
+    for (var i = 0; i < all.length; i++) {
+      var on = (+all[i].getAttribute('data-c') === c && +all[i].getAttribute('data-t') === edState.t);
+      all[i].classList.toggle('active', on);
+    }
+  }
+  var panel = document.getElementById('entityDictPanel');
+  if (panel) panel.setAttribute('data-cat', c);
+  var body = document.getElementById('edBody');
+  if (body) body.innerHTML = edBodyHtml();
+  if (body) body.scrollTop = 0;
+  edScrollNav();
+}
+
+function edFilter(q) {
+  edState.q = (q || '').trim().toLowerCase();
+  var nav = document.getElementById('edNavInner');
+  if (!nav) return;
+  var cats = nav.querySelectorAll('.ed-cat');
+  var firstMatch = null;
+  for (var i = 0; i < cats.length; i++) {
+    var btns = cats[i].querySelectorAll('.ed-type');
+    var shown = 0;
+    for (var j = 0; j < btns.length; j++) {
+      var hit = !edState.q || (btns[j].getAttribute('data-key') || '').indexOf(edState.q) >= 0;
+      btns[j].style.display = hit ? '' : 'none';
+      if (hit) { shown++; if (!firstMatch) firstMatch = { c: +btns[j].getAttribute('data-c'), t: +btns[j].getAttribute('data-t') }; }
+    }
+    var head = cats[i].querySelector('.ed-cat-head');
+    if (head) head.style.display = shown ? '' : 'none';
+    cats[i].style.display = shown ? '' : 'none';
+  }
+  if (firstMatch) edSelect(firstMatch.c, firstMatch.t);
+}
+
+function edScrollNav() {
+  var el = document.querySelector('#edNav .ed-type.active');
+  if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+}
+
+function edKey(e, c, t) {
+  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    openEntityDict(c, t);
+  }
+}
+
+function closeEntityDict(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('entityDict').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    var m = document.getElementById('entityDict');
+    if (m && m.classList.contains('show')) closeEntityDict();
+  }
+});
+
 /* section级别折叠：点击h2标题折叠/展开整个section */
 document.querySelectorAll('.std-section > h2').forEach(function(h2) {
   h2.addEventListener('click', function() {
@@ -2243,6 +2628,23 @@ document.addEventListener('keydown', function(e) {
     }
   }).catch(function() { /* API 不可用时保留静态数字 */ });
 })();
+
+document.addEventListener('click', function(e){
+  var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+  if (!a) return;
+  var id = (a.getAttribute('href') || '').slice(1);
+  if (!id) return;
+  var sec = document.getElementById(id);
+  if (!sec) return;
+  var host = sec.closest('.std-tech-only') || (sec.classList && sec.classList.contains('std-tech-only') ? sec : null);
+  if (host && host.classList.contains('collapsed')) {
+    host.classList.remove('collapsed');
+    document.querySelectorAll('.std-anchor').forEach(function(x){
+      if (x.getAttribute('href') === '#' + host.id) x.classList.add('active');
+    });
+  }
+});
 </script>
+<!--data-deai-20260930-->
 </body>
 </html>

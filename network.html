@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>网络探索 - 知识图谱交互分析</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 /* ==================== Top Toolbar ==================== */
 .nw-toolbar {
@@ -343,9 +343,9 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 .nw-graph-guide {
   position: absolute; top: 12px; left: 12px; z-index: 9;
   width: 30px; min-width: 30px;
-  background: linear-gradient(135deg, rgba(26,29,39,.94), rgba(17,20,30,.88));
-  border: 1px solid rgba(79,140,255,.45); border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  background: var(--tip-bg);
+  border: 1px solid var(--tip-line); border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
   overflow: hidden; cursor: pointer;
   transition: width .3s ease, min-width .3s ease, padding .3s ease;
 }
@@ -367,10 +367,10 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 .nw-graph-guide .guide-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .nw-guide-btn {
   border: 1px solid rgba(79,140,255,.45); border-radius: 999px;
-  background: rgba(79,140,255,.10); color: var(--accent); padding: 4px 9px;
+  background: var(--accent-bg); color: var(--accent); padding: 4px 9px;
   font-size: 11px; font-weight: 800; cursor: pointer;
 }
-.nw-guide-btn:hover { background: rgba(79,140,255,.18); border-color: var(--accent); }
+.nw-guide-btn:hover { background: var(--accent-bg); border-color: var(--accent); }
 .nw-overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
 .nw-overview-card {
   background: var(--bg3); border: 1px solid var(--rule); border-radius: 9px;
@@ -412,7 +412,8 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 <div class="nw-toolbar" id="nw-toolbar">
   <div class="nw-toolbar-title">🕸️ 网络探索</div>
   <div class="nw-toolbar-disease">
-    <select id="nw-disease-select" onchange="onDiseaseSelect()">
+    <a id="nw-goto-explore" href="explore.html" title="在图谱探索中查看当前疾病" style="font-size:11px;color:var(--accent);text-decoration:none;padding:3px 10px;border:1px solid var(--accent-bg);border-radius:6px;background:var(--accent-bg);white-space:nowrap">🧭 图谱探索 →</a>
+      <select id="nw-disease-select" onchange="onDiseaseSelect()">
       <option value="">请选择疾病</option>
     </select>
     <div class="nw-toolbar-center">当前中心: <b id="nw-center-name">-</b></div>
@@ -516,7 +517,8 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 <div class="nw-datasource" id="nw-datasource"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 /* ================================================================
    网络探索 - 知识图谱交互分析
@@ -524,7 +526,7 @@ body.nw-fullscreen .nw-graph-wrap { flex: 1; }
 
 /* ---------- Constants ---------- */
 /* DIM_COLORS and DIM_NAMES are now global from app.js */
-var DISEASE_COLOR = '#4f8cff';
+var DISEASE_COLOR = cssVar('--accent','#4f8cff');
 
 /* ---------- State ---------- */
 var GRAPH_CHART = null;
@@ -573,7 +575,9 @@ loadData(function(d) {
   fetch('/api/kg/disease-tree?v='+Date.now()).then(function(r){return r.json()}).then(function(tree){
     DISEASE_TREE = tree;
     populateDiseaseSelect(tree);
-    var defaultCode = getDefaultDiseaseCode() || chooseDefaultDisease(tree);
+    /* v1.5.1 支持 ?code= 深链定位疾病（首页/其他页跳入） */
+    var urlCode = new URLSearchParams(window.location.search).get('code');
+    var defaultCode = (urlCode && findDiseaseInTree(tree, urlCode)) ? urlCode : (getDefaultDiseaseCode() || chooseDefaultDisease(tree));
     if (defaultCode) {
       document.getElementById('nw-disease-select').value = defaultCode;
       loadDiseaseData(defaultCode, function(dd) {
@@ -586,6 +590,19 @@ loadData(function(d) {
 /* ================================================================
    Disease Select
    ================================================================ */
+/* v1.5.1 在疾病树中查找编码是否存在（含子层级） */
+function findDiseaseInTree(tree, code) {
+  var found = false;
+  function walk(nodes){
+    nodes.forEach(function(n){
+      if (n.code === code) found = true;
+      if (n.children) walk(n.children);
+    });
+  }
+  walk(tree);
+  return found;
+}
+
 function chooseDefaultDisease(tree) {
   var allDiseases = [];
   function walk(nodes){
@@ -653,6 +670,9 @@ function setCenter(code) {
 function updateCenterCard(code) {
   var d = KG_DATA.diseases[code];
   if (!d) return;
+  /* v1.5.1 快捷跳转按钮跟随当前疾病 */
+  var gte = document.getElementById('nw-goto-explore');
+  if (gte) gte.href = 'explore.html?code=' + encodeURIComponent(code);
   document.getElementById('cc-name').textContent = d.info.name;
   document.getElementById('cc-code').textContent = d.info.code;
   document.getElementById('cc-type').textContent = '疾病';
@@ -826,7 +846,7 @@ function buildGraphData() {
         level: 1,
         symbolSize: 36,
         itemStyle: { color: color },
-        label: { show: true, fontSize: 10, color: '#e8eaf0' }
+        label: { show: true, fontSize: 10, color: cssVar('--ink','#e8eaf0') }
       };
       pushUniqueNode(nodes, n);
       pushUniqueLink(links, {
@@ -838,14 +858,14 @@ function buildGraphData() {
 
       /* 1.5-hop: TreatmentPlan → sub_drug / sub_procedure / sub_evidence（V4.1：药品统一 Drug） */
       if (k === 'TreatmentPlan' && (e.sub_drug || e.sub_procedure || e.sub_evidence)) {
-        var subColor = '#ff922b';
+        var subColor = cssVar('--orange','#ff922b');
         (e.sub_drug || []).forEach(function(sm) {
           var smName = cleanName(sm);
           pushUniqueNode(nodes, {
             name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Drug',
             category: DIM_KEYS.indexOf('Drug') + 1, dimKey: 'Drug', level: 1.5,
             symbolSize: 26, itemStyle: { color: subColor },
-            label: { show: true, fontSize: 9, color: '#e8eaf0' }
+            label: { show: true, fontSize: 9, color: cssVar('--ink','#e8eaf0') }
           });
           pushUniqueLink(links, {
             source: eName, target: smName, value: 'includes_drug',
@@ -857,12 +877,12 @@ function buildGraphData() {
           pushUniqueNode(nodes, {
             name: spName, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
             category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 1.5,
-            symbolSize: 26, itemStyle: { color: '#f06595' },
-            label: { show: true, fontSize: 9, color: '#e8eaf0' }
+            symbolSize: 26, itemStyle: { color: cssVar('--pink','#f06595') },
+            label: { show: true, fontSize: 9, color: cssVar('--ink','#e8eaf0') }
           });
           pushUniqueLink(links, {
             source: eName, target: spName, value: 'includes_procedure',
-            lineStyle: { color: '#f06595', width: 1.5, type: 'dotted', opacity: 0.7 }
+            lineStyle: { color: cssVar('--pink','#f06595'), width: 1.5, type: 'dotted', opacity: 0.7 }
           });
           /* 2-hop: Procedure → 标准手术编码（V4.1：读 Procedure.standard_code 自身字段） */
           (sp.std_procedures || []).forEach(function(spd) {
@@ -872,12 +892,12 @@ function buildGraphData() {
             pushUniqueNode(nodes, {
               name: spdName, code: spd.code || '', nodeType: 'entity-sub', type: 'Procedure',
               category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 2,
-              symbolSize: 20, itemStyle: { color: '#cc5de8', opacity: 0.75 },
-              label: { show: true, fontSize: 8, color: '#b0b8c8' }
+              symbolSize: 20, itemStyle: { color: cssVar('--purple','#cc5de8'), opacity: 0.75 },
+              label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
             });
             pushUniqueLink(links, {
               source: spName, target: spdName, value: '标准手术编码',
-              lineStyle: { color: '#cc5de8', width: 1, type: 'dotted', opacity: 0.5 }
+              lineStyle: { color: cssVar('--purple','#cc5de8'), width: 1, type: 'dotted', opacity: 0.5 }
             });
           });
         });
@@ -887,12 +907,12 @@ function buildGraphData() {
           if (seName.length > 30) {
             seName = seName.substring(0, 28) + '…';
           }
-          var evColor = DIM_COLORS['Evidence'] || '#40c057';
+          var evColor = DIM_COLORS['Evidence'] || cssVar('--dim-evidence','#40c057');
           pushUniqueNode(nodes, {
             name: seName, code: se.code || '', nodeType: 'entity-sub', type: 'Evidence',
             category: DIM_KEYS.indexOf('Evidence') + 1, dimKey: 'Evidence', level: 1.5,
             symbolSize: 22, itemStyle: { color: evColor, opacity: 0.8 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: seName, value: 'supported_by_evidence',
@@ -903,14 +923,14 @@ function buildGraphData() {
 
       /* 1.5-hop: Drug药品类别 → sub_drug (具体药品，V4.1 has_specific_drug) */
       if (k === 'Drug' && e.sub_drug) {
-        var medSubColor = '#ff922b';
+        var medSubColor = cssVar('--orange','#ff922b');
         (e.sub_drug || []).forEach(function(sm) {
           var smName = cleanName(sm);
           pushUniqueNode(nodes, {
             name: smName, code: sm.code || '', nodeType: 'entity-sub', type: 'Drug',
             category: DIM_KEYS.indexOf('Drug') + 1, dimKey: 'Drug', level: 1.5,
             symbolSize: 22, itemStyle: { color: medSubColor, opacity: 0.75 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: smName, value: 'has_specific_drug',
@@ -921,7 +941,7 @@ function buildGraphData() {
 
       /* 1.5-hop: Procedure → 标准手术编码（V4.1：读 Procedure.standard_code 自身字段） */
       if (k === 'Procedure' && e.std_procedures && e.std_procedures.length) {
-        var spSubColor = '#cc5de8';
+        var spSubColor = cssVar('--purple','#cc5de8');
         e.std_procedures.forEach(function(sp) {
           if (!sp.standard_code) return;
           var spCodeName = sp.coding_system ? (sp.standard_code + '·' + sp.coding_system) : sp.standard_code;
@@ -930,7 +950,7 @@ function buildGraphData() {
             name: spCodeName, code: sp.code || '', nodeType: 'entity-sub', type: 'Procedure',
             category: DIM_KEYS.indexOf('Procedure') + 1, dimKey: 'Procedure', level: 1.5,
             symbolSize: 22, itemStyle: { color: spSubColor, opacity: 0.75 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: spCodeName, value: '标准手术编码',
@@ -941,14 +961,14 @@ function buildGraphData() {
 
       /* 1.5-hop: DiagnosisCriteria → sub_component (诊断明细组件) */
       if (k === 'DiagnosisCriteria' && (e.sub_component && e.sub_component.length || e.sub_evidence)) {
-        var dcSubColor = '#ffd43b';
+        var dcSubColor = cssVar('--yellow','#ffd43b');
         (e.sub_component || []).forEach(function(sc) {
           var scName = cleanName(sc);
           pushUniqueNode(nodes, {
             name: scName, code: sc.code || '', nodeType: 'entity-sub', type: 'DiagnosisCriteria',
             category: DIM_KEYS.indexOf('DiagnosisCriteria') + 1, dimKey: 'DiagnosisCriteria', level: 1.5,
             symbolSize: 22, itemStyle: { color: dcSubColor, opacity: 0.75 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: scName, value: 'has_diagnostic_component',
@@ -959,12 +979,12 @@ function buildGraphData() {
         (e.sub_evidence || []).forEach(function(se) {
           var seName = cleanName(se);
           if (seName.length > 30) seName = seName.substring(0, 28) + '…';
-          var evColor = DIM_COLORS['Evidence'] || '#40c057';
+          var evColor = DIM_COLORS['Evidence'] || cssVar('--dim-evidence','#40c057');
           pushUniqueNode(nodes, {
             name: seName, code: se.code || '', nodeType: 'entity-sub', type: 'Evidence',
             category: DIM_KEYS.indexOf('Evidence') + 1, dimKey: 'Evidence', level: 1.5,
             symbolSize: 22, itemStyle: { color: evColor, opacity: 0.8 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: seName, value: 'supported_by_evidence',
@@ -975,14 +995,14 @@ function buildGraphData() {
 
       /* 1.5-hop: DifferentialDiagnosis → differential_points / exclusion_exams */
       if (k === 'DifferentialDiagnosis') {
-        var ddxColor = '#ffd43b';
+        var ddxColor = cssVar('--yellow','#ffd43b');
         (e.differential_points || []).forEach(function(dp) {
           var dpName = cleanName(dp);
           pushUniqueNode(nodes, {
             name: dpName, code: dp.code || '', nodeType: 'entity-sub', type: 'DifferentialDiagnosis',
             category: DIM_KEYS.indexOf('DifferentialDiagnosis') + 1, dimKey: 'DifferentialDiagnosis', level: 1.5,
             symbolSize: 18, itemStyle: { color: ddxColor, opacity: 0.6 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: dpName, value: 'has_differential_point',
@@ -994,12 +1014,12 @@ function buildGraphData() {
           pushUniqueNode(nodes, {
             name: exName, code: ex.code || '', nodeType: 'entity-sub', type: 'ExamItem',
             category: DIM_KEYS.indexOf('ExamItem') + 1, dimKey: 'ExamItem', level: 1.5,
-            symbolSize: 18, itemStyle: { color: '#22b8cf', opacity: 0.6 },
-            label: { show: true, fontSize: 8, color: '#b0b8c8' }
+            symbolSize: 18, itemStyle: { color: cssVar('--cyan','#22b8cf'), opacity: 0.6 },
+            label: { show: true, fontSize: 10, color: cssVar('--muted','#475569') }
           });
           pushUniqueLink(links, {
             source: eName, target: exName, value: 'requires_exclusion_exam',
-            lineStyle: { color: '#22b8cf', width: 1, type: 'dotted', opacity: 0.4 }
+            lineStyle: { color: cssVar('--cyan','#22b8cf'), width: 1, type: 'dotted', opacity: 0.4 }
           });
         });
       }
@@ -1011,7 +1031,7 @@ function buildGraphData() {
   var medList = (disease.dimensions['Drug'] || []).slice(0, MAX_ENTITIES_PER_DIM);
   var procList = (disease.dimensions['Procedure'] || []).slice(0, MAX_ENTITIES_PER_DIM);
   if (ruleList.length) {
-    var ruleColor = DIM_COLORS['ClinicalRule'] || '#339af0';
+    var ruleColor = DIM_COLORS['ClinicalRule'] || cssVar('--dim-clinical-rule','#339af0');
     ruleList.forEach(function(rule) {
       var ruleName = cleanName(rule);
       var ruleText = (rule.rule_logic || '') + (rule.output_content || '') + (rule.trigger_condition || '');
@@ -1040,7 +1060,7 @@ function buildGraphData() {
 
   /* SpecialtyCarePathway → PathwayStage（V4.1：专科诊疗路径） */
   if (disease.pathways && disease.pathways.length) {
-    var pwColor = '#339af0';
+    var pwColor = cssVar('--dim-clinical-rule','#339af0');
     disease.pathways.forEach(function(pw) {
       var pwName = cleanName(pw) || '专科诊疗路径';
       pushUniqueNode(nodes, {
@@ -1059,7 +1079,7 @@ function buildGraphData() {
           name: stgName, code: stg.code || '', nodeType: 'entity-sub', type: 'PathwayStage',
           category: 0, level: 1.5,
           symbolSize: 24, itemStyle: { color: pwColor, opacity: 0.7 },
-          label: { show: true, fontSize: 9, color: '#e8eaf0' }
+          label: { show: true, fontSize: 9, color: cssVar('--ink','#e8eaf0') }
         });
         pushUniqueLink(links, {
           source: pwName, target: stgName, value: 'includes_pathway_stage',
@@ -1103,8 +1123,8 @@ function buildGraphData() {
           category: 0,
           level: 2,
           symbolSize: Math.min(34, 18 + sharedDiseaseScore[dc]),
-          itemStyle: { color: '#4f8cff', opacity: 0.62 },
-          label: { show: true, fontSize: 9, color: '#8b90a0' }
+          itemStyle: { color: cssVar('--accent','#4f8cff'), opacity: 0.62 },
+          label: { show: true, fontSize: 9, color: cssVar('--muted','#8b90a0') }
         };
         pushUniqueNode(nodes, otherDiseaseNode);
         sharedDiseaseLinks[dc].slice(0, 8).forEach(function(x) {
@@ -1144,7 +1164,7 @@ function buildGraphData() {
               dimKey: k,
               level: 3,
               symbolSize: 14,
-              itemStyle: { color: DIM_COLORS[k] || '#888', opacity: 0.4 },
+              itemStyle: { color: DIM_COLORS[k] || '#888', opacity: getTheme() === 'light' ? 0.75 : 0.4 },
               label: { show: false }
             };
             pushUniqueNode(nodes, n);
@@ -1152,7 +1172,7 @@ function buildGraphData() {
               source: dName,
               target: eName,
               value: k,
-              lineStyle: { color: DIM_COLORS[k] || '#888', width: 0.8, opacity: 0.25 }
+              lineStyle: { color: DIM_COLORS[k] || '#888', width: getTheme() === 'light' ? 1.2 : 0.8, opacity: getTheme() === 'light' ? 0.5 : 0.25 }
             });
           }
         });
@@ -1174,6 +1194,16 @@ function findDiseaseCodeByName(name) {
 /* ================================================================
    Render Graph
    ================================================================ */
+
+/* v1.4.5 主题热切换：全库网络图就地重绘，免整页刷新 */
+/* v1.4.7：色板热刷新 + 疾病色重读 + 维度筛选重绘，再全图重绘 */
+window.onThemeChange = function() {
+  if (typeof refreshDimColors === 'function') refreshDimColors();
+  DISEASE_COLOR = cssVar('--accent','#4f8cff');
+  if (typeof renderDimFilters === 'function') renderDimFilters();
+  if (typeof renderGraph === 'function') renderGraph();
+};
+
 function renderGraph() {
   var container = document.getElementById('nw-graph');
   if (!container) return;
@@ -1184,7 +1214,8 @@ function renderGraph() {
   renderGraphGuide(gd);
   showGraphOverview(gd);
 
-  GRAPH_CHART = echarts.init(container, null, { renderer: 'canvas' });
+  GRAPH_CHART = echarts.init(container, null, { renderer: 'canvas', devicePixelRatio: kgDpr() });
+  container.setAttribute('role', 'img'); container.setAttribute('aria-label', '全库知识图谱关系网络图');
 
   /* Apply search filter */
   if (SEARCH_RESULTS !== null) {
@@ -1228,9 +1259,9 @@ function renderGraph() {
   GRAPH_CHART.setOption({
     tooltip: {
       trigger: 'item',
-      backgroundColor: '#1a1d27',
-      borderColor: '#2e3348',
-      textStyle: { color: '#e8eaf0', fontSize: 12 },
+      backgroundColor: cssVar('--bg2','#1a1d27'),
+      borderColor: cssVar('--rule','#2e3348'),
+      textStyle: { color: cssVar('--ink','#e8eaf0'), fontSize: 12 },
       formatter: function(p) {
         if (p.dataType === 'edge') {
           return p.data.source + ' → ' + p.data.target;
@@ -1247,8 +1278,8 @@ function renderGraph() {
       show: true,
       data: legendData,
       bottom: 10,
-      textStyle: { color: '#8b92a5', fontSize: 10 },
-      inactiveColor: '#444',
+      textStyle: { color: cssVar('--muted','#64748b'), fontSize: 10 },
+      inactiveColor: cssVar('--rule','#dde3ec'),
       selected: legendSelected,
       type: 'scroll'
     },
@@ -1266,7 +1297,7 @@ function renderGraph() {
         show: true,
         position: 'right',
         fontSize: 10,
-        color: '#e8eaf0'
+        color: cssVar('--ink','#e8eaf0')
       },
       lineStyle: {
         curveness: 0.12,
@@ -1338,10 +1369,10 @@ function renderGraph() {
     showEmptyDetail();
   });
 
-  /* Resize */
-  window.addEventListener('resize', function() {
+  /* Resize（v1.4.4 防抖） */
+  window.addEventListener('resize', kgDebounce(function() {
     if (GRAPH_CHART) GRAPH_CHART.resize();
-  });
+  }, 150));
 
   setTimeout(function() {
     if (GRAPH_CHART) {
@@ -1833,8 +1864,8 @@ function toggleEntityExpand(entityName, nd) {
         category: 0,
         level: 2,
         symbolSize: 22,
-        itemStyle: { color: '#4f8cff', opacity: 0.5 },
-        label: { show: true, fontSize: 9, color: '#8b90a0' }
+        itemStyle: { color: cssVar('--accent','#4f8cff'), opacity: 0.5 },
+        label: { show: true, fontSize: 9, color: cssVar('--muted','#8b90a0') }
       };
       chartNodes.push(n);
       ALL_GRAPH_NODES[dd.info.name] = n;
@@ -1982,7 +2013,7 @@ function highlightNodes(nodeNames, edgeIndices) {
   nodes.forEach(function(n, i) {
     if (nodeNames.indexOf(n.name) !== -1) {
       n.itemStyle.opacity = 1;
-      n.itemStyle.borderColor = '#ffd43b';
+      n.itemStyle.borderColor = cssVar('--yellow','#ffd43b');
       n.itemStyle.borderWidth = 3;
     } else {
       n.itemStyle.opacity = 0.15;
@@ -2005,7 +2036,7 @@ function highlightPath(path) {
     n.itemStyle = n.itemStyle || {};
     if (pathSet[n.name]) {
       n.itemStyle.opacity = 1;
-      n.itemStyle.borderColor = '#ffd43b';
+      n.itemStyle.borderColor = cssVar('--yellow','#ffd43b');
       n.itemStyle.borderWidth = 3;
     } else {
       n.itemStyle.opacity = 0.12;
@@ -2016,7 +2047,7 @@ function highlightPath(path) {
   links.forEach(function(l) {
     l.lineStyle = l.lineStyle || {};
     if (pathSet[l.source] && pathSet[l.target]) {
-      l.lineStyle.color = '#ffd43b';
+      l.lineStyle.color = cssVar('--yellow','#ffd43b');
       l.lineStyle.width = 3;
       l.lineStyle.opacity = 1;
     } else {

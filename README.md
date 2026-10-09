@@ -1,8 +1,8 @@
-# 心血管专科知识图谱 Web 平台
+﻿# 心血管专科知识图谱 Web 平台
 
 > 基于 Neo4j 图数据库的心血管内科专病知识图谱，支持 132 种心血管疾病的交互式浏览、循证分析与临床审核。
 
-**当前版本**：v1.3.1 · Schema 标准 V4.1 · 数据批次 KG-V4-FOUNDATION-ENTITY-QUALITY-REPAIR-20260911
+**当前版本**：v1.3.7 · Schema 标准 V4.1 · 数据批次 KG-V4-FOUNDATION-ENTITY-QUALITY-REPAIR-20260911
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 功能模块
 
-导航共 10 个入口（9 个站内页 + 1 个外部系统）：
+导航共 11 个入口（10 个站内页 + 1 个外部系统）：
 
 | 模块 | 文件 | 说明 |
 |------|------|------|
@@ -34,6 +34,7 @@
 | ✅ 临床审核 | `review.html` | 4 层审核 Tab（疾病/场景/药师/边级），筛选+导出 |
 | 📐 图谱数据字典 | `schema.html` | 图谱结构注册表视图（默认）+ 实体类型、关系类型、分类统计 |
 | 📘 Schema 标准 | `standard.html` | 专科专病图谱建模标准、字段约束、质量规则 |
+| 🤖 AI图谱解析 | `ai-parse.html` | 实例生产 Skill V5.1 解析规范：九道工序 G0–G8、三道硬闸门、字典/疾病/证据规则、必查与禁止事项 |
 | 📋 指南库 | `guideline.html` | 浏览临床指南及其关联疾病 |
 | 🧬 医学术语库 | `terminology.html` | 按维度分类浏览所有医学术语 |
 | 🩺 专科辅助诊疗 | `specialty-cdss-prototype.html` | **外部系统**（新标签页打开），独立 CDSS 原型 |
@@ -184,7 +185,7 @@ ps aux | grep 'python.*server.py' | grep -v grep
 **单一真相源**：`VERSION` 文件
 
 ```
-kg-test-page/VERSION  →  内容为 "1.3.1"
+kg-test-page/VERSION  →  内容为 "1.3.7"
 ```
 
 - `server.py` 启动时读取 `VERSION`（用 `utf-8-sig` 剥离 BOM），提供 `/api/kg/version` 接口
@@ -192,13 +193,13 @@ kg-test-page/VERSION  →  内容为 "1.3.1"
 
 | 字段 | 当前值 | 含义 |
 |------|--------|------|
-| `version` / `app_version` | `1.3.1` | 应用版本（`VERSION` 文件） |
+| `version` / `app_version` | `1.3.7` | 应用版本（`VERSION` 文件） |
 | `api_version` | `v1.3` | 接口代次（`server.py` 中 `API_VERSION`） |
 | `schema_standard_version` | `V4.1` | 当前执行的图谱 Schema 标准（`SCHEMA_STANDARD_VERSION`） |
 | `skill_version` | `V2.1` | 实例生产 Skill 版本（由查询动态统计，非硬编码） |
 
 - `app.js` 从 API 获取版本号，自动注入页面底部版本栏
-- **版本戳**：所有 HTML 引用 JS/CSS 时统一带 `?v=YYYYMMDDNN`（如 `?v=2026092813`），由 `deploy.py` 校验一致性
+- **版本戳**：所有 HTML 引用 JS/CSS 时统一带 `?v=YYYYMMDDNN`（如 `?v=2026092915`），由 `deploy.py` 校验一致性
 
 ```bash
 # 发版流程
@@ -247,6 +248,7 @@ kg-test-page/
 ├── disease-review.html        # 疾病审核详情（review.html 跳转入口）
 ├── schema.html                # 图谱数据字典
 ├── standard.html              # Schema 标准
+├── ai-parse.html              # AI图谱解析（Skill V5.1 执行规范）
 ├── guideline.html             # 指南库
 ├── terminology.html           # 医学术语库
 ├── config.html                # 系统配置

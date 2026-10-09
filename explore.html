@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 图谱探索</title>
-<link rel="stylesheet" href="./_shared/css/style.css">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
 <style>
 html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-layout{display:grid;grid-template-columns:300px 1fr 360px;height:calc(100vh - 48px);overflow:hidden}
@@ -34,7 +34,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-mini-table td.lv.hi{color:#ff6b6b}.ex-mini-table td.lv.mid{color:#ffd43b}.ex-mini-table td.lv.lo{color:#51cf66}
 .ex-mini-table td.num{font-family:'SF Mono','Cascadia Code','Consolas',monospace;white-space:nowrap;color:var(--ink)}
 .ex-risk-factors{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0}
-.ex-risk-factor{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);color:var(--ink)}
+.ex-risk-factor{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--accent-bg);border:1px solid var(--accent-bg);color:var(--ink)}
 .ex-risk-scale{margin-bottom:8px;padding:8px 10px;background:rgba(12,166,120,.05);border:1px solid rgba(12,166,120,.15);border-radius:6px}
 .ex-risk-scale-name{font-weight:700;font-size:12px;color:#0ca678;margin-bottom:2px}
 .ex-risk-scale-rule{font-size:10.5px;color:var(--muted);margin-bottom:4px}
@@ -48,13 +48,13 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-view-mode label{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:6px;background:var(--bg3);flex:1;transition:all .15s}
 .ex-view-mode label:hover{color:var(--ink)}
 .ex-view-mode input[type=radio]{display:none}
-.ex-view-mode label.active{color:var(--accent);background:rgba(79,140,255,.15);font-weight:600}
+.ex-view-mode label.active{color:var(--accent);background:var(--accent-bg);font-weight:600}
 .ex-search{padding:12px;border-bottom:1px solid var(--rule)}
 .ex-search input{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}
 .ex-search input:focus{border-color:var(--accent)}
 .ex-tree{flex:1;overflow:auto;padding:4px 0}.ex-tree::-webkit-scrollbar,.ex-main::-webkit-scrollbar,.ex-right::-webkit-scrollbar{width:5px}.ex-tree::-webkit-scrollbar-thumb,.ex-main::-webkit-scrollbar-thumb,.ex-right::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
 .ex-group{margin-bottom:1px}.ex-group-head{display:flex;align-items:center;gap:7px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:11px;font-weight:700}.ex-group-head:hover{background:var(--bg3);color:var(--ink)}.ex-group-head .arr{font-size:8px;transition:transform .2s}.ex-group.open .arr{transform:rotate(90deg)}.ex-group-head .count{margin-left:auto;background:var(--bg3);border-radius:999px;padding:1px 7px;font-size:9px;color:var(--muted)}.ex-group-items{display:none}.ex-group.open .ex-group-items{display:block}
-.ex-disease{display:flex;align-items:flex-start;gap:8px;padding:8px 14px 8px 32px;border-left:3px solid transparent;cursor:pointer;font-size:12px;line-height:1.4}.ex-disease:hover{background:rgba(79,140,255,.06)}.ex-disease.active{background:rgba(79,140,255,.1);border-left-color:var(--accent);color:var(--accent)}.ex-disease .name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ex-disease .name-row{display:flex;align-items:center;gap:6px}.ex-disease .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.ex-disease .meta{font-size:10px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}.ex-disease .cov{font-size:9px;border-radius:999px;padding:2px 6px;font-weight:700;line-height:1;flex-shrink:0;margin-top:1px}.ex-disease.has-children{padding-right:6px}.ex-disease .ex-child-toggle{font-size:9px;color:var(--muted);cursor:pointer;padding:2px 4px;margin-left:auto;transition:color .15s;flex-shrink:0}.ex-disease .ex-child-toggle:hover{color:var(--accent)}.dx-role-badge{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;white-space:nowrap;flex-shrink:0}.dx-role-badge.broad{background:rgba(255,193,7,.15);color:#ffc107}.dx-role-badge.subtype{background:rgba(81,207,102,.15);color:#51cf66}.dx-role-badge.independent{background:rgba(34,184,207,.12);color:#22b8cf}.icd-code{font-size:9px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);background:var(--bg3);padding:1px 4px;border-radius:3px}.subtype-count{font-size:9px;color:var(--accent);background:rgba(79,140,255,.1);padding:1px 5px;border-radius:4px}.ex-children{display:none;border-left:2px solid var(--rule);margin-left:14px;background:rgba(255,255,255,.02)}.ex-children.open{display:block}.ex-children .ex-disease.level-2{padding-left:14px}.ex-children .ex-disease.level-3{padding-left:28px}
+.ex-disease{display:flex;align-items:flex-start;gap:8px;padding:8px 14px 8px 32px;border-left:3px solid transparent;cursor:pointer;font-size:12px;line-height:1.4}.ex-disease:hover{background:rgba(79,140,255,.06)}.ex-disease.active{background:var(--accent-bg);border-left-color:var(--accent);color:var(--accent)}.ex-disease .name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ex-disease .name-row{display:flex;align-items:center;gap:6px}.ex-disease .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.ex-disease .meta{font-size:10px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}.ex-disease .cov{font-size:9px;border-radius:999px;padding:2px 6px;font-weight:700;line-height:1;flex-shrink:0;margin-top:1px}.ex-disease.has-children{padding-right:6px}.ex-disease .ex-child-toggle{font-size:9px;color:var(--muted);cursor:pointer;padding:2px 4px;margin-left:auto;transition:color .15s;flex-shrink:0}.ex-disease .ex-child-toggle:hover{color:var(--accent)}.dx-role-badge{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;white-space:nowrap;flex-shrink:0}.dx-role-badge.broad{background:rgba(255,193,7,.15);color:#ffc107}.dx-role-badge.subtype{background:var(--green-bg);color:#51cf66}.dx-role-badge.independent{background:rgba(34,184,207,.12);color:#22b8cf}.icd-code{font-size:9px;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);background:var(--bg3);padding:1px 4px;border-radius:3px}.subtype-count{font-size:9px;color:var(--accent);background:var(--accent-bg);padding:1px 5px;border-radius:4px}.ex-children{display:none;border-left:2px solid var(--rule);margin-left:14px;background:rgba(255,255,255,.02)}.ex-children.open{display:block}.ex-children .ex-disease.level-2{padding-left:14px}.ex-children .ex-disease.level-3{padding-left:28px}
 /* 层级树 */
 .ex-tree .ex-group-head{padding-left:14px}
 .ex-tree .level-1 > .ex-group-head{padding-left:14px}
@@ -72,11 +72,11 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-disease.has-cls{flex-wrap:wrap;padding-bottom:4px}
 .ex-cls-bar{width:100%;padding-left:14px;margin-top:2px}
 .ex-cls-toggle{font-size:10px;color:var(--muted);background:var(--bg3);padding:2px 8px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-.ex-cls-toggle:hover{color:var(--accent);background:rgba(79,140,255,.1)}
+.ex-cls-toggle:hover{color:var(--accent);background:var(--accent-bg)}
 .ex-cls-chips{width:100%;padding-left:14px;margin-top:4px;display:none;gap:6px;flex-wrap:wrap}
 .ex-cls-chips.open{display:flex}
 .ex-cls-chip{font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--rule);padding:2px 6px;border-radius:4px;cursor:pointer}
-.ex-cls-chip:hover{color:var(--accent);background:rgba(79,140,255,.1);border-color:var(--accent)}
+.ex-cls-chip:hover{color:var(--accent);background:var(--accent-bg);border-color:var(--accent)}
 .ex-tabs{display:flex;background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-bottom:18px}.ex-tab{flex:1;padding:12px 14px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;border-bottom:2px solid transparent}.ex-tab:hover{background:var(--bg3);color:var(--ink)}.ex-tab.active{color:var(--accent);background:var(--bg3);border-bottom-color:var(--accent)}
 .ex-head{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:18px;margin-bottom:16px}.ex-head h1{font-size:24px;font-weight:800;margin-bottom:6px}.ex-meta{font-size:12px;color:var(--muted);line-height:1.7}.ex-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--accent)}
 .ex-panel{display:none}.ex-panel.active{display:block}.ex-dim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
@@ -84,7 +84,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;flex-shrink:0}
 .ex-card-title{font-size:12px;font-weight:800;color:var(--muted)}
 .ex-card-count{font-size:11px;border-radius:999px;padding:2px 8px;font-weight:700}
-.ex-card-count.ok{background:rgba(81,207,102,.15);color:#51cf66}
+.ex-card-count.ok{background:var(--green-bg);color:#51cf66}
 .ex-card-count.zz{background:rgba(255,255,255,.05);color:var(--muted)}
 .ex-card-body{flex:1;overflow-y:auto;min-height:0}
 .ex-card-body::-webkit-scrollbar{width:4px}
@@ -99,8 +99,12 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-clinical-title .icon{font-size:14px}
 .ex-clinical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .ex-graph-box{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:14px}.ex-graph-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.ex-graph-title{font-size:14px;font-weight:800;color:var(--ink)}.ex-graph-note{font-size:12px;color:var(--muted)}#explore-graph{width:100%;height:700px}
+.ex-graph-legendbar{display:flex;align-items:center;gap:6px;margin:0 0 8px;flex-wrap:wrap}
+.ex-legend-tip{font-size:11px;color:var(--muted)}
+.ex-lg-btn{font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--rule);background:var(--bg2);color:var(--ink);cursor:pointer;transition:all .15s}
+.ex-lg-btn:hover{border-color:var(--accent);color:var(--accent)}
 .ex-entity-tools{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:14px}.ex-entity-tools input,.ex-entity-tools select{padding:10px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;color:var(--ink);font-size:12px;outline:none}.ex-entity-tools input:focus,.ex-entity-tools select:focus{border-color:var(--accent)}
-.ex-table-wrap{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:auto;max-height:640px}.ex-table{width:100%;border-collapse:collapse;font-size:12px}.ex-table th{position:sticky;top:0;background:var(--bg3);padding:10px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.ex-table td{padding:9px 12px;border-top:1px solid var(--rule);vertical-align:top}.ex-table tr{cursor:pointer}.ex-table tr:hover td{background:rgba(79,140,255,.06)}.ex-ename{font-weight:700;color:var(--ink)}.ex-ecode{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px}.ex-dim-badge{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.1);color:var(--accent);white-space:nowrap}
+.ex-table-wrap{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:auto;max-height:640px}.ex-table{width:100%;border-collapse:collapse;font-size:12px}.ex-table th{position:sticky;top:0;background:var(--bg3);padding:10px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.ex-table td{padding:9px 12px;border-top:1px solid var(--rule);vertical-align:top}.ex-table tr{cursor:pointer}.ex-table tr:hover td{background:rgba(79,140,255,.06)}.ex-ename{font-weight:700;color:var(--ink)}.ex-ecode{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px}.ex-dim-badge{font-size:10px;padding:2px 7px;border-radius:999px;background:var(--accent-bg);color:var(--accent);white-space:nowrap}
 .ex-side-empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}.ex-side-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:5px}.ex-side-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--muted);font-size:11px;margin-bottom:14px}.ex-side-section{border-top:1px solid var(--rule);padding-top:12px;margin-top:12px}.ex-side-section h4{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px}.ex-row{display:grid;grid-template-columns:88px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule)}.ex-row:last-child{border-bottom:none}.ex-row-label{font-size:10px;font-weight:800;color:var(--muted)}.ex-row-value{font-size:12px;color:var(--ink);line-height:1.5;word-break:break-all}.ex-small-item{font-size:12px;color:var(--ink);padding:5px 0;border-bottom:1px solid var(--rule)}.ex-small-item:last-child{border-bottom:none}.ex-empty{display:flex;align-items:center;justify-content:center;height:420px;color:var(--muted);font-size:14px;text-align:center;background:var(--bg2);border:1px solid var(--rule);border-radius:12px}
 /* 子组件/鉴别诊断下钻样式 */
 .ex-drill-list{margin:2px 0 6px 0}
@@ -124,7 +128,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 /* 详情面板子组件样式 */
 .ex-sub-detail{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:12px;margin:8px 0}
 .ex-sub-detail-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.ex-sub-detail-title .idx{font-size:10px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.12);border-radius:999px;padding:1px 6px}
+.ex-sub-detail-title .idx{font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-bg);border-radius:999px;padding:1px 6px}
 .ex-sub-detail-row{font-size:11px;color:var(--muted);padding:3px 0 3px 8px;line-height:1.6}
 .ex-sub-detail-row b{color:var(--ink);font-weight:700}
 .ex-evidence-item{font-size:11px;color:var(--muted);padding:2px 0 2px 16px;line-height:1.5}
@@ -137,7 +141,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .ex-rec-section h3 .badge{background:var(--accent);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
 .ex-rec-grid{display:grid;gap:10px}
 .ex-rec-card{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s}
-.ex-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(79,140,255,.12)}
+.ex-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px var(--accent-bg)}
 .ex-rec-card-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .ex-rec-card-title{font-size:13px;font-weight:600;color:var(--ink);flex:1;line-height:1.3}
 .ex-rec-card-type{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
@@ -155,7 +159,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 /* CDSS流程视角 */
 .cdss-pathway { padding: 16px; }
 .cdss-pathway-head {
-  background: linear-gradient(135deg, var(--accent), #748ffc);
+  background: linear-gradient(135deg, var(--accent), var(--dim-patho));
   border-radius: 12px; padding: 20px; margin-bottom: 20px;
   color: #fff;
 }
@@ -173,7 +177,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   border-bottom: 1px solid var(--rule);
   cursor: pointer; user-select: none;
 }
-.cdss-stage-head:hover { background: rgba(79,140,255,.08); }
+.cdss-stage-head:hover { background: var(--row-hover); }
 .cdss-stage-icon { font-size: 20px; }
 .cdss-stage-title { font-size: 15px; font-weight: 700; color: var(--ink); flex: 1; }
 .cdss-stage-count { font-size: 11px; color: var(--muted); background: var(--bg2); padding: 2px 8px; border-radius: 8px; }
@@ -187,7 +191,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px; cursor: pointer;
 }
-.cdss-rule-head:hover { background: rgba(79,140,255,.05); }
+.cdss-rule-head:hover { background: var(--row-hover); }
 .cdss-rule-icon { font-size: 16px; }
 .cdss-rule-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
 .cdss-rule-body { padding: 0 14px 14px; }
@@ -197,83 +201,83 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   border-radius: 8px; padding: 12px; margin-bottom: 8px;
   cursor: pointer; transition: all .15s;
 }
-.cdss-rec:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(79,140,255,.15); transform: translateY(-1px); }
+.cdss-rec:hover { border-color: var(--accent); box-shadow: 0 2px 12px var(--accent-bg); transform: translateY(-1px); }
 .cdss-rec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .cdss-rec-badge {
   font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
 }
-.cdss-rec-badge.recommend { background: #d3f9d8; color: #2b8a3e; }
-.cdss-rec-badge.block { background: #ffe3e3; color: #c92a2a; }
+.cdss-rec-badge.recommend { background: var(--ok-bg); color: var(--ok-ink); }
+.cdss-rec-badge.block { background: var(--bad-bg); color: var(--bad-ink); }
 .cdss-rec-class { font-size: 11px; color: var(--accent); font-weight: 700; }
 .cdss-rec-ev { font-size: 11px; color: var(--muted); }
 .cdss-rec-text { font-size: 13px; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
 .cdss-rec-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
 .cdss-rec-action {
-  font-size: 11px; background: rgba(79,140,255,.1); color: var(--accent);
-  padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(79,140,255,.2);
+  font-size: 11px; background: var(--accent-bg); color: var(--accent);
+  padding: 2px 8px; border-radius: 6px; border: 1px solid var(--accent-bg);
 }
 .cdss-rec-blocked {
-  font-size: 11px; background: rgba(255,107,107,.1); color: var(--accent2);
-  padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,.2);
+  font-size: 11px; background: var(--bad-bg); color: var(--accent2);
+  padding: 2px 8px; border-radius: 6px; border: 1px solid var(--bad-line);
 }
 .cdss-rec-source { font-size: 11px; color: var(--muted); display: block; line-height: 1.6; margin-top: 4px; }
-.cdss-rec-source .page { font-size: 10px; color: var(--accent); background: rgba(79,140,255,.1); padding: 0 5px; border-radius: 4px; margin-left: 2px; }
-.cdss-rec-evidence { font-size: 12px; color: var(--ink); background: rgba(79,140,255,.06); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; line-height: 1.6; }
+.cdss-rec-source .page { font-size: 10px; color: var(--accent); background: var(--accent-bg); padding: 0 5px; border-radius: 4px; margin-left: 2px; }
+.cdss-rec-evidence { font-size: 12px; color: var(--ink); background: var(--row-hover); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; line-height: 1.6; }
 
 /* ===== 4001整改：推荐卡片新增元素（状态徽章/闭环链路/缺失项/受阻卡片） ===== */
 .cdss-rec-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-.cdss-rec-status.ok { background: #d3f9d8; color: #2b8a3e; }
-.cdss-rec-status.warn { background: #fff3bf; color: #e67700; }
-.cdss-rec-status.bad { background: #ffe3e3; color: #c92a2a; }
+.cdss-rec-status.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.cdss-rec-status.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.cdss-rec-status.bad { background: var(--bad-bg); color: var(--bad-ink); }
 .cdss-rec-closure {
   font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 8px;
-  padding: 4px 8px; background: rgba(139,146,165,.08); border-radius: 6px;
+  padding: 4px 8px; background: var(--neutral-bg); border-radius: 6px;
 }
-.cdss-rec-closure.none { color: #e8590c; background: rgba(232,89,12,.08); }
-.bf-mark { color: #4f8cff; font-weight: 700; cursor: help; margin-left: 1px; }
+.cdss-rec-closure.none { color: var(--orange); background: var(--orange-bg); }
+.bf-mark { color: var(--accent); font-weight: 700; cursor: help; margin-left: 1px; }
 .cdss-rec-missing {
-  font-size: 11px; color: #e8590c; line-height: 1.5; margin-bottom: 6px;
-  padding: 4px 8px; background: rgba(232,89,12,.07); border: 1px dashed rgba(232,89,12,.35);
+  font-size: 11px; color: var(--orange); line-height: 1.5; margin-bottom: 6px;
+  padding: 4px 8px; background: var(--orange-bg); border: 1px dashed var(--orange-line);
   border-radius: 6px;
 }
-.cdss-rec-isblocked { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.03); }
-.chain-blocked-box summary::-webkit-details-marker { color: #ffb020; }
+.cdss-rec-isblocked { border-color: var(--bad-line); background: var(--bad-bg-faint); }
+.chain-blocked-box summary::-webkit-details-marker { color: var(--yellow); }
 
 /* ===== Schema V3.2 状态摘要条（5指标） ===== */
 .cdss-sum-bar { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 14px 0; }
 .cdss-sum-card {
   flex: 1; min-width: 130px; display: flex; align-items: center; gap: 8px;
   padding: 10px 12px; border-radius: 10px; cursor: default;
-  background: rgba(255,255,255,.04); border: 1px solid rgba(139,146,165,.18);
+  background: var(--neutral-bg); border: 1px solid var(--neutral-line);
 }
-.cdss-sum-card.ok { border-color: rgba(81,207,102,.35); background: rgba(81,207,102,.06); }
-.cdss-sum-card.warn { border-color: rgba(250,173,20,.35); background: rgba(250,173,20,.06); }
-.cdss-sum-card.bad { border-color: rgba(250,82,82,.35); background: rgba(250,82,82,.06); }
+.cdss-sum-card.ok { border-color: var(--ok-line); background: var(--ok-bg-faint); }
+.cdss-sum-card.warn { border-color: var(--warn-line); background: var(--warn-bg-faint); }
+.cdss-sum-card.bad { border-color: var(--bad-line); background: var(--bad-bg-faint); }
 .cdss-sum-icon { font-size: 18px; line-height: 1; }
 .cdss-sum-value { font-size: 15px; font-weight: 800; color: var(--ink); line-height: 1.2; }
-.cdss-sum-card.ok .cdss-sum-value { color: #51cf66; }
-.cdss-sum-card.warn .cdss-sum-value { color: #fab005; }
-.cdss-sum-card.bad .cdss-sum-value { color: #fa5252; }
+.cdss-sum-card.ok .cdss-sum-value { color: var(--green); }
+.cdss-sum-card.warn .cdss-sum-value { color: var(--yellow); }
+.cdss-sum-card.bad .cdss-sum-value { color: var(--accent2); }
 .cdss-sum-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
 /* ===== 推荐卡禁忌标识（has_contraindication） ===== */
 .cdss-rec-contra {
   font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
-  background: #ffe3e3; color: #c92a2a;
+  background: var(--bad-bg); color: var(--bad-ink);
 }
 .cdss-rec-contra-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
 .cdss-contra-tag {
   font-size: 10px; padding: 1px 7px; border-radius: 4px;
-  background: rgba(250,82,82,.08); color: #e03131; border: 1px solid rgba(250,82,82,.2);
+  background: var(--bad-bg-faint); color: var(--bad-ink); border: 1px solid var(--bad-line);
 }
-.cdss-contra-tag.more { color: var(--muted); border-color: rgba(139,146,165,.25); background: rgba(139,146,165,.06); }
+.cdss-contra-tag.more { color: var(--muted); border-color: var(--neutral-line); background: var(--neutral-bg); }
 
 /* ===== 实体状态徽标（schema-map.js 渲染） ===== */
 .sm-badge {
   display: inline-block; font-size: 9px; font-weight: 700; padding: 0 4px;
   border-radius: 4px; margin-left: 3px; vertical-align: middle; line-height: 1.6;
 }
-.sm-badge.ok { color: #37b24d; }
+.sm-badge.ok { color: var(--green); }
 .sm-badge.warn { color: #f08c00; }
 .sm-badge.ev { color: #4dabf7; background: rgba(77,171,247,.12); }
 
@@ -286,7 +290,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .st-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 8px; white-space: nowrap; }
 .st-badge.ok { background: rgba(81,207,102,.12); color: #37b24d; }
 .st-badge.warn { background: rgba(250,173,20,.14); color: #e8590c; }
-.st-badge.bad { background: rgba(250,82,82,.14); color: #fa5252; }
+.st-badge.bad { background: rgba(250,82,82,.14); color: var(--accent2); }
 .st-badge.muted { background: rgba(139,146,165,.12); color: var(--muted); }
 .gap-flag { font-size: 10px; color: #f08c00; font-style: italic; }
 .ex-risk-chips{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 8px}
@@ -309,9 +313,9 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;
   margin-left: 4px;
 }
-.cdss-ready-badge.high { background: #d3f9d8; color: #2b8a3e; }
+.cdss-ready-badge.high { background: var(--ok-bg); color: var(--ok-ink); }
 .cdss-ready-badge.mid { background: #fff3bf; color: #e67700; }
-.cdss-ready-badge.low { background: #ffe3e3; color: #c92a2a; }
+.cdss-ready-badge.low { background: var(--bad-bg); color: var(--bad-ink); }
 
 /* ===== 专科CDSS诊疗链路（6段式） ===== */
 .chain-wrap{max-width:1200px;margin:0 auto}
@@ -320,7 +324,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .chain-step-num{min-width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .chain-step-icon{font-size:18px}
 .chain-step-title{font-size:15px;font-weight:700;color:var(--ink)}
-.chain-step-count{font-size:11px;color:var(--accent);background:rgba(79,140,255,.1);padding:2px 10px;border-radius:10px;font-weight:600}
+.chain-step-count{font-size:11px;color:var(--accent);background:var(--accent-bg);padding:2px 10px;border-radius:10px;font-weight:600}
 .chain-step-note{font-size:11px;color:var(--muted);margin-left:auto;text-align:right;max-width:460px;line-height:1.4}
 .chain-step-body{padding:16px 18px}
 .chain-empty{font-size:12px;color:var(--muted);padding:14px;text-align:center;background:var(--bg3);border:1px dashed var(--rule);border-radius:8px;font-style:italic;line-height:1.6}
@@ -343,7 +347,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .chain-dd-section{padding:10px 16px;border-bottom:1px dashed var(--rule)}
 .chain-dd-section:last-child{border-bottom:none}
 .chain-dd-sec-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
-.chain-dd-sec-title .count{background:rgba(79,140,255,.15);color:var(--accent);padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.chain-dd-sec-title .count{background:var(--accent-bg);color:var(--accent);padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700}
 .chain-dd-pill-list{display:flex;flex-wrap:wrap;gap:6px}
 .chain-dd-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:4px 10px;background:var(--bg2);border:1px solid var(--rule);border-radius:16px;color:var(--ink);line-height:1.4}
 .chain-dd-pill.excl{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.3);color:#fa5252}
@@ -358,7 +362,7 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .chain-ev-card{background:var(--bg3);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin-bottom:10px}
 .chain-ev-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
 .chain-ev-name{font-weight:600;font-size:13px;color:var(--ink)}
-.chain-ev-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(79,140,255,.12);color:var(--accent)}
+.chain-ev-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--accent-bg);color:var(--accent)}
 .chain-ev-src{font-size:11px;color:var(--muted)}
 .chain-ev-excerpt{font-size:11.5px;color:var(--fg2);line-height:1.7;padding:8px 10px;background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;margin-top:6px}
 
@@ -401,10 +405,10 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 /* 标签类通用样式（鉴别诊断用途标签等） */
 .ex-cm-tag{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:4px;vertical-align:middle;margin-left:4px;white-space:nowrap}
 .ex-cm-tag-warn{background:rgba(255,107,107,.12);color:#fa5252;border:1px solid rgba(255,107,107,.3)}
-.ex-cm-tag-info{background:rgba(79,140,255,.12);color:var(--accent);border:1px solid rgba(79,140,255,.3)}
+.ex-cm-tag-info{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(79,140,255,.3)}
 
 /* 覆盖率说明弹层 */
-.cov-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(79,140,255,.12);color:var(--accent);font-size:10px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none;margin-left:4px;vertical-align:middle}
+.cov-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:800;cursor:pointer;transition:all .2s;flex-shrink:0;user-select:none;margin-left:4px;vertical-align:middle}
 .cov-help:hover{background:rgba(79,140,255,.25);transform:scale(1.1)}
 .cov-help.active{background:var(--accent);color:#fff}
 .cov-help-panel{position:fixed;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:14px 18px;font-size:12px;color:var(--ink);line-height:1.7;width:460px;max-width:90vw;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s}
@@ -417,14 +421,14 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
 .cov-help-panel .cov-help-val{color:var(--ink);flex:1}
 .cov-help.active .cov-help-panel{opacity:1;pointer-events:auto}
 .ex-view-mode{position:relative}
-.cov-note{font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px;padding:12px 14px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);border-radius:8px;display:none}
+.cov-note{font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px;padding:12px 14px;background:rgba(79,140,255,.06);border:1px solid var(--accent-bg);border-radius:8px;display:none}
 .cov-note.show{display:block}
 .cov-note h4{font-size:12px;font-weight:700;color:var(--text);margin:0 0 6px 0}
 .cov-note ul{margin:0;padding-left:16px}
 .cov-note li{margin-bottom:4px}
 .cov-note .cov-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;font-weight:700;margin:0 2px}
-.cov-note .cov-tag.core{background:rgba(79,140,255,.15);color:var(--accent)}
-.cov-note .cov-tag.indep{background:rgba(81,207,102,.15);color:#51cf66}
+.cov-note .cov-tag.core{background:var(--accent-bg);color:var(--accent)}
+.cov-note .cov-tag.indep{background:var(--green-bg);color:#51cf66}
 .cov-note .cov-tag.broad{background:rgba(255,193,7,.15);color:#ffc107}
 .cov-note .cov-tag.sub{background:rgba(255,146,43,.15);color:#ff922b}
 </style>
@@ -453,8 +457,9 @@ html,body{height:100%;overflow:hidden;margin:0;padding:0}
   <aside class="ex-right" id="detail-panel"><div class="ex-side-empty">点击疾病、实体或图谱节点后<br>这里显示属性、关系和证据信息</div></aside>
 </div>
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/schema-map.js?v=2026092813"></script>
-<script src="./_shared/js/app.js?v=2026092813"></script>
+<script src="./_shared/js/schema-map.js?v=2026100901"></script>
+<script src="./_shared/js/theme.js"></script>
+<script src="./_shared/js/app.js?v=2026100901"></script>
 <script>
 var CURRENT_VIEW = 'cdss';  // 默认CDSS流程视角
 var CURRENT_DISEASE = null;
@@ -1131,7 +1136,7 @@ function renderCDSSChain(d, recData) {
       hasContent = true;
       h += '<div class="chain-ev-empty-tip">';
       h += '💡 该疾病推荐语句暂未建立 RS→supported_by_evidence→Evidence 直连证据节点，当前证据来源为指南依据（上方 Guideline）。';
-      h += '如需查看直连证据，需在图谱生产流程中补充 supported_by_evidence 关系。';
+      h += '如需查看直连证据，需在AI图谱解析流程中补充 supported_by_evidence 关系。';
       h += '</div>';
     }
 
@@ -1242,6 +1247,15 @@ function chainRecCard(rec, opts) {
   h += '</div>';
   return h;
 }
+
+/* v1.4.5 主题热切换：关系图就地重绘（仅 graph 视图有 canvas；cdss/disease 视图为 DOM 渲染，CSS 变量自动生效） */
+window.onThemeChange = function() {
+  if (typeof refreshDimColors === 'function') refreshDimColors();
+  if (CURRENT_VIEW === 'graph' && CURRENT_DISEASE && typeof drawGraph === 'function') {
+    drawGraph(CURRENT_DISEASE);
+  }
+};
+
 function renderCurrent(){
   if(CURRENT_VIEW==='entity'){renderEntityView();return;}
   if(!CURRENT_DISEASE){document.getElementById('workspace').innerHTML='<div class="ex-empty">请先从左侧选择一种疾病</div>';return;}
@@ -2039,36 +2053,79 @@ function renderGraphView(code){
   var d=KG_DATA.diseases[code];
   var h='<div class="ex-graph-box"><div class="ex-graph-toolbar">';
   h+='<div><div class="ex-graph-title">'+d.info.name+' 关系网络</div>';
-  h+='<div class="ex-graph-note">维度→实体连线悬停显示中文关系名（如 症状→<b>有症状</b>、鉴别→<b>需鉴别诊断</b>、检查→<b>含检查项目</b>）；<span style="color:#d8b4fe">紫色标签</span>=鉴别语义线，<span style="color:#8ce99a">绿色标签</span>=正式推荐（recommends_action），<span style="color:#e8590c">橙色虚线</span>=排除检查/检验</div></div>';
+  h+='<div class="ex-graph-note">维度→实体连线悬停显示中文关系名（如 症状→<b>有症状</b>、鉴别→<b>需鉴别诊断</b>、检查→<b>含检查项目</b>）；<span style="color:var(--purple)">紫色标签</span>=鉴别语义线，<span style="color:var(--green-text)">绿色标签</span>=正式推荐（recommends_action），<span style="color:var(--orange)">橙色虚线</span>=排除检查/检验</div></div>';
+  h+='</div>';
+  h+='<div class="ex-graph-legendbar"><span class="ex-legend-tip">图例快捷：</span>';
+  h+='<button class="ex-lg-btn" onclick="exLegendAll()">全部显示</button>';
+  h+='<button class="ex-lg-btn" onclick="exLegendClinic()">仅临床链路</button>';
+  h+='<button class="ex-lg-btn" onclick="exLegendInvert()">反选</button>';
+  h+='<button class="ex-lg-btn" onclick="exLegendReset()">还原</button>';
+  h+='<span class="ex-legend-tip" style="margin-left:8px">双击分组节点展开/收起；双击实体节点看详情</span>';
   h+='</div><div id="explore-graph" style="width:100%;height:700px"></div></div>';
   document.getElementById('workspace').innerHTML=h;
   setTimeout(function(){drawGraph(code)},200);
 }
+
+/* v1.4.6 图例批量显隐：setOption legend.selected 批量切换并保存状态 */
+function exLegendApply(sel){
+  if(!GRAPH)return;
+  GRAPH.setOption({legend:{selected:sel}});
+  try{ window['__exGraphLegend_'+(CURRENT_DISEASE||'')]=sel; }catch(e){}
+}
+function exLegendAll(){
+  if(!GRAPH)return;
+  var opt=GRAPH.getOption();
+  var data=(opt.legend&&opt.legend[0]&&opt.legend[0].data)||[];
+  var sel={};data.forEach(function(n){sel[n]=true;});
+  exLegendApply(sel);
+}
+function exLegendClinic(){
+  if(!GRAPH)return;
+  var opt=GRAPH.getOption();
+  var data=(opt.legend&&opt.legend[0]&&opt.legend[0].data)||[];
+  var sel={};data.forEach(function(n){sel[n]=(n==='临床规则'||n==='临床表现'||n==='治疗与处置');});
+  if(!Object.keys(sel).some(function(k){return sel[k];})) data.forEach(function(n){sel[n]=true;});
+  exLegendApply(sel);
+}
+function exLegendInvert(){
+  if(!GRAPH)return;
+  var opt=GRAPH.getOption();
+  var cur=(opt.legend&&opt.legend[0]&&opt.legend[0].selected)||{};
+  var sel={};Object.keys(cur).forEach(function(k){sel[k]=!cur[k];});
+  exLegendApply(sel);
+}
+function exLegendReset(){ exLegendAll(); }
 
 function drawGraph(code){
   var el=document.getElementById('explore-graph');
   if(!el) return;
   if(GRAPH){try{GRAPH.dispose();}catch(e){}GRAPH=null;}
   el.innerHTML=''; el.removeAttribute('_echarts_instance_');
-  GRAPH=echarts.init(el);
+  GRAPH=echarts.init(el, null, {renderer:'canvas', devicePixelRatio:kgDpr()});
+  el.setAttribute('role','img'); el.setAttribute('aria-label','疾病关系网络图（维度实体连线）');
+  /* v1.4.4 补漏：原本无 resize 监听，窗口缩放后画布不跟随 */
+  if(!window.__exGraphResizeBound){
+    window.__exGraphResizeBound=true;
+    window.addEventListener('resize', kgDebounce(function(){ if(GRAPH) GRAPH.resize(); },150));
+  }
 
   var d=KG_DATA.diseases[code];
   var seen={};
-  var nodes=[{name:d.info.name, symbolSize:70, itemStyle:{color:'#4f8cff',shadowBlur:24,shadowColor:'rgba(79,140,255,.65)'}, label:{fontSize:14,fontWeight:'bold',color:'#fff'}}];
+  var nodes=[{name:d.info.name, symbolSize:70, itemStyle:{color:cssVar('--accent','#4f8cff'),shadowBlur:24,shadowColor:'rgba(79,140,255,.65)'}, label:{fontSize:14,fontWeight:'bold',color:'#fff'}}];
   seen[d.info.name]=1;
   var links=[];
   var cGroups=[
-    {name:'定义与基础',dims:['Definition'],color:'#748ffc'},
-    {name:'临床表现',dims:['Symptom','Sign'],color:'#51cf66'},
-    {name:'诊断检查',dims:['ExamItem','ExamObservation','LabItem','LabSubitem'],color:'#22b8cf'},
-    {name:'诊断与鉴别',dims:['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'],color:'#ffd43b'},
-    {name:'治疗方案',dims:['TreatmentPlan','Drug','Procedure','Contraindication'],color:'#ff922b'},
-    {name:'临床规则',dims:['ClinicalRule'],color:'#339af0'},
-    {name:'预后与预防',dims:['Prognosis','FollowUp','Complication','Prevention'],color:'#cc5de8'},
-    {name:'病因与机制',dims:['Etiology','Pathophysiology','Epidemiology','RiskFactor'],color:'#fcc419'},
-    {name:'标准诊断',dims:['StandardDiagnosis'],color:'#ff6b6b'},
-    {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule'],color:'#40c057'},
-    {name:'护理支持',dims:['NursingCarePlan','NursingAssessment','NursingDiagnosis'],color:'#0ca678'}
+    {name:'定义与基础',dims:['Definition'],color:cssVar('--dim-patho','#748ffc')},
+    {name:'临床表现',dims:['Symptom','Sign'],color:cssVar('--green','#51cf66')},
+    {name:'诊断检查',dims:['ExamItem','ExamObservation','LabItem','LabSubitem'],color:cssVar('--cyan','#22b8cf')},
+    {name:'诊断与鉴别',dims:['DiagnosisCriteria','DifferentialDiagnosis','RiskStratification'],color:cssVar('--yellow','#ffd43b')},
+    {name:'治疗方案',dims:['TreatmentPlan','Drug','Procedure','Contraindication'],color:cssVar('--orange','#ff922b')},
+    {name:'临床规则',dims:['ClinicalRule'],color:cssVar('--dim-clinical-rule','#339af0')},
+    {name:'预后与预防',dims:['Prognosis','FollowUp','Complication','Prevention'],color:cssVar('--purple','#cc5de8')},
+    {name:'病因与机制',dims:['Etiology','Pathophysiology','Epidemiology','RiskFactor'],color:cssVar('--yellow','#fcc419')},
+    {name:'标准诊断',dims:['StandardDiagnosis'],color:cssVar('--accent2','#ff6b6b')},
+    {name:'证据指南',dims:['Evidence','Guideline','ThresholdRule'],color:cssVar('--dim-evidence','#40c057')},
+    {name:'护理支持',dims:['NursingCarePlan','NursingAssessment','NursingDiagnosis'],color:cssVar('--dim-nursing','#0ca678')}
   ];
   /* 兜底：未归组维度（Schema扩展维度自动归组，无需改本页） */
   (function(){
@@ -2076,11 +2133,15 @@ function drawGraph(code){
     cGroups.forEach(function(g){g.dims.forEach(function(k){known[k]=1;});});
     for (var ak in CORE_DIM_ALIAS) legacy[CORE_DIM_ALIAS[ak]]=1;
     var others=DIM_KEYS.filter(function(k){return !known[k]&&!legacy[k];});
-    if(others.length) cGroups.push({name:'其他维度',dims:others,color:'#94a3b8'});
+    if(others.length) cGroups.push({name:'其他维度',dims:others,color:cssVar('--muted','#94a3b8')});
   })();
-  /* 分组显隐控制 */
+  /* 分组显隐控制（v1.4.6：跨重绘保持——同疾病重绘时沿用上次显隐状态） */
+  var legendKey='__exGraphLegend_'+code;
   var groupVisible={};
   cGroups.forEach(function(g){groupVisible[g.name]=true;});
+  var savedLegend=null;
+  try{ savedLegend=window[legendKey]; }catch(e){}
+  if(savedLegend){ cGroups.forEach(function(g){ if(g.name in savedLegend) groupVisible[g.name]=savedLegend[g.name]; }); }
 
   cGroups.forEach(function(grp){
     var total=grp.dims.reduce(function(s,k){
@@ -2088,46 +2149,46 @@ function drawGraph(code){
     },0);
     if(!total) return;
     if(!seen[grp.name]){nodes.push({name:grp.name, symbolSize:40, itemStyle:{color:grp.color,opacity:.85}, label:{fontSize:11,fontWeight:'bold',color:'#fff'},category:grp.name});seen[grp.name]=1;}
-    links.push({source:d.info.name, target:grp.name, lineStyle:{color:grp.color,width:2.5,opacity:.6}});
+    links.push({source:d.info.name, target:grp.name, lineStyle:{color:grp.color,width:2.5,opacity:getTheme() === 'light'?.75:.6}});
     grp.dims.forEach(function(k){
       var it=(d.dimensions[k]||[]).filter(function(e){return cleanName(e)!==d.info.name});
       if(!it.length) return;
       var dn=DIM_NAMES[k];
-      if(!seen[dn]){nodes.push({name:dn, symbolSize:Math.min(16+it.length,36), itemStyle:{color:grp.color+'bb'}, label:{fontSize:9,fontWeight:'bold',color:'#e8eaf0'},category:grp.name});seen[dn]=1;}
-      if(dn!==grp.name) links.push({source:grp.name, target:dn, lineStyle:{color:grp.color+'88',width:1.5,opacity:.5}}); // 分组名与维度名相同（标准诊断）时不建自环边
+      if(!seen[dn]){nodes.push({name:dn, symbolSize:Math.min(16+it.length,36), itemStyle:{color:grp.color+(getTheme() === 'light'?'ee':'bb')}, label:{fontSize:9,fontWeight:'bold',color:cssVar('--ink','#e8eaf0')},category:grp.name});seen[dn]=1;}
+      if(dn!==grp.name) links.push({source:grp.name, target:dn, lineStyle:{color:grp.color+(getTheme() === 'light'?'cc':'88'),width:1.5,opacity:getTheme() === 'light'?.7:.5}}); // 分组名与维度名相同（标准诊断）时不建自环边
       var relCN=SCHEMA.relationLabel(SCHEMA.DIM_REL[k]||'');  /* 维度→实体的中文关系名，如 症状=有症状 */
       it.slice(0,8).forEach(function(e){
         var eName=cleanName(e);
         if(eName===d.info.name) return;
-        if(!seen[eName]){nodes.push({name:eName, symbolSize:11, itemStyle:{color:grp.color+'99'}, label:{fontSize:8,color:'#b0b8c8'},category:grp.name});seen[eName]=1;}
-        links.push({source:dn, target:eName, lineStyle:{color:grp.color+'55',width:1,opacity:.4},
-          label:{show:false, formatter:relCN, fontSize:9, color:'#c8d0e0', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3},
+        if(!seen[eName]){nodes.push({name:eName, symbolSize:11, itemStyle:{color:grp.color+(getTheme() === 'light'?'dd':'99')}, label:{fontSize:10,color:cssVar('--muted','#475569')},category:grp.name});seen[eName]=1;}
+        links.push({source:dn, target:eName, lineStyle:{color:grp.color+(getTheme() === 'light'?'99':'55'),width:1,opacity:getTheme() === 'light'?.6:.4},
+          label:{show:false, formatter:relCN, fontSize:9, color:cssVar('--tip-ink','#c8d0e0'), backgroundColor:cssVar('--tip-bg','rgba(30,34,48,.85)'), padding:[1,4], borderRadius:3},
           emphasis:{label:{show:true}}});
         // DiagnosisCriteria 二跳：sub_component
         if(k==='DiagnosisCriteria' && e.sub_component && e.sub_component.length){
           e.sub_component.slice(0,8).forEach(function(sc){
             var scName=cleanName(sc);
-            if(!seen[scName]){nodes.push({name:scName, symbolSize:9, itemStyle:{color:'#ffd43b77'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[scName]=1;}
-            links.push({source:eName, target:scName, lineStyle:{color:'#ffd43b44',width:1,opacity:.3}});
+            if(!seen[scName]){nodes.push({name:scName, symbolSize:9, itemStyle:{color:cssVar('--yellow','#ffd43b')+(getTheme() === 'light'?'dd':'77')}, label:{fontSize:9,color:cssVar('--muted','#475569')},category:grp.name});seen[scName]=1;}
+            links.push({source:eName, target:scName, lineStyle:{color:cssVar('--yellow','#ffd43b')+(getTheme() === 'light'?'88':'44'),width:1,opacity:getTheme() === 'light'?.55:.3}});
           });
         }
         // DifferentialDiagnosis 二跳：differential_points / exclusion_exams / exclusion_labs（语义线常显标签）
         if(k==='DifferentialDiagnosis'){
-          var semLabel=function(txt){return {show:true, formatter:txt, fontSize:8, color:'#d8b4fe', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3};};
+          var semLabel=function(txt){return {show:true, formatter:txt, fontSize:8, color:cssVar('--tip-ink','#d8b4fe'), backgroundColor:cssVar('--tip-bg','rgba(30,34,48,.85)'), padding:[1,4], borderRadius:3};};
           (e.differential_points||[]).slice(0,3).forEach(function(dp){
             var dn2='[鉴别]'+cleanName(dp);
-            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#ffd43b33',width:1,opacity:.3}, label:semLabel('鉴别要点')});
+            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:cssVar('--yellow','#ffd43b')+(getTheme() === 'light'?'cc':'66')}, label:{fontSize:9,color:cssVar('--muted','#475569')},category:grp.name});seen[dn2]=1;}
+            links.push({source:eName, target:dn2, lineStyle:{color:cssVar('--yellow','#ffd43b')+(getTheme() === 'light'?'88':'33'),width:1,opacity:getTheme() === 'light'?.55:.3}, label:semLabel('鉴别要点')});
           });
           (e.exclusion_exams||[]).slice(0,3).forEach(function(ex){
             var dn2='[排除]'+cleanName(ex);
-            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#ffd43b66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#e8590c44',width:1.5,opacity:.45,type:'dashed'}, label:semLabel('需排除检查')});
+            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:cssVar('--yellow','#ffd43b')+(getTheme() === 'light'?'cc':'66')}, label:{fontSize:9,color:cssVar('--muted','#475569')},category:grp.name});seen[dn2]=1;}
+            links.push({source:eName, target:dn2, lineStyle:{color:cssVar('--orange','#e8590c')+(getTheme() === 'light'?'88':'44'),width:1.5,opacity:getTheme() === 'light'?.7:.45,type:'dashed'}, label:semLabel('需排除检查')});
           });
           (e.exclusion_labs||[]).slice(0,3).forEach(function(lb){
             var dn2='[排检]'+cleanName(lb);
-            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:'#748ffc66'}, label:{fontSize:7,color:'#b0b8c8'},category:grp.name});seen[dn2]=1;}
-            links.push({source:eName, target:dn2, lineStyle:{color:'#e8590c44',width:1.5,opacity:.45,type:'dashed'}, label:semLabel('需排除检验')});
+            if(!seen[dn2]){nodes.push({name:dn2, symbolSize:9, itemStyle:{color:cssVar('--dim-patho','#748ffc')+(getTheme() === 'light'?'cc':'66')}, label:{fontSize:9,color:cssVar('--muted','#475569')},category:grp.name});seen[dn2]=1;}
+            links.push({source:eName, target:dn2, lineStyle:{color:cssVar('--orange','#e8590c')+(getTheme() === 'light'?'88':'44'),width:1.5,opacity:getTheme() === 'light'?.7:.45,type:'dashed'}, label:semLabel('需排除检验')});
           });
         }
       });
@@ -2135,15 +2196,15 @@ function drawGraph(code){
   });
   // 专科诊疗路径融入临床规则分组（不再独立渲染）
   if(d.pathways && d.pathways.length){
-    var pwColor='#339af0';
+    var pwColor = cssVar('--dim-clinical-rule','#339af0');
     d.pathways.forEach(function(pw){
       var pwName=cleanName(pw)||'临床路径';
       if(!seen[pwName]){nodes.push({name:pwName, symbolSize:36, itemStyle:{color:pwColor,opacity:.85}, label:{fontSize:10,fontWeight:'bold',color:'#fff'},category:'临床规则'});seen[pwName]=1;}
-      links.push({source:d.info.name, target:pwName, lineStyle:{color:pwColor,width:2,opacity:.6}});
+      links.push({source:d.info.name, target:pwName, lineStyle:{color:pwColor,width:2,opacity:getTheme() === 'light'?.8:.6}});
       (pw.stages||[]).forEach(function(stg,i){
         var stgName=cleanName(stg)||('阶段'+(i+1));
-        if(!seen[stgName]){nodes.push({name:stgName, symbolSize:18, itemStyle:{color:pwColor+'bb'}, label:{fontSize:9,color:'#e8eaf0'},category:'临床规则'});seen[stgName]=1;}
-        links.push({source:pwName, target:stgName, lineStyle:{color:pwColor+'88',width:1.5,opacity:.5}});
+        if(!seen[stgName]){nodes.push({name:stgName, symbolSize:18, itemStyle:{color:pwColor+(getTheme() === 'light'?'ee':'bb')}, label:{fontSize:9,color:cssVar('--ink','#e8eaf0')},category:'临床规则'});seen[stgName]=1;}
+        links.push({source:pwName, target:stgName, lineStyle:{color:pwColor+(getTheme() === 'light'?'cc':'88'),width:1.5,opacity:getTheme() === 'light'?.7:.5}});
       });
     });
   }
@@ -2159,15 +2220,15 @@ function drawGraph(code){
       medList.forEach(function(med){
         var medName=cleanName(med);
         if(ruleText.indexOf(medName)!==-1 && seen[ruleName] && seen[medName]){
-          links.push({source:ruleName, target:medName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'},
-            label:{show:true, formatter:'推荐动作', fontSize:8, color:'#8ce99a', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3}});
+          links.push({source:ruleName, target:medName, lineStyle:{color:cssVar('--dim-clinical-rule','#339af0')+(getTheme() === 'light'?'88':'44'),width:1,opacity:getTheme() === 'light'?.5:.3,type:'dashed'},
+            label:{show:true, formatter:'推荐动作', fontSize:8, color:cssVar('--green-text','#8ce99a'), backgroundColor:cssVar('--tip-bg','rgba(30,34,48,.85)'), padding:[1,4], borderRadius:3}});
         }
       });
       procList.forEach(function(proc){
         var procName=cleanName(proc);
         if(ruleText.indexOf(procName)!==-1 && seen[ruleName] && seen[procName]){
-          links.push({source:ruleName, target:procName, lineStyle:{color:'#339af044',width:1,opacity:.3,type:'dashed'},
-            label:{show:true, formatter:'推荐动作', fontSize:8, color:'#8ce99a', backgroundColor:'rgba(30,34,48,.85)', padding:[1,4], borderRadius:3}});
+          links.push({source:ruleName, target:procName, lineStyle:{color:cssVar('--dim-clinical-rule','#339af0')+(getTheme() === 'light'?'88':'44'),width:1,opacity:getTheme() === 'light'?.5:.3,type:'dashed'},
+            label:{show:true, formatter:'推荐动作', fontSize:8, color:cssVar('--green-text','#8ce99a'), backgroundColor:cssVar('--tip-bg','rgba(30,34,48,.85)'), padding:[1,4], borderRadius:3}});
         }
       });
     });
@@ -2202,24 +2263,30 @@ function drawGraph(code){
   if(d.pathways && d.pathways.length && legendData.indexOf('临床规则')===-1) legendData.push('临床规则');
 
   GRAPH.setOption({
-    tooltip:{show:true,formatter:function(p){
+    tooltip:{show:true,backgroundColor:cssVar('--tip-bg','rgba(30,34,48,.85)'),borderColor:cssVar('--tip-line','rgba(255,255,255,.1)'),textStyle:{color:cssVar('--tip-ink','#c8d0e0'),fontSize:12},formatter:function(p){
       if(p.dataType==='node') return p.data.name;
       return p.data.source+' → '+p.data.target;
     }},
     legend:{
       show:true,data:legendData,bottom:10,
-      textStyle:{color:'#8b92a5',fontSize:10},
-      inactiveColor:'#444',
+      textStyle:{color:cssVar('--muted','#475569'),fontSize:10},
+      inactiveColor:cssVar('--rule','#dde3ec'),
       selected:groupVisible
     },
     series:[{
       type:'graph',layout:'force',data:nodes,links:links,roam:true,
       categories:cGroups.map(function(g){return {name:g.name};}),
-      label:{show:true,fontSize:9,color:'#e8eaf0'},
+      label:{show:true,fontSize:9,color:cssVar('--ink','#e8eaf0')},
       force:{repulsion:350,gravity:.06,edgeLength:[60,200],friction:.6},
       lineStyle:{curveness:0.1}
     }]
   });
+  /* v1.4.6 图例显隐时保存状态（供切主题/重绘恢复） */
+  GRAPH.on('legendselectchanged',function(p){
+    try{ window[legendKey]=p.selected; }catch(e){}
+  });
+  /* v1.4.6 分组展开记录：name -> {names:{新增节点}, pairs:{新增连线}}，供双击收起 */
+  var __grpAdded={};
   // 点击节点展开关联内容
   GRAPH.on('click',function(p){
     if(p.dataType==='node'){
@@ -2227,14 +2294,18 @@ function drawGraph(code){
       // 查找分组节点，展开该组下所有维度的全部实体
       var grp=cGroups.find(function(g){return g.name===name;});
       if(grp){
+        if(!__grpAdded[name]) __grpAdded[name]={names:{},pairs:{}};
+        var rec=__grpAdded[name];
         grp.dims.forEach(function(k){
           var it=d.dimensions[k]||[];
           it.forEach(function(e){
             var eName=cleanName(e);
             if(!seen[eName]){
-              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:9,color:cssVar('--muted','#475569')}});
               seen[eName]=1;
+              rec.names[eName]=1;
               links.push({source:name,target:eName,lineStyle:{color:grp.color+'44',width:1,opacity:.3}});
+              rec.pairs[name+'\u2192'+eName]=1;
             }
           });
         });
@@ -2244,11 +2315,11 @@ function drawGraph(code){
       else{
         var dimKey=Object.keys(DIM_NAMES).find(function(k){return DIM_NAMES[k]===name;});
         if(dimKey && d.dimensions[dimKey]){
-          var grpColor=cGroups.find(function(g){return g.dims.indexOf(dimKey)!==-1;})?.color||'#ff922b';
+          var grpColor=cGroups.find(function(g){return g.dims.indexOf(dimKey)!==-1;})?.color||cssVar('--orange','#ff922b');
           d.dimensions[dimKey].forEach(function(e){
             var eName=cleanName(e);
             if(!seen[eName]){
-              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grpColor+'cc'},label:{fontSize:7,color:'#b0b8c8'}});
+              nodes.push({name:eName,symbolSize:13,itemStyle:{color:grpColor+'cc'},label:{fontSize:9,color:cssVar('--muted','#475569')}});
               seen[eName]=1;
               links.push({source:name,target:eName,lineStyle:{color:grpColor+'44',width:1,opacity:.3}});
             }
@@ -2257,6 +2328,56 @@ function drawGraph(code){
         }
       }
     }
+  });
+  /* v1.4.6 双击分组节点：一键展开（复用 click 展开逻辑）；再双击收起（仅移除展开时新增的节点与连线） */
+  GRAPH.on('dblclick',function(p){
+    if(p.dataType!=='node')return;
+    var name=p.data.name;
+    var grp=cGroups.find(function(g){return g.name===name;});
+    if(!grp)return;
+    var rec=__grpAdded[name];
+    if(rec && Object.keys(rec.names).length){
+      nodes=nodes.filter(function(n){ return !rec.names[n.name]; });
+      links=links.filter(function(l){ return !rec.pairs[l.source+'\u2192'+l.target]; });
+      Object.keys(rec.names).forEach(function(nm){ delete seen[nm]; });
+      __grpAdded[name]={names:{},pairs:{}};
+    }else{
+      if(!__grpAdded[name]) __grpAdded[name]={names:{},pairs:{}};
+      var r2=__grpAdded[name];
+      grp.dims.forEach(function(k){
+        var it=d.dimensions[k]||[];
+        it.forEach(function(e){
+          var eName=cleanName(e);
+          if(!seen[eName]){
+            nodes.push({name:eName,symbolSize:13,itemStyle:{color:grp.color+'cc'},label:{fontSize:9,color:cssVar('--muted','#475569')}});
+            seen[eName]=1;
+            r2.names[eName]=1;
+            links.push({source:name,target:eName,lineStyle:{color:grp.color+'44',width:1,opacity:.3}});
+            r2.pairs[name+'\u2192'+eName]=1;
+          }
+        });
+      });
+    }
+    GRAPH.setOption({series:[{data:nodes,links:links}]});
+  });
+  /* v1.4.6 双击实体节点：反查所属维度，右侧详情栏弹出实体就绪状态 */
+  GRAPH.on('dblclick',function(p){
+    if(p.dataType!=='node')return;
+    var name=p.data.name;
+    if(name===d.info.name)return;                                /* 疾病中心节点不弹 */
+    if(cGroups.some(function(g){return g.name===name;}))return;  /* 分组节点走上面的展开/收起 */
+    var isDim=Object.keys(DIM_NAMES).some(function(k){return DIM_NAMES[k]===name;});
+    if(isDim)return;                                             /* 维度节点不弹 */
+    var hit=null;
+    Object.keys(d.dimensions).forEach(function(k){
+      if(hit)return;
+      (d.dimensions[k]||[]).some(function(e){
+        if(cleanName(e)===name){hit={dim:k,e:e};return true;}
+        return false;
+      });
+    });
+    if(!hit)return;
+    showEntityDetail(code,hit.dim,hit.e.code||hit.e.name||name);
   });
 }
 function buildEntityIndexAsync(){

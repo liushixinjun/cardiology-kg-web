@@ -31,7 +31,9 @@ deploy_cfg = cfg["deploy"]
 redis_cli = cfg["redis"].get("cli_path", "/zoesoft/zoekgRedis/bin/redis-cli")
 
 # 版本戳：所有 HTML 中的 ?v= 统一用此值（格式 YYYYMMDDNN，NN为当日第几批）
-VERSION_STAMP = datetime.now().strftime("%Y%m%d") + "13"
+# v1.4.0 菜单名恢复批次：2026-09-30 深夜开始、10-01 发版，沿用 0930 起始的批次号，
+# 与全站文件内已有戳及 changelog 文案保持一致（勿改回自动拼日期，跨天会对不上）
+VERSION_STAMP = "2026100901"
 local_dir = deploy_cfg["local_dir"]
 
 # ============ 部署保护闸 1：作废文件黑名单 ============
