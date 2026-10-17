@@ -1,0 +1,22 @@
+.rec-overflow-hidden{display:none!important}.density-more{border:0;background:none;color:#2186b5;font-size:12px;cursor:pointer;padding:4px 0}.density-more[hidden]{display:none}.rec-list-more{display:block;width:auto;margin:2px 0 0 auto;padding:2px 4px;line-height:20px;font-size:11px}.diff-clamped:not(.diff-expanded){display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.cx-diff-knowledge .density-more{font-size:11px;padding:0 0 4px}.cx-diff-knowledge>a{display:block}
+#page-simulation .toolbar{padding:5px 8px;gap:6px;min-height:36px;margin-bottom:8px;font-size:11px}#page-simulation .toolbar>.btn,#page-simulation .toolbar>.select,#page-simulation .toolbar #moreActionsBtn{font-size:11px;line-height:18px;padding:3px 7px;min-height:26px;height:26px}#page-simulation .toolbar>label{font-size:11px}#moreActionsMenu{max-height:calc(100vh - 175px);overflow:auto}#moreActionsMenu #caseStory{margin:8px 0!important;padding:8px!important;font-size:12px}#moreActionsMenu .demo-description{font-size:11px;line-height:1.6;color:#8292a0;margin:8px 0}
+#page-simulation .right-panel{min-height:0;position:sticky;top:8px;align-self:start;overflow:hidden}
+#recommendPanel{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+#recommendPanel .ordinary-item{padding:6px 2px;margin:0;border-bottom:1px solid #edf2f6}
+#recommendPanel .ordinary-item>div{min-height:25px;gap:6px}
+#recommendPanel .ordinary-item strong{font-size:12px}
+#recommendPanel .pw-treatment{padding:8px 10px;margin:0;border:0;border-bottom:1px solid #e6edf3;border-radius:0}
+#recommendPanel .pw-treatment>header{padding:0 0 4px;margin:0;border:0;gap:6px}
+#recommendPanel .pw-treatment h3{font-size:13px;margin:0}
+#recommendPanel .pw-treatment .pw-item{padding:4px 0;gap:6px}
+#recommendPanel .pw-treatment .pw-item strong{font-size:12px}
+#recommendPanel .pw-group-title{font-size:11px;color:#6d8191;margin:6px 0}
+.pw-todo{padding:7px 0;border-top:1px solid #e6edf3;font-size:12px}.pw-todo summary{cursor:pointer}.pw-todo summary span{color:#72889a;margin-left:6px}.pw-todo button{display:block}
+.patient-panel label .field-note{display:block;border:0;background:none;color:#1688bd;font-size:11px;padding:3px 0;cursor:pointer}
+[data-ordinary-basis]{font-size:13px;line-height:1.7}[data-ordinary-basis] h4{margin:12px 0 6px}
+.ordinary-review{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:12px;background:#f2f8fc;border-top:1px solid #dae7ef}
+body:has(#page-simulation.active){min-width:0}
+body:has(#page-simulation.active) .content{overflow:visible;padding-bottom:12px}
+#page-simulation .patient-panel{height:auto;position:static}
+@media(max-width:1279px){#page-simulation .simulate-layout{grid-template-columns:minmax(0,1fr) 360px}#page-simulation .form-grid{padding:10px;grid-template-columns:70px minmax(0,1fr);gap:8px}#page-simulation .form-grid .inline-row{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr)}#page-simulation .right-panel{min-width:0}#page-simulation .form-grid input{min-width:0}}
+

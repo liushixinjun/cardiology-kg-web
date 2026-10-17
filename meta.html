@@ -1,0 +1,1426 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>专科知识图谱 · 心血管内科 - 图谱元模型配置</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
+<script src="./_shared/js/app.js?v=2026101601"></script>
+<style>
+.mm-layout{padding:20px;max-width:1440px;margin:0 auto}
+.mm-header{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(81,207,102,.05));border:1px solid var(--rule);border-radius:12px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.mm-header h1{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px}
+.mm-header .mm-sub{font-size:12px;color:var(--muted);max-width:760px;line-height:1.6}
+.mm-kpis{display:flex;gap:10px;flex-wrap:wrap}
+.mm-kpi{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;min-width:110px;text-align:center}
+.mm-kpi b{display:block;font-size:20px;color:var(--accent);font-weight:800}
+.mm-kpi span{font-size:11px;color:var(--muted)}
+.mm-kpi .tip{display:block;font-size:10px;color:var(--muted);opacity:.85;margin-top:2px;line-height:1.4}
+.mm-kpi.warn b{color:#f59f00}
+.mm-kpi.err b{color:#fa5252}
+
+.mm-tabs{display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px}
+.mm-tab{padding:10px 18px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.mm-tab:hover{color:var(--ink);background:var(--bg3)}
+.mm-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.mm-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.mm-toolbar input,.mm-toolbar select{padding:8px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none}
+.mm-toolbar input:focus,.mm-toolbar select:focus{border-color:var(--accent)}
+.mm-btn{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:opacity .15s}
+.mm-btn:hover{opacity:.88}
+.mm-btn.ghost{background:var(--bg2);color:var(--ink);border:1px solid var(--rule)}
+.mm-btn.danger{background:#fa5252}
+.mm-btn.sm{padding:4px 10px;font-size:11px}
+
+.mm-table{width:100%;border-collapse:collapse;background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:hidden;font-size:12px}
+.mm-table th{background:var(--bg3);color:var(--muted);text-align:left;padding:9px 12px;font-size:11px;font-weight:700;white-space:nowrap;border-bottom:1px solid var(--rule)}
+.mm-table td{padding:8px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top}
+.mm-table tr:hover td{background:var(--bg3)}
+.mm-table .mono{font-family:ui-monospace,Consolas,monospace;font-size:11px}
+.mm-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.mm-badge.schema{background:rgba(79,140,255,.12);color:var(--accent)}
+.mm-badge.db{background:rgba(255,212,59,.15);color:#f59f00}
+.mm-badge.manual{background:rgba(81,207,102,.12);color:#40c057}
+.mm-badge.zero{background:var(--bg3);color:var(--muted)}
+.mm-badge.drift{background:rgba(250,82,82,.12);color:#fa5252}
+.mm-badge.match{background:rgba(81,207,102,.12);color:#40c057}
+.mm-badge.cat-nur{background:rgba(12,166,120,.12);color:#0ca678}
+.mm-badge.cat-ass{background:rgba(230,73,128,.12);color:#e64980}
+.mm-badge.cat-cli{background:rgba(79,140,255,.1);color:var(--accent)}
+.mm-props{display:flex;flex-wrap:wrap;gap:4px;max-width:520px}
+.mm-prop{font-size:10px;background:var(--bg3);border:1px solid var(--rule);border-radius:4px;padding:1px 6px;color:var(--muted);font-family:ui-monospace,Consolas,monospace}
+.mm-prop .cn{font-family:inherit;font-style:normal;margin-left:4px;color:var(--ink);opacity:.75}
+.mm-prop.miss{border-color:rgba(250,82,82,.5);color:#fa5252}
+.mm-prop.miss .cn{color:#fa5252}
+tr.mm-inactive>td{opacity:.5}
+.mm-badge.inactive{background:rgba(134,142,150,.18);color:#868e96}
+
+/* 模态框 */
+.mm-modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.mm-modal-mask.open{display:flex}
+.mm-modal{background:var(--bg);border:1px solid var(--rule);border-radius:14px;width:640px;max-width:100%;max-height:86vh;overflow-y:auto;padding:22px}
+.mm-modal h3{font-size:16px;font-weight:800;color:var(--ink);margin:0 0 14px}
+.mm-form-row{margin-bottom:12px}
+.mm-form-row label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.mm-form-row input,.mm-form-row select,.mm-form-row textarea{width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none;font-family:inherit;box-sizing:border-box}
+.mm-form-row input:focus,.mm-form-row select:focus,.mm-form-row textarea:focus{border-color:var(--accent)}
+.mm-form-row textarea{min-height:70px;resize:vertical;font-family:ui-monospace,Consolas,monospace}
+.mm-form-hint{font-size:10px;color:var(--muted);margin-top:3px}
+.mm-modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* 一致性校验视图 */
+.mm-check-card{background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.mm-check-card h4{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.mm-check-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;color:var(--ink);border-top:1px dashed var(--rule)}
+.mm-check-item:first-of-type{border-top:none}
+.mm-check-ico{font-size:13px}
+/* v1.5.11l 一致性校验白话说明条 */
+.mm-ck-intro{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(79,140,255,.02));border:1px solid rgba(79,140,255,.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:12px;line-height:1.8;color:var(--ink)}
+.mm-ck-intro b{color:var(--ink)}
+.mm-ck-intro .t{font-size:13px;font-weight:800;margin-bottom:4px}
+.mm-ck-intro .q{display:inline-block;margin:6px 8px 0 0;padding:2px 10px;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;font-size:11px;color:var(--muted)}
+.mm-check-item .mm-check-desc{color:var(--muted);font-size:11px}
+.mm-check-item .mm-check-act{margin-top:4px;font-size:11px;color:var(--ink);background:var(--bg3);border:1px dashed var(--rule);border-radius:6px;padding:4px 8px;line-height:1.7}
+.mm-sample-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mm-sample-node{background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:10px;font-size:11px}
+.mm-sample-node .mm-sample-name{font-weight:700;color:var(--ink);margin-bottom:6px;font-size:12px}
+.mm-kv{display:flex;gap:6px;padding:1px 0}
+.mm-kv .k{color:var(--muted);min-width:120px;font-family:ui-monospace,Consolas,monospace;font-size:10px}
+.mm-kv .v{color:var(--ink);word-break:break-all;font-size:11px}
+@media(max-width:900px){.mm-sample-grid{grid-template-columns:1fr}.mm-props{max-width:280px}}
+.mm-empty{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+
+/* ===== 层级视图 ===== */
+.mm-hier-wrap{display:flex;gap:14px;align-items:stretch;min-height:520px}
+.mm-hier-left{width:340px;flex-shrink:0;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:12px;overflow-y:auto;max-height:76vh}
+/* v1.5.11n 树顶操作条：一键展开/收起 */
+.mm-hier-tools{display:flex;gap:8px;padding:2px 2px 10px;border-bottom:1px solid var(--rule);margin-bottom:10px;position:sticky;top:-12px;background:var(--bg2);z-index:5;padding-top:12px;margin-top:-12px}
+.mm-hier-tool{flex:1;padding:6px 0;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--rule);border-radius:8px;cursor:pointer;transition:all .15s}
+.mm-hier-tool:hover{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.mm-hier-right{flex:1;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;overflow-y:auto;max-height:76vh;min-width:0}
+.mm-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.mm-crumb b{color:var(--accent);cursor:pointer}
+.mm-crumb .sep{color:var(--muted);opacity:.5}
+.mm-tree-dom{margin-bottom:8px;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--bg)}
+.mm-tree-dom-head{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;background:var(--bg3);font-size:13px;font-weight:800;color:var(--ink);user-select:none}
+.mm-tree-dom-head:hover{background:rgba(79,140,255,.08)}
+.mm-tree-dom-head .mm-dom-tag{font-size:10px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.mm-tree-dom-head .mm-dom-cnt{margin-left:auto;font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
+.mm-tree-dom-head .mm-dom-arrow{transition:transform .18s;font-size:10px;color:var(--muted)}
+.mm-tree-dom.open .mm-dom-arrow{transform:rotate(90deg)}
+.mm-tree-dom-body{display:none;padding:6px 8px 8px}
+.mm-tree-dom.open .mm-tree-dom-body{display:block}
+.mm-tree-sub{margin:2px 0 6px}
+.mm-tree-sub-head{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);padding:5px 6px 3px;cursor:pointer;user-select:none}
+.mm-tree-sub-head:hover{color:var(--accent)}
+.mm-tree-sub-head .mm-dom-arrow{font-size:9px;transition:transform .18s;color:var(--muted)}
+.mm-tree-sub.open .mm-tree-sub-head .mm-dom-arrow{transform:rotate(90deg)}
+.mm-tree-sub-body{display:none;padding-left:14px;border-left:1px dashed var(--rule);margin-left:6px}
+.mm-tree-sub.open .mm-tree-sub-body{display:block}
+.mm-tree-node{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--ink)}
+.mm-tree-node:hover{background:var(--bg3)}
+.mm-tree-node.active{background:rgba(79,140,255,.15);color:var(--accent);font-weight:700}
+.mm-tree-node .mm-node-ico{font-size:13px}
+.mm-tree-node .mm-node-cn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mm-tree-node .mm-node-n{font-size:10px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+.mm-tree-node .mm-node-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.mm-tree-node.off{opacity:.55}
+.mm-hier-landing{padding:26px 10px;text-align:center;color:var(--muted);font-size:13px}
+.mm-hier-landing .big{font-size:38px;margin-bottom:10px}
+.mm-hier-domain-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.mm-hier-domain-card{background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
+.mm-hier-domain-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.mm-hier-domain-card h4{font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.mm-hier-domain-card .mm-card-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+.mm-hier-domain-card .mm-card-stats{display:flex;gap:12px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.mm-hier-domain-card .mm-card-stats b{color:var(--accent);font-size:13px}
+.mm-hier-domain-card .mm-card-stats .live b{color:#40c057}
+.mm-hier-domain-card .mm-card-stats .zero b{color:#f59f00}
+.mm-hier-node-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.mm-hier-node-head h3{font-size:17px;font-weight:800;color:var(--ink);margin:0;display:flex;align-items:center;gap:8px}
+.mm-hier-node-head .mm-node-meta{font-size:11px;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.mm-subsec{margin-top:18px}
+.mm-subsec h5{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:6px}
+.mm-hier-rel-list{display:flex;flex-direction:column;gap:6px}
+.mm-hier-rel{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:7px 12px;font-size:12px;flex-wrap:wrap}
+.mm-hier-rel .mm-rel-arrow{color:var(--muted);font-weight:700}
+.mm-hier-rel .mm-rel-tgt{cursor:pointer;color:var(--accent);font-weight:700}
+.mm-hier-rel .mm-rel-tgt:hover{text-decoration:underline}
+.mm-hier-rel .mm-rel-tgt.self{color:var(--ink);cursor:default}
+.mm-hier-rel .mm-rel-name{color:var(--muted);font-size:11px}
+@media(max-width:1000px){.mm-hier-wrap{flex-direction:column}.mm-hier-left{width:100%;max-height:320px}.mm-wb-grid{grid-template-columns:1fr}}
+
+/* ===== 一站式维护工作台 ===== */
+.mm-wb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+.mm-wb-card{background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.mm-wb-card h6{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 10px;display:flex;align-items:center;gap:6px}
+.mm-wb-card h6 .cnt{font-size:10px;color:var(--muted);font-weight:600}
+.mm-wb-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.mm-wb-row input,.mm-wb-row select{padding:6px 9px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;outline:none}
+.mm-wb-row input:focus,.mm-wb-row select:focus{border-color:var(--accent)}
+.mm-wb-prop{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:5px 8px;margin-bottom:6px}
+.mm-wb-prop input{flex:1;min-width:0;border:none;background:transparent;padding:2px;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink);outline:none}
+.mm-wb-prop input.cn-in{font-family:inherit;color:var(--muted)}
+.mm-wb-prop .mm-wb-x{cursor:pointer;color:var(--muted);font-size:14px;line-height:1;flex-shrink:0}
+.mm-wb-prop .mm-wb-x:hover{color:#fa5252}
+/* v1.5.11k：属性行字段标签（属性编码 / 代码名称） */
+.mm-wb-prop .mm-wb-flab{font-size:10px;color:var(--muted);font-weight:600;flex-shrink:0;letter-spacing:.5px}
+.mm-wb-prop.dirty{border-color:rgba(79,140,255,.55)}
+.mm-wb-add{width:100%;padding:7px;border:1px dashed var(--rule);border-radius:6px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;margin-top:2px}
+.mm-wb-add:hover{border-color:var(--accent);color:var(--accent)}
+.mm-wb-rel{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:7px 10px;margin-bottom:6px;flex-wrap:wrap;font-size:12px}
+.mm-wb-rel.dirty{border-color:rgba(79,140,255,.55)}
+.mm-wb-rel .mm-wb-endpt{flex:1;min-width:150px}
+.mm-wb-rel .mm-wb-endpt input{width:100%;padding:5px 8px;background:var(--bg);border:1px solid var(--rule);border-radius:5px;font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--ink);outline:none}
+.mm-wb-rel .mm-wb-endpt input:focus{border-color:var(--accent)}
+.mm-wb-rel .mm-wb-live{font-size:10px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+.mm-wb-rel .mm-wb-x{cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
+.mm-wb-rel .mm-wb-x:hover{color:#fa5252}
+.mm-wb-rel .mm-rel-arrow{color:var(--muted);font-weight:700}
+.mm-wb-newrel{background:rgba(79,140,255,.06);border:1px dashed rgba(79,140,255,.5)}
+.mm-wb-savebar{position:sticky;bottom:0;margin-top:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--rule);border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;z-index:5}
+.mm-wb-savebar .mm-wb-status{font-size:11px;color:var(--muted);flex:1;min-width:120px}
+.mm-wb-savebar.dirty{border-color:rgba(79,140,255,.55)}
+.mm-wb-dirty-n{display:inline-block;min-width:18px;text-align:center;background:rgba(79,140,255,.14);color:var(--accent);font-weight:800;border-radius:999px;font-size:11px;padding:1px 5px}
+
+/* 关系名搜索选择器 */
+.mm-wb-combo{position:relative;flex:1;min-width:150px}
+.mm-wb-combo input{width:100%;padding:5px 8px;background:var(--bg);border:1px solid var(--rule);border-radius:5px;font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--ink);outline:none}
+.mm-wb-combo input:focus{border-color:var(--accent)}
+.mm-wb-dd{display:none;position:fixed;top:0;left:0;width:380px;max-height:264px;overflow-y:auto;background:var(--bg);border:1px solid var(--accent);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.25);z-index:60;padding:4px;text-align:left;box-sizing:border-box}
+.mm-wb-dd.open{display:block}
+.mm-wb-dd-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:11px}
+.mm-wb-dd-item:hover{background:var(--bg3)}
+.mm-wb-dd-item .dd-t{font-family:ui-monospace,Consolas,monospace;font-weight:700;color:var(--ink);white-space:nowrap}
+.mm-wb-dd-item .dd-cn{color:var(--muted);white-space:nowrap}
+.mm-wb-dd-item .dd-ep{color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.mm-wb-dd-item .dd-live{font-size:10px;color:var(--muted);white-space:nowrap}
+.mm-wb-dd-new{display:block;width:100%;padding:7px 8px;margin-top:4px;border:none;border-top:1px dashed var(--rule);background:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit}
+.mm-wb-dd-new:hover{background:rgba(79,140,255,.08)}
+.mm-wb-dd-hint{padding:6px 8px;font-size:10px;color:var(--muted)}
+.mm-wb-dd-item.mm-wb-dd-hi{background:rgba(79,140,255,.12)}
+</style>
+</head>
+<body>
+<div class="nav"></div>
+
+<div class="mm-layout">
+  <div class="mm-header">
+    <div>
+      <h1>🧩 图谱元模型配置</h1>
+      <div class="mm-sub">维护知识图谱的<b>实体类型（含属性口径）</b>与<b>关系类型（含端点约束）</b>。配置持久化于服务端 meta_model.json，所有变更落审计日志；每次打开实时对照线上 Neo4j 实例数与属性抽样，元模型与库内数据漂移一目了然。</div>
+      <div class="mm-sub" style="margin-top:4px" id="mm-meta-info"></div>
+    </div>
+    <div class="mm-kpis" id="mm-kpis"></div>
+  </div>
+
+  <div class="mm-tabs" role="tablist">
+    <div class="mm-tab active" role="tab" data-view="hierarchy" onclick="mmSwitch('hierarchy')">🌳 层级视图</div>
+    <div class="mm-tab" role="tab" data-view="entities" onclick="mmSwitch('entities')">📦 实体类型</div>
+    <div class="mm-tab" role="tab" data-view="relations" onclick="mmSwitch('relations')">🔗 关系类型</div>
+    <div class="mm-tab" role="tab" data-view="check" onclick="mmSwitch('check')">🩺 一致性校验</div>
+  </div>
+
+  <!-- 层级视图（顶层往下下钻维护；v1.5.11c 层级结构读 meta_model.json hierarchy，可在工作台移动归属） -->
+  <div id="mm-view-hierarchy">
+    <div class="mm-hier-wrap">
+      <div class="mm-hier-left" id="mm-hier-tree"></div>
+      <div class="mm-hier-right">
+        <div id="mm-hier-move" style="display:none;margin-bottom:10px;padding:12px;border:1px solid var(--rule);border-radius:10px;background:var(--bg2)"></div>
+        <div id="mm-hier-detail"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 实体类型视图 -->
+  <div id="mm-view-entities" style="display:none">
+    <div class="mm-toolbar">
+      <input type="text" id="mm-et-q" placeholder="搜索类型/中文名/属性..." style="width:240px" oninput="mmRenderEntities()">
+      <select id="mm-et-cat" onchange="mmRenderEntities()">
+        <option value="">全部分类...</option><option value="临床">临床</option>
+        <option value="护理">护理</option><option value="评估">评估</option>
+      </select>
+      <select id="mm-et-src" onchange="mmRenderEntities()">
+        <option value="">全部来源...</option><option value="schema">Schema注册</option>
+        <option value="db_observed">库内实测</option><option value="manual">手工新增</option>
+      </select>
+      <select id="mm-et-act" onchange="mmRenderEntities()">
+        <option value="">全部状态...</option><option value="active">启用中</option>
+        <option value="inactive">已停用</option>
+      </select>
+      <span style="flex:1"></span>
+      <button class="mm-btn ghost" onclick="mmRefreshCounts()">🔄 刷新实例对照</button>
+      <button class="mm-btn" onclick="mmEditEntity(null)">＋ 新增实体类型</button>
+    </div>
+    <table class="mm-table"><thead><tr>
+      <th>实体类型</th><th>中文名</th><th>分类</th><th>关键属性口径</th><th>库内实例</th><th>快照对照</th><th>来源</th><th>操作</th>
+    </tr></thead><tbody id="mm-et-body"></tbody></table>
+  </div>
+
+  <!-- 关系类型视图 -->
+  <div id="mm-view-relations" style="display:none">
+    <div class="mm-toolbar">
+      <input type="text" id="mm-rt-q" placeholder="搜索类型/中文名/端点..." style="width:240px" oninput="mmRenderRelations()">
+      <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px">
+        <input type="checkbox" id="mm-rt-drift" onchange="mmRenderRelations()"> 仅看端点不一致（线上实际连接的类型与登记定义不同）
+      </label>
+      <select id="mm-rt-act" onchange="mmRenderRelations()">
+        <option value="">全部状态...</option><option value="active">启用中</option>
+        <option value="inactive">已停用</option>
+      </select>
+      <span style="flex:1"></span>
+      <button class="mm-btn" onclick="mmEditRelation(null)">＋ 新增关系类型</button>
+    </div>
+    <table class="mm-table"><thead><tr>
+      <th>关系类型</th><th>中文名</th><th>定义端点（起点→终点）</th><th>线上观测端点</th><th>实例数</th><th>快照对照</th><th>来源</th><th>操作</th>
+    </tr></thead><tbody id="mm-rt-body"></tbody></table>
+  </div>
+
+  <!-- 一致性校验视图 -->
+  <div id="mm-view-check" style="display:none">
+    <div class="mm-ck-intro">
+      <div class="t">🩺 这一页是做什么的？</div>
+      图谱里的每类实体（如 Specialty 专科）在「实体类型」里登记了一份<b>属性清单</b>（属性编码 + 代码名称），
+      而线上 Neo4j 图谱库里的真实数据是各程序写入的，两边可能对不上。这一页就是<b>抽几个线上真实节点，和登记的属性清单逐条核对</b>，看有没有「登记了但数据里没有」或「数据里有但没登记」的属性。
+      <div>
+        <span class="q">✅ 全部对上 = 配置和数据一致，无需处理</span>
+        <span class="q">⚠️ 登记了但数据缺 = 图谱数据不完整，转给数据建设方补</span>
+        <span class="q">ℹ️ 数据里有但没登记 = 属实属性，建议登记进属性口径</span>
+      </div>
+    </div>
+    <div class="mm-toolbar">
+      <select id="mm-ck-type" onchange="mmRunCheck()" style="min-width:220px"><option value="">选择要核对的实体类型...</option></select>
+      <span style="flex:1"></span>
+      <button class="mm-btn ghost" onclick="mmRunCheck()">🔍 抽样核对</button>
+    </div>
+    <div id="mm-check-result"></div>
+  </div>
+</div>
+
+<!-- 实体类型编辑模态框 -->
+<div class="mm-modal-mask" id="mm-modal-entity">
+  <div class="mm-modal">
+    <h3 id="mm-modal-entity-title">编辑实体类型</h3>
+    <div class="mm-form-row"><label>实体类型（entityType）</label>
+      <input type="text" id="mm-f-et-type" placeholder="如 NursingCarePlan（字母开头，仅字母数字下划线）">
+      <div class="mm-form-hint">已存在则更新；新增时才可修改此字段</div></div>
+    <div class="mm-form-row"><label>中文名</label><input type="text" id="mm-f-et-name" placeholder="如 护理计划"></div>
+    <div class="mm-form-row"><label>分类</label>
+      <select id="mm-f-et-cat"><option value="临床">临床</option><option value="护理">护理</option><option value="评估">评估</option></select></div>
+    <div class="mm-form-row"><label>关键属性口径（属性编码 + 代码名称）</label>
+      <div id="mm-f-et-props"></div>
+      <button type="button" class="mm-wb-add" onclick="mmEtAddProp()">＋ 添加属性</button>
+      <div id="mm-et-merge-tip" style="display:none" class="mm-form-hint">已自动补齐线上真实节点观测到的属性（带「线上补齐」标记，含系统种子中文名）；AI 解析内置属性（source_/schema_/pdf_ 等溯源治理字段）已自动排除。多余的行可点 ✕ 删除</div>
+      <div class="mm-form-hint">属性编码即字段的英文标识（snake_case），代码名称即对应中文；代码名称会显示在实体表/层级工作台/抽样校验中，留空则仅显示属性编码。保存后可在「一致性校验」抽样验证线上节点是否具备这些属性</div></div>
+    <div class="mm-form-row"><label>操作人（落审计日志）</label><input type="text" id="mm-f-et-op" placeholder="你的名字"></div>
+    <div class="mm-modal-foot">
+      <button class="mm-btn ghost" onclick="mmCloseModal('mm-modal-entity')">取消</button>
+      <button class="mm-btn" onclick="mmSaveEntity()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 关系类型编辑模态框 -->
+<div class="mm-modal-mask" id="mm-modal-relation">
+  <div class="mm-modal">
+    <h3 id="mm-modal-relation-title">编辑关系类型</h3>
+    <div class="mm-form-row"><label>关系类型（snake_case）</label>
+      <input type="text" id="mm-f-rt-type" placeholder="如 includes_nursing_intervention（小写字母开头）"></div>
+    <div class="mm-form-row"><label>中文名</label><input type="text" id="mm-f-rt-name" placeholder="如 包含护理措施"></div>
+    <div class="mm-form-row"><label>起点实体类型</label><input type="text" id="mm-f-rt-start" placeholder="如 NursingCarePlan"></div>
+    <div class="mm-form-row"><label>终点实体类型</label><input type="text" id="mm-f-rt-end" placeholder="如 NursingIntervention"></div>
+    <div class="mm-form-row"><label>操作人（落审计日志）</label><input type="text" id="mm-f-rt-op" placeholder="你的名字"></div>
+    <div class="mm-modal-foot">
+      <button class="mm-btn ghost" onclick="mmCloseModal('mm-modal-relation')">取消</button>
+      <button class="mm-btn" onclick="mmSaveRelation()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer"></div>
+
+<script>
+var MM = null;  // 元模型数据
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof renderNav === 'function') renderNav('meta');
+  /* v1.5.11k：页面加载默认进入层级视图 */
+  try {
+    var v = new URLSearchParams(location.search).get('view') || 'hierarchy';
+    if (['hierarchy','entities','relations','check'].indexOf(v) >= 0) mmSwitch(v);
+  } catch(e) {}
+  mmLoad();
+});
+
+function mmLoad(){
+  fetch('/api/kg/meta-model').then(function(r){return r.json();}).then(function(m){
+    if (m.error){ document.getElementById('mm-kpis').innerHTML = '<div class="mm-empty">加载失败：'+m.error+'</div>'; return; }
+    MM = m;
+    var nEt = m.entity_types.length, nRt = m.relation_types.length;
+    var driftEt = m.entity_types.filter(function(x){return x.drift==='drift';}).length;
+    var zeroEt = m.entity_types.filter(function(x){return (x.live_count||0)===0;}).length;
+    document.getElementById('mm-meta-info').textContent =
+      'Schema基准 ' + (m.version||'-') + ' · 生成于 ' + (m.generated_at||'-');
+    document.getElementById('mm-kpis').innerHTML =
+      '<div class="mm-kpi"><b>'+nEt+'</b><span>实体类型</span></div>' +
+      '<div class="mm-kpi"><b>'+nRt+'</b><span>关系类型</span></div>' +
+      '<div class="mm-kpi'+(driftEt?' warn':'')+'" title="登记时的实例数（快照）与现在线上 Neo4j 实际数不一致的类型个数——数据在登记后又增减过，属正常演进，点开实体类型表可看每个类型快照数 vs 实测数"><b>'+driftEt+'</b><span>登记数与实际不一致</span><span class="tip">登记后又增减过数据</span></div>' +
+      '<div class="mm-kpi'+(zeroEt?' warn':'')+'" title="在元模型里登记了、但线上 Neo4j 里一个数据节点都没有的类型个数——属规划中未落地的类型，等数据建设方（Codex）解析灌入后才会有实例"><b>'+zeroEt+'</b><span>登记了但无数据</span><span class="tip">规划中、尚未落地</span></div>';
+    var sel = document.getElementById('mm-ck-type');
+    sel.innerHTML = '<option value="">选择要核对的实体类型...</option>' +
+      m.entity_types.filter(function(x){return (x.live_count||0)>0;}).map(function(x){
+        return '<option value="'+x.type+'">'+x.type+' · '+(x.name_cn||'')+'（'+x.live_count+'）</option>';
+      }).join('');
+    mmRenderEntities(); mmRenderRelations(); mmRenderHierarchy();
+  }).catch(function(e){
+    document.getElementById('mm-kpis').innerHTML = '<div class="mm-empty">API 不可达：'+e+'</div>';
+  });
+}
+
+function mmSwitch(v){
+  document.querySelectorAll('.mm-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-view')===v);
+  });
+  ['hierarchy','entities','relations','check'].forEach(function(x){
+    document.getElementById('mm-view-'+x).style.display = (x===v)?'':'none';
+  });
+}
+
+function mmBadge(s){
+  if (s==='schema') return '<span class="mm-badge schema">Schema注册</span>';
+  if (s==='db_observed') return '<span class="mm-badge db">库内实测</span>';
+  if (s==='manual') return '<span class="mm-badge manual">手工新增</span>';
+  return '<span class="mm-badge zero">'+s+'</span>';
+}
+
+/* ===== v1.5.11d 属性中文名：key_properties 兼容 ['code'] / [{key,name_cn}] 两形态 ===== */
+function mmPropKey(p){ return typeof p==='object'&&p ? (p.key||'') : String(p==null?'':p); }
+function mmPropCn(p){ return typeof p==='object'&&p ? (p.name_cn||'') : ''; }
+/* 统一归一为 [{key,name_cn}]（供保存提交） */
+function mmNormProps(arr){
+  return (arr||[]).map(function(p){ return {key:mmPropKey(p), name_cn:mmPropCn(p)}; })
+    .filter(function(p){ return p.key; });
+}
+/* 双语标签：<span class="mm-prop">code<em class="cn">编码</em></span>；无中文名仅英文 */
+function mmPropTag(p, cls){
+  var k = mmPropKey(p), cn = mmPropCn(p);
+  return '<span class="mm-prop'+(cls?' '+cls:'')+'">'+mmEsc(k)+(cn?'<em class="cn">'+mmEsc(cn)+'</em>':'')+'</span>';
+}
+
+/* ===== 层级视图（v1.5.11c 方案B：层级结构存 meta_model.json hierarchy 字段，界面可维护） ===== */
+/* 兜底种子：API 未返回 hierarchy 时使用（与 server.py META_HIERARCHY_SEED 同步维护） */
+var HIER_FALLBACK = [
+  {key:'d1',tag:'第一层',tagColor:'#4f8cff',icon:'🫀',name:'疾病知识层',desc:'疾病目录、定义与基础医学、检查检验、诊断与风险、治疗与管理——专科知识的主体内容层',
+    subs:[
+      {icon:'📂',name:'目录与疾病',types:['Specialty','DiseaseCategory','DiseaseSubcategory','Disease']},
+      {icon:'📖',name:'定义与基础医学',types:['Definition','DefinitionComponent','Symptom','Sign','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','Prevention']},
+      {icon:'🔬',name:'检查与检验',types:['ExamPlan','ExamItem','ExamObservation','LabItem','LabSubitem','LabSample','VitalSignItem','ThresholdRule']},
+      {icon:'📋',name:'诊断与风险',types:['DiagnosisCriteria','DiagnosisCriteriaComponent','DifferentialDiagnosis','RiskStratification','ClinicalRule']},
+      {icon:'💊',name:'治疗与管理',types:['Drug','Procedure','TreatmentPlan','TreatmentItem','Contraindication','FollowUp']}
+    ]},
+  {key:'d2',tag:'结构层',tagColor:'#0ca678',icon:'🏥',name:'专科应用结构层',desc:'评估五件套、护理十件套、路径与质控——按专科应用场景组织的结构化配置层',
+    subs:[
+      {icon:'📊',name:'评估五件套',types:['AssessmentScale','AssessmentItem','AssessmentScoreRule','AssessmentResultLevel','AssessmentActionRule']},
+      {icon:'🩺',name:'护理十件套',types:['NursingAssessment','NursingAssessmentItem','NursingDiagnosis','NursingIntervention','NursingOutcome','NursingCarePlan','NursingGrade','NursingContraindication','NursingRecordItem','NursingOrderCheckRule']},
+      {icon:'🗺️',name:'路径与质控',types:['SpecialtyCarePathway','InpatientClinicalPathway','PathwayStage','PathwayTask','PathwayVariationReason','PathwayExitCriteria','QualityControlPoint','QualityControlRule']}
+    ]},
+  {key:'d3',tag:'治理层',tagColor:'#845ef7',icon:'🔖',name:'证据治理层',desc:'术语受控与别名治理，保障图谱口径统一',
+    subs:[
+      {icon:'🔖',name:'术语治理',types:['MedicalTermAlias']}
+    ]},
+  {key:'d4',tag:'扩展槽位',tagColor:'#f59f00',icon:'🧬',name:'专病扩展槽位',desc:'按专病（心血管）预留的扩展实体槽位，注册表已定义、按批次落地',
+    subs:[
+      {icon:'🧬',name:'心血管专病扩展',types:['ClinicalSubtype','ECGPattern','ElectrophysiologyMechanism','HeartFailurePhenotype','InfarctLocation','InheritancePattern','FamilyHistory','Gene','GeneticVariant','SecondaryCause','HemodynamicIndicator','TargetOrganDamage','BloodPressureGrade','VolumeStatus','SeverityGrade','TimeWindow','Device','DeviceParameter','AblationTarget','ValveAnatomy','ValveLesionType','VascularTerritory']}
+    ]},
+  {key:'d5',tag:'第二层',tagColor:'#ff922b',icon:'🏷️',name:'CDSS标准主数据层',desc:'与 CDSS 对齐的标准诊断/手术字典，含 ICD 编码',
+    subs:[
+      {icon:'🏷️',name:'标准字典',types:['StandardDiagnosis','StandardProcedure']}
+    ]},
+  {key:'d6',tag:'第三层',tagColor:'#e64980',icon:'⚖️',name:'临床决策层',desc:'推荐陈述、来源裁决、证据与指南——面向 CDSS 决策输出',
+    subs:[
+      {icon:'⚖️',name:'决策与证据',types:['RecommendationStatement','SourceAdjudication','Evidence','Guideline']}
+    ]},
+  {key:'d7',tag:'内部',tagColor:'#868e96',icon:'📑',name:'内部管理',desc:'来源段落等内部追溯实体，不对外展示',
+    subs:[
+      {icon:'📑',name:'来源追溯',types:['SourceSection']}
+    ]}
+];
+function HIER_DOMAINS(){ return (MM && MM.hierarchy && MM.hierarchy.length) ? MM.hierarchy : HIER_FALLBACK; }
+var HIER = {sel:null, selDom:null, openDom:'d1', openSubs:{}};
+
+function mmHierEt(type){ return MM.entity_types.find(function(e){return e.type===type;}); }
+function mmHierDot(e){
+  if (!e) return '#f59f00';
+  if (e.drift==='drift') return '#fa5252';
+  return (e.live_count||0)>0 ? '#40c057' : '#f59f00';
+}
+function mmHierFindDomain(type){
+  var ds = mmHierAllDomains();
+  for (var i=0;i<ds.length;i++){
+    var d = ds[i];
+    for (var j=0;j<d.subs.length;j++){
+      if (d.subs[j].types.indexOf(type)>=0) return {dom:d, sub:d.subs[j]};
+    }
+  }
+  return null;
+}
+function mmHierMappedTypes(){
+  var s = {};
+  HIER_DOMAINS().forEach(function(d){ d.subs.forEach(function(x){ x.types.forEach(function(t){s[t]=1;}); }); });
+  return s;
+}
+/* 未归入分层的类型（手工新增等）自动补一个尾部域 */
+function mmHierAllDomains(){
+  var mapped = mmHierMappedTypes(), extra = [];
+  (MM?MM.entity_types:[]).forEach(function(e){ if (!mapped[e.type]) extra.push(e.type); });
+  var ds = HIER_DOMAINS().slice();
+  if (extra.length) ds.push({key:'dx',tag:'未归类',tagColor:'#868e96',icon:'⚙️',name:'未归类（手工/实测补充）',
+    desc:'未落入标准分层的新增实体类型，建议维护后归入对应分层',
+    subs:[{icon:'⚙️',name:'待归类',types:extra}]});
+  return ds;
+}
+function mmHierDomStats(d){
+  var types=0, live=0, zero=0;
+  d.subs.forEach(function(s){ s.types.forEach(function(t){
+    var e = mmHierEt(t); types++;
+    var l = e?(e.live_count||0):0; live += l; if (!l) zero++;
+  });});
+  return {types:types, live:live, zero:zero};
+}
+
+function mmRenderHierarchy(){
+  if (!MM) return;
+  var ds = mmHierAllDomains();
+  /* v1.5.11n 树顶操作条：整树一键展开/收起 */
+  var h = '<div class="mm-hier-tools">'
+    + '<button class="mm-hier-tool" onclick="mmHierExpandAll(true)" title="展开左侧整棵树的所有层级">⬇ 全部展开</button>'
+    + '<button class="mm-hier-tool" onclick="mmHierExpandAll(false)" title="收起左侧整棵树">⬆ 全部收起</button>'
+    + '</div>';
+  ds.forEach(function(d){
+    var st = mmHierDomStats(d);
+    h += '<div class="mm-tree-dom'+(HIER.openDom===d.key?' open':'')+'" id="mm-hier-dom-'+d.key+'">'
+      + '<div class="mm-tree-dom-head" onclick="mmHierToggleDom(\''+d.key+'\')">'
+      + '<span class="mm-dom-arrow">▶</span><span>'+d.icon+' '+d.name+'</span>'
+      + '<span class="mm-dom-tag" style="background:'+d.tagColor+'22;color:'+d.tagColor+'">'+d.tag+'</span>'
+      + '<span class="mm-dom-cnt">'+st.types+'类 · '+st.live.toLocaleString()+'实例</span></div>'
+      + '<div class="mm-tree-dom-body">';
+    d.subs.forEach(function(s,si){
+      var sk = d.key+'_'+si, open = !!HIER.openSubs[sk];
+      h += '<div class="mm-tree-sub'+(open?' open':'')+'">'
+        + '<div class="mm-tree-sub-head" onclick="mmHierToggleSub(\''+d.key+'\','+si+')">'
+        + '<span class="mm-dom-arrow">▶</span>'+s.icon+' '+s.name+' <span class="mm-node-n">('+s.types.length+')</span></div>'
+        + '<div class="mm-tree-sub-body">';
+      s.types.forEach(function(t){
+        var e = mmHierEt(t);
+        var live = e?(e.live_count||0):0;
+        var off = e && e.active===false;
+        h += '<div class="mm-tree-node'+(HIER.sel===t?' active':'')+(off?' off':'')+'" onclick="mmHierPick(\''+t+'\')" title="'+t+(off?'（已停用）':'')+'">'
+          + '<span class="mm-node-dot" style="background:'+(off?'#adb5bd':mmHierDot(e))+'"></span>'
+          + '<span class="mm-node-cn">'+(e&&e.name_cn?e.name_cn:t)+'</span>'
+          + (off?'<span class="mm-node-off" style="font-size:9px;color:#868e96">停</span>':'')
+          + '<span class="mm-node-n">'+live.toLocaleString()+'</span></div>';
+      });
+      h += '</div></div>';
+    });
+    h += '</div></div>';
+  });
+  document.getElementById('mm-hier-tree').innerHTML = h;
+  if (HIER.sel) mmHierDetail(HIER.sel);
+  else if (HIER.selDom) mmHierDomainPanel(HIER.selDom);
+  else mmHierLanding();
+}
+function mmHierToggleDom(k){
+  /* v1.5.11n：点域即展开其全部分组（openSubs 批量置位）并选中该域；再点同一个域才收起 */
+  if (HIER.openDom === k){
+    HIER.openDom = null;
+    HIER.selDom = null;
+  } else {
+    HIER.openDom = k; HIER.sel = null; HIER.selDom = k;
+    mmHierAllDomains().forEach(function(d){
+      if (d.key === k) d.subs.forEach(function(_,si){ HIER.openSubs[k+'_'+si] = true; });
+    });
+  }
+  mmRenderHierarchy();
+}
+function mmHierToggleSub(k,si){
+  var sk = k+'_'+si;
+  HIER.openSubs[sk] = !HIER.openSubs[sk];
+  if (HIER.openDom!==k) HIER.openDom = k;
+  mmRenderHierarchy();
+}
+/* v1.5.11n 整树一键展开/收起 */
+function mmHierExpandAll(open){
+  if (open){
+    HIER.openDom = null;
+    mmHierAllDomains().forEach(function(d){
+      d.subs.forEach(function(_,si){ HIER.openSubs[d.key+'_'+si] = true; });
+    });
+  } else {
+    HIER.openDom = null; HIER.openSubs = {};
+  }
+  mmRenderHierarchy();
+}
+
+/* 右侧：顶层落地页（域概览卡片） */
+function mmHierLanding(){
+  var ds = mmHierAllDomains();
+  var h = '<div class="mm-hier-landing"><div class="big">🌳</div>'
+    + '<b style="color:var(--ink);font-size:15px">专科知识图谱 · 顶层视角</b><br>'
+    + '从顶层往下维护：点击左侧树或下方领域卡片，逐层下钻到实体类型与关系端点</div>'
+    + '<div class="mm-hier-domain-cards">';
+  ds.forEach(function(d){
+    var st = mmHierDomStats(d);
+    h += '<div class="mm-hier-domain-card" onclick="mmHierShowDomain(\''+d.key+'\')">'
+      + '<h4><span>'+d.icon+'</span>'+d.name
+      + '<span class="mm-dom-tag" style="background:'+d.tagColor+'22;color:'+d.tagColor+'">'+d.tag+'</span></h4>'
+      + '<div class="mm-card-desc">'+d.desc+'</div>'
+      + '<div class="mm-card-stats"><span><b>'+st.types+'</b> 实体类型</span>'
+      + '<span class="live"><b>'+st.live.toLocaleString()+'</b> 库内实例</span>'
+      + '<span class="zero"><b>'+st.zero+'</b> 零实例</span>'
+      + '</div></div>';
+  });
+  h += '</div>';
+  document.getElementById('mm-hier-detail').innerHTML = h;
+}
+
+/* 右侧：域详情（子域 → 类型清单） */
+function mmHierShowDomain(k){
+  HIER.sel = null; HIER.selDom = k; HIER.openDom = k;
+  mmRenderHierarchy();
+}
+function mmHierDomainPanel(k){
+  var d = null, ds = mmHierAllDomains();
+  for (var i=0;i<ds.length;i++) if (ds[i].key===k) d = ds[i];
+  if (!d){ mmHierLanding(); return; }
+  var st = mmHierDomStats(d);
+  var h = '<div class="mm-crumb">专科知识图谱 <span class="sep">›</span> <b onclick="mmHierLandingReset()">'+d.icon+' '+d.name+'</b></div>'
+    + '<div class="mm-hier-node-head"><div><h3>'+d.icon+' '+d.name
+    + '<span class="mm-dom-tag" style="background:'+d.tagColor+'22;color:'+d.tagColor+'">'+d.tag+'</span></h3>'
+    + '<div class="mm-node-meta"><span>'+st.types+' 个实体类型</span><span>·</span><span>'+st.live.toLocaleString()+' 库内实例</span>'
+    + (st.zero?'<span>·</span><span style="color:#f59f00">'+st.zero+' 个零实例</span>':'')+'</div></div></div>'
+    + '<div class="mm-subsec" style="margin-top:10px"><h5>下辖子域</h5><div class="mm-hier-rel-list">';
+  d.subs.forEach(function(s,si){
+    var live = 0;
+    s.types.forEach(function(t){ var e = mmHierEt(t); live += e?(e.live_count||0):0; });
+    h += '<div class="mm-hier-rel"><span>'+s.icon+' <b>'+s.name+'</b></span>'
+      + '<span class="mm-rel-name">'+s.types.length+' 类 · '+live.toLocaleString()+' 实例</span>'
+      + '<span style="flex:1"></span>'
+      + '<button class="mm-btn ghost sm" onclick="mmHierToggleSub(\''+d.key+'\','+si+')">在左侧树展开</button></div>';
+  });
+  h += '</div></div><div class="mm-subsec"><h5>实体类型（点击下钻维护）</h5><div class="mm-hier-rel-list">';
+  d.subs.forEach(function(s){
+    s.types.forEach(function(t){ h += mmHierTypeRow(t); });
+  });
+  h += '</div></div>';
+  document.getElementById('mm-hier-detail').innerHTML = h;
+}
+function mmHierLandingReset(){ HIER.sel = null; HIER.selDom = null; mmRenderHierarchy(); }
+
+function mmHierTypeRow(t){
+  var e = mmHierEt(t);
+  var live = e?(e.live_count||0):0;
+  return '<div class="mm-hier-rel" onclick="mmHierPick(\''+t+'\')" style="cursor:pointer">'
+    + '<span class="mm-node-dot" style="background:'+mmHierDot(e)+';width:8px;height:8px;border-radius:50%;display:inline-block"></span>'
+    + '<span class="mono" style="font-family:ui-monospace,Consolas,monospace;font-weight:700">'+t+'</span>'
+    + '<span>'+(e&&e.name_cn?e.name_cn:'<span style="color:var(--muted)">未登记</span>')+'</span>'
+    + '<span class="mm-rel-name">'+(live>0?live.toLocaleString()+' 实例':'<span style="color:#f59f00">0 实例</span>')+'</span>'
+    + (e && e.drift==='drift'?'<span class="mm-badge drift" title="登记时 '+(e.instance_count||0)+' 个，现在实测 '+live+' 个——数据在登记后有增减">不一致</span>':'')
+    + '<span style="flex:1"></span><span class="mm-rel-name">下钻 ›</span></div>';
+}
+
+/* ===== 右侧：实体类型一站式维护工作台（定义+属性+关联同屏编辑，统一保存） ===== */
+var WB = null;  // 工作台状态 {type, name_cn, category, props:[{v,orig}], rels:[{key,dir,rel,relName,orig,endpt,origEnd,live,drift,_new}], saving}
+
+function mmHierPick(t){
+  HIER.sel = t; HIER.selDom = null;
+  var loc = mmHierFindDomain(t);
+  if (loc){ HIER.openDom = loc.dom.key; }
+  mmRenderHierarchy();
+}
+
+/* 收集某实体类型相关的全部关系端点（含出边/入边，端点可多个则拆行） */
+function mmHierRelsOf(t){
+  var rels = [];
+  MM.relation_types.forEach(function(r){
+    var ends = (r.end_types||[]);
+    (ends.length?ends:[null]).forEach(function(tg){
+      if ((r.start_types||[]).indexOf(t)>=0)
+        rels.push({key:'o|'+r.type+'|'+tg, dir:'out', rel:r.type, relName:r.name_cn||'',
+          origEnd:(tg===null?'':tg), endpt:(tg===null?'':tg), live:r.live_count||0, drift:r.drift});
+    });
+    (r.start_types||[]).forEach(function(src){
+      if ((r.end_types||[]).indexOf(t)>=0 && src!==t)
+        rels.push({key:'i|'+r.type+'|'+src, dir:'in', rel:r.type, relName:r.name_cn||'',
+          origEnd:(src===null?'':src), endpt:(src===null?'':src), live:r.live_count||0, drift:r.drift});
+    });
+  });
+  return rels;
+}
+
+function mmHierDetail(t){
+  var e = mmHierEt(t);
+  var loc = mmHierFindDomain(t);
+  if (!e){
+    document.getElementById('mm-hier-detail').innerHTML =
+      '<div class="mm-crumb">专科知识图谱 <span class="sep">›</span> '+t+'</div>'
+      + '<div class="mm-empty">该类型在元模型中未登记（仅存在于分层定义）</div>';
+    WB = null;
+    return;
+  }
+  /* 构建工作台状态（v1.5.11d：属性对象形态 {key, name_cn}，双输入维护） */
+  var rels = mmHierRelsOf(t);
+  var normProps = mmNormProps(e.key_properties||[]);
+  WB = {type:t, name_cn:e.name_cn||'', category:e.category||'临床', saving:false,
+    props:normProps.map(function(p){return {key:p.key, cn:p.name_cn, origKey:p.key, origCn:p.name_cn};}),
+    origProps:normProps.map(function(p){return p.key+'|'+p.name_cn;}),
+    rels:rels,
+    origRelKeys:rels.map(function(r){return r.key;})};
+  var live = e.live_count||0;
+  var crumb = '专科知识图谱';
+  if (loc) crumb += ' <span class="sep">›</span> <b onclick="mmHierShowDomain(\''+loc.dom.key+'\')">'+loc.dom.icon+' '+loc.dom.name+'</b>'
+    + ' <span class="sep">›</span> '+loc.sub.icon+' '+loc.sub.name;
+  crumb += ' <span class="sep">›</span> <b>'+t+'</b>';
+  document.getElementById('mm-hier-detail').innerHTML =
+    '<div class="mm-crumb">'+crumb+'</div>'
+    + '<div class="mm-hier-node-head"><div><h3>'+t+' <span style="font-size:13px;color:var(--muted);font-weight:600" id="mm-wb-name-preview">'+(e.name_cn||'')+'</span></h3>'
+    + '<div class="mm-node-meta">'
+    + '<span class="mm-badge cat-'+({临床:'cli',护理:'nur',评估:'ass'}[e.category]||'cli')+'">'+e.category+'</span>'
+    + mmBadge(e.source)
+    + (e.active===false?'<span class="mm-badge inactive" title="停用于 '+(e.inactive_at||'')+' by '+(e.inactive_by||'')+'">已停用</span>':'')
+    + (live>0?'<span>库内实例 <b style="color:#40c057">'+live.toLocaleString()+'</b></span>':'<span style="color:#f59f00" title="在元模型登记了，但线上图谱里还没有该类型的数据节点——规划中、尚未落地">无数据 · 未落地</span>')
+    + (e.drift==='drift'?'<span class="mm-badge drift" title="登记时 '+(e.instance_count||0)+' 个，现在实测 '+live+' 个——数据在登记后有增减">与登记数不一致</span>':'<span class="mm-badge match" title="登记快照数与线上实测数相同">与登记数一致</span>')
+    + '</div></div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<button class="mm-btn ghost sm" onclick="mmCheckType(\''+t+'\')">🔍 属性抽样</button>'
+    + '<button class="mm-btn ghost sm" onclick="mmHierMove(\''+t+'\')">📦 移动到分组</button>'
+    + (e.active===false
+      ? '<button class="mm-btn sm" onclick="mmRestore(\'entity\',\''+t+'\')">↩️ 恢复启用</button>'
+      : '<button class="mm-btn danger sm" onclick="mmDeactivate(\'entity\',\''+t+'\')">⏸️ 停用</button>')
+    + '</div></div>'
+    + '<div class="mm-wb-grid">'
+    + '<div class="mm-wb-card"><h6>🏷️ 实体定义</h6>'
+    + '<div class="mm-wb-row"><span style="color:var(--muted);min-width:64px">中文名</span>'
+    + '<input type="text" id="mm-wb-name" value="'+mmEsc(WB.name_cn)+'" style="flex:1" placeholder="如 疾病" oninput="mmWbDirty()"></div>'
+    + '<div class="mm-wb-row"><span style="color:var(--muted);min-width:64px">分类</span>'
+    + '<select id="mm-wb-cat" onchange="mmWbDirty()">'
+    + ['临床','护理','评估'].map(function(c){return '<option value="'+c+'"'+(WB.category===c?' selected':'')+'>'+c+'</option>';}).join('')
+    + '</select></div>'
+    + '<div class="mm-wb-row" style="color:var(--muted);font-size:11px;line-height:1.6">实体类型 <b class="mono" style="color:var(--ink)">'+t+'</b> · 来源 '+e.source+' · 快照实例 '+(e.instance_count||0).toLocaleString()+'</div>'
+    + '</div>'
+    + '<div class="mm-wb-card"><h6>🔑 关键属性口径 <span class="cnt" id="mm-wb-prop-cnt">('+WB.props.length+')</span></h6>'
+    + '<div id="mm-wb-props"></div>'
+    + '<button class="mm-wb-add" onclick="mmWbAddProp()">＋ 添加属性</button></div>'
+    + '</div>'
+    + '<div class="mm-wb-card" style="grid-column:1/-1"><h6>🔗 实体关联（'+t+' 的出边 / 入边，端点即另一实体类型，可直接改） <span class="cnt" id="mm-wb-rel-cnt"></span></h6>'
+    + '<div id="mm-wb-rels"></div>'
+    + '<button class="mm-wb-add" onclick="mmWbAddRel()">＋ 添加关联（搜索既有关系或新建）</button></div>'
+    + '<div class="mm-wb-savebar" id="mm-wb-savebar">'
+    + '<span class="mm-wb-status" id="mm-wb-status">所有修改将一次性提交（实体定义+属性+关联端点），逐项落审计日志</span>'
+    + '<input type="text" id="mm-wb-op" placeholder="操作人" style="padding:7px 10px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;width:120px;outline:none">'
+    + '<button class="mm-btn ghost" onclick="mmHierDetail(HIER.sel)">↩️ 放弃修改</button>'
+    + '<button class="mm-btn" id="mm-wb-save-btn" onclick="mmWbSave()">💾 一键保存全部修改</button>'
+    + '</div>';
+  mmWbRenderProps(); mmWbRenderRels();
+}
+
+function mmEsc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ---- v1.5.11c 方案B：调整实体类型的层级归属（落 meta_model.json hierarchy + 审计） ---- */
+function mmHierMove(t){
+  var loc = mmHierFindDomain(t);
+  var cur = loc ? (loc.dom.icon+' '+loc.dom.name+' / '+loc.sub.name) : '未归类';
+  var h = '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'
+    + '当前归属：<b style="color:var(--ink)">'+cur+'</b> · 移动后立即写入元模型（meta_model.json hierarchy）并落审计日志</div>'
+    + '<div class="mm-wb-row"><span style="color:var(--muted);min-width:64px">目标域</span>'
+    + '<select id="mm-move-dom" style="flex:1" onchange="mmHierMoveSubs()">'
+    + mmHierAllDomains().filter(function(d){return d.key!=='dx';}).map(function(d){
+        return '<option value="'+d.key+'"'+(loc&&loc.dom.key===d.key?' selected':'')+'>'+d.icon+' '+d.name+'（'+d.tag+'）</option>';
+      }).join('')
+    + '</select></div>'
+    + '<div class="mm-wb-row"><span style="color:var(--muted);min-width:64px">目标分组</span>'
+    + '<select id="mm-move-sub" style="flex:1"></select></div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'
+    + '<button class="mm-btn ghost" onclick="mmHierMoveClose()">取消</button>'
+    + '<button class="mm-btn" onclick="mmHierMoveSave(\''+t+'\')">📦 确认移动</button></div>';
+  var box = document.getElementById('mm-hier-move');
+  box.innerHTML = h; box.style.display = 'block';
+  mmHierMoveSubs();
+}
+function mmHierMoveSubs(){
+  var dk = document.getElementById('mm-move-dom').value;
+  var d = mmHierAllDomains().find(function(x){return x.key===dk;});
+  var sel = document.getElementById('mm-move-sub');
+  sel.innerHTML = (d?d.subs:[]).map(function(s){
+    return '<option value="'+mmEsc(s.name)+'">'+s.icon+' '+mmEsc(s.name)+'（'+s.types.length+'类）</option>';
+  }).join('');
+}
+function mmHierMoveClose(){ var b = document.getElementById('mm-hier-move'); b.style.display='none'; b.innerHTML=''; }
+function mmHierMoveSave(t){
+  var dk = document.getElementById('mm-move-dom').value;
+  var sn = document.getElementById('mm-move-sub').value;
+  var op = (document.getElementById('mm-wb-op')||{}).value || '';
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'move_entity_domain', type:t, domain_key:dk, sub_name:sn, operator:op||'meta页面'})
+  }).then(function(r){return r.json();}).then(function(d){
+    if (d.error){ alert('移动失败：'+d.error); return; }
+    mmHierMoveClose();
+    mmLoad();  // 重拉元模型刷新层级树
+  }).catch(function(e){ alert('网络错误：'+e); });
+}
+
+/* ---- 工作台：属性区（v1.5.11d 双输入：属性名 + 中文名） ---- */
+function mmWbRenderProps(){
+  var h = '';
+  WB.props.forEach(function(p,i){
+    var dirty = p.key!==p.origKey || p.cn!==p.origCn;
+    h += '<div class="mm-wb-prop'+(dirty?' dirty':'')+'" id="mm-wb-prop-'+i+'">'
+      + '<span style="color:var(--muted);font-size:11px;width:14px">'+(i+1)+'</span>'
+      + '<span class="mm-wb-flab">属性编码</span>'
+      + '<input type="text" value="'+mmEsc(p.key)+'" oninput="mmWbPropVal('+i+',\'key\',this.value)" placeholder="如 code / disease_code（snake_case）" title="属性编码：如 code、name、disease_code（snake_case）">'
+      + '<span class="mm-wb-flab">代码名称</span>'
+      + '<input type="text" class="cn-in" value="'+mmEsc(p.cn)+'" oninput="mmWbPropVal('+i+',\'cn\',this.value)" placeholder="如 编码 / 名称" style="max-width:130px" title="代码名称：该属性编码对应的中文名称，可空">'
+      + '<span class="mm-wb-x" onclick="mmWbDelProp('+i+')" title="删除该属性">✕</span></div>';
+  });
+  document.getElementById('mm-wb-props').innerHTML = h || '<div class="mm-rel-name" style="padding:4px 0">未定义关键属性</div>';
+  document.getElementById('mm-wb-prop-cnt').textContent = '('+WB.props.length+')';
+  mmWbStatus();
+}
+function mmWbPropVal(i,f,v){ WB.props[i][f] = v; mmWbStatus(); }
+function mmWbAddProp(){ WB.props.push({key:'',cn:'',origKey:'',origCn:''}); mmWbRenderProps(); mmWbStatus(); }
+function mmWbDelProp(i){ WB.props.splice(i,1); mmWbRenderProps(); mmWbStatus(); }
+
+/* ---- 工作台：关联区 ---- */
+function mmWbRenderRels(){
+  var t = WB.type;
+  var h = '';
+  WB.rels.forEach(function(r,i){
+    var isNew = r._new;
+    h += '<div class="mm-wb-rel'+((!isNew && r.endpt!==r.origEnd)?' dirty':'')+(isNew?' mm-wb-newrel':'')+'">'
+      + '<span class="mm-node-dot" style="background:'+(r.drift==='drift'?'#fa5252':((r.live||0)>0?'#40c057':'#f59f00'))+'"></span>'
+      + (r.dir==='out'
+          ? '<span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;color:var(--ink)">'+t+'</span> <span class="mm-rel-arrow">—</span>'
+          : '<span class="mm-wb-endpt"><input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="起点实体类型"></span> <span class="mm-rel-arrow">—</span>')
+      + (isNew
+          ? '<span class="mm-wb-combo"><input type="text" id="mm-wb-rel-in-'+i+'" value="'+mmEsc(r.rel)+'" autocomplete="off"'
+            + ' oninput="mmWbRelName('+i+',this.value);mmWbComboInput('+i+')" onfocus="mmWbComboOpen('+i+')" onkeydown="mmWbComboKey(event,'+i+')"'
+            + ' placeholder="🔎 关系名：搜索既有 / 新建"></span>'
+          : '<span class="mm-wb-endpt" style="min-width:130px"><input type="text" value="'+mmEsc(r.rel)+'" readonly></span>')
+      + '<span class="mm-rel-arrow">→</span> '
+      + (r.dir==='out'
+          ? '<span class="mm-wb-endpt"><input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="终点实体类型"></span>'
+          : '<span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;color:var(--ink)">'+t+'</span>')
+      + (isNew && r._mode!=='exist'
+          ? '<span class="mm-wb-endpt" style="min-width:104px"><input type="text" value="'+mmEsc(r.relName)+'" oninput="WB.rels['+i+'].relName=this.value" placeholder="中文名(新关系)"></span>'
+          : (r.relName?'<span class="mm-rel-name">'+mmEsc(r.relName)+'</span>':''))
+      + (isNew
+          ? (r._mode==='exist' ? '<span class="mm-badge schema">既有·合并端点</span>'
+              : (r._mode==='new' ? '<span class="mm-badge manual">新建关系</span>' : '<span class="mm-badge manual">新增</span>'))
+          : '<span class="mm-wb-live">'+(r.live||0).toLocaleString()+' 实例</span>')
+      + (r.drift==='drift'&&!isNew?'<span class="mm-badge drift" title="登记时 '+(r.instance_count||0)+' 条，现在实测 '+(r.live||0)+' 条——数据在登记后有增减">不一致</span>':'')
+      + '<span style="flex:1"></span>'
+      + '<span class="mm-wb-x" onclick="mmWbDelRel('+i+')" title="'+(isNew?'取消新增':'从该关系端点列表移除')+'">✕</span></div>';
+  });
+  document.getElementById('mm-wb-rels').innerHTML = h || '<div class="mm-rel-name" style="padding:4px 0">元模型未定义任何关联</div>';
+  document.getElementById('mm-wb-rel-cnt').textContent = '('+WB.rels.length+' 条，含出边与入边)';
+  mmWbStatus();
+}
+function mmWbRelVal(i,v){ WB.rels[i].endpt = v; mmWbStatus(); }
+function mmWbRelName(i,v){ WB.rels[i].rel = v; mmWbStatus(); }
+function mmWbAddRel(){
+  WB.rels.push({key:'n'+Date.now()+'_'+WB.rels.length, dir:'out', rel:'', relName:'', origEnd:'', endpt:'', live:0, _new:true});
+  mmWbRenderRels();
+}
+function mmWbDelRel(i){
+  var r = WB.rels[i];
+  if (r._new){ WB.rels.splice(i,1); mmWbRenderRels(); return; }
+  /* 删除行 = 把行内端点类型从该关系端点列表移除（不删关系类型本身，其他端点保留） */
+  if (!confirm('将从关系 '+r.rel+' 的'+(r.dir==='out'?'终点':'起点')+'列表移除「'+r.endpt+'」（关系类型与其他端点保留）。继续？')) return;
+  WB.rels.splice(i,1); mmWbRenderRels();
+}
+
+/* ---- 工作台：关系名搜索选择器（combobox，防拼错/防重复建关系） ---- */
+var WBCOMBO = {idx:-1, q:'', hi:0};  // 当前编辑行、搜索词、高亮项
+
+function mmWbComboFind(relType){
+  var hit = null;
+  (MM?MM.relation_types:[]).forEach(function(x){ if (x.type===relType) hit = x; });
+  return hit;
+}
+/* 搜索候选：类型名/中文名/端点 命中；已用关系靠后，常用（实例多）优先 */
+function mmWbComboCands(){
+  var used = {};
+  WB.rels.forEach(function(r){ if (!r._new) used[r.rel] = 1; });
+  var q = WBCOMBO.q.toLowerCase();
+  var list = (MM?MM.relation_types:[]).filter(function(x){
+    if (q){
+      var hay = (x.type+' '+(x.name_cn||'')+' '+(x.start_types||[]).join(' ')+' '+(x.end_types||[]).join(' ')).toLowerCase();
+      if (hay.indexOf(q)<0) return false;
+    }
+    return true;
+  }).map(function(x){
+    return {x:x, used:!!used[x.type], score:(used[x.type]?0:(x.live_count||0))};
+  }).sort(function(a,b){ return b.score - a.score; }).slice(0, 30);
+  return list.map(function(o){return o.x;});
+}
+function mmWbComboOpen(i){
+  if (WBCOMBO.skipFocus===i){ WBCOMBO.skipFocus = null; return; }
+  WBCOMBO.idx = i; WBCOMBO.q = WB.rels[i].rel; WBCOMBO.hi = 0;
+  mmWbComboRender();
+}
+function mmWbComboInput(i){
+  WBCOMBO.idx = i; WBCOMBO.q = WB.rels[i].rel; WBCOMBO.hi = 0;
+  WB.rels[i]._mode = null;  // 手动改动后清除模式，待重新选择/确认新建
+  mmWbComboRender();
+}
+function mmWbComboRender(){
+  mmWbComboClose(true);
+  var i = WBCOMBO.idx;
+  if (i<0 || !WB || !WB.rels[i] || !WB.rels[i]._new) return;
+  var inp = document.getElementById('mm-wb-rel-in-'+i);
+  if (!inp) return;
+  var cands = mmWbComboCands();
+  var exact = mmWbComboFind(WBCOMBO.q);
+  var h = '';
+  if (cands.length){
+    cands.forEach(function(x,ci){
+      var ss = x.start_types||[], es = x.end_types||[];
+      h += '<div class="mm-wb-dd-item'+(ci===WBCOMBO.hi?' mm-wb-dd-hi':'')+'" data-ci="'+ci+'"'
+        + ' onmousedown="event.preventDefault()" onclick="mmWbComboPick('+ci+')">'
+        + '<span class="dd-t">'+x.type+'</span>'
+        + '<span class="dd-cn">'+(x.name_cn||'')+'</span>'
+        + '<span class="dd-ep">'+((ss.length?ss.join('/'):'?')+' → '+(es.length?es.join('/'):'?'))+'</span>'
+        + '<span class="dd-live">'+(x.live_count||0).toLocaleString()+' 实例</span>'
+        + '</div>';
+    });
+  } else {
+    h += '<div class="mm-wb-dd-hint">无匹配的既有关系</div>';
+  }
+  if (WBCOMBO.q && !exact){
+    h += '<button type="button" class="mm-wb-dd-new" onmousedown="event.preventDefault()" onclick="mmWbComboNew()">＋ 新建关系类型「'+mmEsc(WBCOMBO.q)+'」</button>';
+  } else if (exact && cands.length>6){
+    h += '<div class="mm-wb-dd-hint">已精确匹配既有关系 '+exact.type+'（点上方选项确认合并端点）</div>';
+  }
+  var rc = inp.getBoundingClientRect();
+  var dd = document.createElement('div');
+  dd.className = 'mm-wb-dd open';
+  dd.id = 'mm-wb-dd';
+  dd.style.left = Math.min(rc.left, window.innerWidth-392) + 'px';
+  var spaceBelow = window.innerHeight - rc.bottom - 8, spaceAbove = rc.top - 8;
+  if (spaceBelow >= 200 || spaceBelow >= spaceAbove){
+    dd.style.top = Math.max(8, Math.min(rc.bottom+4, window.innerHeight-274)) + 'px';
+  } else {
+    dd.style.top = Math.max(8, rc.top - 268) + 'px';  // 上方空间更充裕：向上弹出，不遮挡输入框
+  }
+  dd.innerHTML = h;
+  dd.addEventListener('mousedown', function(e){ e.preventDefault(); });  // 防止点击时输入框先失焦
+  document.body.appendChild(dd);
+}
+function mmWbComboKey(e,i){
+  var dd = document.getElementById('mm-wb-dd');
+  if (!dd) return;
+  var cands = mmWbComboCands();
+  if (e.key==='ArrowDown'){ e.preventDefault(); WBCOMBO.hi = Math.min(WBCOMBO.hi+1, cands.length-1); mmWbComboRerender(); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); WBCOMBO.hi = Math.max(WBCOMBO.hi-1, 0); mmWbComboRerender(); }
+  else if (e.key==='Enter'){
+    e.preventDefault();
+    if (cands[WBCOMBO.hi]) mmWbComboPick(WBCOMBO.hi);
+    else if (WBCOMBO.q) mmWbComboNew();
+  }
+  else if (e.key==='Escape'){ mmWbComboClose(); }
+}
+function mmWbComboRerender(){
+  var dd = document.getElementById('mm-wb-dd');
+  if (!dd) return;
+  var items = dd.querySelectorAll('.mm-wb-dd-item');
+  items.forEach(function(el,ci){ el.classList.toggle('mm-wb-dd-hi', ci===WBCOMBO.hi); });
+  if (items[WBCOMBO.hi]) items[WBCOMBO.hi].scrollIntoView({block:'nearest'});
+}
+/* 选中既有关系：填入类型名+中文名，行标记 _mode='exist'（保存时向该关系合并端点） */
+function mmWbComboPick(ci){
+  var i = WBCOMBO.idx;
+  var x = mmWbComboCands()[ci];
+  if (i<0 || !x || !WB.rels[i]) return;
+  var r = WB.rels[i];
+  r.rel = x.type; r.relName = x.name_cn||'';
+  r._mode = 'exist';
+  r.live = x.live_count||0;
+  mmWbComboClose();
+  mmWbRenderRels();
+  var inp = document.getElementById('mm-wb-rel-in-'+i);
+  if (inp) inp.focus();  // onfocus 会重开下拉，选择完成场景下先豁免一次
+  WBCOMBO.skipFocus = i;
+}
+/* 新建：保留输入的名称，行标记 _mode='new'（需填中文名） */
+function mmWbComboNew(){
+  var i = WBCOMBO.idx;
+  if (i<0 || !WB.rels[i]) return;
+  var name = (WBCOMBO.q||'').trim();
+  if (!/^[a-z][a-z0-9_]*$/.test(name)){ alert('关系类型需为 snake_case（小写字母开头，仅小写字母/数字/下划线）：'+name); return; }
+  WB.rels[i]._mode = 'new';
+  mmWbComboClose();
+  mmWbRenderRels();
+  var inp = document.getElementById('mm-wb-rel-in-'+i);
+  if (inp) inp.focus();
+  WBCOMBO.skipFocus = i;
+}
+function mmWbComboClose(keepIdx){
+  var dd = document.getElementById('mm-wb-dd');
+  if (dd) dd.remove();
+  if (!keepIdx) WBCOMBO.idx = -1;
+}
+/* 全局点击/失焦关闭下拉（点选项本身除外，onmousedown 已 preventDefault） */
+document.addEventListener('click', function(e){
+  if (document.getElementById('mm-wb-dd') && !e.target.closest('#mm-wb-dd'))
+    mmWbComboClose();
+}, true);
+document.addEventListener('blur', function(){ mmWbComboClose(); }, true);
+/* 右侧面板滚动时下拉会脱位，直接关闭 */
+document.addEventListener('scroll', function(){ mmWbComboClose(); }, true);
+
+/* ---- 工作台：脏检查与统一保存 ---- */
+function mmWbDirtyCount(){
+  if (!WB) return 0;
+  var n = 0;
+  /* 定义：与初始值比对（保存后 WB 会用新值重建，此时相等） */
+  if (document.getElementById('mm-wb-name').value !== WB.name_cn) n++;
+  if (document.getElementById('mm-wb-cat').value !== WB.category) n++;
+  /* 属性：编辑前后逐位比对（顺序也参与；key|中文名 串行比对） */
+  var propsNow = WB.props.map(function(p){return p.key.trim()+'|'+(p.cn||'').trim();}).filter(function(s){return s!=='|';});
+  if (propsNow.join('\n') !== WB.origProps.join('\n')) n++;
+  /* 关联：编辑前后 key 集合 + 端点值比对 */
+  var relKeysNow = WB.rels.filter(function(r){return !r._new;}).map(function(r){return r.key;});
+  if (relKeysNow.join() !== WB.origRelKeys.join()) n++;
+  WB.rels.forEach(function(r){ if (!r._new && r.endpt.trim()!==r.origEnd) n++; });
+  if (WB.rels.some(function(r){return r._new;})) n++;
+  return n;
+}
+function mmWbStatus(){
+  var n = mmWbDirtyCount();
+  var bar = document.getElementById('mm-wb-savebar');
+  var st = document.getElementById('mm-wb-status');
+  var btn = document.getElementById('mm-wb-save-btn');
+  if (!bar) return;
+  bar.classList.toggle('dirty', n>0);
+  if (n>0) st.innerHTML = '有 <span class="mm-wb-dirty-n">'+n+'</span> 处修改待保存';
+  else st.textContent = '所有修改将一次性提交（实体定义+属性+关联端点），逐项落审计日志';
+  if (btn) btn.disabled = n===0;
+  if (btn) btn.style.opacity = n===0 ? .5 : 1;
+}
+function mmWbDirty(){ mmWbStatus(); }
+
+function mmWbSave(){
+  if (!WB || WB.saving) return;
+  var n = mmWbDirtyCount();
+  if (n===0) return;
+  /* 前置校验：新增关联行必须通过选择器确认（选既有关系 或 确认新建），杜绝手输拼写/重复 */
+  var pending = [];
+  WB.rels.forEach(function(r){
+    if (!r._new) return;
+    var rt = (r.rel||'').trim(), tg = (r.endpt||'').trim();
+    if (!rt && !tg) return;  // 全空行忽略
+    if (!rt || !tg || !r._mode) pending.push({rt:rt, tg:tg, mode:r._mode});
+  });
+  if (pending.length){
+    alert('有 '+pending.length+' 条新增关联未确认关系名：\n'
+      + pending.slice(0,5).map(function(p){return ' · '+WB.type+' — '+(p.rt||'(空)')+' → '+(p.tg||'(空)')+(p.mode?'':'【未从下拉选择/确认新建】');}).join('\n')
+      + '\n\n请在关联行的关系名框中：从下拉列表选择既有关系（合并端点），或点击「＋ 新建关系类型」确认新建。');
+    return;
+  }
+  var operator = document.getElementById('mm-wb-op').value.trim() || 'admin';
+  /* 1. 实体定义 + 属性（v1.5.11d 对象形态 [{key, name_cn}]） */
+  var props = WB.props.map(function(p){return {key:p.key.trim(), name_cn:(p.cn||'').trim()};}).filter(function(p){return p.key;});
+  var steps = [{action:'update_entity', entity:{type:WB.type,
+    name_cn:document.getElementById('mm-wb-name').value.trim(),
+    category:document.getElementById('mm-wb-cat').value,
+    key_properties:props}}];
+  /* 2. 关联：按关系类型聚合端点改动
+     端点编辑 = 以工作台当前端点集合重建该关系类型的端点列表；
+     删除行 = 把行内端点从该关系端点列表移除（行删光则本类型脱离该关系）；
+     新增行 = 新关系类型 upsert（已存在则合并端点） */
+  var byRel = {};
+  WB.rels.forEach(function(r){
+    if (r.dir!=='out' || r._new) return;
+    if (!byRel[r.rel]) byRel[r.rel] = {type:r.rel, ends:[], relName:r.relName};
+    if (r.endpt.trim()) byRel[r.rel].ends.push(r.endpt.trim());
+  });
+  /* 出边端点被改/被删的关系 → 重建端点（行删光则该关系不再以本类型为起点，从 start_types 移除本类型） */
+  var curOut = {};
+  MM.relation_types.forEach(function(r){
+    if ((r.start_types||[]).indexOf(WB.type)>=0) curOut[r.type] = r;
+  });
+  Object.keys(curOut).forEach(function(rt){
+    var cur = (curOut[rt].end_types||[]);
+    var want = byRel[rt] ? byRel[rt].ends : [];
+    if (cur.join('\n') !== want.join('\n')){
+      var newStarts = want.length ? (curOut[rt].start_types||[]).slice() : (curOut[rt].start_types||[]).filter(function(x){return x!==WB.type;});
+      steps.push({action:'update_relation', relation:{type:rt,
+        start_types:newStarts, end_types:want}});
+    }
+  });
+  /* 入边端点改动：行被删=该起点从 start_types 移除；全部入边行删光=本类型从 end_types 移除 */
+  var curIn = {};
+  MM.relation_types.forEach(function(r){
+    if ((r.end_types||[]).indexOf(WB.type)>=0) curIn[r.type] = r;
+  });
+  var byIn = {};
+  WB.rels.forEach(function(r){
+    if (r.dir!=='in' || r._new) return;
+    if (!byIn[r.rel]) byIn[r.rel] = {type:r.rel, starts:[]};
+    if (r.endpt.trim()) byIn[r.rel].starts.push(r.endpt.trim());
+  });
+  Object.keys(curIn).forEach(function(rt){
+    var cur = (curIn[rt].start_types||[]);
+    var want = byIn[rt] ? byIn[rt].starts : [];
+    if (cur.join('\n') !== want.join('\n')){
+      var newEnds = want.length ? (curIn[rt].end_types||[]).slice() : (curIn[rt].end_types||[]).filter(function(x){return x!==WB.type;});
+      steps.push({action:'update_relation', relation:{type:rt,
+        start_types:want, end_types:newEnds}});
+    }
+  });
+  /* 3. 新增关联（起点=本类型；_mode='exist' 已选既有→向其端点合并；'new' 确认新建） */
+  WB.rels.forEach(function(r){
+    if (!r._new) return;
+    var rt = r.rel.trim(), tg = r.endpt.trim();
+    if (!rt || !tg) return;
+    var exist = null;
+    MM.relation_types.forEach(function(x){ if (x.type===rt) exist = x; });
+    if (exist){
+      var starts = (exist.start_types||[]).slice();
+      if (starts.indexOf(WB.type)<0) starts.push(WB.type);
+      var ends = (exist.end_types||[]).slice();
+      if (ends.indexOf(tg)<0) ends.push(tg);
+      steps.push({action:'update_relation', relation:{type:rt, name_cn:exist.name_cn||'',
+        start_types:starts, end_types:ends}});
+    } else {
+      steps.push({action:'update_relation', relation:{type:rt, name_cn:r.relName||'',
+        start_types:[WB.type], end_types:[tg]}});
+    }
+  });
+  /* 串行提交 */
+  WB.saving = true;
+  var btn = document.getElementById('mm-wb-save-btn');
+  btn.textContent = '⏳ 提交中 '+steps.length+' 项...';
+  var st = document.getElementById('mm-wb-status');
+  (function run(idx){
+    if (idx>=steps.length){
+      WB.saving = false;
+      st.innerHTML = '✅ 已保存 '+steps.length+' 项变更';
+      setTimeout(function(){ mmLoad(); }, 400);
+      return;
+    }
+    var s = steps[idx];
+    st.textContent = '提交第 '+(idx+1)+'/'+steps.length+' 项：'+s.action+' '+(s.type||(s.entity||{}).type||(s.relation||{}).type);
+    fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({operator:operator}, s))})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if (res.error){ WB.saving=false; btn.textContent='💾 一键保存全部修改'; alert('第 '+(idx+1)+' 项失败：'+res.error+'\n已提交 '+(idx)+' 项，后续未提交。'); return; }
+      MM = res.model || MM;
+      run(idx+1);
+    })
+    .catch(function(err){
+      WB.saving=false; btn.textContent='💾 一键保存全部修改';
+      alert('网络错误：'+err+'（已提交 '+idx+' 项）');
+    });
+  })(0);
+}
+
+/* ===== 实体类型 ===== */
+function mmRenderEntities(){
+  if (!MM) return;
+  var q = (document.getElementById('mm-et-q').value||'').toLowerCase();
+  var cat = document.getElementById('mm-et-cat').value;
+  var src = document.getElementById('mm-et-src').value;
+  var act = document.getElementById('mm-et-act').value;
+  var rows = MM.entity_types.filter(function(x){
+    if (act==='active' && x.active===false) return false;
+    if (act==='inactive' && x.active!==false) return false;
+    if (cat && x.category!==cat) return false;
+    if (src && x.source!==src) return false;
+    if (q){
+      var hay = (x.type+' '+(x.name_cn||'')+' '+mmNormProps(x.key_properties).map(function(p){return p.key+' '+p.name_cn;}).join(' ')).toLowerCase();
+      if (hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var h = '';
+  rows.forEach(function(x){
+    var live = x.live_count||0;
+    var off = x.active===false;
+    h += '<tr'+(off?' class="mm-inactive"':'')+'>'
+      + '<td class="mono"><b>'+x.type+'</b>'+(off?'<span class="mm-badge inactive" title="停用于 '+(x.inactive_at||'')+' by '+(x.inactive_by||'')+'">已停用</span>':'')+'</td>'
+      + '<td>'+(x.name_cn||'<span style="color:var(--muted)">—</span>')+'</td>'
+      + '<td><span class="mm-badge cat-'+({临床:'cli',护理:'nur',评估:'ass'}[x.category]||'cli')+'">'+x.category+'</span></td>'
+      + '<td><div class="mm-props">'+mmNormProps(x.key_properties).map(function(p){return mmPropTag(p);}).join('')+'</div></td>'
+      + '<td>'+(live>0?('<b>'+live.toLocaleString()+'</b>'):'<span class="mm-badge zero">0·未落地</span>')+'</td>'
+      + '<td>'+(x.drift==='match'
+            ? '<span class="mm-badge match" title="登记快照数与线上实测数相同">一致</span>'
+            : '<span class="mm-badge drift" title="登记时 '+x.instance_count+' 个，现在实测 '+live+' 个——数据在登记后有增减">不一致 '+(live>x.instance_count?'+':'')+(live-x.instance_count)+'</span>')+'</td>'
+      + '<td>'+mmBadge(x.source)+'</td>'
+      + '<td style="white-space:nowrap">'
+      + '<button class="mm-btn ghost sm" onclick="mmEditEntity(\''+x.type+'\')">编辑</button> '
+      + '<button class="mm-btn ghost sm" onclick="mmCheckType(\''+x.type+'\')">抽样</button> '
+      + (off
+          ? '<button class="mm-btn sm" onclick="mmRestore(\'entity\',\''+x.type+'\')">恢复</button>'
+          : '<button class="mm-btn danger sm" onclick="mmDeactivate(\'entity\',\''+x.type+'\')">停用</button>')+'</td>'
+      + '</tr>';
+  });
+  document.getElementById('mm-et-body').innerHTML = h || '<tr><td colspan="8" class="mm-empty">无匹配</td></tr>';
+}
+
+/* ---- v1.5.11k 实体编辑模态框：属性行复用工作台双输入（属性编码 + 代码名称） ---- */
+var ET_PROPS = [];
+/* v1.5.11o AI 解析内置属性前缀/名单：系统自动写入的溯源与治理戳，不算业务属性，编辑弹窗自动补齐时排除 */
+var ET_BUILTIN_PROP_PREFIX = ['source_','schema_','term_','standardization_','pdf_','docx_','line_','segment_','parse_','ai_','audit_','content_hash','_meta'];
+var ET_BUILTIN_PROPS = ['entityType','entity_type','id','content_hash','display_order','sort_order'];
+function mmEtIsBuiltin(k){
+  if (ET_BUILTIN_PROPS.indexOf(k) >= 0) return true;
+  return ET_BUILTIN_PROP_PREFIX.some(function(p){ return k.indexOf(p) === 0; });
+}
+function mmEtRenderProps(){
+  var h = '';
+  ET_PROPS.forEach(function(p,i){
+    h += '<div class="mm-wb-prop">'
+      + '<span style="color:var(--muted);font-size:11px;width:14px">'+(i+1)+'</span>'
+      + '<span class="mm-wb-flab">属性编码</span>'
+      + '<input type="text" value="'+mmEsc(p.key)+'" oninput="mmEtPropVal('+i+',\'key\',this.value)" placeholder="如 code / disease_code（snake_case）">'
+      + '<span class="mm-wb-flab">代码名称</span>'
+      + '<input type="text" class="cn-in" value="'+mmEsc(p.cn)+'" oninput="mmEtPropVal('+i+',\'cn\',this.value)" placeholder="如 编码 / 名称" style="max-width:130px">'
+      + (p.auto ? '<span class="mm-badge" style="font-size:10px" title="该属性来自线上真实节点的属性键（抽样观测），非原登记清单">线上补齐</span>' : '')
+      + '<span class="mm-wb-x" onclick="mmEtDelProp('+i+')" title="删除该属性">✕</span></div>';
+  });
+  document.getElementById('mm-f-et-props').innerHTML = h || '<div class="mm-rel-name" style="padding:4px 0">未定义关键属性</div>';
+}
+function mmEtPropVal(i,f,v){ ET_PROPS[i][f] = v; }
+function mmEtAddProp(){ ET_PROPS.push({key:'',cn:''}); mmEtRenderProps(); }
+function mmEtDelProp(i){ ET_PROPS.splice(i,1); mmEtRenderProps(); }
+
+/* v1.5.11o 打开弹窗：已登记属性在前，自动合并线上真实观测到的全部业务属性（排除 AI 解析内置属性），中文名优先用种子 */
+function mmEtMergeLiveProps(registered){
+  var merged = registered.map(function(p){ return {key:p.key, cn:p.name_cn, auto:false}; });
+  var seen = {};
+  merged.forEach(function(p){ seen[p.key] = true; });
+  var cns = (MM && MM.prop_cn_seed) || {};
+  var type = document.getElementById('mm-f-et-type').value.trim();
+  fetch('/api/kg/meta-model/sample?entityType='+encodeURIComponent(type)+'&limit=8')
+    .then(function(r){return r.json();}).then(function(s){
+    if (s.error || !s.observed_keys) return;
+    var add = s.observed_keys.filter(function(k){ return !seen[k] && !mmEtIsBuiltin(k); });
+    if (!add.length) return;
+    add.forEach(function(k){
+      merged.push({key:k, cn:(s.observed_keys_cn && s.observed_keys_cn[k]) || cns[k] || '', auto:true});
+    });
+    ET_PROPS = merged;
+    mmEtRenderProps();
+    var tip = document.getElementById('mm-et-merge-tip');
+    if (tip) tip.style.display = 'block';
+  }).catch(function(){});
+}
+
+function mmEditEntity(type){
+  var x = type ? MM.entity_types.find(function(e){return e.type===type;}) : null;
+  document.getElementById('mm-modal-entity-title').textContent = x ? '编辑实体类型 · '+x.type : '新增实体类型';
+  document.getElementById('mm-f-et-type').value = x ? x.type : '';
+  document.getElementById('mm-f-et-type').disabled = !!x;
+  document.getElementById('mm-f-et-name').value = x ? (x.name_cn||'') : '';
+  document.getElementById('mm-f-et-cat').value = x ? (x.category||'临床') : '临床';
+  ET_PROPS = x ? mmNormProps(x.key_properties).map(function(p){return {key:p.key, cn:p.name_cn};})
+             : [{key:'code',cn:'编码'},{key:'name',cn:'名称'}];
+  var tip = document.getElementById('mm-et-merge-tip');
+  if (tip) tip.style.display = 'none';
+  mmEtRenderProps();
+  document.getElementById('mm-modal-entity').classList.add('open');
+  /* v1.5.11o 编辑已有类型时：拉线上真实属性自动补齐（排除 AI 解析内置属性） */
+  if (x) mmEtMergeLiveProps(ET_PROPS);
+}
+function mmSaveEntity(){
+  var type = document.getElementById('mm-f-et-type').value.trim();
+  var props = ET_PROPS.filter(function(p){ return p.key.trim(); })
+    .map(function(p){ return {key:p.key.trim(), name_cn:(p.cn||'').trim()}; });
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'update_entity',operator:document.getElementById('mm-f-et-op').value.trim()||'admin',
+      entity:{type:type,name_cn:document.getElementById('mm-f-et-name').value.trim(),
+        category:document.getElementById('mm-f-et-cat').value,key_properties:props}})})
+  .then(function(r){return r.json();}).then(function(res){
+    if (res.error){ alert(res.error); return; }
+    MM = res.model; mmCloseModal('mm-modal-entity'); mmLoad();
+  });
+}
+
+/* ===== 关系类型 ===== */
+function mmRenderRelations(){
+  if (!MM) return;
+  var q = (document.getElementById('mm-rt-q').value||'').toLowerCase();
+  var onlyDrift = document.getElementById('mm-rt-drift').checked;
+  var act = document.getElementById('mm-rt-act').value;
+  var rows = MM.relation_types.filter(function(x){
+    if (act==='inactive' && x.active!==false) return false;
+    if (act==='active' && x.active===false) return false;
+    if (onlyDrift){
+      var ss = x.start_types||[], es = x.end_types||[];
+      var d = (ss.length && x.observed_start && x.observed_start.length &&
+               x.observed_start.join()!==ss.join()) ||
+              (es.length && x.observed_end && x.observed_end.length &&
+               x.observed_end.join()!==es.join());
+      if (!d) return false;
+    }
+    if (q){
+      var hay = (x.type+' '+(x.name_cn||'')+' '+(x.start_types||[]).join(' ')+' '+(x.end_types||[]).join(' ')).toLowerCase();
+      if (hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var h = '';
+  rows.forEach(function(x){
+    var live = x.live_count||0;
+    var ss = x.start_types||[], es = x.end_types||[];
+    var epDrift = (ss.length && x.observed_start && x.observed_start.length && x.observed_start.join()!==ss.join()) ||
+                  (es.length && x.observed_end && x.observed_end.length && x.observed_end.join()!==es.join());
+    var off = x.active===false;
+    h += '<tr'+(off?' class="mm-inactive"':'')+'>'
+      + '<td class="mono"><b>'+x.type+'</b>'+(off?' <span class="mm-badge inactive" title="停用时间：'+(x.inactive_at||'—')+'，操作人：'+(x.inactive_by||'—')+'">已停用</span>':'')+'</td>'
+      + '<td>'+(x.name_cn||'<span style="color:var(--muted)">—</span>')+'</td>'
+      + '<td class="mono">'+(ss.length?ss.join(' → '):'<span style="color:var(--muted)">未定义</span>')+' → '+(es.length?es.join('/'): '<span style="color:var(--muted)">未定义</span>')+'</td>'
+      + '<td class="mono" style="font-size:10px;color:var(--muted)">'
+        + ((x.observed_start||[]).join(',')||'—')+' → '+((x.observed_end||[]).join(',')||'—')
+        + (epDrift?' <span class="mm-badge drift" title="线上实际连接的实体类型与登记的端点定义不一致">端点不一致</span>':'')+'</td>'
+      + '<td>'+(live>0?('<b>'+live.toLocaleString()+'</b>'):'<span class="mm-badge zero">0</span>')+'</td>'
+      + '<td>'+(x.drift==='match'
+            ? '<span class="mm-badge match" title="登记快照数与线上实测数相同">一致</span>'
+            : '<span class="mm-badge drift" title="登记时 '+x.instance_count+' 条，现在实测 '+live+' 条——数据在登记后有增减">不一致 '+(live>x.instance_count?'+':'')+(live-x.instance_count)+'</span>')+'</td>'
+      + '<td>'+mmBadge(x.source)+'</td>'
+      + '<td style="white-space:nowrap">'
+      + '<button class="mm-btn ghost sm" onclick="mmEditRelation(\''+x.type+'\')">编辑</button> '
+      + (off
+        ? '<button class="mm-btn sm" onclick="mmRestore(\'relation\',\''+x.type+'\')">恢复</button>'
+        : '<button class="mm-btn danger sm" onclick="mmDeactivate(\'relation\',\''+x.type+'\')">停用</button>')+'</td>'
+      + '</tr>';
+  });
+  document.getElementById('mm-rt-body').innerHTML = h || '<tr><td colspan="8" class="mm-empty">无匹配</td></tr>';
+}
+
+function mmEditRelation(type){
+  var x = type ? MM.relation_types.find(function(e){return e.type===type;}) : null;
+  document.getElementById('mm-modal-relation-title').textContent = x ? '编辑关系类型 · '+x.type : '新增关系类型';
+  document.getElementById('mm-f-rt-type').value = x ? x.type : '';
+  document.getElementById('mm-f-rt-type').disabled = !!x;
+  document.getElementById('mm-f-rt-name').value = x ? (x.name_cn||'') : '';
+  document.getElementById('mm-f-rt-start').value = x ? (x.start_types||[]).join(',') : '';
+  document.getElementById('mm-f-rt-end').value = x ? (x.end_types||[]).join(',') : '';
+  document.getElementById('mm-modal-relation').classList.add('open');
+}
+function mmSaveRelation(){
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'update_relation',operator:document.getElementById('mm-f-rt-op').value.trim()||'admin',
+      relation:{type:document.getElementById('mm-f-rt-type').value.trim(),
+        name_cn:document.getElementById('mm-f-rt-name').value.trim(),
+        start_types:document.getElementById('mm-f-rt-start').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+        end_types:document.getElementById('mm-f-rt-end').value.split(',').map(function(s){return s.trim();}).filter(Boolean)}})})
+  .then(function(r){return r.json();}).then(function(res){
+    if (res.error){ alert(res.error); return; }
+    MM = res.model; mmCloseModal('mm-modal-relation'); mmLoad();
+  });
+}
+
+/* ===== 通用 ===== */
+function mmDeactivate(kind, type){
+  if (!confirm('确认停用'+(kind==='entity'?'实体类型':'关系类型')+'「'+type+'」？\n仅停用元模型配置（active=false，逻辑删除），可随时恢复，不影响线上 Neo4j 数据。')) return;
+  var op = prompt('操作人（落审计日志）：','admin');
+  if (op===null) return;
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'delete_'+kind,type:type,operator:op||'admin'})})
+  .then(function(r){return r.json();}).then(function(res){
+    if (res.error){ alert(res.error); return; }
+    mmLoad();
+  });
+}
+function mmRestore(kind, type){
+  if (!confirm('确认恢复'+(kind==='entity'?'实体类型':'关系类型')+'「'+type+'」为启用状态？')) return;
+  var op = prompt('操作人（落审计日志）：','admin');
+  if (op===null) return;
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'restore_'+kind,type:type,operator:op||'admin'})})
+  .then(function(r){return r.json();}).then(function(res){
+    if (res.error){ alert(res.error); return; }
+    mmLoad();
+  });
+}
+function mmRefreshCounts(){
+  fetch('/api/kg/meta-model',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'refresh_counts',operator:'admin'})})
+  .then(function(r){return r.json();}).then(function(res){
+    if (res.error){ alert(res.error); return; }
+    mmLoad();
+  });
+}
+function mmCloseModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mm-modal-mask').forEach(function(m){
+  m.addEventListener('click', function(e){ if (e.target===m) m.classList.remove('open'); });
+});
+
+/* ===== 一致性校验 ===== */
+function mmCheckType(type){
+  mmSwitch('check');
+  document.getElementById('mm-ck-type').value = type;
+  mmRunCheck();
+}
+function mmRunCheck(){
+  var type = document.getElementById('mm-ck-type').value;
+  var box = document.getElementById('mm-check-result');
+  if (!type){ box.innerHTML = '<div class="mm-empty">请先选择实体类型</div>'; return; }
+  box.innerHTML = '<div class="mm-empty">抽样中...</div>';
+  fetch('/api/kg/meta-model/sample?entityType='+encodeURIComponent(type)+'&limit=4')
+    .then(function(r){return r.json();}).then(function(s){
+    if (s.error){ box.innerHTML = '<div class="mm-empty">失败：'+s.error+'</div>'; return; }
+    var meta = MM.entity_types.find(function(x){return x.type===type;});
+      var metaName = (meta && meta.name_cn) ? meta.name_cn : type;
+      var props = mmNormProps((meta && meta.key_properties) || []);
+      var propKeys = props.map(function(p){return p.key;});
+      var obs = s.observed_keys || [];
+      var cnMap = s.observed_keys_cn || {};
+      var missing = props.filter(function(p){return obs.indexOf(p.key)<0;});
+      var extra = obs.filter(function(p){return propKeys.indexOf(p)<0;});
+      /* v1.5.11l：白话结论 + 行动指引 */
+      var verdict, act;
+      if (missing.length === 0 && extra.length === 0) {
+        verdict = '✅ <b>核对一致</b>：登记的 ' + propKeys.length + ' 个属性在线上数据里全部存在，无需处理';
+        act = '';
+      } else {
+        verdict = '⚠️ <b>发现不一致</b>，共 ' + (missing.length + extra.length) + ' 处';
+        act = '<div class="mm-check-act">下一步：'
+          + (missing.length ? '「登记了但数据缺」的 ' + missing.length + ' 个属性属于图谱数据不完整，请转给数据建设方（Codex）补齐；' : '')
+          + (extra.length ? '「数据里有但没登记」的 ' + extra.length + ' 个属性如属实，点「实体类型 → 编辑」把它们登记进关键属性口径（补上代码名称）' : '')
+          + '</div>';
+      }
+      var h = '<div class="mm-check-card"><h4>📋 属性核对结论 · ' + metaName + '（' + type + '）</h4>'
+        + '<div class="mm-check-item"><span class="mm-check-ico"></span><div>' + verdict
+        + '<div class="mm-check-desc">登记属性 ' + propKeys.length + ' 个 · 线上实际观测 ' + obs.length + ' 个 · 抽样节点 ' + s.sampled + ' 个</div>'
+        + '</div></div>';
+      if (missing.length){
+        h += '<div class="mm-check-item"><span class="mm-check-ico">⚠️</span><div><b>登记了、但线上数据缺</b>（' + missing.length + ' 个）——图谱数据不完整'
+          + '<div class="mm-check-desc">' + missing.map(function(p){return mmPropTag(p,'miss');}).join(' ') + '</div></div></div>';
+      }
+      if (extra.length){
+        h += '<div class="mm-check-item"><span class="mm-check-ico">ℹ️</span><div><b>数据里有、但没登记</b>（' + extra.length + ' 个）——如实属该类型的属性，建议登记进口径'
+          + '<div class="mm-check-desc">' + extra.map(function(p){return mmPropTag({key:p,name_cn:cnMap[p]||''});}).join(' ') + '</div></div></div>';
+      }
+      if (act) h += '<div class="mm-check-item"><span class="mm-check-ico">👉</span><div>' + act + '</div></div>';
+      h += '</div>';
+    h += '<div class="mm-check-card"><h4>🧬 抽到的真实节点（' + s.sampled + ' 个，属性编码 | 值）</h4><div class="mm-sample-grid">';
+    (s.samples||[]).forEach(function(n){
+      h += '<div class="mm-sample-node"><div class="mm-sample-name">'+(n.name||n.code||'-')+'</div>';
+      Object.keys(n).slice(0,10).forEach(function(k){
+        h += '<div class="mm-kv"><span class="k">'+k+'</span><span class="v">'+(n[k]===''?'—':n[k])+'</span></div>';
+      });
+      h += '</div>';
+    });
+    h += '</div></div>';
+    box.innerHTML = h;
+  });
+}
+</script>
+</body>
+</html>

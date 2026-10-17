@@ -1,63 +1,68 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>临床审核 - 专科知识图谱</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
+<title>建设与审核 - 专科知识图谱</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
 <style>
-/* ===== 页面布局 ===== */
+/* ===== 页面布局 v1.5.11f：左侧边栏导航 + 右侧内容（主次分明，替代顶部 8-tab 横排） ===== */
 html, body { height: 100%; overflow: hidden; margin: 0; }
 .rv-layout { display: flex; flex-direction: column; height: calc(100vh - 48px); overflow: hidden; }
 
-/* ===== 顶部区域 ===== */
-.rv-header { flex-shrink: 0; padding: 20px 28px 0; }
-.rv-title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-.rv-title-row h1 { font-size: 22px; font-weight: 800; margin: 0; }
-.rv-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+/* ===== 顶栏（紧凑一行：标题 + 内联小指标） ===== */
+.rv-header { flex-shrink: 0; padding: 12px 24px; border-bottom: 1px solid var(--rule);
+  background: var(--bg1, var(--bg2)); }
+.rv-title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rv-title-row h1 { font-size: 18px; font-weight: 800; margin: 0; }
+.rv-subtitle { display: none; }  /* 说明并入侧栏分组，顶部不再占行 */
 
-/* KPI 指标栏 */
-.rv-kpi-bar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-.rv-kpi {
-  background: var(--bg2); border: 1px solid var(--rule); border-radius: 12px;
-  padding: 14px 20px; flex: 1; min-width: 150px;
-  display: flex; align-items: center; gap: 14px;
-  transition: border-color .2s;
-}
-.rv-kpi:hover { border-color: var(--accent); }
-.rv-kpi-icon { font-size: 28px; width: 44px; height: 44px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.rv-kpi-num { font-size: 28px; font-weight: 800; line-height: 1; }
-.rv-kpi-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.rv-kpi-detail { font-size: 10px; color: var(--muted); margin-top: 1px; }
+/* KPI 内联小指标（替代大卡片，紧贴标题一行排开） */
+.rv-kpi-bar { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-left: auto; }
+.rv-kpi { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+.rv-kpi-num { font-size: 16px; font-weight: 800; line-height: 1; }
+.rv-kpi-label { font-size: 11px; color: var(--muted); }
+.rv-kpi-icon, .rv-kpi-detail { display: none; }  /* 内联模式隐藏图标与副描述 */
 
-/* 警告横幅 */
+/* 警告横幅（闸门校验等仍用） */
 .rv-warning {
   background: rgba(255,210,59,.06); border: 1px solid rgba(255,210,59,.25);
   border-radius: 10px; padding: 10px 16px; font-size: 12px; color: var(--yellow);
   display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
 }
 
-/* ===== 标签页 ===== */
+/* ===== 左侧边栏导航 ===== */
+.rv-body { flex: 1; display: flex; min-height: 0; }
 .rv-tabs {
-  display: flex; background: var(--bg2); border: 1px solid var(--rule);
-  border-radius: 12px; overflow: hidden; margin-bottom: 0;
+  width: 172px; flex-shrink: 0; display: flex; flex-direction: column;
+  background: var(--bg2); border-right: 1px solid var(--rule);
+  padding: 10px 8px; overflow-y: auto;
 }
+.rv-tabs::-webkit-scrollbar { width: 4px; }
+.rv-tabs::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
 .rv-tab {
-  flex: 1; padding: 12px 16px; text-align: center; cursor: pointer;
-  color: var(--muted); font-size: 13px; font-weight: 700;
-  border-bottom: 2px solid transparent; transition: all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 12px; cursor: pointer; color: var(--muted);
+  font-size: 13px; font-weight: 600; text-align: left;
+  border-radius: 8px; transition: all .15s;
+  display: flex; align-items: center; gap: 7px;
+  white-space: nowrap; margin-bottom: 2px; border-bottom: none;
 }
 .rv-tab:hover { background: var(--bg3); color: var(--ink); }
-.rv-tab.active { color: var(--accent); background: rgba(79,140,255,.06); border-bottom-color: var(--accent); }
+.rv-tab.active { color: var(--accent); background: var(--accent-bg, rgba(79,140,255,.1)); border-bottom-color: transparent; }
 .rv-tab-badge {
   background: var(--accent-bg); color: var(--accent);
-  font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 700;
+  font-size: 10px; padding: 1px 7px; border-radius: 999px; font-weight: 700; margin-left: auto;
 }
+/* 侧栏分组标题 */
+.rv-tab-group {
+  padding: 14px 12px 4px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  color: var(--muted); opacity: .65; white-space: nowrap;
+  border-bottom: none; background: transparent;
+}
+.rv-tab-group:first-child { padding-top: 2px; }
 
 /* ===== 内容区域 ===== */
-.rv-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 28px 90px; }
+.rv-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 18px 24px 60px; min-width: 0; }
 .rv-content::-webkit-scrollbar { width: 6px; }
 .rv-content::-webkit-scrollbar-track { background: transparent; }
 .rv-content::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
@@ -175,20 +180,25 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 }
 .rv-disease-expand.open { display: block; }
 
-/* ===== Tab 1: 疾病级审核卡片（保留原设计） ===== */
-.rv-disease-card { border-left: 3px solid var(--accent); }
-.rv-disease-card-header {
-  padding: 16px 20px 0; display: flex; justify-content: space-between; align-items: flex-start;
-}
-.rv-disease-name { font-size: 16px; font-weight: 800; color: var(--ink); }
-.rv-disease-code { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 2px; }
-.rv-disease-stats { display: flex; gap: 12px; margin: 12px 20px; }
-.rv-disease-stat {
-  background: var(--bg3); border-radius: 8px; padding: 8px 14px;
-  text-align: center; flex: 1;
-}
-.rv-disease-stat-num { font-size: 20px; font-weight: 800; }
-.rv-disease-stat-label { font-size: 10px; color: var(--muted); margin-top: 1px; }
+/* ===== Tab 1: 疾病级审核列表（v1.5.11g 卡片网格 → 表格列表，参考指南库） ===== */
+.rv-dis-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rv-dis-table th { padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700;
+  color: var(--muted); border-bottom: 2px solid var(--rule); white-space: nowrap; }
+.rv-dis-table td { padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.rv-dis-table tbody tr { cursor: pointer; transition: background .1s; }
+.rv-dis-table tbody tr:hover { background: rgba(79,140,255,.06); }
+.rv-dis-name { font-weight: 600; color: var(--ink); }
+.rv-dis-code { font-size: 10px; color: var(--muted); font-family: monospace; margin-top: 1px; }
+.rv-dis-num { font-weight: 700; display: inline-block; min-width: 22px; text-align: center; }
+.rv-dis-num.warn { color: var(--orange); }
+.rv-dis-num.zero { color: var(--muted); opacity: .5; }
+.rv-dis-batch { font-size: 11px; color: var(--ink); white-space: nowrap; }
+.rv-dis-batch small { display: block; color: var(--muted); font-size: 10px; margin-top: 1px; }
+.rv-dis-go { font-size: 11px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--accent);
+  background: transparent; color: var(--accent); cursor: pointer; font-weight: 600; white-space: nowrap; }
+.rv-dis-go:hover { background: var(--accent-bg, rgba(79,140,255,.1)); }
+.rv-dis-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+@media (max-width: 900px) { .rv-dis-table .hide-sm { display: none; } }
 
 /* ===== Tab 2/3/4: 展开项卡片 ===== */
 .rv-item-card {
@@ -299,6 +309,81 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 .rv-empty-icon { font-size: 48px; margin-bottom: 12px; }
 .rv-empty-text { font-size: 14px; }
 
+/* ===== v1.5.11e 建设进度 tab（自 heatmap.html 移植） ===== */
+.cov-section{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px;margin-bottom:20px}
+.cov-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.cov-section-desc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.cov-table{width:100%;border-collapse:collapse;font-size:12px}
+.cov-table th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);border-bottom:2px solid var(--rule);white-space:nowrap}
+.cov-table td{padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.cov-table tr.cov-row{cursor:pointer;transition:background .1s}
+.cov-table tr.cov-row:hover{background:rgba(79,140,255,.06)}
+.cov-table tr.cov-row.expanded{background:rgba(79,140,255,.04)}
+.cov-table .disease-name{font-weight:600;color:var(--ink)}
+.cov-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.cov-badge.ready{background:var(--green-bg);color:var(--green-text,#2f9e44)}
+.cov-badge.reviewed{background:#d0ebff;color:#1971c2}
+.cov-badge.partial{background:var(--warn-bg);color:var(--warn-ink)}
+.cov-badge.struct{background:var(--neutral-bg);color:var(--muted)}
+.cov-badge.none{background:var(--bg3);color:var(--muted)}
+.cov-num{font-weight:700;color:var(--accent);min-width:20px;display:inline-block;text-align:center}
+.cov-num.zero{color:var(--muted);opacity:.5}
+.cov-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.cov-filter label{font-size:12px;color:var(--muted)}
+.cov-filter select,.cov-filter input{font-size:12px;padding:4px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--bg3);color:var(--ink);outline:none}
+.cov-filter select:focus,.cov-filter input:focus{border-color:var(--accent)}
+.cov-empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.cov-funnel{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fn-step{flex:1;min-width:150px;background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px 12px;text-align:center;position:relative}
+.fn-step.hot{border-color:var(--green,#2f9e44)}
+.fn-num{font-size:30px;font-weight:800;line-height:1.1}
+.fn-label{font-size:12px;font-weight:700;color:var(--ink);margin-top:6px}
+.fn-pct{font-size:10px;color:var(--muted);margin-top:4px}
+.fn-arrow{display:flex;align-items:center;padding:0 6px;font-size:18px;color:var(--muted);font-weight:700}
+.fn-note{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6}
+.pdot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;margin-right:3px;background:var(--bg3);color:var(--muted);border:1px solid var(--rule)}
+.pdot.on{background:var(--green-bg);color:var(--green-text,#2f9e44);border-color:var(--green,#2f9e44)}
+.pdot-num{font-size:10px;color:var(--muted);margin-left:4px;white-space:nowrap}
+.cov-bottleneck{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.cov-bn-card{background:var(--bg3);border:1px solid var(--rule);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:border-color .15s}
+.cov-bn-card.critical{border-color:var(--accent2)}
+.cov-bn-card.good{border-color:var(--green,#2f9e44)}
+.cov-bn-card.clickable{cursor:pointer}
+.cov-bn-card.clickable:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(79,140,255,.15)}
+.cov-bn-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cov-bn-title{font-size:13px;font-weight:700;color:var(--ink)}
+.cov-bn-count{font-size:20px;font-weight:800}
+.cov-bn-bar{height:4px;background:var(--bg2);border-radius:2px;margin-top:8px;overflow:hidden}
+.cov-bn-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.cov-bn-desc{font-size:11px;color:var(--muted);margin-top:6px}
+/* v1.5.11h: 缺口卡片上的下一步行动指引 */
+.cov-bn-action{font-size:11px;color:var(--ink);background:var(--bg3);border:1px dashed var(--rule);border-radius:6px;padding:5px 8px;margin-top:8px;line-height:1.6}
+.cov-expand-row td{padding:0!important;border-bottom:1px solid var(--rule)}
+.cov-expand{padding:16px 24px;background:var(--bg3);animation:covSlideIn .2s ease}
+@keyframes covSlideIn{from{opacity:0;max-height:0}to{opacity:1;max-height:2000px}}
+.cov-expand-loading{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+.cov-pw{margin-bottom:16px}
+.cov-pw-head{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cov-pw-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-stage{margin-left:16px;margin-bottom:10px}
+.cov-stage-head{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cov-stage-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-rule{margin-left:16px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.cov-rule:last-child{border-bottom:none}
+.cov-rule-head{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cov-rule-head .cov-lvl{font-size:10px;font-weight:600;color:var(--muted);background:var(--bg2);padding:1px 6px;border-radius:4px}
+.cov-rec-card{background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.cov-rec-card:hover{border-color:var(--accent);box-shadow:0 2px 8px var(--accent-bg)}
+.cov-rec-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.cov-rec-lvl{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px}
+.cov-rec-lvl.yes{background:var(--green-bg);color:var(--green-text,#2f9e44)}
+.cov-rec-lvl.no{background:var(--bg3);color:var(--muted)}
+.cov-rec-text{font-size:12px;color:var(--ink);line-height:1.6}
+.cov-rec-meta{font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.cov-drill-btn{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent-bg);color:var(--accent);cursor:pointer;white-space:nowrap}
+.cov-drill-btn:hover{background:var(--accent);color:#fff}
+@media (max-width:900px){.fn-arrow{display:none}.fn-step{margin-bottom:8px}}
+
 /* ===== 响应式 ===== */
 @media(max-width: 1100px) {
   .rv-flow { flex-wrap: wrap; gap: 6px; }
@@ -314,20 +399,23 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 <body>
 <div class="nav"></div>
 <div class="rv-layout">
-  <!-- 顶部区域 -->
+  <!-- v1.5.11f 顶栏：紧凑一行（标题 + 内联 KPI 小指标） -->
   <div class="rv-header">
     <div class="rv-title-row">
-      <h1>临床审核工作台</h1>
+      <h1>建设与审核工作台</h1>
       <span class="rv-badge rv-badge-blue">专家审核模式</span>
+      <div class="rv-kpi-bar" id="rv-kpi"></div>
     </div>
-    <p class="rv-subtitle">专家按疾病/场景/药师专项审核，Codex 回写验收的闭环流程</p>
-    <div class="rv-kpi-bar" id="rv-kpi"></div>
-    <div class="rv-warning">
-      <span>&#9888;</span>
-      <span>当前允许状态：测试库工作版本，不得正式 CDSS 上线。所有审核决策仅用于图谱质量改进，不直接标记为 clinical_approved。</span>
-    </div>
-    <div class="rv-tabs" id="rv-tabs">
-      <div class="rv-tab active" data-tab="disease" onclick="switchTab('disease')">
+  </div>
+  <div class="rv-body">
+  <!-- v1.5.11f 左侧边栏导航：总览 | 专家审核 | 发布 三组 -->
+  <div class="rv-tabs" id="rv-tabs">
+      <div class="rv-tab-group">总览</div>
+      <div class="rv-tab active" data-tab="coverage" onclick="switchTab('coverage')">
+        📈 建设进度
+      </div>
+      <div class="rv-tab-group">专家审核</div>
+      <div class="rv-tab" data-tab="disease" onclick="switchTab('disease')">
         疾病级审核 <span class="rv-tab-badge" id="tab-badge-disease">0</span>
       </div>
       <div class="rv-tab" data-tab="scenario" onclick="switchTab('scenario')">
@@ -339,31 +427,72 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
       <div class="rv-tab" data-tab="detail" onclick="switchTab('detail')">
         边级证据追溯 <span class="rv-tab-badge" id="tab-badge-detail">0</span>
       </div>
+      <div class="rv-tab-group">发布</div>
       <div class="rv-tab" data-tab="cdss" onclick="switchTab('cdss')">
         CDSS推荐审核 <span class="rv-tab-badge" id="tab-badge-cdss">-</span>
       </div>
       <div class="rv-tab" data-tab="skeleton" onclick="switchTab('skeleton')">
         教材骨架审计 <span class="rv-tab-badge" id="tab-badge-skeleton">-</span>
       </div>
+      <div class="rv-tab" data-tab="publish" onclick="switchTab('publish')">
+        发布控制台 <span class="rv-tab-badge" id="tab-badge-publish">-</span>
+      </div>
     </div>
-  </div>
   <!-- 内容区域 -->
   <div class="rv-content">
-    <div class="rv-panel active" id="panel-disease"></div>
+    <!-- v1.5.11e Tab 0: 建设进度（自 heatmap.html 移植） -->
+    <div class="rv-panel active" id="panel-coverage">
+      <div class="cov-section">
+        <div class="cov-section-title">🏥 建设进度总览</div>
+        <div class="cov-section-desc">全库疾病的诊疗知识建设进度，从左到右层层递进，数字表示达到该步骤的疾病数。</div>
+        <div class="cov-funnel" id="cov-funnel"></div>
+        <div class="fn-note" id="cov-funnel-note"></div>
+      </div>
+      <div class="cov-section">
+        <div class="cov-section-title">🎯 下一步补什么</div>
+        <div class="cov-section-desc">每个环节有多少疾病还缺数据。<b style="color:var(--accent2)">红色</b> = 缺口最大、最该优先补的环节；<b style="color:var(--green,#2f9e44)">绿色</b> = 覆盖良好。点击卡片可下钻查看缺该环节的疾病明细。</div>
+        <div class="cov-bottleneck" id="cov-bottleneck"></div>
+      </div>
+      <div class="cov-section">
+        <div class="cov-section-title">📋 各疾病建设明细</div>
+        <div class="cov-section-desc">点击任意行展开该疾病的完整内容（路径 → 阶段 → 规则 → 推荐意见），点击推荐卡片可跳到图谱探索查看详情；「待审队列」列可直达该疾病的审核任务。</div>
+        <div id="cov-drill-tip" class="cov-filter" style="display:none;align-items:center;gap:8px;border:1px dashed var(--accent);border-radius:8px;padding:6px 12px;background:var(--accent-bg)"></div>
+        <div class="cov-filter">
+          <label>筛选：</label>
+          <select id="cov-status-filter" onchange="renderCovTable()">
+            <option value="">全部状态</option>
+            <option value="usable">✅ 可正式使用</option>
+            <option value="reviewed">✅ 审核通过·待发布</option>
+            <option value="instance">🟡 有推荐·待审核</option>
+            <option value="structure">⚪ 只有路径骨架</option>
+            <option value="none">🔴 尚无建设</option>
+          </select>
+          <select id="cov-category-filter" onchange="renderCovTable()">
+            <option value="">全部大类</option>
+          </select>
+          <input id="cov-search" placeholder="搜索疾病名称..." oninput="renderCovTable()" style="width:180px">
+        </div>
+        <div id="cov-table-container"></div>
+      </div>
+    </div>
+    <div class="rv-panel" id="panel-disease"></div>
     <div class="rv-panel" id="panel-scenario"></div>
     <div class="rv-panel" id="panel-pharmacist"></div>
     <div class="rv-panel" id="panel-detail"></div>
     <div class="rv-panel" id="panel-cdss"></div>
     <div class="rv-panel" id="panel-skeleton"></div>
+    <div class="rv-panel" id="panel-publish"></div>
   </div>
+  </div><!-- /rv-body -->
 </div>
+
 <button class="rv-export-btn" onclick="exportDecisions()">
   <span>&#128229;</span> 导出审核结果 <span class="rv-export-count" id="export-count">0</span>
 </button>
 
 <!-- 加载共享导航 -->
 <script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026100901"></script>
+<script src="./_shared/js/app.js?v=2026101601"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -495,12 +624,22 @@ function renderKPI(summary) {
     { num: summary.pharmacist_item_count, label: '药师专项', icon: '&#128138;', bg: 'rgba(204,93,232,.1)', color: cssVar('--purple','#cc5de8'), detail: '药物专项审核' },
     { num: summary.detail_item_count, label: '边级追溯', icon: '&#128269;', bg: 'rgba(255,146,43,.1)', color: cssVar('--orange','#ff922b'), detail: '边级证据回溯' }
   ];
+  /* v1.5.11e: 融合建设进度漏斗数据（coverage 后到时重渲染） */
+  if (COV_DATA.length > 0) {
+    var _gd = GLOBAL_STATS.disease_count || 0;
+    var _inst = COV_DATA.filter(function(d){return d.instance_ready}).length;
+    var _usable = COV_DATA.filter(function(d){return d.usable_ready}).length;
+    kpis.push(
+      { num: _inst + '/' + _gd, label: '已写推荐意见', icon: '&#128196;', bg: 'rgba(47,158,68,.1)', color: cssVar('--green','#51cf66'), detail: '有推荐意见的疾病' },
+      { num: _usable + '/' + _gd, label: '可正式使用', icon: '&#128640;', bg: 'rgba(255,107,107,.1)', color: cssVar('--accent2','#ff6b6b'), detail: '审核通过并发布' }
+    );
+  }
   var h = '';
+  /* v1.5.11f: 内联小指标（数字+标签一行），hover 有 title 提示 */
   kpis.forEach(function(k) {
-    h += '<div class="rv-kpi"><div class="rv-kpi-icon" style="background:' + k.bg + ';color:' + k.color + '">' + k.icon + '</div>';
-    h += '<div><div class="rv-kpi-num" style="color:' + k.color + '">' + k.num + '</div>';
-    h += '<div class="rv-kpi-label">' + k.label + '</div>';
-    h += '<div class="rv-kpi-detail">' + k.detail + '</div></div></div>';
+    h += '<div class="rv-kpi" title="' + k.label + '：' + (k.detail || '') + '">';
+    h += '<div class="rv-kpi-num" style="color:' + k.color + '">' + k.num + '</div>';
+    h += '<div class="rv-kpi-label">' + k.label + '</div></div>';
   });
   document.getElementById('rv-kpi').innerHTML = h;
   /* 更新标签页徽章 */
@@ -511,8 +650,28 @@ function renderKPI(summary) {
 }
 
 /* =====================================================================
-   Tab 1: 疾病级审核（保留原设计 - 卡片网格点击跳转）
+   Tab 1: 疾病级审核（v1.5.11g 卡片网格 → 表格列表，参考指南库列表）
    ===================================================================== */
+/* 批次 ID 可读化（v1.5.11h）：BATCH-CARD-CAD-20260623-001 → 冠心病（2026-06-23 生成）
+   缩写映射复用 app.js parseParentCode 的 groupMap，医生看中文不看 CAD/CM 缩写 */
+var BATCH_GROUP_CN = null;  // 延迟构建：groupMap 缩写 → 中文
+function batchLabel(batchId) {
+  var m = /^BATCH-CARD-([A-Z]+)-(\d{4})(\d{2})(\d{2})-(\d+)$/.exec(batchId || '');
+  if (!m) return { main: batchId || '-', sub: '' };
+  if (!BATCH_GROUP_CN) {
+    /* groupMap 在 parseParentCode 闭包内取不到，这里内置同源映射（与 app.js 保持一致） */
+    var gm = {'HF':'心力衰竭','ARR':'心律失常','CAD':'冠心病','CM':'心肌病',
+      'VHD':'瓣膜性心脏病','PERICARD':'心包疾病','HTN':'高血压',
+      'CHD':'先天性心脏病','IE':'感染性心内膜炎','SCD':'心脏骤停/猝死',
+      'AORTA':'主动脉/外周血管','PAD':'外周血管','NEUROSIS':'心脏神经症',
+      'AVB':'心律失常','BBB':'心律失常','BRADY':'心律失常','SINUS':'心律失常','SND':'心律失常',
+      'SHD':'先天性心脏病','CAT':'其他','LIPID':'血脂异常','MPIE':'心肌/心包/感染性','HT':'高血压','PERIGENERAL':'心包疾病'};
+    BATCH_GROUP_CN = gm;
+  }
+  var cn = BATCH_GROUP_CN[m[1]] || m[1];
+  var nth = parseInt(m[5], 10) || 1;
+  return { main: cn, sub: m[2] + '-' + m[3] + '-' + m[4] + ' 生成' + (nth > 1 ? ' · 第' + m[5] + '批' : '') };
+}
 function renderDiseasePanel(items) {
   var panel = document.getElementById('panel-disease');
   var batches = {};
@@ -520,35 +679,39 @@ function renderDiseasePanel(items) {
 
   var h = '<div class="rv-filters">';
   h += '<select id="disease-batch-filter" onchange="filterDiseases()"><option value="">全部批次</option>';
-  Object.keys(batches).forEach(function(b) { h += '<option value="' + b + '">' + b + '</option>'; });
+  Object.keys(batches).sort().forEach(function(b) {
+    var lb = batchLabel(b);
+    h += '<option value="' + escHtml(b) + '">' + escHtml(lb.main + (lb.sub ? '（' + lb.sub + '）' : '')) + '</option>';
+  });
   h += '</select>';
   h += '<input id="disease-search" placeholder="搜索疾病名称或编码..." oninput="filterDiseases()" style="width:220px">';
   h += '<span class="rv-filter-count" id="disease-count"></span>';
   h += '</div>';
 
-  h += '<div id="disease-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">';
+  /* 表格列表：一行一疾病，点击直达审核 */
+  h += '<table class="rv-dis-table"><thead><tr>'
+    + '<th>疾病</th>'
+    + '<th class="hide-sm">批次</th>'
+    + '<th>待审核推荐</th>'
+    + '<th>场景卡片</th>'
+    + '<th class="hide-sm">建设状态</th>'
+    + '<th>操作</th>'
+    + '</tr></thead><tbody id="disease-rows">';
   items.forEach(function(r) {
     var pending = parseInt(r.pending_recommendation_count) || 0;
     var scenarios = parseInt(r.scenario_card_count) || 0;
-
-    h += '<div class="rv-card rv-disease-card" data-batch="' + r.batch_id + '" data-name="' + r.disease_name + '" data-code="' + r.disease_code + '" style="cursor:pointer;transition:all .15s" onclick="openDiseaseReview(\'' + encodeURIComponent(r.disease_code) + '\',\'' + encodeURIComponent(r.batch_id) + '\',\'' + encodeURIComponent(r.disease_name) + '\')" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\'">';
-
-    h += '<div class="rv-disease-card-header">';
-    h += '<div><div class="rv-disease-name">' + r.disease_name + '</div>';
-    h += '<div class="rv-disease-code">' + r.disease_code + '</div></div>';
-    h += '<span class="rv-badge rv-badge-blue" style="font-size:11px">' + r.batch_id.split('-').slice(2,4).join('-') + '</span>';
-    h += '</div>';
-
-    h += '<div class="rv-disease-stats">';
-    h += '<div class="rv-disease-stat"><div class="rv-disease-stat-num" style="color:var(--orange)">' + pending + '</div><div class="rv-disease-stat-label">待审核推荐</div></div>';
-    h += '<div class="rv-disease-stat"><div class="rv-disease-stat-num" style="color:var(--cyan)">' + scenarios + '</div><div class="rv-disease-stat-label">场景卡片</div></div>';
-    h += '</div>';
-
-    h += '<div style="text-align:center;color:var(--accent);font-size:12px;margin-top:8px">点击进入审核 &#8594;</div>';
-
-    h += '</div>';
+    var lb = batchLabel(r.batch_id);
+    var jump = "openDiseaseReview('" + encodeURIComponent(r.disease_code) + "','" + encodeURIComponent(r.batch_id) + "','" + encodeURIComponent(r.disease_name) + "')";
+    h += '<tr class="rv-dis-row" data-batch="' + escHtml(r.batch_id) + '" data-name="' + escHtml(r.disease_name) + '" data-code="' + escHtml(r.disease_code) + '" onclick="' + jump + '">';
+    h += '<td><div class="rv-dis-name">' + escHtml(r.disease_name) + '</div><div class="rv-dis-code">' + escHtml(r.disease_code) + '</div></td>';
+    h += '<td class="hide-sm"><div class="rv-dis-batch">' + escHtml(lb.main) + (lb.sub ? '<small>' + lb.sub + '</small>' : '') + '</div></td>';
+    h += '<td><span class="rv-dis-num' + (pending ? ' warn' : ' zero') + '">' + pending + '</span></td>';
+    h += '<td><span class="rv-dis-num' + (scenarios ? '' : ' zero') + '" style="color:var(--cyan)">' + scenarios + '</span></td>';
+    h += '<td class="hide-sm">' + covStatusBadge(r.disease_code) + '</td>';
+    h += '<td><button class="rv-dis-go" onclick="event.stopPropagation();' + jump + '">进入审核 →</button></td>';
+    h += '</tr>';
   });
-  h += '</div>';
+  h += '</tbody></table>';
   panel.innerHTML = h;
   updateDiseaseCount();
 }
@@ -560,9 +723,9 @@ function openDiseaseReview(code, batch, name) {
 function filterDiseases() {
   var batch = document.getElementById('disease-batch-filter').value;
   var q = document.getElementById('disease-search').value.toLowerCase();
-  var cards = document.querySelectorAll('#disease-cards .rv-disease-card');
+  var rows = document.querySelectorAll('#disease-rows .rv-dis-row');
   var shown = 0;
-  cards.forEach(function(c) {
+  rows.forEach(function(c) {
     var show = (!batch || c.dataset.batch === batch) && (!q || c.dataset.name.toLowerCase().indexOf(q) !== -1 || c.dataset.code.toLowerCase().indexOf(q) !== -1);
     c.style.display = show ? '' : 'none';
     if (show) shown++;
@@ -572,7 +735,7 @@ function filterDiseases() {
 
 function updateDiseaseCount(n) {
   var el = document.getElementById('disease-count');
-  if (el) el.textContent = '显示 ' + (n !== undefined ? n : document.querySelectorAll('#disease-cards .rv-disease-card').length) + ' / ' + (REVIEW_DATA ? REVIEW_DATA.disease_reviews.length : 0);
+  if (el) el.textContent = '显示 ' + (n !== undefined ? n : document.querySelectorAll('#disease-rows .rv-dis-row').length) + ' / ' + (REVIEW_DATA ? REVIEW_DATA.disease_reviews.length : 0);
 }
 
 /* =====================================================================
@@ -1102,12 +1265,462 @@ function updateDtCount(n) {
 }
 
 /* =====================================================================
+   v1.5.11e Tab 0: 建设进度（自 heatmap.html 移植 + 审核队列打通）
+   ===================================================================== */
+var COV_DATA = [];
+var GLOBAL_STATS = {};
+var DISEASE_DIMS = {};  // code -> {dimCount, pct}
+var CATEGORIES = {};
+var EXPANDED_ROW = null;
+var CHAIN_CACHE = {};
+var COV_LOADED = false;
+var GUIDE_MAP = {};  // v1.5.11j code -> linked|candidate|none（指南挂靠状态）
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* 待审队列映射：disease_code -> {pending, batch}（来自审核 JSON，供进度表与卡片互查） */
+function buildPendingMap() {
+  var m = {};
+  if (!REVIEW_DATA || !REVIEW_DATA.disease_reviews) return m;
+  REVIEW_DATA.disease_reviews.forEach(function(r) {
+    var n = parseInt(r.pending_recommendation_count) || 0;
+    if (n > 0) m[r.disease_code] = { pending: n, batch: r.batch_id, name: r.disease_name };
+  });
+  return m;
+}
+
+/* 建设状态徽标（供疾病级审核卡片反查显示） */
+function covStatusBadge(code) {
+  var d = null;
+  for (var i = 0; i < COV_DATA.length; i++) { if (COV_DATA[i].disease_code === code) { d = COV_DATA[i]; break; } }
+  if (!d) return '';
+  var ICONS = { usable: '🚀', reviewed: '✅', instance: '🟡', structure: '⚪', none: '🔴' };
+  return '<span class="cov-badge ' + (d.status || 'none') + '" title="建设状态：' + escHtml(d.status_label || d.status || 'none') + '">' + (ICONS[d.status] || '') + ' ' + escHtml(d.status_label || d.status || '未建设') + '</span>';
+}
+
+/* 覆盖数据加载：进度漏斗/瓶颈/明细表 + 审核队列列 */
+function loadCoverageData() {
+  return Promise.all([
+    fetch('/api/kg/cdss/coverage?v=' + Date.now()).then(function(r){return r.json()}),
+    fetch('/api/kg/stats?v=' + Date.now()).then(function(r){return r.json()}),
+    fetch('/api/kg/diseases?v=' + Date.now()).then(function(r){return r.json()}),
+    /* v1.5.11j: 拉挂靠映射，区分「有指南未解析完」vs「缺指南」 */
+    fetch('/api/kg/anchor-mapping?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return {}})
+  ]).then(function(results){
+    COV_DATA = results[0] || [];
+    GLOBAL_STATS = results[1] || {};
+    CATEGORIES = {};  // 联动刷新时重拉需重置，避免大类计数累加
+    /* 指南挂靠状态：linked=已挂靠(解析依据就绪) / candidate=有候选待确认 / none=库内缺指南 */
+    GUIDE_MAP = {};
+    var am = results[3] || {};
+    (am.items || []).forEach(function(it){
+      GUIDE_MAP[it.disease_code] = it.linked_count > 0 ? 'linked' : (it.candidates && it.candidates.length ? 'candidate' : 'none');
+    });
+    var diseaseList = results[2] || [];
+    diseaseList.forEach(function(d){
+      var f = 0;
+      if (d.dim_counts) {
+        CORE_DIM_KEYS.forEach(function(k) { if (d.dim_counts[k] && d.dim_counts[k] > 0) f++; });
+      }
+      DISEASE_DIMS[d.code] = { dimCount: f, pct: Math.round(f / CORE_DIM_KEYS.length * 100) };
+    });
+    COV_DATA.forEach(function(d){
+      var g = parseParentCode(d.parent_code).group;
+      if (!CATEGORIES[g]) CATEGORIES[g] = 0;
+      CATEGORIES[g]++;
+      var dimInfo = DISEASE_DIMS[d.disease_code] || {dimCount: 0, pct: 0};
+      d.dim_count = dimInfo.dimCount;
+      d.dim_pct = dimInfo.pct;
+    });
+    COV_LOADED = true;
+    renderCoverageAll();
+    /* v1.5.11e: coverage 后到时若 KPI 已渲染，补充建设漏斗指标 */
+    if (REVIEW_DATA && REVIEW_DATA.summary) renderKPI(REVIEW_DATA.summary);
+  });
+}
+
+function renderCoverageAll(){
+  renderCovFunnel();
+  renderCovBottleneck();
+  renderCovCategoryFilter();
+  renderCovTable();
+}
+
+/* ============ 建设进度漏斗 ============ */
+function renderCovFunnel(){
+  var globalDiseases = GLOBAL_STATS.disease_count || 0;
+  var steps = [
+    {key:'structure_ready', icon:'🗺️', label:'建了路径', cls:''},
+    {key:'instance_ready',  icon:'📄', label:'有推荐意见', cls:''},
+    {key:'review_ready',    icon:'✅', label:'审核通过', cls:''},
+    {key:'usable_ready',    icon:'🚀', label:'可正式使用', cls:'hot'}
+  ];
+  var h = '';
+  steps.forEach(function(s, i){
+    if (i > 0) h += '<div class="fn-arrow">→</div>';
+    var n = COV_DATA.filter(function(d){return d[s.key]}).length;
+    var pct = globalDiseases > 0 ? Math.round(n / globalDiseases * 100) : 0;
+    h += '<div class="fn-step' + (s.cls ? ' ' + s.cls : '') + '">';
+    h += '<div class="fn-num">' + s.icon + ' ' + n + '</div>';
+    h += '<div class="fn-label">第' + (i+1) + '步 · ' + s.label + '</div>';
+    h += '<div class="fn-pct">占全库疾病 ' + pct + '%</div>';
+    h += '</div>';
+  });
+  h += '<div class="fn-arrow">＋</div>';
+  var dimSum = 0;
+  COV_DATA.forEach(function(d){ dimSum += (d.dim_pct || 0); });
+  var avgDimPct = COV_DATA.length > 0 ? Math.round(dimSum / COV_DATA.length) : 0;
+  h += '<div class="fn-step"><div class="fn-num">📊 ' + avgDimPct + '%</div><div class="fn-label">知识维度平均覆盖</div><div class="fn-pct">' + CORE_DIM_KEYS.length + '个知识维度（与首页一致）</div></div>';
+  document.getElementById('cov-funnel').innerHTML = h;
+
+  var usableN = COV_DATA.filter(function(d){return d.usable_ready}).length;
+  document.getElementById('cov-funnel-note').innerHTML =
+    '全库共 <b>' + globalDiseases + '</b> 个疾病，其中 <b>' + COV_DATA.length + '</b> 个已建立诊疗路径；目前 <b>' + usableN + '</b> 个疾病的知识已审核通过并正式发布，可供临床使用。';
+}
+
+/* ============ 缺口分析（卡片可点击下钻） ============ */
+/* v1.5.11i 缺口分工：解析补数是 Codex 的活——医生不写推荐/不挂证据，
+   只做两件事：①把合适指南挂靠给 Codex（缺口根治）②审核已生成的推荐。
+   ai:true=解析前置缺口（去挂靠指南给 Codex）；audit:true=审核侧缺口（进待审队列） */
+var COV_BN_LAYERS = [
+  {key:'dim_count', label:'知识维度', icon:'📊', desc:'知识维度有数据', isDim:true, ai:true,
+   cause:'该疾病还没跑过文献解析，图谱里没有检查/用药等维度数据',
+   fix:'确认挂靠合适指南 → Codex 解析建图', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'pathway_count', label:'诊疗路径', icon:'🗺️', desc:'已建立诊疗路径', ai:true,
+   cause:'文献解析未跑或未解析出诊疗路径',
+   fix:'确认挂靠合适指南 → Codex 解析建图', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'stage_count', label:'路径阶段', icon:'📋', desc:'路径划分了就诊阶段', ai:true,
+   cause:'解析出的路径没分阶段（初诊/住院/随访）',
+   fix:'确认挂靠合适指南 → Codex 解析建图', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'rule_count', label:'临床规则', icon:'⚙️', desc:'定义了适用规则', ai:true,
+   cause:'解析未产出适用规则（年龄段、禁忌等），生成的推荐无法进入待审队列',
+   fix:'确认挂靠合适指南 → Codex 重新解析补规则', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'rec_count', label:'推荐意见', icon:'📄', desc:'写出了推荐意见', ai:true,
+   cause:'解析未产出推荐意见，或产出后已被全部审核完',
+   fix:'确认挂靠合适指南 → Codex 解析生成待审推荐', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'action_count', label:'具体措施', icon:'💊', desc:'推荐落到具体医嘱/操作', ai:true,
+   cause:'推荐意见笼统，未落到具体药名/术式/剂量',
+   fix:'确认挂靠合适指南 → Codex 重新解析细化措施', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'evidence_count', label:'证据支撑', icon:'📖', desc:'推荐有文献证据支撑', ai:true,
+   cause:'解析时未带出文献证据页码',
+   fix:'确认挂靠合适指南 → Codex 重新解析挂证据', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'},
+  {key:'guideline_count', label:'指南来源', icon:'📚', desc:'推荐标注了指南出处', ai:true,
+   cause:'该疾病尚未挂靠指南，解析没有依据来源',
+   fix:'确认挂靠合适指南 → Codex 解析补出处', link:'guideline.html?tab=anchor', linkText:'去确认指南挂靠'}
+];
+
+function renderCovBottleneck(){
+  var total = COV_DATA.length;
+  var h = '';
+  COV_BN_LAYERS.forEach(function(layer){
+    var has;
+    if (layer.isDim) {
+      has = COV_DATA.filter(function(d){return (d.dim_count || 0) > 0}).length;
+    } else {
+      has = COV_DATA.filter(function(d){return d[layer.key] > 0}).length;
+    }
+    var missing = total - has;
+    var pct = Math.round(has / total * 100);
+    var isCritical = missing > total * 0.3;
+    var isGood = missing <= total * 0.1;
+    var cls = isCritical ? 'critical' : (isGood ? 'good' : '');
+    var barColor = isCritical ? cssVar('--accent2','#ff6b6b') : (isGood ? cssVar('--green','#51cf66') : cssVar('--yellow','#ffd43b'));
+    h += '<div class="cov-bn-card ' + cls + ' clickable" title="点击筛出缺「' + layer.label + '」的 ' + missing + ' 个疾病" onclick="drillBottleneck(\'' + layer.key + '\')">';
+    h += '<div class="cov-bn-header">';
+    h += '<span class="cov-bn-title">' + layer.icon + ' ' + layer.label + '</span>';
+    h += '<span class="cov-bn-count" style="color:' + barColor + '">' + missing + '</span>';
+    h += '</div>';
+    h += '<div style="font-size:11px;color:var(--muted)">' + layer.desc + '</div>';
+    /* v1.5.11i/j: 缺口卡片 = 缺因 + 解法；缺指南的疾病单独标红提示提供全文 */
+    if (missing > 0) {
+      var noGuideN = COV_DATA.filter(function(d){
+        if (layer.isDim ? (d.dim_count || 0) > 0 : d[layer.key] > 0) return false;
+        return GUIDE_MAP[d.disease_code] === 'none';
+      }).length;
+      h += '<div class="cov-bn-action">'
+        + (noGuideN > 0
+          ? '<div style="color:var(--accent2)">📕 ' + noGuideN + ' 个缺指南——请提供指南 PDF 或全文内容放入指南库</div>'
+          : '')
+        + ((missing - noGuideN) > 0
+          ? '<div' + (noGuideN > 0 ? ' style="color:var(--muted);margin-top:' + (noGuideN ? 3 : 0) + 'px"' : '') + '>缺因：' + layer.cause + '</div>'
+            + '<div style="margin-top:3px">&#9654; ' + layer.fix
+            + ' <a href="' + layer.link + '" onclick="event.stopPropagation()" style="color:var(--accent);font-weight:700;text-decoration:underline;white-space:nowrap">' + layer.linkText + '</a></div>'
+          : '')
+        + '</div>';
+    }
+    h += '<div class="cov-bn-bar"><div class="cov-bn-bar-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
+    h += '<div class="cov-bn-desc">' + has + '/' + total + ' 疾病已覆盖（' + pct + '%）</div>';
+    h += '</div>';
+  });
+  document.getElementById('cov-bottleneck').innerHTML = h;
+}
+
+/* 缺口卡片下钻：构造搜索词筛出缺口疾病（layer.key 不在筛选项里，借用搜索框语义） */
+function drillBottleneck(layerKey){
+  var layer = null;
+  for (var i = 0; i < COV_BN_LAYERS.length; i++) { if (COV_BN_LAYERS[i].key === layerKey) { layer = COV_BN_LAYERS[i]; break; } }
+  if (!layer) return;
+  var missingCodes = COV_DATA.filter(function(d){
+    return layer.isDim ? (d.dim_count || 0) === 0 : !(d[layer.key] > 0);
+  }).map(function(d){ return d.disease_code; });
+  /* 临时筛选：把缺口疾病集合记到全局，渲染时优先用它 */
+  COV_DRILL_CODES = missingCodes;
+  document.getElementById('cov-status-filter').value = '';
+  document.getElementById('cov-category-filter').value = '';
+  document.getElementById('cov-search').value = '';
+  var tip = document.getElementById('cov-drill-tip');
+  tip.style.display = 'flex';
+  /* 缺口疾病里有多少已有待审推荐（医生可先审这批，等 Codex 解析的同时推进） */
+  var pendMap = buildPendingMap();
+  var pendN = missingCodes.filter(function(c){ return pendMap[c]; }).length;
+  /* v1.5.11j: 按指南状态分流——库内有支撑=未解析完（等 Codex）；库内无=缺指南（请提供全文） */
+  var noGuide = missingCodes.filter(function(c){ return GUIDE_MAP[c] === 'none'; });
+  var withGuide = missingCodes.length - noGuide.length;
+  var guideHtml = noGuide.length
+    ? '<div style="font-size:11px;margin-top:3px;color:var(--accent2)">📕 其中 <b>' + noGuide.length + '</b> 个缺指南（' + noGuide.slice(0,3).map(function(c){
+        var dd = COV_DATA.filter(function(x){return x.disease_code===c})[0];
+        return dd ? dd.disease_name : c;
+      }).join('、') + (noGuide.length > 3 ? ' 等' : '') + '）——请提供对应指南 PDF 或全文内容放入指南库，Codex 才能解析建图</div>'
+    : '';
+  tip.innerHTML = '<div style="flex:1;min-width:0">'
+    + '<div>🔎 已筛出缺「' + layer.icon + ' ' + layer.label + '」的 <b>' + missingCodes.length + '</b> 个疾病'
+    + (withGuide > 0 && noGuide.length ? '（' + withGuide + ' 个库内有指南支撑' : '')
+    + (withGuide > 0 && noGuide.length ? '）' : '')
+    + (pendN > 0 ? '，其中 <b style="color:var(--orange)">' + pendN + '</b> 个已有待审推荐' : '') + '</div>'
+    + guideHtml
+    + (noGuide.length < missingCodes.length
+      ? '<div style="font-size:11px;margin-top:3px;color:var(--muted)">' + (withGuide > 0 && noGuide.length ? '其余缺因：' : '缺因：') + layer.cause + '</div>'
+        + '<div style="font-size:11px;margin-top:2px;color:var(--ink)">&#9654; 解法：' + layer.fix
+        + ' <a href="' + layer.link + '" style="color:var(--accent);font-weight:700;text-decoration:underline">' + layer.linkText + '</a></div>'
+      : '')
+    + (pendN > 0 ? '<div style="font-size:11px;margin-top:2px">🩺 医生侧：先审已有推荐 <a href="review.html?tab=disease" style="color:var(--orange);font-weight:700;text-decoration:underline">进疾病级审核</a></div>' : '')
+    + '</div>'
+    + '<button class="cov-drill-btn" style="align-self:center" onclick="clearDrill()">✕ 清除筛选</button>';
+  renderCovTable();
+}
+var COV_DRILL_CODES = null;
+function clearDrill(){
+  COV_DRILL_CODES = null;
+  document.getElementById('cov-drill-tip').style.display = 'none';
+  renderCovTable();
+}
+
+function renderCovCategoryFilter(){
+  var sel = document.getElementById('cov-category-filter');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">全部大类</option>';
+  Object.keys(CATEGORIES).sort().forEach(function(c){
+    var opt = document.createElement('option');
+    opt.value = c; opt.textContent = c + ' (' + CATEGORIES[c] + ')';
+    sel.appendChild(opt);
+  });
+}
+
+/* ============ 疾病明细表（8列：含待审队列） ============ */
+function renderCovTable(){
+  var status = document.getElementById('cov-status-filter').value;
+  var cat = document.getElementById('cov-category-filter').value;
+  var q = document.getElementById('cov-search').value.toLowerCase();
+  var pendingMap = buildPendingMap();
+  var rows = COV_DATA.filter(function(d){
+    if (COV_DRILL_CODES && COV_DRILL_CODES.indexOf(d.disease_code) === -1) return false;
+    if (status && d.status !== status) return false;
+    if (cat) { var g = parseParentCode(d.parent_code).group; if (g !== cat) return false; }
+    if (q && d.disease_name.toLowerCase().indexOf(q) === -1 && d.disease_code.toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+
+  var h = '<table class="cov-table">';
+  h += '<thead><tr>';
+  h += '<th></th><th>疾病</th><th>大类</th>';
+  h += '<th title="' + CORE_DIM_KEYS.length + '个核心知识维度中有数据的维度数，与首页一致">知识维度</th>';
+  h += '<th title="推荐意见条数（悬停看审核通过/受阻明细）">推荐意见</th>';
+  h += '<th title="该疾病当前待审核的推荐条数，点击直达疾病级审核">待审队列</th>';
+  h += '<th title="1建路径 2有推荐 3审核通过 4可正式使用，实心=已完成">建设进度</th>';
+  h += '<th title="库内指南挂靠情况：已挂靠=解析依据就绪；未解析完=有指南/候选文献但 Codex 还没解析到位；缺指南=库内没有可支撑的指南">指南状态</th>';
+  h += '<th>当前状态</th>';
+  h += '</tr></thead><tbody>';
+  var STATUS_CLS = { usable: 'ready', reviewed: 'reviewed', instance: 'partial', structure: 'struct', none: 'none' };
+  var STATUS_ICON = { usable: '🚀', reviewed: '✅', instance: '🟡', structure: '⚪', none: '🔴' };
+  rows.forEach(function(d, i){
+    var g = parseParentCode(d.parent_code).group;
+    var st = d.status || 'none';
+    var badge = '<span class="cov-badge ' + (STATUS_CLS[st] || 'none') + '">' + (STATUS_ICON[st] || '') + ' ' + escHtml(d.status_label || st) + '</span>';
+    var expanded = EXPANDED_ROW === d.disease_code;
+    var dimCount = d.dim_count || 0;
+    var dimPct = d.dim_pct || 0;
+    var dimCls = dimPct >= 80 ? 'cov-badge ready' : dimPct >= 50 ? 'cov-badge partial' : 'cov-badge none';
+    var pend = pendingMap[d.disease_code];
+    var pendCell = pend
+      ? '<button class="cov-drill-btn" style="border-color:var(--accent2);background:rgba(255,107,107,.08);color:var(--accent2)" onclick="event.stopPropagation();goDiseaseReview(\'' + encodeURIComponent(d.disease_code) + '\',\'' + encodeURIComponent(pend.batch) + '\',\'' + encodeURIComponent(d.disease_name) + '\')" title="待审核 ' + pend.pending + ' 条，点击进入疾病级审核">待审 ' + pend.pending + ' →</button>'
+      : '<span style="color:var(--muted);font-size:10px">—</span>';
+    /* v1.5.11j 指南状态：以「建设是否到位」为判据——有依据但没建到 = 未解析完；库内无指南 = 缺指南 */
+    var gs = GUIDE_MAP[d.disease_code] || '';
+    var built = d.status && d.status !== 'none';  // 已建路径及以上
+    var guideCell;
+    if (gs === 'none') {
+      guideCell = '<span class="cov-badge none" style="cursor:help" title="库内没有可支撑的指南/文献。请提供指南 PDF 或全文内容，放入指南库后再由 Codex 解析建图" onclick="event.stopPropagation()">📕 缺指南</span>';
+    } else if (built || gs === 'linked') {
+      /* 已挂靠或已建路径：解析在跑或已建部分内容 */
+      guideCell = built
+        ? '<span class="cov-badge ready" style="cursor:help" title="已有解析产出（路径/推荐），Codex 会继续按挂靠指南补齐剩余环节" onclick="event.stopPropagation()">📖 未解析完</span>'
+        : '<span class="cov-badge ready" style="cursor:help" title="指南已挂靠，等待 Codex 解析建图" onclick="event.stopPropagation()">📖 已挂靠·待解析</span>';
+    } else if (gs === 'candidate') {
+      guideCell = '<a class="cov-badge partial" style="cursor:pointer;text-decoration:none" href="guideline.html?tab=anchor" title="库内有候选文献未确认挂靠，点击去确认，确认后 Codex 即可解析" >📖 有指南·待确认</a>';
+    } else {
+      /* 不在挂靠清单（多数疾病有直接指南关联），按建设状态给口径 */
+      guideCell = d.guideline_count > 0
+        ? '<span class="cov-badge ready" style="cursor:help" title="推荐已标注指南出处" onclick="event.stopPropagation()">✅ 有指南</span>'
+        : (built
+          ? '<span class="cov-badge ready" style="cursor:help" title="已有解析产出但出处标注不全，Codex 会补" onclick="event.stopPropagation()">📖 未解析完</span>'
+          : '<span class="cov-badge partial" style="cursor:help" title="有直接关联指南，等待 Codex 解析建图" onclick="event.stopPropagation()">⏳ 待解析</span>');
+    }
+    h += '<tr class="cov-row' + (expanded ? ' expanded' : '') + '" onclick="toggleCovRow(\'' + d.disease_code + '\')">';
+    h += '<td style="width:20px;font-size:10px;color:var(--muted)">' + (expanded ? '▼' : '▶') + '</td>';
+    h += '<td><a class="disease-name" style="color:var(--accent);text-decoration:none;cursor:pointer" title="在图谱探索中查看 ' + escHtml(d.disease_name) + '" onclick="event.stopPropagation();location.href=\'explore.html?code=' + d.disease_code + '\'">' + escHtml(d.disease_name) + '</a></td>';
+    h += '<td style="color:var(--muted);font-size:11px">' + escHtml(g) + '</td>';
+    h += '<td><span class="' + dimCls + '" title="' + dimCount + '/' + CORE_DIM_KEYS.length + ' 个知识维度">' + dimCount + '/' + CORE_DIM_KEYS.length + '</span></td>';
+    h += '<td><span class="cov-num' + (d.rec_count === 0 ? ' zero' : '') + '" title="共 ' + (d.rec_count||0) + ' 条 · 审核通过 ' + (d.reviewed_count||0) + ' 条 · 受阻 ' + (d.blocked_rec_count||0) + ' 条">' + (d.rec_count || 0) + '</span></td>';
+    h += '<td>' + pendCell + '</td>';
+    h += '<td>' + covProgressDots(d) + '</td>';
+    h += '<td>' + guideCell + '</td>';
+    h += '<td>' + badge + '</td>';
+    h += '</tr>';
+    if (expanded) {
+      h += '<tr class="cov-expand-row"><td colspan="9"><div class="cov-expand" id="expand-' + d.disease_code + '">';
+      if (CHAIN_CACHE[d.disease_code]) {
+        h += renderChainHTML(CHAIN_CACHE[d.disease_code]);
+      } else {
+        h += '<div class="cov-expand-loading">加载中...</div>';
+      }
+      h += '</div></td></tr>';
+    }
+  });
+  h += '</tbody></table>';
+  if (rows.length === 0) h = '<div class="cov-empty">没有符合条件的疾病</div>';
+  document.getElementById('cov-table-container').innerHTML = h;
+  if (EXPANDED_ROW && !CHAIN_CACHE[EXPANDED_ROW]) {
+    loadChain(EXPANDED_ROW);
+  }
+}
+
+/* 建设进度 4 步圆点 */
+function covProgressDots(d){
+  var steps = [d.structure_ready, d.instance_ready, d.review_ready, d.usable_ready];
+  var tips = ['建立路径', '有推荐意见', '审核通过', '可正式使用'];
+  var n = 0;
+  var h = '';
+  for (var i = 0; i < 4; i++) {
+    if (steps[i]) n++;
+    h += '<span class="pdot' + (steps[i] ? ' on' : '') + '" title="第' + (i+1) + '步 ' + tips[i] + (steps[i] ? '：已完成' : '：未达到') + '">' + (i+1) + '</span>';
+  }
+  h += '<span class="pdot-num">' + n + '/4</span>';
+  return h;
+}
+
+function toggleCovRow(code){
+  EXPANDED_ROW = EXPANDED_ROW === code ? null : code;
+  renderCovTable();
+}
+
+function loadChain(code){
+  var el = document.getElementById('expand-' + code);
+  if (!el) return;
+  fetch('/api/kg/cdss/pathway?diseaseCode=' + encodeURIComponent(code))
+    .then(function(r){return r.json()})
+    .then(function(data){
+      CHAIN_CACHE[code] = data;
+      if (EXPANDED_ROW === code) {
+        el.innerHTML = renderChainHTML(data);
+      }
+    })
+    .catch(function(e){
+      el.innerHTML = '<div class="cov-expand-loading">加载失败: ' + e.message + '</div>';
+    });
+}
+
+/* 展开行：完整链路（路径 → 阶段 → 规则 → 推荐意见） */
+function renderChainHTML(data){
+  if (!data.pathways || data.pathways.length === 0) {
+    return '<div class="cov-expand-loading">该疾病暂无诊疗框架数据</div>';
+  }
+  var diseaseCode = data.disease ? data.disease.code : '';
+  var h = '';
+  data.pathways.forEach(function(pw){
+    var totalRecs = 0;
+    (pw.stages||[]).forEach(function(s){
+      (s.rules||[]).forEach(function(r){ totalRecs += (r.recommendations||[]).length; });
+    });
+    if (totalRecs === 0) return;
+
+    h += '<div class="cov-pw">';
+    h += '<div class="cov-pw-head"><span class="cov-lvl">诊疗路径</span> 🗺️ ' + escHtml(pw.name || pw.code) + '</div>';
+
+    (pw.stages||[]).forEach(function(stage){
+      h += '<div class="cov-stage">';
+      h += '<div class="cov-stage-head"><span class="cov-lvl">就诊阶段</span> 📋 ' + escHtml(stage.name || stage.code) + '</div>';
+
+      (stage.rules||[]).forEach(function(rule){
+        h += '<div class="cov-rule">';
+        h += '<div class="cov-rule-head"><span class="cov-lvl">适用规则</span> ⚙️ ' + escHtml(rule.name || rule.code) + '</div>';
+
+        (rule.recommendations||[]).forEach(function(rec){
+          var cls = rec.recommendation_class || '';
+          var lvl = rec.evidence_level || '';
+          var hasGrade = cls && cls.indexOf('未') === -1;
+          h += '<div class="cov-rec-card" onclick="event.stopPropagation();location.href=\'explore.html?code=' + diseaseCode + '&view=cdss\'">';
+          h += '<div class="cov-rec-head">';
+          h += '<span class="cov-rec-lvl ' + (hasGrade ? 'yes' : 'no') + '">推荐意见</span>';
+          if (cls) h += '<span style="font-size:10px;color:var(--accent);font-weight:700">等级 ' + escHtml(cls) + '</span>';
+          if (lvl) h += '<span style="font-size:10px;color:var(--muted)">证据 ' + escHtml(lvl) + '</span>';
+          h += '<span style="font-size:10px;color:var(--muted)">点击查看详情 →</span>';
+          h += '</div>';
+          h += '<div class="cov-rec-text">' + escHtml(rec.statement_text || rec.code) + '</div>';
+          var metas = [];
+          if (rec.actions && rec.actions.length > 0) {
+            var actNames = rec.actions.slice(0,3).map(function(a){return a.name||a.code});
+            metas.push('💊 ' + actNames.join('、'));
+          }
+          if (rec.primary_source_name) {
+            var src = rec.primary_source_name;
+            if (rec.primary_source_page) src += ' p.' + rec.primary_source_page;
+            metas.push('📖 ' + src);
+          }
+          if (metas.length > 0) {
+            h += '<div class="cov-rec-meta">' + metas.map(function(m){return '<span>'+m+'</span>'}).join('') + '</div>';
+          }
+          h += '</div>';
+        });
+
+        h += '</div>';
+      });
+
+      h += '</div>';
+    });
+
+    h += '</div>';
+  });
+  return h;
+}
+
+/* 进度表「待审 N →」直达疾病级审核 */
+function goDiseaseReview(code, batch, name){
+  window.location.href = 'disease-review.html?code=' + code + '&batch=' + batch + '&name=' + name;
+}
+
+/* =====================================================================
    标签页切换
    ===================================================================== */
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.rv-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
   document.querySelectorAll('.rv-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'panel-' + tab); });
+  /* deep-link：同步地址栏 ?tab= */
+  try {
+    var u = new URL(window.location.href);
+    u.searchParams.set('tab', tab);
+    window.history.replaceState(null, '', u);
+  } catch(e) {}
 }
 
 /* =====================================================================
@@ -1249,6 +1862,7 @@ function exportDecisions() {
   downloadFile('\uFEFF' + csvLines.join('\n'), 'clinical_review_decisions_export_' + ts + '.csv', 'text/csv;charset=utf-8');
 
   alert('已导出 ' + rows.length + ' 条审核决策\nJSON + CSV 文件已下载');
+  loadCoverageData();  // v1.5.11e: 审核导出后联动刷新建设进度（待审队列列）
 }
 
 function downloadFile(content, filename, type) {
@@ -1468,13 +2082,157 @@ function renderDistTable(title, dist, color) {
 }
 
 /* =====================================================================
+   发布控制台（v1.5.4 人工发布通道）
+   勾选"审核通过·待发布"疾病 → 二次确认（操作人必填）→ POST /api/kg/rs-publish
+   后端逐条硬闸门校验（动作/证据/指南），不过即跳过并回传原因
+   ===================================================================== */
+var PUBLISH_STATE = { queue: [], blocked: [], sel: {} };
+
+function loadPublishQueue() {
+  fetch('/api/kg/publish-queue?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      PUBLISH_STATE.queue = data.queue || [];
+      PUBLISH_STATE.blocked = data.blocked || [];
+      PUBLISH_STATE.sel = {};
+      renderPublishPanel();
+      var b = document.getElementById('tab-badge-publish');
+      if (b) b.textContent = PUBLISH_STATE.queue.length;
+    })
+    .catch(function() {
+      document.getElementById('panel-publish').innerHTML =
+        '<div class="rv-empty" style="display:block;padding:40px;text-align:center;color:var(--muted)">&#9888; 加载待发布队列失败，请刷新重试</div>';
+    });
+}
+
+function publishSelCount() {
+  var n = 0;
+  Object.keys(PUBLISH_STATE.sel).forEach(function(c) { if (PUBLISH_STATE.sel[c]) n++; });
+  return n;
+}
+
+function togglePublishSel(code) {
+  PUBLISH_STATE.sel[code] = !PUBLISH_STATE.sel[code];
+  renderPublishPanel();
+}
+
+function togglePublishAll(on) {
+  PUBLISH_STATE.queue.forEach(function(q) { PUBLISH_STATE.sel[q.disease_code] = on; });
+  renderPublishPanel();
+}
+
+function renderPublishPanel() {
+  var panel = document.getElementById('panel-publish');
+  if (!panel) return;
+  var q = PUBLISH_STATE.queue || [];
+  var h = '';
+  h += '<div style="background:rgba(255,210,59,.07);border:1px solid rgba(255,210,59,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.7;color:var(--ink)"><b style="color:#e8590c">&#9888; 发布即 formal_cdss_ready=true</b>，正式进入 CDSS 使用层。仅限人工操作，操作人写入审计日志；动作/证据/指南硬闸门逐条校验，不满足者自动跳过。</div>';
+  if (!q.length) {
+    h += '<div class="rv-empty" style="display:block;padding:40px;text-align:center;color:var(--muted)">&#9989; 当前没有"审核通过·待发布"的疾病，全部清零</div>';
+    panel.innerHTML = h;
+    return;
+  }
+  var selN = publishSelCount();
+  var canGo = selN > 0;
+  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">';
+  h += '<button onclick="togglePublishAll(true)" style="padding:6px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--bg2);color:var(--ink);cursor:pointer;font-size:12px">全选</button>';
+  h += '<button onclick="togglePublishAll(false)" style="padding:6px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--bg2);color:var(--ink);cursor:pointer;font-size:12px">清空</button>';
+  h += '<span style="font-size:12px;color:var(--muted)">已选 <b style="color:var(--ink)">' + selN + '</b> / ' + q.length + ' 个疾病</span>';
+  h += '<span style="flex:1"></span>';
+  h += '<button onclick="confirmPublish()" ' + (canGo ? '' : 'disabled ') + 'style="padding:8px 20px;border-radius:8px;border:none;background:' + (canGo ? '#2f9e44' : 'var(--bg3,#ccc)') + ';color:' + (canGo ? '#fff' : 'var(--muted,#999)') + ';font-weight:700;cursor:' + (canGo ? 'pointer' : 'not-allowed') + ';font-size:13px">&#128640; 批量发布 (' + selN + ')</button>';
+  h += '</div>';
+  h += '<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;overflow:hidden;max-height:calc(100vh - 320px);overflow-y:auto">';
+  h += '<div style="display:grid;grid-template-columns:36px 1fr 130px 110px;padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--rule);background:var(--bg3,rgba(0,0,0,.04));position:sticky;top:0"><span></span><span>疾病</span><span>大类</span><span style="text-align:right">可发布推荐</span></div>';
+  q.forEach(function(item) {
+    var ck = !!PUBLISH_STATE.sel[item.disease_code];
+    h += '<div style="display:grid;grid-template-columns:36px 1fr 130px 110px;padding:10px 14px;align-items:center;border-bottom:1px solid var(--rule);cursor:pointer" onclick="togglePublishSel(\'' + item.disease_code + '\')">';
+    h += '<input type="checkbox" ' + (ck ? 'checked' : '') + ' onclick="event.stopPropagation();togglePublishSel(\'' + item.disease_code + '\')" style="cursor:pointer">';
+    h += '<span style="font-size:13px;color:var(--ink)">' + item.disease_name + ' <span style="color:var(--muted);font-size:10px">' + item.disease_code + '</span></span>';
+    h += '<span style="font-size:12px;color:var(--muted)">' + (item.category || '-') + '</span>';
+    h += '<span style="font-size:13px;font-weight:700;color:#2f9e44;text-align:right">' + item.publishable + ' 条</span>';
+    h += '</div>';
+  });
+  h += '</div>';
+  if (PUBLISH_STATE.blocked.length) {
+    h += '<div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7">&#9888; 另有 ' + PUBLISH_STATE.blocked.length + ' 个疾病存在闸门未过的推荐（不参与本次发布，需先补齐动作/证据/指南）：'
+      + PUBLISH_STATE.blocked.slice(0, 5).map(function(b) { return b.disease_name + '(' + b.blocked_count + '条)'; }).join('、')
+      + (PUBLISH_STATE.blocked.length > 5 ? ' 等' : '') + '</div>';
+  }
+  panel.innerHTML = h;
+}
+
+function confirmPublish() {
+  var codes = Object.keys(PUBLISH_STATE.sel).filter(function(c) { return PUBLISH_STATE.sel[c]; });
+  if (!codes.length) return;
+  var names = codes.map(function(c) {
+    var q = PUBLISH_STATE.queue.filter(function(x) { return x.disease_code === c; })[0];
+    return (q && q.disease_name) || c;
+  });
+  var ov = document.createElement('div');
+  ov.id = 'pub-confirm-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:var(--bg2,#fff);border:1px solid var(--rule,#ddd);border-radius:12px;padding:22px;max-width:460px;width:92%';
+  box.innerHTML = '<div style="font-size:15px;font-weight:800;color:var(--ink,#333);margin-bottom:10px">&#9888; 确认正式发布？</div>'
+    + '<div style="font-size:12px;color:#e8590c;font-weight:700;margin-bottom:10px">发布后即 formal_cdss_ready=true，正式进入 CDSS 使用层，全站可见。</div>'
+    + '<div style="font-size:12px;color:var(--ink,#333);margin-bottom:12px">共 <b>' + codes.length + '</b> 个疾病：' + names.slice(0, 8).join('、') + (names.length > 8 ? ' 等' : '') + '</div>'
+    + '<div style="font-size:12px;color:var(--muted,#888);margin-bottom:6px">操作人（写入审计日志，必填）</div>'
+    + '<input id="pub-operator" placeholder="姓名/工号" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--rule,#ddd);background:var(--bg,#fff);color:var(--ink,#333);margin-bottom:16px;font-size:13px">'
+    + '<div style="display:flex;gap:10px;justify-content:flex-end">'
+    + '<button id="pub-cancel" style="padding:7px 16px;border-radius:8px;border:1px solid var(--rule,#ddd);background:var(--bg,#fff);color:var(--muted,#888);cursor:pointer">取消</button>'
+    + '<button id="pub-go" style="padding:7px 20px;border-radius:8px;border:none;background:#2f9e44;color:#fff;font-weight:700;cursor:pointer">确认发布</button>'
+    + '</div>';
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  document.getElementById('pub-cancel').onclick = function() { ov.remove(); };
+  document.getElementById('pub-go').onclick = function() {
+    var op = document.getElementById('pub-operator').value.trim();
+    if (!op) { alert('请填写操作人姓名/工号（写入审计日志）'); return; }
+    document.getElementById('pub-go').disabled = true;
+    document.getElementById('pub-go').textContent = '发布中…';
+    doPublish(codes, op, ov);
+  };
+}
+
+function doPublish(codes, operator, ov) {
+  fetch('/api/kg/rs-publish', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ disease_codes: codes, operator: operator })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.error) { alert('发布失败：' + res.error); return; }
+      if (ov) ov.remove();
+      var msg = '发布完成：' + res.diseases + ' 个疾病，正式发布 ' + res.published_total + ' 条推荐'
+        + (res.skipped_total ? '，跳过 ' + res.skipped_total + ' 条（硬闸门未过）' : '')
+        + '。建设进度漏斗已同步刷新。';
+      alert(msg);
+      loadPublishQueue();
+      loadCoverageData();  // v1.5.11e: 发布后联动刷新建设进度漏斗/明细表
+    })
+    .catch(function(e) {
+      alert('发布请求失败：' + e);
+      var go = document.getElementById('pub-go');
+      if (go) { go.disabled = false; go.textContent = '确认发布'; }
+    });
+}
+
+/* =====================================================================
    初始化
    ===================================================================== */
 document.addEventListener('DOMContentLoaded', function() {
   renderNav('review');
   loadReviewData();
+  loadCoverageData();  // v1.5.11e: 建设进度 tab 数据
   loadCDSSReview();
   loadSkeletonAudit();
+  loadPublishQueue();
+  /* v1.5.11e: deep-link ?tab= 解析，默认首屏 coverage */
+  try {
+    var _t = new URLSearchParams(window.location.search).get('tab');
+    if (_t && document.getElementById('panel-' + _t)) switchTab(_t);
+  } catch(e) {}
 });
 </script>
 </body>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>专科知识图谱 · 心血管内科 - 数据总览</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
+<title>专科知识图谱 · 心血管内科 - 首页</title>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
 <style>
 /* ====== Page ====== */
 .page{width:100%;padding:24px 32px;box-sizing:border-box}
@@ -46,14 +46,15 @@
 
 .hero-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1}
 .hero-left{flex:1;min-width:0}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
-  background:var(--accent-bg);border:1px solid rgba(79,140,255,.25);
-  color:var(--hero-blue);margin-bottom:10px;letter-spacing:.03em;
+/* v1.5.11p 右侧轻量实时状态点（替代原「NEO4J 实时图谱」徽标） */
+.hero-live-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-left:24px;align-self:center}
+.hero-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.03em;cursor:help}
+.hero-live-dot{width:7px;height:7px;border-radius:50%;background:#51cf66;box-shadow:0 0 0 0 rgba(82,196,26,.5);animation:livePulse 2s infinite}
+@keyframes livePulse{
+  0%{box-shadow:0 0 0 0 rgba(82,196,26,.45)}
+  70%{box-shadow:0 0 0 7px rgba(82,196,26,0)}
+  100%{box-shadow:0 0 0 0 rgba(82,196,26,0)}
 }
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#51cf66;animation:badgePulse 2s infinite}
-@keyframes badgePulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hero h1{
   font-size:26px;font-weight:900;margin:0 0 8px;
   background:linear-gradient(135deg,var(--ink) 30%,var(--hero-blue) 100%);
@@ -105,6 +106,7 @@ a.hero-tag:hover{color:var(--accent);border-color:var(--accent);background:var(-
   .hero-top{flex-direction:column;align-items:center;text-align:center}
   .hero-sub{max-width:100%}
   .hero-tags{justify-content:center}
+  .hero-live-wrap{margin-left:0;align-items:center}
 }
 
 /* ====== Section ====== */
@@ -239,7 +241,6 @@ html[data-theme="dark"]{
     <div class="hero-glow-2"></div>
     <div class="hero-top">
       <div class="hero-left">
-        <div class="hero-badge"><span class="hero-badge-dot"></span> NEO4J 实时图谱</div>
         <h1>心血管内科 · 专科知识图谱</h1>
         <div class="hero-sub">以心血管内科为主线，按疾病大类组织专病知识，汇总症状、体征、检查、检验、药物、治疗方案等<span class="dcp">20</span>个核心知识维度，帮助快速了解图谱覆盖范围和建设质量。</div>
         <div class="hero-tags">
@@ -248,11 +249,14 @@ html[data-theme="dark"]{
           <span class="hero-tag">🔍 检索 · 可视化 · 质量审计</span>
         </div>
       </div>
-      <div class="hero-kpis" id="hero-kpis">
-        <a class="hero-kpi" href="explore.html" title="疾病树按大类组织，点开即见专病（图谱探索）"><div class="hero-kpi-num" id="k-groups">-</div><div class="hero-kpi-label">疾病大类</div></a>
-        <a class="hero-kpi" href="explore.html" title="按疾病浏览专病与20维度详情（图谱探索）"><div class="hero-kpi-num" id="k-diseases">-</div><div class="hero-kpi-label">专病</div></a>
-        <a class="hero-kpi" href="network.html" title="实体全景网络（网络探索）"><div class="hero-kpi-num" id="k-entities">-</div><div class="hero-kpi-label">可视化实体</div></a>
-        <a class="hero-kpi" href="network.html" title="关系连线与路径查找（网络探索）"><div class="hero-kpi-num" id="k-relations">-</div><div class="hero-kpi-label">关系</div></a>
+      <div class="hero-live-wrap">
+        <div class="hero-live" id="hero-live" title="页面统计为实时查询结果，非静态快照；数据写入后刷新页面即可看到最新值"><span class="hero-live-dot"></span>实时数据</div>
+        <div class="hero-kpis" id="hero-kpis">
+          <a class="hero-kpi" href="explore.html" title="疾病树按大类组织，点开即见专病（图谱探索）"><div class="hero-kpi-num" id="k-groups">-</div><div class="hero-kpi-label">疾病大类</div></a>
+          <a class="hero-kpi" href="explore.html" title="按疾病浏览专病与20维度详情（图谱探索）"><div class="hero-kpi-num" id="k-diseases">-</div><div class="hero-kpi-label">专病</div></a>
+          <a class="hero-kpi" href="network.html" title="实体全景网络（网络探索）"><div class="hero-kpi-num" id="k-entities">-</div><div class="hero-kpi-label">可视化实体</div></a>
+          <a class="hero-kpi" href="network.html" title="关系连线与路径查找（网络探索）"><div class="hero-kpi-num" id="k-relations">-</div><div class="hero-kpi-label">关系</div></a>
+        </div>
       </div>
     </div>
   </section>
@@ -315,15 +319,11 @@ html[data-theme="dark"]{
         <h3>网络探索</h3>
         <p>交互式知识图谱，点击展开关联、路径查找、全屏浏览</p>
       </a>
-      <a class="nav-card" href="heatmap.html">
+      <!-- v1.5.11e: 数据建设进度并入临床审核，合并为「建设与审核」导航卡 -->
+      <a class="nav-card" href="review.html?tab=coverage">
         <div class="nc-icon">&#x1f4c8;</div>
-        <h3>数据建设进度</h3>
-        <p>每个疾病的知识建设到哪一步：建路径→写推荐→审核→可用</p>
-      </a>
-      <a class="nav-card" href="review.html">
-        <div class="nc-icon">&#x2705;</div>
-        <h3>临床审核</h3>
-        <p>推荐陈述审核工作台：审核基线、G6/G8状态、受阻清单</p>
+        <h3>建设与审核</h3>
+        <p>建设进度漏斗+一站式审核：建路径→写推荐→审核→发布，待审队列直达</p>
       </a>
       <a class="nav-card" href="schema.html">
         <div class="nc-icon">&#x1f4d0;</div>
@@ -361,8 +361,8 @@ html[data-theme="dark"]{
 
 <script src="./_shared/js/echarts.min.js"></script>
 <script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026100901"></script>
-<script src="dashboard.js?v=2026100901"></script>
+<script src="./_shared/js/app.js?v=2026101601"></script>
+<script src="dashboard.js?v=2026101601"></script>
 <script>
 injectDimCount();renderNav('index');
 /* Dashboard 只需要 disease list + stats + dim_counts，不需要全量维度数据 */

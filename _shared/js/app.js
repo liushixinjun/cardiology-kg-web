@@ -415,17 +415,18 @@ function getDefaultDiseaseCode(){
 
 /* Professional Nav — brand links back to index */
 function renderNav(activePage) {
-  /* 11个功能菜单（数据总览/图谱探索/网络探索/数据覆盖分析/临床审核/图谱数据字典/
+  /* 11个功能菜单（首页/图谱探索/网络探索/数据覆盖分析/临床审核/图谱数据字典/
      Schema标准/AI图谱解析/指南库/医学术语库）+ 外部链接（专科辅助诊疗，新标签页打开）
      注：diagnosis.html(临床诊断模拟)、engine.html(路径编辑) 已作废并已从仓库移除 */
+  /* v1.5.11e: heatmap(数据建设进度) 已并入 review「建设与审核」，菜单合并 */
   var pages = [
-    {id:'index',label:'数据总览',icon:'📊',group:'browse'},
+    {id:'index',label:'首页',icon:'🏠',group:'browse',home:true},
     {id:'explore',label:'图谱探索',icon:'🧭',group:'browse'},
     {id:'network',label:'网络探索',icon:'🕸️',group:'browse'},
-    {id:'heatmap',label:'数据建设进度',icon:'📈',group:'gov'},
-    {id:'review',label:'临床审核',icon:'✅',group:'gov'},
+    {id:'review',label:'建设与审核',icon:'📈',group:'gov'},
     {id:'ai-parse',label:'AI图谱解析',icon:'🤖',group:'gov'},
     {id:'schema',label:'图谱数据字典',icon:'📐',group:'std'},
+    {id:'meta',label:'元模型配置',icon:'🧩',group:'std'},
     {id:'standard',label:'Schema标准',icon:'📘',group:'std'},
     {id:'guideline',label:'指南库',icon:'📚',group:'std'},
     {id:'terminology',label:'医学术语库',icon:'🧬',group:'std'},
@@ -440,7 +441,9 @@ function renderNav(activePage) {
     if (lastGroup !== null && p.group !== lastGroup) h += '<span class="nav-sep"></span>';
     lastGroup = p.group;
     var target = p.external ? ' target="_blank"' : '';
-    h += '<a class="nav-link nav-g-'+(p.group||'browse')+(activePage===p.id?' active':'')+'" href="'+p.id+'.html"'+target+' title="分组：'+(GROUPS[p.group]||'')+'">'+p.icon+' '+p.label+'</a>';
+    /* v1.5.11m：首页入口独立视觉（徽标底色），与其他菜单区分 */
+    var cls = 'nav-link nav-g-'+(p.group||'browse')+(p.home?' nav-home':'')+(activePage===p.id?' active':'');
+    h += '<a class="'+cls+'" href="'+p.id+'.html"'+target+' title="'+(p.home?'返回首页 · ':'分组：')+(GROUPS[p.group]||'')+'">'+p.icon+' '+p.label+'</a>';
   });
   h += '</div><div class="nav-right">';
   h += '<a class="nav-config-btn" href="config.html" title="系统配置" aria-label="系统配置">⚙</a>';

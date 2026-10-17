@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -4037,7 +4037,7 @@
     .ui-record h4 {margin:6px 0;}
     .ui-record small {display:block;color:#647f94;}
   </style>
-  <link rel="stylesheet" href="specialty-treatment-workspace.css?v=2026100901">
+  <link rel="stylesheet" href="specialty-treatment-workspace.css?v=2026101601">
   <link rel="stylesheet" href="specialty-recommendation-view.css">
   <link rel="stylesheet" href="specialty-patient-journey.css">
   <link rel="stylesheet" href="specialty-evidence-chain.css">
@@ -4521,6 +4521,12 @@
             <div class="more-actions" id="moreActions">
               <button class="btn" id="moreActionsBtn" type="button" aria-expanded="false" aria-controls="moreActionsMenu">演示设置 ▾</button>
               <div class="more-menu" id="moreActionsMenu">
+          <details id="caseStory" style="margin:10px 0;padding:10px 14px;background:#f4f8fc;border:1px solid #d9e3ec;border-radius:6px">
+            <summary style="cursor:pointer;font-weight:700">本步就诊故事（演示讲解）</summary>
+            <div id="caseStoryBody" style="padding-top:8px;line-height:1.8"></div>
+            <a href="./需求分析/02_需求梳理与映射/患者就诊演示故事_AMI与心肌病_V0.1.md" target="_blank">完整案例讲解稿</a>
+          </details>
+                <p class="demo-description">原型使用虚构资料；修改资料后需重新核对。</p>
             <label for="patientSceneSelect">模拟就诊场景（实际由HIS/EMR提供）</label>
             <select class="select" id="patientSceneSelect" style="width:168px">
               <option value="emergency-first">急诊首诊</option>
@@ -4549,14 +4555,8 @@
             </div>
           </div>
 
-          <details id="caseStory" style="margin:10px 0;padding:10px 14px;background:#f4f8fc;border:1px solid #d9e3ec;border-radius:6px">
-            <summary style="cursor:pointer;font-weight:700">本步就诊故事（演示讲解）</summary>
-            <div id="caseStoryBody" style="padding-top:8px;line-height:1.8"></div>
-            <a href="./需求分析/02_需求梳理与映射/患者就诊演示故事_AMI与心肌病_V0.1.md" target="_blank">完整案例讲解稿</a>
-          </details>
           <div class="simulate-layout">
             <div class="patient-panel">
-              <div class="demo-caption">仅使用虚构资料；修改病历或报告后需重新核验。</div>
               <div id="draftStatus" hidden></div>
               <div class="stage-board" id="stageBoard">
                 <div class="stage-pill active">疑似识别<br><span class="mini">待生成</span></div>
@@ -4611,9 +4611,9 @@
                   <span class="muted">状态</span>
                   <input class="input" id="subStatus2" placeholder="待确认">
                 </div>
-                <label>处置</label>
+                <label>处置<button type="button" class="field-note" data-care-note="plan">记录计划</button></label>
                 <textarea class="textarea" id="treatmentText" placeholder="记录诊疗计划；普通诊疗与专病路径均可使用"></textarea>
-                <label>疗效观察/出院注意</label>
+                <label>疗效观察/出院注意<button type="button" class="field-note" data-care-note="discharge">记录事项</button></label>
                 <textarea class="textarea" id="perioperativeText" placeholder="记录治疗后观察、复评及出院复查注意事项"></textarea>
               </div>
             </div>
@@ -4813,16 +4813,16 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="specialty-cdss-clinical-ui.js?v=2026100901"></script>
-  <script src="specialty-treatment-workspace.js?v=2026100901"></script>
+  <script src="specialty-cdss-clinical-ui.js?v=2026101601"></script>
+  <script src="specialty-treatment-workspace.js?v=2026101601"></script>
   <script src="specialty-recommendation-view.js"></script>
   <script src="specialty-order-bridge.js"></script>
-  <link rel="stylesheet" href="specialty-pathway-tasks.css?v=2026100901">
-  <script src="specialty-pathway-tasks.js?v=2026100901"></script>
+  <link rel="stylesheet" href="specialty-pathway-tasks.css?v=2026101601">
+  <script src="specialty-pathway-tasks.js?v=2026101601"></script>
   <script src="specialty-patient-journey.js"></script>
-  <script src="specialty-encounter-demo.js"></script>
-  <link rel="stylesheet" href="specialty-evidence-ux.css?v=2026100901"><link rel="stylesheet" href="specialty-ai-evidence.css?v=2026100901">
-  <script src="specialty-ai-evidence.js?v=2026100901"></script><script src="specialty-evidence-ux.js?v=2026100901"></script>
+  <script src="specialty-encounter-demo.js?v=2026101601"></script>
+  <link rel="stylesheet" href="specialty-evidence-ux.css?v=2026101601"><link rel="stylesheet" href="specialty-ai-evidence.css?v=2026101601"><link rel="stylesheet" href="specialty-dialog-shell.css?v=2026101601">
+  <script src="specialty-ai-evidence.js?v=2026101601"></script><script src="specialty-evidence-ux.js?v=2026101601"></script><script src="specialty-recommendation-density.js?v=2026101601"></script><link rel="stylesheet" href="specialty-recommendation-density.css?v=2026101601">
   <script>
     const rules = [
       {
@@ -8623,12 +8623,7 @@
       }
       if(simulationState === "case") return generateSuspects();
       if(simulationState === "suspect") return focusSuspectDisease();
-      if(simulationState === "focused") {
-        // Report loading remains an explicit, labelled demo action, never an implicit stage transition.
-        if(assistFocus === "diagnosis") return fillReports();
-        assistFocus="diagnosis";renderRecommendations();
-        showToast("当前展示诊断依据及缺失项；继续演示请点击“载入演示报告”。");return;
-      }
+      if(simulationState === "focused") return fillReports();
       if(simulationState === "reports") return openPathwayAdmissionReview("下一步入组核对");
       if(simulationState === "pathway") return enterPerioperative();
       if(simulationState === "periop" && window.EncounterDemo) return EncounterDemo.next();
@@ -8702,6 +8697,7 @@
       const reviewingEarlier=viewOrder.indexOf(assistFocus)<viewOrder.indexOf(focusForSimulationState(simulationState));
       const noPathwayEnd=activeSimulationDisease === "no-pathway" && simulationState === "focused" && assistFocus === "diagnosis";
       $("#nextStepBtn").textContent = nextLabels[simulationState] || "下一步";
+      if(simulationState==="focused") $("#nextStepBtn").textContent="载入报告并查看诊断依据";
       if(reviewingEarlier) $("#nextStepBtn").textContent="下一步";
       if(noPathwayEnd) $("#nextStepBtn").textContent="已显示通用辅助";
       if(activeSimulationDisease === "no-pathway") {
@@ -8846,7 +8842,10 @@
         const item=currentPatientTagEvidence()[Number(tag.dataset.patientTag)];if(!item)return;
         $("#clinicalActionTitle").textContent="患者标签："+item.name;
         $("#clinicalActionSubTitle").textContent="";
-        $("#clinicalActionBody").innerHTML=detailGrid([["来源",escapeAttr(item.source)],["命中内容",item.fact.split(/[；;\n]/).filter(Boolean).map(part=>'<p class="cx-tag-evidence">'+escapeAttr(part)+'</p>').join("")]]);
+        const parts=item.fact.split(/[；;\n]/).map(x=>x.trim()).filter(Boolean);
+        const diagnosis=item.name===fieldValue("mainDiagnosis");
+        const groups=diagnosis?[["诊断记录",[fieldValue("mainDiagnosis")]],["相关检查",parts.filter(x=>/心电图|超声心动图|心脏磁共振/.test(x))],["相关检验",parts.filter(x=>/肌钙蛋白|CK-MB|BNP/.test(x))]]:[[item.source,parts]];
+        $("#clinicalActionBody").innerHTML='<div data-tag-groups>'+groups.filter(([,rows])=>rows.length).map(([label,rows])=>'<section><h4>'+escapeAttr(label)+'</h4>'+rows.map(x=>'<p>'+escapeAttr(x)+'</p>').join('')+'</section>').join('')+'</div>';
         $("#clinicalActionModal").classList.add("open");
       }
       if(event.target.closest("[data-patient-pathway]") && admissionConfirmed) openPathwayWorkbench();
@@ -8865,7 +8864,7 @@
     }
 
     function screeningDetail(hasReports, rows) {
-      const parts=(hasReports ? rows.after : rows.before)||rows.before||[];return '<p class="screening-brief">'+parts.filter(r=>r[1]).map(r=>escapeAttr(r[1])).join(" ")+"</p>";
+      const parts=(hasReports ? rows.after : rows.before)||rows.before||[];return '<p class="screening-brief">'+parts.filter(r=>r[1]).map(r=>escapeAttr(r[1])).join(" ")+"</p>"+(rows.source?'<a class="screening-source" data-screening-source href="'+escapeAttr(rows.source.url)+'" target="_blank" rel="noopener noreferrer">'+escapeAttr(rows.source.title)+' ↗</a>':"");
     }
 
     function symptomTags(items = []) {
@@ -10322,7 +10321,8 @@
           after: [["指南依据", "AMI 风险评估与心功能评估要求。"], ["当前结果", "下壁室壁运动减弱。"], ["结果分析", "支持心肌缺血/梗死相关心功能评估，供治疗风险和质控使用。"]]
         }), { white: true, rules: [2, 8], summary: hasReports ? "室壁运动减弱｜已回填" : "风险评估｜缺结果", hideGuide: true })}
         ${recItem("主动脉 CT 血管成像（CTA）", [{ text: "高危鉴别", type: "red" }], screeningDetail(false, {
-          before: [["指南依据", "胸痛高危鉴别要求。"], ["用途/风险", "用于排除主动脉夹层；未排除会影响溶栓和强抗栓治疗放行。"]]
+          source: {title:"2022 ACC/AHA 主动脉疾病指南",url:"https://www.jacc.org/doi/10.1016/j.jacc.2022.08.004"},
+          before: [["鉴别依据", "疑似急性主动脉综合征时，指南推荐CT作为初始诊断影像检查，用于明确主动脉病变。"]]
         }), { white: true, tone: "danger", rules: [3, 7], summary: "高危鉴别｜待排", hideGuide: true })}
         ${recItem("肺动脉 CT 血管成像（CTA）", [{ text: "鉴别排除", type: "orange" }], screeningDetail(false, {
           before: [["指南依据", "胸痛/呼吸困难鉴别诊断要求。"], ["用途/风险", "用于排除肺栓塞，不作为 AMI 确诊项目。"]]
@@ -10538,6 +10538,17 @@
           ? html
           : `<div class="empty-state" style="margin:14px">当前阶段暂无推荐内容。状态：${simulationState}</div>`;
         panel.innerHTML = `${recTab==='assist'?renderPatientAlerts()+ClinicalUI.alerts():''}${recTab==='search'?'':renderRightPanelClinicalContext()}${body}`;
+        if(recTab==="assist") {
+          const sections=[...panel.querySelectorAll('.rec-section')];
+          const named=name=>sections.find(s=>s.querySelector(':scope > .rec-head .rec-title')?.textContent.trim().startsWith(name));
+          const suspect=named('疑似疾病'),diff=named('鉴别诊断');
+          if(suspect&&diff){
+            const first=sections[0];
+            if(first!==suspect)first.before(suspect);
+            suspect.after(diff);
+          }
+          RecommendationDensity.apply(panel);
+        }
       } catch (error) {
         panel.innerHTML = `<div class="empty-state" style="margin:14px;color:#c43636">辅助诊疗推荐渲染异常：${error.message}<br>当前状态：${simulationState}</div>`;
         console.error(error);

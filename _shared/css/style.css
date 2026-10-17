@@ -51,6 +51,11 @@ a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:under
 .nav-link:hover { color:var(--ink); border-bottom-color:var(--nav-g,var(--accent)); }
 .nav-link.active { border-bottom-color:var(--nav-g,var(--accent)); }
 
+/* v1.5.11m 首页入口：徽标式底色，与其他菜单区分 */
+.nav-home { display:inline-flex; align-items:center; gap:5px; margin:8px 10px 8px 0; padding:4px 12px !important; border-radius:16px; background:color-mix(in srgb, var(--accent) 12%, transparent); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent); color:var(--accent); font-weight:700; border-bottom:none !important; }
+.nav-home:hover { background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+.nav-home.active { background:var(--accent); color:#fff; }
+
 /* Page container */
 .page { width:100%; padding:24px 32px; box-sizing:border-box; }
 .page-header { margin-bottom:24px; }
@@ -134,6 +139,8 @@ textarea.input { min-height:120px; resize:vertical; font-family:inherit; }
   .nav-link { border-left-color: color-mix(in srgb, var(--nav-g, var(--accent)) 28%, transparent); }
 }
 .nav-link:hover, .nav-link.active { border-left-color: var(--nav-g, var(--accent)); }
+/* v1.5.11m 首页徽标不加组色竖条 */
+.nav-home { border-left:none !important; }
 
 /* ====== v1.4.4 响应式增强 ====== */
 @media (max-width: 1100px) {

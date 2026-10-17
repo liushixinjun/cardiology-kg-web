@@ -141,6 +141,9 @@ function renderFlowBar(stats, groups) {
   if (kd) kd.textContent = stats.disease_count;
   if (ke) ke.textContent = entityCount.toLocaleString();
   if (kr) kr.textContent = (stats.total_relationships || 0).toLocaleString();
+  /* v1.5.11p 实时状态点：数据到达后由「同步中」转绿 */
+  var hl = el('hero-live');
+  if (hl){ hl.innerHTML = '<span class="hero-live-dot"></span>实时数据'; }
   /* 兼容旧 flow-bar（如有） */
   var fb = el('flow-bar');
   if (fb) fb.innerHTML =

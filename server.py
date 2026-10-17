@@ -1787,16 +1787,22 @@ def query_disease_full(code):
         }
 
 
-def query_global_stats():
+def query_global_stats(sync_trigger='auto'):
     """全局统计 — 单次查询优化，Redis缓存（V2.0三层统计）
     4001整改：区分"图谱实例数"与"已映射CDSS标准字典数"两种口径，避免
     std_procedure_count=0 被误读为"图谱没有操作数据"。
+    v1.5.11b：sync_trigger 传给同步留痕（auto=缓存过期重算 / manual=手动同步）。
     """
     cached = cache_get('kg:global_stats')
     if cached is not None:
         return cached
     d = get_driver()
     with d.session() as sess:
+        # v1.5.11b：属性种类数（全库去重 keys 集合大小），供同步留痕对比
+        pk_rows = sess.run(
+            "MATCH (n:KGNode) UNWIND keys(n) AS k RETURN count(DISTINCT k) AS c"
+        ).single()
+        property_key_count = pk_rows['c'] if pk_rows else 0
         # 单次查询获取所有统计（V2.0：新增三层统计 + 4001整改双口径）
         r = sess.run("""
             MATCH (n:KGNode)
@@ -1830,6 +1836,7 @@ def query_global_stats():
             RETURN disease_category_count, disease_count, visual_entity_count,
                    kg_node_count, evidence_count, std_diagnosis_count,
                    std_procedure_count, source_adjudication_count, count(r) AS total_rels,
+                   count(DISTINCT type(r)) AS rel_type_count,
                    procedure_instance_count, procedure_cdss_mapped_count,
                    exam_item_instance_count, exam_item_cdss_mapped_count,
                    lab_item_instance_count, lab_item_cdss_mapped_count,
@@ -1869,6 +1876,9 @@ def query_global_stats():
             "stats_note": "图谱实例数=Neo4j中该entityType节点数；CDSS字典映射数=其中已具备cdss_dict_id的节点数；"
                           "std_procedure_count=StandardProcedure标准字典节点数（当前未建设，不代表图谱无操作数据，"
                           "操作实例见instance_counts.procedure）",
+            # v1.5.11b：属性/关系类型种类数（同步留痕对比维度）
+            "property_key_count": property_key_count,
+            "rel_type_count": r["rel_type_count"],
             # 推荐陈述审核四态（4001整改）
             "rs_review_stats": {
                 "total": r["rs_total_count"],
@@ -1882,6 +1892,11 @@ def query_global_stats():
             "shell_entity_count": 0,
         }
         cache_set('kg:global_stats', result)
+        # v1.5.11b：stats 重算即与落盘快照对比，变化自动写 sync_log.jsonl
+        try:
+            record_stats_change(result, trigger=sync_trigger)
+        except Exception as e:
+            print(f"record_stats_change failed: {e}")
         return result
 
 
@@ -2225,27 +2240,824 @@ def query_schema_registry():
 
 
 def query_guidelines():
-    """获取所有指南及其关联疾病"""
+    """指南库总览（v1.5.11 重构）：
+    返回全部 Guideline（含未挂疾病的），带 code/year/org/path/page_count/evidence_count/
+    rec_count/disease_count/diseases/categories，供"左侧专科+疾病分类树 + 右侧统一表格"使用。
+    - year 取 publication_year（'N/A'/空 均归一为 ''）
+    - org 取 issuing_body（库内极少，兜底空）
+    - evidence_count 按 Evidence.source_name 匹配指南名
+    - categories：该指南关联疾病所属的疾病大类（CAT- 前缀，用于左树联动过滤）
+    """
+    cached = cache_get('kg:guidelines_v2')
+    if cached is not None:
+        return cached
     d = get_driver()
     with d.session() as sess:
-        results = sess.run("""
-            MATCH (g:Guideline)<-[:based_on_guideline]-(d:Disease)
-            RETURN g.name as name, g.organization as org, g.year as year,
-                   g.version as version, g.recommendation_level as level,
-                   collect(DISTINCT {code: d.code, name: d.name}) as diseases
-            ORDER BY g.year DESC, g.name
-        """)
-        guidelines = []
-        for r in results:
-            guidelines.append({
-                "name": r["name"] or "",
-                "organization": r["org"] or "",
-                "year": r["year"] or "",
-                "version": r["version"] or "",
-                "level": r["level"] or "",
-                "diseases": r["diseases"] or []
+        # 1. 全部指南 + 挂靠疾病（含未挂疾病的指南，dis 数组可能为空）
+        g_rows = list(sess.run("""
+            MATCH (g:Guideline)
+            WHERE """ + _active_node_filter('g') + """
+            OPTIONAL MATCH (d:Disease)-[:based_on_guideline]->(g)
+            WHERE """ + _active_node_filter('d') + """
+            RETURN g.code AS code, g.name AS name, g.preferred_name AS pref,
+                   g.publication_year AS year, g.issuing_body AS org,
+                   g.version AS version, g.source_path AS source_path,
+                   g.page_count AS page_count, g.batch_id AS batch_id,
+                   g.document_id AS document_id,
+                   collect(DISTINCT {code: d.code, name: d.name}) AS diseases
+            ORDER BY (g.publication_year IS NULL), g.publication_year DESC, g.name
+        """))
+        # 2. 证据数按 source_name 匹配（Evidence 不与 Guideline 建结构关系）
+        ev_rows = {r['src']: r['cnt'] for r in sess.run(
+            "MATCH (e:Evidence) WHERE e.source_name IS NOT NULL "
+            "RETURN e.source_name AS src, count(*) AS cnt")}
+        # 3. 推荐语句数（based_on_guideline + uses_primary_guideline 都算）
+        rs_rows = {}
+        for r in sess.run(
+                "MATCH (rs:RecommendationStatement)-[r]->(g:Guideline) "
+                "WHERE type(r) IN ['based_on_guideline','uses_primary_guideline'] "
+                "RETURN g.code AS gc, count(DISTINCT rs) AS cnt"):
+            rs_rows[r['gc']] = r['cnt']
+        # 4. 疾病 → 大类映射（用于 categories 联动）
+        cat_rows = {}
+        for r in sess.run(
+                "MATCH (d:Disease)-[:belongs_to_category]->(c:DiseaseCategory) "
+                "WHERE c.code STARTS WITH 'CAT-' "
+                "RETURN d.code AS dc, collect(DISTINCT {code:c.code, name:c.name}) AS cats"):
+            cat_rows[r['dc']] = r['cats']
+        # 兜底：belongs_to_category 缺失时用 has_disease 反查
+        for r in sess.run(
+                "MATCH (c:DiseaseCategory)-[:has_disease]->(d:Disease) "
+                "WHERE c.code STARTS WITH 'CAT-' "
+                "AND NOT (d)-[:belongs_to_category]->() "
+                "RETURN d.code AS dc, collect(DISTINCT {code:c.code, name:c.name}) AS cats"):
+            if r['dc'] not in cat_rows:
+                cat_rows[r['dc']] = r['cats']
+
+    guidelines = []
+    for r in g_rows:
+        year = r['year'] or ''
+        if str(year).strip().upper() in ('N/A', 'NULL', 'UNKNOWN'):
+            year = ''
+        diseases = [x for x in (r['diseases'] or []) if x.get('code')]
+        cats = {}
+        for dis in diseases:
+            for c in (cat_rows.get(dis['code']) or []):
+                cats[c['code']] = c['name']
+        # 证据数：source_name 与指南名精确匹配；未命中再按去扩展名匹配
+        name = r['name'] or ''
+        ev_cnt = ev_rows.get(name, 0)
+        if not ev_cnt:
+            base = re.sub(r'\.(pdf|docx?|txt)$', '', name, flags=re.I)
+            for src, cnt in ev_rows.items():
+                if re.sub(r'\.(pdf|docx?|txt)$', '', src or '', flags=re.I) == base:
+                    ev_cnt = cnt
+                    break
+        # 文件可预览：文件名（取 source_path 尾段）在 guideline_files/ 目录存在
+        fname = os.path.basename((r['source_path'] or '').replace('\\', '/')) if r['source_path'] else ''
+        guidelines.append({
+            "code": r['code'] or '',
+            "name": name,
+            "pref": r['pref'] or name,
+            "year": str(year),
+            "organization": r['org'] or '',
+            "version": r['version'] or '',
+            "file_name": fname,
+            "has_file": bool(fname and os.path.isfile(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             'guideline_files', fname))),
+            "page_count": r['page_count'] or 0,
+            "batch_id": r['batch_id'] or '',
+            "disease_count": len(diseases),
+            "diseases": diseases,
+            "categories": [{"code": k, "name": v} for k, v in cats.items()],
+            "evidence_count": ev_cnt,
+            "rec_count": rs_rows.get(r['code'], 0),
+        })
+    result = {"guidelines": guidelines, "total": len(guidelines)}
+    cache_set('kg:guidelines_v2', result)
+    return result
+
+
+def query_guideline_detail(code):
+    """单份指南解析数据详情（v1.5.11）：
+    按疾病维度汇总该指南产出的图谱数据量，供操作列"解析数据"弹窗使用。
+    """
+    d = get_driver()
+    with d.session() as sess:
+        g = sess.run("""
+            MATCH (g:Guideline {code: $code})
+            RETURN g.code AS code, g.name AS name, g.publication_year AS year,
+                   g.issuing_body AS org, g.version AS version,
+                   g.source_path AS source_path, g.page_count AS page_count,
+                   g.batch_id AS batch_id
+        """, code=code).single()
+        if not g:
+            return {"error": "指南不存在: %s" % code}
+        # 挂靠疾病 + 每病在该指南下产出的维度实例数（Evidence 按 source_name 计）
+        name = g['name'] or ''
+        dis_rows = list(sess.run("""
+            MATCH (d:Disease)-[:based_on_guideline]->(g:Guideline {code: $code})
+            RETURN d.code AS dc, d.name AS dn
+            ORDER BY d.name
+        """, code=code))
+        ev_cnt_rows = {r['src']: r['cnt'] for r in sess.run(
+            "MATCH (e:Evidence) WHERE e.source_name IS NOT NULL "
+            "RETURN e.source_name AS src, count(*) AS cnt")}
+        ev_total = ev_cnt_rows.get(name, 0)
+        if not ev_total:
+            base = re.sub(r'\.(pdf|docx?|txt)$', '', name, flags=re.I)
+            for src, cnt in ev_cnt_rows.items():
+                if re.sub(r'\.(pdf|docx?|txt)$', '', src or '', flags=re.I) == base:
+                    ev_total = cnt
+                    break
+        rs_cnt = sess.run(
+            "MATCH (rs:RecommendationStatement)-[r]->(g:Guideline {code: $code}) "
+            "WHERE type(r) IN ['based_on_guideline','uses_primary_guideline'] "
+            "RETURN count(DISTINCT rs) AS c", code=code).single()['c']
+        # 每病证据数（按 source_name 精确匹配）
+        per_dis_ev = {}
+        for row in sess.run("""
+            MATCH (d:Disease)-[:based_on_guideline]->(g:Guideline {code: $code})
+            MATCH (d)-[:supported_by_evidence]->(e:Evidence)
+            WHERE e.source_name = $name
+            RETURN d.code AS dc, count(e) AS c
+        """, code=code, name=name):
+            per_dis_ev[row['dc']] = row['c']
+    diseases = []
+    for r in dis_rows:
+        diseases.append({
+            "code": r['dc'], "name": r['dn'],
+            "evidence_count": per_dis_ev.get(r['dc'], 0),
+        })
+    fname = os.path.basename((g['source_path'] or '').replace('\\', '/')) if g['source_path'] else ''
+    return {
+        "code": g['code'], "name": name, "year": str(g['year'] or ''),
+        "organization": g['org'] or '', "version": g['version'] or '',
+        "page_count": g['page_count'] or 0, "batch_id": g['batch_id'] or '',
+        "file_name": fname,
+        "has_file": bool(fname and os.path.isfile(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'guideline_files', fname))),
+        "diseases": diseases,
+        "evidence_count": ev_total,
+        "rec_count": rs_cnt,
+    }
+
+
+# ---------------- 图谱元模型配置（v1.5.7 新模块） ----------------
+# 元模型 = 实体类型（含属性定义）+ 关系类型（含端点约束）的可维护配置。
+# 持久化在 meta_model.json；首次访问时以代码内 V4.1 注册表 + Neo4j 实测自动构建种子。
+# 所有变更经 POST /api/kg/meta-model 落审计日志（audit_log.jsonl），与临床审核同源。
+
+META_MODEL_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meta_model.json')
+
+# v1.5.11c 层级结构种子（方案B：层级关系从 meta.html 前端硬编码迁到元模型 JSON 持久化）
+# 结构：域(key/tag/icon/name/desc) -> 子分组(icon/name/types) -> 实体类型
+# 与 schema.html ENTITY_TYPES 分层口径一致；未归入任何域的类型由前端自动归入"未归类"域
+META_HIERARCHY_SEED = [
+    {'key': 'd1', 'tag': '第一层', 'tagColor': '#4f8cff', 'icon': '🫀', 'name': '疾病知识层',
+     'desc': '疾病目录、定义与基础医学、检查检验、诊断与风险、治疗与管理——专科知识的主体内容层',
+     'subs': [
+         {'icon': '📂', 'name': '目录与疾病', 'types': ['Specialty', 'DiseaseCategory', 'DiseaseSubcategory', 'Disease']},
+         {'icon': '📖', 'name': '定义与基础医学', 'types': ['Definition', 'DefinitionComponent', 'Symptom', 'Sign', 'Etiology', 'Pathophysiology', 'Epidemiology', 'RiskFactor', 'Complication', 'Prognosis', 'Prevention']},
+         {'icon': '🔬', 'name': '检查与检验', 'types': ['ExamPlan', 'ExamItem', 'ExamObservation', 'LabItem', 'LabSubitem', 'LabSample', 'VitalSignItem', 'ThresholdRule']},
+         {'icon': '📋', 'name': '诊断与风险', 'types': ['DiagnosisCriteria', 'DiagnosisCriteriaComponent', 'DifferentialDiagnosis', 'RiskStratification', 'ClinicalRule']},
+         {'icon': '💊', 'name': '治疗与管理', 'types': ['Drug', 'Procedure', 'TreatmentPlan', 'TreatmentItem', 'Contraindication', 'FollowUp']},
+     ]},
+    {'key': 'd2', 'tag': '结构层', 'tagColor': '#0ca678', 'icon': '🏥', 'name': '专科应用结构层',
+     'desc': '评估五件套、护理十件套、路径与质控——按专科应用场景组织的结构化配置层',
+     'subs': [
+         {'icon': '📊', 'name': '评估五件套', 'types': ['AssessmentScale', 'AssessmentItem', 'AssessmentScoreRule', 'AssessmentResultLevel', 'AssessmentActionRule']},
+         {'icon': '🩺', 'name': '护理十件套', 'types': ['NursingAssessment', 'NursingAssessmentItem', 'NursingDiagnosis', 'NursingIntervention', 'NursingOutcome', 'NursingCarePlan', 'NursingGrade', 'NursingContraindication', 'NursingRecordItem', 'NursingOrderCheckRule']},
+         {'icon': '🗺️', 'name': '路径与质控', 'types': ['SpecialtyCarePathway', 'InpatientClinicalPathway', 'PathwayStage', 'PathwayTask', 'PathwayVariationReason', 'PathwayExitCriteria', 'QualityControlPoint', 'QualityControlRule']},
+     ]},
+    {'key': 'd3', 'tag': '治理层', 'tagColor': '#845ef7', 'icon': '🔖', 'name': '证据治理层',
+     'desc': '术语受控与别名治理，保障图谱口径统一',
+     'subs': [
+         {'icon': '🔖', 'name': '术语治理', 'types': ['MedicalTermAlias']},
+     ]},
+    {'key': 'd4', 'tag': '扩展槽位', 'tagColor': '#f59f00', 'icon': '🧬', 'name': '专病扩展槽位',
+     'desc': '按专病（心血管）预留的扩展实体槽位，注册表已定义、按批次落地',
+     'subs': [
+         {'icon': '🧬', 'name': '心血管专病扩展', 'types': ['ClinicalSubtype', 'ECGPattern', 'ElectrophysiologyMechanism', 'HeartFailurePhenotype', 'InfarctLocation', 'InheritancePattern', 'FamilyHistory', 'Gene', 'GeneticVariant', 'SecondaryCause', 'HemodynamicIndicator', 'TargetOrganDamage', 'BloodPressureGrade', 'VolumeStatus', 'SeverityGrade', 'TimeWindow', 'Device', 'DeviceParameter', 'AblationTarget', 'ValveAnatomy', 'ValveLesionType', 'VascularTerritory']},
+     ]},
+    {'key': 'd5', 'tag': '第二层', 'tagColor': '#ff922b', 'icon': '🏷️', 'name': 'CDSS标准主数据层',
+     'desc': '与 CDSS 对齐的标准诊断/手术字典，含 ICD 编码',
+     'subs': [
+         {'icon': '🏷️', 'name': '标准字典', 'types': ['StandardDiagnosis', 'StandardProcedure']},
+     ]},
+    {'key': 'd6', 'tag': '第三层', 'tagColor': '#e64980', 'icon': '⚖️', 'name': '临床决策层',
+     'desc': '推荐陈述、来源裁决、证据与指南——面向 CDSS 决策输出',
+     'subs': [
+         {'icon': '⚖️', 'name': '决策与证据', 'types': ['RecommendationStatement', 'SourceAdjudication', 'Evidence', 'Guideline']},
+     ]},
+    {'key': 'd7', 'tag': '内部', 'tagColor': '#868e96', 'icon': '📑', 'name': '内部管理',
+     'desc': '来源段落等内部追溯实体，不对外展示',
+     'subs': [
+         {'icon': '📑', 'name': '来源追溯', 'types': ['SourceSection']},
+     ]},
+]
+
+# 实体类型属性种子：核心字段口径（code/name 必有，其余为该类型的关键业务属性）
+META_ENTITY_PROP_SEEDS = {
+    'Disease': ['code', 'name', 'icd_code', 'icd_name', 'disease_category', 'raw_name'],
+    'Guideline': ['code', 'name', 'organization', 'year', 'version', 'file_path'],
+    'Evidence': ['code', 'name', 'source_name', 'pdf_page', 'evidence_level', 'content'],
+    'Symptom': ['code', 'name', 'aliases', 'description'],
+    'Sign': ['code', 'name', 'aliases', 'description'],
+    'Drug': ['code', 'name', 'aliases', 'cdss_dict_id', 'drug_class'],
+    'Procedure': ['code', 'name', 'aliases', 'cdss_dict_id'],
+    'ExamItem': ['code', 'name', 'aliases', 'exam_type'],
+    'LabItem': ['code', 'name', 'aliases', 'lab_type', 'cdss_dict_id'],
+    'TreatmentPlan': ['code', 'name', 'plan_type', 'description'],
+    'RecommendationStatement': ['code', 'name', 'disease_code', 'clinical_review_status', 'formal_cdss_ready'],
+    'ClinicalRule': ['code', 'name', 'disease_code', 'rule_type', 'expression'],
+    'NursingCarePlan': ['code', 'name', 'schema_version', 'review_status', 'clinical_review_status', 'execution_status'],
+    'NursingIntervention': ['code', 'name', 'intervention_type', 'content_completeness'],
+    'NursingAssessment': ['code', 'name', 'assessment_type'],
+    'NursingDiagnosis': ['code', 'name', 'diagnosis_domain'],
+}
+
+# 关系类型语义种子（中文说明 + 建议端点），REL_NAME_MAP 提供中文名
+META_REL_SEED_ENDPOINTS = {
+    'has_symptom': ['Disease', 'Symptom'],
+    'has_sign': ['Disease', 'Sign'],
+    'has_risk_factor': ['Disease', 'RiskFactor'],
+    'has_complication': ['Disease', 'Complication'],
+    'has_differential_diagnosis': ['Disease', 'DifferentialDiagnosis'],
+    'has_risk_stratification': ['Disease', 'RiskStratification'],
+    'has_prognosis': ['Disease', 'Prognosis'],
+    'has_followup': ['Disease', 'FollowUp'],
+    'has_treatment_plan': ['Disease', 'TreatmentPlan'],
+    'has_diagnostic_criteria': ['Disease', 'DiagnosisCriteria'],
+    'has_etiology': ['Disease', 'Etiology'],
+    'has_epidemiology': ['Disease', 'Epidemiology'],
+    'has_pathophysiology': ['Disease', 'Pathophysiology'],
+    'has_prevention': ['Disease', 'Prevention'],
+    'has_definition': ['Disease', 'Definition'],
+    'based_on_guideline': ['Disease', 'Guideline'],
+    'supported_by_evidence': ['RecommendationStatement', 'Evidence'],
+    'has_evidence': ['Disease', 'Evidence'],
+    'has_exam_plan': ['Disease', 'ExamPlan'],
+    'includes_exam_item': ['ExamPlan', 'ExamItem'],
+    'includes_lab_item': ['ExamPlan', 'LabItem'],
+    'includes_drug': ['TreatmentPlan', 'Drug'],
+    'includes_procedure': ['TreatmentPlan', 'Procedure'],
+    'has_nursing_care_plan': ['Disease', 'NursingCarePlan'],
+    'has_nursing_assessment': ['Disease', 'NursingAssessment'],
+    'has_nursing_diagnosis': ['Disease', 'NursingDiagnosis'],
+    'includes_nursing_intervention': ['NursingCarePlan', 'NursingIntervention'],
+    'plan_has_nursing_diagnosis': ['NursingCarePlan', 'NursingDiagnosis'],
+    'plan_targets_outcome': ['NursingCarePlan', 'NursingOutcome'],
+    'plan_uses_assessment': ['NursingCarePlan', 'NursingAssessment'],
+}
+
+
+# v1.5.11d 属性中文名种子：属性英文 key -> 中文口径名（全局生效）
+# 覆盖线上高频属性（身份/疾病/证据/审核/治理/用药/检查/规则/评估/路径/字典/溯源）；
+# 未收录的 key 前端仅显示英文，可在 meta 页属性编辑中逐条补中文名（存入 meta_model.json）。
+META_PROP_CN_SEED = {
+    # ---- 身份与基础 ----
+    'code': '编码', 'name': '名称', 'display_name': '显示名', 'preferred_name': '首选名',
+    'primary_label': '主标签', 'canonical_labels': '规范标签集', 'aliases': '别名', 'alias': '别名',
+    'alias_text': '别名文本', 'alias_type': '别名类型', 'alias_norm': '归一化别名',
+    'abbr': '缩写', 'name_en': '英文名', 'original_name': '原始名称', 'standard_name': '标准名称',
+    'standard_code': '标准编码', 'kg_code': '图谱编码', 'legacy_codes': '历史编码',
+    'id': '内部ID', 'description': '描述', 'definition': '定义', 'definition_text': '定义文本',
+    'summary_text': '摘要文本', 'original_text': '原文', 'content': '内容', 'text_excerpt': '文本摘录',
+    'content_hash': '内容哈希', 'entityType': '实体类型', 'entity_type': '实体类型',
+    'entityCategory': '实体分类', 'type_label': '类型标签', 'language': '语言', 'version': '版本',
+    'status': '状态', 'display_order': '显示顺序', 'display_only': '仅展示',
+    'display_title': '显示标题', 'sort_order': '排序',
+    # ---- 疾病与分类 ----
+    'disease_code': '疾病编码', 'disease_name': '疾病名称', 'disease_category': '疾病分类',
+    'disease_level': '疾病层级', 'icd10': 'ICD10编码', 'icd_code': 'ICD编码', 'icd_name': 'ICD名称',
+    'raw_name': '原始名称', 'parent_code': '父级编码', 'parentCode': '父级编码',
+    'parent_name': '父级名称', 'is_diagnosable': '可诊断标志', 'is_emr_writable': '可写入病历',
+    'emr_write_allowed': '允许写入病历', 'directory_category_code': '目录分类编码',
+    'directory_category_name': '目录分类名称', 'directory_subcategory_code': '目录子类编码',
+    'directory_subcategory_name': '目录子类名称', 'classification_tags': '分类标签',
+    'applicable_disease_codes': '适用疾病编码',
+    # ---- 证据与文献 ----
+    'evidence_level': '证据等级', 'evidence_ids': '证据ID列表', 'evidence_id': '证据ID',
+    'evidence_text': '证据文本', 'evidence_summary': '证据摘要', 'evidence_category': '证据类别',
+    'evidence_count': '证据数量', 'evidence_granularity': '证据粒度', 'confidence': '置信度',
+    'pdf_page': 'PDF页码', 'pdf_page_start': 'PDF起始页', 'pdf_page_end': 'PDF结束页',
+    'pdf_page_approx': 'PDF约略页码', 'printed_page': '印刷页码', 'source_page': '来源页码',
+    'source_name': '来源名称', 'source_type': '来源类型', 'source_file': '来源文件',
+    'source_path': '来源路径', 'source_section': '来源章节', 'source_section_path': '来源章节路径',
+    'source_authority': '来源权威级别', 'source_layer': '来源层', 'source_version': '来源版本',
+    'source_schema_version': '来源模式版本', 'source_batch_ids': '来源批次列表',
+    'source_quality': '来源质量', 'source_verbatim': '来源原文', 'locator': '定位符',
+    'publication_date': '出版日期', 'publication_year': '出版年份', 'organization': '发布机构',
+    'issuing_body': '发布机构', 'title': '标题', 'original_title': '原始标题', 'page_count': '页数',
+    'file_path': '文件路径', 'year': '年份', 'document_id': '文档ID', 'document_code': '文档编码',
+    'guideline_id': '指南ID', 'guideline_names': '指南名称', 'guideline_count': '指南数量',
+    # ---- 审核与CDSS发布 ----
+    'clinical_review_status': '临床审核状态', 'clinical_use_status': '临床使用状态',
+    'review_status': '审核状态', 'conflict_status': '冲突状态', 'execution_status': '执行状态',
+    'formal_cdss_ready': '正式CDSS就绪', 'formal_ready_at': '正式就绪时间',
+    'formal_ready_by': '正式就绪操作人', 'formal_ready_scope': '正式就绪范围',
+    'formal_block_reason': '正式发布阻断原因', 'cdss_release_level': 'CDSS发布级别',
+    'cdss_dict_id': 'CDSS字典ID', 'cdss_dict_code': 'CDSS字典编码',
+    'cdss_orderable': 'CDSS可开单', 'cdss_display_ready': 'CDSS展示就绪',
+    'cdss_use_status': 'CDSS使用状态', 'cdss_usage_scope': 'CDSS使用范围',
+    'active_for_cdss': 'CDSS启用', 'hidden_from_cdss': '对CDSS隐藏',
+    'deprecated': '已废弃', 'deprecated_reason': '废弃原因', 'deprecated_at': '废弃时间',
+    'valid_flag': '有效标志', 'inference_status': '推理状态',
+    'implementation_validation_status': '实施验证状态',
+    # ---- 治理与系统 ----
+    'batch_id': '批次号', 'import_batch': '导入批次', 'import_run_id': '导入运行ID',
+    'imported_at': '导入时间', 'created_at': '创建时间', 'created_by': '创建人',
+    'updated_at': '更新时间', 'updated_by': '更新人', 'updated_reason': '更新原因',
+    'last_update_batch_id': '最近更新批次', 'last_update_run_id': '最近更新运行',
+    'knowledge_layer': '知识层', 'scope_target': '范围目标', 'scope_type': '范围类型',
+    'skeleton_scope': '骨架范围', 'skeleton_slot': '骨架槽位', 'skeleton_slot_status': '骨架槽位状态',
+    'merge_status': '合并状态', 'merged_from_codes': '合并来源编码',
+    'merged_from_batches': '合并来源批次', 'master_data_merge_status': '主数据合并状态',
+    'master_data_merge_batch': '主数据合并批次', 'master_data_merged_at': '主数据合并时间',
+    'schema_version': '模式版本', 'schema_v41_migrated_at': 'V4.1迁移时间',
+    'previous_schema_version_before_v41': 'V4.1迁移前版本', 'schema_normalized_batch': '模式归一批次',
+    'schema_normalized_time': '模式归一时间', 'term_normalized_at': '术语归一时间',
+    'term_normalized_by': '术语归一人', 'standardization_status': '标准化状态',
+    'standardization_run_id': '标准化运行ID', 'standardization_updated_at': '标准化更新时间',
+    'dictionary_status': '字典状态', 'dictionary_code': '字典编码', 'dictionary_eligible': '字典候选',
+    'dictionary_validation_status': '字典验证状态', 'dictionary_match_confidence': '字典匹配置信度',
+    'dictionary_match_type': '字典匹配方式', 'dictionary_source_table': '字典源表',
+    'dictionary_block_reason': '字典阻断原因',
+    # ---- 用药与治疗 ----
+    'drug_class': '药物分类', 'dosage': '剂量', 'dose_text': '剂量文本', 'route': '给药途径',
+    'contraindication': '禁忌', 'contraindications': '禁忌症', 'caution_text': '注意事项',
+    'drug_interactions': '药物相互作用', 'exclusion_conditions': '排除条件',
+    'exclusion_criteria': '排除标准', 'indication_text': '适应证文本', 'plan_type': '方案类型',
+    'composition': '组成', 'intervention_type': '干预类型', 'intervention_text': '干预内容',
+    'assessment_type': '评估类型', 'assessment_method': '评估方法', 'assessment_scope': '评估范围',
+    'diagnosis_domain': '诊断领域', 'care_context': '护理场景', 'outcome_definition': '结局定义',
+    'follow_up_frequency': '随访频率', 'prognosis_text': '预后文本',
+    'contraindication_text': '禁忌文本',
+    # ---- 检查与检验 ----
+    'exam_type': '检查类型', 'exam_category': '检查类别', 'lab_type': '检验类型',
+    'observation_kind': '观察类型', 'value_type': '值类型', 'value_unit': '值单位',
+    'value_min': '最小值', 'value_max': '最大值', 'value_source': '值来源',
+    'value_direction': '值方向', 'unit': '单位', 'unit_hint': '单位提示', 'value': '值',
+    'operator': '操作符', 'threshold_value': '阈值', 'time_window': '时间窗',
+    'time_context': '时间语境', 'indicator_code': '指标编码', 'indicator_category': '指标类别',
+    'indicator_domain': '指标域', 'indicator_value': '指标值', 'reference_range_note': '参考范围说明',
+    # ---- 规则与推荐 ----
+    'rule_type': '规则类型', 'rule_text': '规则文本', 'rule_logic': '规则逻辑',
+    'rule_expression_cn': '规则表达式(中文)', 'expression': '表达式', 'condition': '条件',
+    'trigger_condition': '触发条件', 'trigger_event': '触发事件',
+    'calculation_expression': '计算表达式', 'score_options': '评分选项',
+    'result_action': '结果动作', 'action_code': '动作编码', 'action_type': '动作类型',
+    'action_mode': '动作模式', 'action_status': '动作状态', 'action_codes': '动作编码列表',
+    'recommendation_text': '推荐文本', 'final_recommendation': '最终推荐意见',
+    'clinical_question': '临床问题', 'clinical_scenario': '临床场景', 'clinical_stage': '临床分期',
+    'recommendation_class': '推荐分类', 'recommendation_type': '推荐类型',
+    'required_patient_facts': '所需患者事实', 'required_patient_data': '所需患者数据',
+    'severity': '严重程度', 'handling_strategy': '处理策略', 'rule_scope': '规则范围',
+    # ---- 评估量表 ----
+    'scale_code': '量表编码', 'scale_name': '量表名称', 'item_code': '条目编码',
+    'item_name': '条目名称', 'level_code': '级别编码', 'level_name': '级别名称',
+    'result_interpretation': '结果解读', 'risk_color': '风险颜色', 'scoring_status': '评分状态',
+    'required_flag': '必填标志', 'missing_policy': '缺失策略', 'input_specs': '输入规格',
+    'output_spec': '输出规格', 'input_item_code': '输入条目编码', 'algorithm_id': '算法ID',
+    'algorithm_version': '算法版本', 'applicable_population': '适用人群',
+    'applicable_stage': '适用阶段', 'abnormal_condition_text': '异常条件文本',
+    'observation_method': '观察方法', 'recording_time_policy': '记录时机策略',
+    # ---- 临床路径 ----
+    'pathway_code': '路径编码', 'pathway_name': '路径名称', 'pathway_type': '路径类型',
+    'pathway_goal': '路径目标', 'stage_code': '阶段编码', 'stage_name': '阶段名称',
+    'stage_order': '阶段顺序', 'stage_goal': '阶段目标', 'stage_type': '阶段类型',
+    'stage_key': '阶段键', 'exit_condition': '退出条件', 'criteria_scope': '标准范围',
+    'reason_category': '原因类别', 'execution_boundary': '执行边界',
+    # ---- 标准字典 ----
+    'coding_system': '编码体系', 'coding_system_version': '编码体系版本',
+    'class_code': '分类编码', 'sex_limit_code': '性别限制编码',
+    'pregnancy_limit_code': '妊娠限制编码', 'age_unit': '年龄单位',
+    'last_sync_time': '最近同步时间',
+    # ---- 术语与溯源 ----
+    'normalized_target_code': '归一目标编码', 'normalized_target_name': '归一目标名称',
+    'normalized_target_type': '归一目标类型', 'local_term_row': '本地术语行',
+    'local_term_source_code': '本地术语来源编码', 'terminology_mapping_status': '术语映射状态',
+    'chapter_title': '章节标题', 'chapter_level': '章节层级', 'chapter_parent': '父章节',
+    'section_usage': '章节用途', 'anchor_note': '锚点说明', 'docx_start_para': '起始段落',
+    'docx_end_para': '结束段落', 'docx_para_start': '起始段落', 'docx_para_end': '结束段落',
+    'line_start': '起始行', 'line_end': '结束行', 'segment_id': '片段ID',
+    'component_text': '组件文本', 'component_type': '组件类型', 'component_kind': '组件种类',
+    'component_role': '组件角色', 'definition_source': '定义来源', 'criteria_code': '标准编码',
+    'parent_criteria_code': '父标准编码', 'polarity': '极性', 'structured_logic': '结构化逻辑',
+    'quality_gate': '质量闸门',
+}
+
+
+def _prop_cn(key):
+    """取属性中文名：种子优先；key 本身含中文（脏属性）则原样返回；否则空串"""
+    if key in META_PROP_CN_SEED:
+        return META_PROP_CN_SEED[key]
+    if re.search(r'[\u4e00-\u9fff]', key or ''):
+        return key
+    return ''
+
+
+def _normalize_props(props, existing=None):
+    """key_properties 归一为对象数组 [{key, name_cn}]。
+    兼容输入：['code','name'] 字符串数组 / [{'key':'code','name_cn':'编码'}] 对象数组。
+    existing: {key: name_cn} 旧配置中已维护的中文名（优先于种子）。"""
+    existing = existing or {}
+    out, seen = [], set()
+    if not isinstance(props, list):
+        return out
+    for p in props:
+        if isinstance(p, dict):
+            key = str(p.get('key', '')).strip()
+            cn = str(p.get('name_cn', '') or '').strip()
+        else:
+            key, cn = str(p).strip(), ''
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append({'key': key, 'name_cn': cn or existing.get(key, '') or _prop_cn(key)})
+    return out
+
+
+def _meta_load():
+    """读取元模型配置；文件不存在时构建种子并落盘。
+    v1.5.11c：旧文件缺 hierarchy 字段时自动补层级种子（不覆盖已有配置）。
+    v1.5.11d：key_properties 旧字符串数组形态自动迁移为 [{key,name_cn}] 对象形态（种子补中文名）。"""
+    if os.path.exists(META_MODEL_FILE):
+        try:
+            with open(META_MODEL_FILE, 'r', encoding='utf-8') as f:
+                model = json.load(f)
+            changed = False
+            if not model.get('hierarchy'):
+                model['hierarchy'] = json.loads(json.dumps(META_HIERARCHY_SEED, ensure_ascii=False))
+                changed = True
+            for e in model.get('entity_types', []):
+                props = e.get('key_properties') or []
+                if any(not isinstance(p, dict) for p in props):
+                    old_cn = {p['key']: p.get('name_cn', '') for p in props if isinstance(p, dict)}
+                    e['key_properties'] = _normalize_props(props, old_cn)
+                    changed = True
+            if changed:
+                _meta_save(model)
+            return model
+        except Exception:
+            pass
+    model = build_meta_model_seed()
+    _meta_save(model)
+    return model
+
+
+def _meta_save(model):
+    with open(META_MODEL_FILE, 'w', encoding='utf-8') as f:
+        json.dump(model, f, ensure_ascii=False, indent=2)
+
+
+def build_meta_model_seed():
+    """以代码注册表 + Neo4j 实测构建元模型种子（首次自动生成，不覆盖用户配置）"""
+    d = get_driver()
+    et_counts, rel_obs = {}, {}
+    with d.session() as sess:
+        for r in sess.run("MATCH (n:KGNode) WHERE n.entityType IS NOT NULL "
+                          "RETURN n.entityType AS et, count(*) AS cnt"):
+            et_counts[r['et']] = r['cnt']
+        for r in sess.run("MATCH (a:KGNode)-[r]->(b:KGNode) "
+                          "RETURN type(r) AS rt, count(*) AS cnt, "
+                          "collect(DISTINCT a.entityType) AS st, collect(DISTINCT b.entityType) AS et2"):
+            rel_obs[r['rt']] = {'count': r['cnt'],
+                                'start_types': sorted([x for x in (r['st'] or []) if x]),
+                                'end_types': sorted([x for x in (r['et2'] or []) if x])}
+
+    entities = []
+    for et in sorted(set(list(ENTITY_NAME_MAP.keys()) + list(et_counts.keys()))):
+        entities.append({
+            'type': et,
+            'name_cn': ENTITY_NAME_MAP.get(et, ''),
+            'category': '护理' if et.startswith('Nursing') else
+                        ('评估' if et.startswith('Assessment') else '临床'),
+            'key_properties': _normalize_props(META_ENTITY_PROP_SEEDS.get(et, ['code', 'name'])),
+            'instance_count': et_counts.get(et, 0),
+            'source': 'schema' if et in ENTITY_NAME_MAP else 'db_observed',
+        })
+    relations = []
+    for rt in sorted(set(list(REL_NAME_MAP.keys()) + list(rel_obs.keys()))):
+        obs = rel_obs.get(rt, {'count': 0, 'start_types': [], 'end_types': []})
+        seed = META_REL_SEED_ENDPOINTS.get(rt, [])
+        relations.append({
+            'type': rt,
+            'name_cn': REL_NAME_MAP.get(rt, ''),
+            'start_types': seed[0:1] if seed else [],
+            'end_types': seed[1:2] if seed else [],
+            'observed_start': obs['start_types'],
+            'observed_end': obs['end_types'],
+            'instance_count': obs['count'],
+            'source': 'schema' if rt in REL_NAME_MAP else 'db_observed',
+        })
+    return {
+        'version': SCHEMA_STANDARD_VERSION,
+        'generated_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'entity_types': entities,
+        'relation_types': relations,
+        'hierarchy': json.loads(json.dumps(META_HIERARCHY_SEED, ensure_ascii=False)),
+        'note': '元模型配置首次自动生成：实体类型/关系类型=代码V4.1注册表∪Neo4j实测；'
+                'key_properties=核心字段口径种子；端点建议=Schema定义，observed=线上实测；'
+                'hierarchy=层级结构（域→分组→实体类型），可在层级视图维护',
+    }
+
+
+def query_meta_model(include_inactive=True):
+    """GET /api/kg/meta-model：返回配置 + 线上实例数实时对照
+    v1.5.11d：key_properties 归一为 [{key,name_cn}] 对象形态输出（读时兜底，不改盘）；
+    include_inactive=0 时过滤已停用（active=false）的实体/关系类型。"""
+    model = _meta_load()
+    d = get_driver()
+    with d.session() as sess:
+        et_rows = {r['et']: r['cnt'] for r in sess.run(
+            "MATCH (n:KGNode) WHERE n.entityType IS NOT NULL "
+            "RETURN n.entityType AS et, count(*) AS cnt")}
+        rel_rows = {}
+        for r in sess.run("MATCH ()-[r]->() RETURN type(r) AS rt, count(*) AS cnt"):
+            rel_rows[r['rt']] = r['cnt']
+    entities = []
+    for e in model.get('entity_types', []):
+        if not include_inactive and e.get('active') is False:
+            continue
+        e['live_count'] = et_rows.get(e['type'], 0)
+        e['drift'] = 'match' if et_rows.get(e['type'], 0) == e.get('instance_count', 0) else 'drift'
+        if any(not isinstance(p, dict) for p in (e.get('key_properties') or [])):
+            old_cn = {p['key']: p.get('name_cn', '') for p in e['key_properties'] if isinstance(p, dict)}
+            e['key_properties'] = _normalize_props(e['key_properties'], old_cn)
+        entities.append(e)
+    relations = []
+    for r in model.get('relation_types', []):
+        if not include_inactive and r.get('active') is False:
+            continue
+        r['live_count'] = rel_rows.get(r['type'], 0)
+        r['drift'] = 'match' if rel_rows.get(r['type'], 0) == r.get('instance_count', 0) else 'drift'
+        relations.append(r)
+    out = dict(model)
+    out['entity_types'] = entities
+    out['relation_types'] = relations
+    return out
+
+
+def update_meta_model(body, operator):
+    """POST /api/kg/meta-model：整包或单类型更新，落审计日志"""
+    model = _meta_load()
+    action = body.get('action', '')
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if action == 'update_entity':
+        item = body.get('entity', {})
+        et = item.get('type', '')
+        if not et or not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', et):
+            return {'error': '合法 entityType 必填（字母开头，仅字母数字下划线）'}
+        old = next((x for x in model['entity_types'] if x['type'] == et), None)
+        if old:
+            updates = {k: item[k] for k in ('name_cn', 'category') if k in item}
+            if 'key_properties' in item:
+                # v1.5.11d 兼容字符串数组 / 对象数组两形态，统一归一为 [{key,name_cn}]
+                old_cn = {p['key']: p.get('name_cn', '') for p in item['key_properties']
+                          if isinstance(p, dict)}
+                updates['key_properties'] = _normalize_props(item['key_properties'], old_cn)
+            old.update(updates)
+        else:
+            model['entity_types'].append({
+                'type': et, 'name_cn': item.get('name_cn', ''),
+                'category': item.get('category', '临床'),
+                'key_properties': _normalize_props(item.get('key_properties', ['code', 'name'])),
+                'instance_count': 0, 'source': 'manual',
             })
-        return {"guidelines": guidelines, "total": len(guidelines)}
+        model['entity_types'].sort(key=lambda x: x['type'])
+    elif action == 'update_relation':
+        item = body.get('relation', {})
+        rt = item.get('type', '')
+        if not rt or not re.match(r'^[a-z][a-z0-9_]*$', rt):
+            return {'error': '合法关系类型必填（小写字母开头 snake_case）'}
+        old = next((x for x in model['relation_types'] if x['type'] == rt), None)
+        if old:
+            old.update({k: item[k] for k in ('name_cn', 'start_types', 'end_types') if k in item})
+        else:
+            model['relation_types'].append({
+                'type': rt, 'name_cn': item.get('name_cn', ''),
+                'start_types': item.get('start_types', []),
+                'end_types': item.get('end_types', []),
+                'observed_start': [], 'observed_end': [],
+                'instance_count': 0, 'source': 'manual',
+            })
+        model['relation_types'].sort(key=lambda x: x['type'])
+    elif action in ('delete_entity', 'restore_entity', 'delete_relation', 'restore_relation'):
+        # v1.5.11d 逻辑删除/恢复：不再物理移除，置 active=false/true + 留停用人/时间，可逆、全程审计
+        is_entity = action.endswith('_entity')
+        kind_key = 'entity_types' if is_entity else 'relation_types'
+        t = body.get('type', '')
+        item = next((x for x in model[kind_key] if x['type'] == t), None)
+        if not item:
+            return {'error': ('实体' if is_entity else '关系') + '类型不存在: %s' % t}
+        deactivating = action.startswith('delete_')
+        if deactivating and item.get('active') is False:
+            return {'error': '该类型已处于停用状态: %s' % t}
+        if not deactivating and item.get('active') is not False:
+            return {'error': '该类型未停用，无需恢复: %s' % t}
+        if deactivating:
+            item['active'] = False
+            item['inactive_at'] = now
+            item['inactive_by'] = operator
+        else:
+            item['active'] = True
+            item.pop('inactive_at', None)
+            item.pop('inactive_by', None)
+    elif action == 'move_entity_domain':
+        # v1.5.11c 方案B：调整实体类型的层级归属（从原域/分组移除，加入目标域/分组）
+        et = body.get('type', '')
+        dom_key = body.get('domain_key', '')
+        sub_name = body.get('sub_name', '')
+        if not et:
+            return {'error': 'type 必填'}
+        hier = model.setdefault('hierarchy',
+                                json.loads(json.dumps(META_HIERARCHY_SEED, ensure_ascii=False)))
+        # 校验实体类型存在
+        if not next((x for x in model['entity_types'] if x['type'] == et), None):
+            return {'error': '实体类型不存在: %s（请先在实体页新增）' % et}
+        # 从所有分组移除（保证一个类型只归属一处）
+        for dom in hier:
+            for s in dom.get('subs', []):
+                if et in s.get('types', []):
+                    s['types'].remove(et)
+        # 目标分组：按 domain_key + sub_name 定位；sub_name 为空则加入该域第一个分组
+        target = next((d for d in hier if d.get('key') == dom_key), None)
+        if not target:
+            return {'error': '目标域不存在: %s' % dom_key}
+        grp = next((s for s in target.get('subs', []) if s.get('name') == sub_name), None)
+        if not grp:
+            return {'error': '目标分组不存在: %s / %s' % (dom_key, sub_name)}
+        grp['types'].append(et)
+    elif action == 'update_hierarchy':
+        # v1.5.11c 方案B：整包更新层级结构（域/分组元信息），types 归属建议用 move_entity_domain
+        new_hier = body.get('hierarchy')
+        if not isinstance(new_hier, list) or not new_hier:
+            return {'error': 'hierarchy 必须为非空数组'}
+        # 校验：key 唯一、每个 sub 的 types 中的类型存在于 entity_types
+        keys = [d.get('key') for d in new_hier]
+        if len(keys) != len(set(keys)):
+            return {'error': '域 key 重复'}
+        known = {e['type'] for e in model['entity_types']}
+        for d in new_hier:
+            if not d.get('key') or not d.get('name'):
+                return {'error': '每个域需包含 key 与 name'}
+            for s in d.get('subs', []):
+                for t in s.get('types', []):
+                    if t not in known:
+                        return {'error': '分组含未知实体类型: %s' % t}
+        model['hierarchy'] = new_hier
+    elif action == 'refresh_counts':
+        # 用线上实测刷新快照 instance_count（消除 drift）
+        fresh = build_meta_model_seed()
+        live_et = {e['type']: e['instance_count'] for e in fresh['entity_types']}
+        live_rt = {r['type']: r['instance_count'] for r in fresh['relation_types']}
+        for e in model['entity_types']:
+            e['instance_count'] = live_et.get(e['type'], 0)
+        for r in model['relation_types']:
+            r['instance_count'] = live_rt.get(r['type'], 0)
+            f = next((x for x in fresh['relation_types'] if x['type'] == r['type']), None)
+            if f:
+                r['observed_start'], r['observed_end'] = f['observed_start'], f['observed_end']
+    else:
+        return {'error': 'action 必须为 update_entity/update_relation/delete_entity/delete_relation/'
+                         'restore_entity/restore_relation/move_entity_domain/update_hierarchy/refresh_counts'}
+
+    model['generated_at'] = now + ' (updated)'
+    _meta_save(model)
+    write_audit_log('meta_model_' + action, body.get('type', '') or
+                    (body.get('entity', {}) or {}).get('type', '') or
+                    (body.get('relation', {}) or {}).get('type', ''),
+                    operator, {'action': action}, body)
+    return {'status': 'ok', 'action': action, 'model': model}
+
+
+def query_meta_property_sample(entity_type, limit=5):
+    """GET /api/kg/meta-model/sample?entityType=X：抽样该类型真实节点属性，
+    校验元模型 key_properties 与线上属性的一致性"""
+    d = get_driver()
+    with d.session() as sess:
+        rows = list(sess.run(
+            "MATCH (n:KGNode {entityType:$et}) RETURN properties(n) AS props LIMIT $l",
+            et=entity_type, l=limit))
+    samples, all_keys = [], {}
+    for r in rows:
+        props = r['props'] or {}
+        # 内部字段不展示
+        for k, v in props.items():
+            s = str(v)[:60] if v is not None else ''
+            all_keys[k] = all_keys.get(k, 0) + 1
+        samples.append({k: (str(v)[:80] if v is not None else '') for k, v in
+                        list(props.items())[:12]})
+    return {'entity_type': entity_type, 'sampled': len(samples),
+            'observed_keys': sorted(all_keys.keys()),
+            'observed_keys_cn': {k: _prop_cn(k) for k in all_keys.keys()},
+            'samples': samples}
+
+
+# ---------------- 挂靠映射（v1.5.5 批次三决策工具） ----------------
+# 11 个无直接指南关联的疾病 + 每病的候选文献（来自数据侧建设计划，Codex 映射前的人工确认视图）
+ANCHOR_MAP_PLAN = [
+    {"disease_code": "DIS-CARD-PERICARD-ACUTE", "disease_name": "急性心包炎",
+     "candidates": ["心包炎", "ericard"]},
+    {"disease_code": "DIS-CARD-PERICARD-CONSTRICTIVE", "disease_name": "缩窄性心包炎",
+     "candidates": ["心包炎", "ericard"]},
+    {"disease_code": "DIS-CARD-PERICARD-EFFUSION", "disease_name": "心包积液及心脏压塞",
+     "candidates": ["心包炎", "ericard"]},
+    {"disease_code": "DIS-CARD-ARR-PSVT", "disease_name": "阵发性室上性心动过速",
+     "candidates": ["室上性心动过速", "SVT"]},
+    {"disease_code": "DIS-CARD-CAD-CHD", "disease_name": "冠状动脉粥样硬化性心脏病",
+     "candidates": ["冠心病", "稳定性冠心病", "双联抗血小板", " myocardial revascularization"]},
+    {"disease_code": "DIS-CARD-PAD-LEAD", "disease_name": "下肢动脉硬化闭塞症",
+     "candidates": ["PAD", "周围动脉", "下肢动脉", "动脉硬化闭塞"]},
+    {"disease_code": "DIS-CARD-AORTA-ANEURYSM", "disease_name": "主动脉瘤",
+     "candidates": ["主动脉", "Aortic", "EACTS"]},
+    {"disease_code": "DIS-CARD-HT-EMERGENCY", "disease_name": "高血压急症",
+     "candidates": ["高血压", "HT ", "hypertensive"]},
+    {"disease_code": "DIS-CARD-HTN-PHEO", "disease_name": "嗜铬细胞瘤和副神经节瘤",
+     "candidates": ["内分泌性高血压", "嗜铬", "pheochromocytoma", "PPGL"]},
+    {"disease_code": "DIS-CARD-IE-PVE", "disease_name": "人工瓣膜心内膜炎",
+     "candidates": ["心内膜炎", "Endocarditis", "感染性心内膜炎"]},
+    {"disease_code": "DIS-CARD-CAD-ATHEROSCLEROSIS", "disease_name": "动脉粥样硬化",
+     "candidates": ["血脂", "Dyslipidaemias", "动脉粥样"]},
+]
+
+
+def query_anchor_mapping():
+    """挂靠映射确认视图数据源：
+    对 ANCHOR_MAP_PLAN 中每个待挂靠疾病，从库内 Guideline 节点按候选关键词检索，
+    返回候选文献列表（含已关联疾病数），供用户确认后写入 based_on_guideline 关系。
+    注：写关系复用既有 /api/kg/relation/add（from=疾病 code，to=文献 code，rel=based_on_guideline），
+    每次写入均落审计日志——AI 不代确认，确认权在用户。"""
+    d = get_driver()
+    with d.session() as sess:
+        # 库内全部指南（Guideline 旧标签 + KGNode entityType=Guideline 双形态都收）
+        rows = list(sess.run("""
+            MATCH (g)
+            WHERE (g:Guideline OR (g:KGNode AND g.entityType = 'Guideline'))
+            RETURN g.code AS code, g.name AS name, g.year AS year,
+                   g.organization AS org, g.version AS version
+        """))
+        pool = []
+        seen = set()
+        for r in rows:
+            code = r['code'] or ''
+            if not code or code in seen:
+                continue
+            seen.add(code)
+            pool.append({
+                'code': code,
+                'name': r['name'] or '',
+                'year': r['year'] or '',
+                'org': r['org'] or '',
+                'version': r['version'] or '',
+            })
+        # 每份文献已关联的疾病数（用于前端展示"已被 N 个疾病使用"）
+        usage_rows = list(sess.run("""
+            MATCH (g)-[:based_on_guideline]-(dis)
+            WHERE (g:Guideline OR (g:KGNode AND g.entityType = 'Guideline'))
+              AND (dis:Disease OR (dis:KGNode AND dis.entityType = 'Disease'))
+            RETURN g.code AS code, count(DISTINCT dis) AS n
+        """))
+        usage = {r['code']: r['n'] for r in usage_rows}
+        # 已存在的挂靠关系（页面刷新后回显用户之前的确认结果）
+        linked_rows = list(sess.run("""
+            MATCH (dis)-[r:based_on_guideline]->(g)
+            WHERE (g:Guideline OR (g:KGNode AND g.entityType = 'Guideline'))
+            RETURN dis.code AS dc, g.code AS gc
+        """))
+        linked = set()
+        for r in linked_rows:
+            linked.add((r['dc'] or '', r['gc'] or ''))
+
+        result = []
+        for item in ANCHOR_MAP_PLAN:
+            kws = item['candidates']
+            hits = []
+            name_l = {g['code']: (g['name'] or '').lower() for g in pool}
+            for g in pool:
+                text = name_l.get(g['code'], '')
+                if not text:
+                    continue
+                if any(kw.lower() in text for kw in kws):
+                    hits.append({
+                        'code': g['code'],
+                        'name': g['name'],
+                        'year': g['year'],
+                        'org': g['org'],
+                        'used_by': usage.get(g['code'], 0),
+                        'linked': (item['disease_code'], g['code']) in linked,
+                    })
+            hits.sort(key=lambda x: (-x['linked'], x['used_by'], x['name']))
+            result.append({
+                'disease_code': item['disease_code'],
+                'disease_name': item['disease_name'],
+                'candidates': hits,
+                'linked_count': sum(1 for h in hits if h['linked']),
+            })
+        return {'items': result, 'pool_total': len(pool)}
 
 
 def _extract_risk_threshold_sentences(text, limit=8):
@@ -3695,6 +4507,114 @@ ENTITY_NAME_MAP = {
 }
 
 
+def query_publish_queue():
+    """待发布队列：按疾病汇总 审核通过(clinical_ready)且未发布(formal_cdss_ready<>true) 的推荐。
+    与 query_cdss_coverage 四层漏斗口径一致；逐条预检硬闸门，闸门不过的进 blocked 清单。"""
+    d = get_driver()
+    with d.session() as sess:
+        rows = list(sess.run("""
+            MATCH (rs:KGNode {entityType:'RecommendationStatement'})
+            WHERE rs.clinical_review_status = 'clinical_ready'
+              AND coalesce(rs.formal_cdss_ready, false) <> true
+              AND (rs)-[:recommends_action]->()
+              AND ( (rs)-[:supported_by_evidence]->() OR (rs)-[:derived_from]->() )
+              AND ( (rs)-[:based_on_guideline]->() OR (rs)-[:uses_primary_guideline]->() )
+            RETURN rs.disease_code AS dc, count(rs) AS cnt
+            ORDER BY dc
+        """))
+        lookup = _disease_lookup_from_tree()
+        queue = []
+        for r in rows:
+            code = r['dc'] or ''
+            meta = lookup.get(code, {})
+            queue.append({
+                'disease_code': code,
+                'disease_name': meta.get('name', code),
+                'category': meta.get('category', ''),
+                'publishable': r['cnt'],
+            })
+        blocked_rows = list(sess.run("""
+            MATCH (rs:KGNode {entityType:'RecommendationStatement'})
+            WHERE rs.clinical_review_status = 'clinical_ready'
+              AND coalesce(rs.formal_cdss_ready, false) <> true
+              AND ( NOT (rs)-[:recommends_action]->()
+                 OR ( NOT (rs)-[:supported_by_evidence]->() AND NOT (rs)-[:derived_from]->() )
+                 OR ( NOT (rs)-[:based_on_guideline]->() AND NOT (rs)-[:uses_primary_guideline]->() ) )
+            RETURN rs.disease_code AS dc, count(rs) AS cnt, collect(rs.name)[0..5] AS names
+            ORDER BY dc
+        """))
+        blocked_list = []
+        for r in blocked_rows:
+            code = r['dc'] or ''
+            meta = lookup.get(code, {})
+            blocked_list.append({
+                'disease_code': code,
+                'disease_name': meta.get('name', code),
+                'blocked_count': r['cnt'],
+                'examples': [str(n or '') for n in (r['names'] or [])],
+            })
+        return {'queue': queue, 'blocked': blocked_list}
+
+
+def publish_rs_batch(disease_codes, operator='admin'):
+    """批量正式发布（人工通道）：对指定疾病执行 formal_cdss_ready=true。
+    铁律落地：formal_cdss_ready 只能人工置真——本函数由医生在发布控制台勾选确认后调用。
+    硬闸门逐条校验（动作/证据/指南），缺一即跳过并给原因；每病写审计日志；发布后清缓存。"""
+    if not disease_codes:
+        return {'error': 'disease_codes required'}
+    operator = (operator or '').strip() or 'admin'
+    d = get_driver()
+    results = []
+    with d.session() as sess:
+        for code in disease_codes:
+            rows = list(sess.run("""
+                MATCH (rs:KGNode {entityType:'RecommendationStatement'})
+                WHERE rs.disease_code = $dc
+                  AND rs.clinical_review_status = 'clinical_ready'
+                  AND coalesce(rs.formal_cdss_ready, false) <> true
+                OPTIONAL MATCH (rs)-[:recommends_action]->(a:KGNode)
+                OPTIONAL MATCH (rs)-[:supported_by_evidence|derived_from]->(e:KGNode)
+                OPTIONAL MATCH (rs)-[:based_on_guideline|uses_primary_guideline]->(g:KGNode)
+                RETURN rs.code AS rs_code, count(DISTINCT a) AS na,
+                       count(DISTINCT e) AS ne, count(DISTINCT g) AS ng
+            """, dc=code))
+            published, skipped = [], []
+            for r in rows:
+                if r['na'] > 0 and r['ne'] > 0 and r['ng'] > 0:
+                    sess.run("""
+                        MATCH (rs:KGNode {code: $c})
+                        SET rs.formal_cdss_ready = true
+                    """, c=r['rs_code'])
+                    published.append(r['rs_code'])
+                else:
+                    reasons = []
+                    if r['na'] == 0:
+                        reasons.append('无动作')
+                    if r['ne'] == 0:
+                        reasons.append('无证据')
+                    if r['ng'] == 0:
+                        reasons.append('无指南')
+                    skipped.append({'code': r['rs_code'], 'reasons': reasons})
+            if published:
+                write_audit_log('publish', code, operator,
+                                {'formal_cdss_ready': False},
+                                {'formal_cdss_ready': True, 'rs_codes': published})
+            results.append({
+                'disease_code': code,
+                'published': len(published),
+                'skipped': len(skipped),
+                'skip_detail': skipped[:10],
+            })
+    r = get_redis()
+    if r:
+        r.flushall()
+    return {'status': 'ok', 'operator': operator,
+            'diseases': len(results),
+            'published_total': sum(x['published'] for x in results),
+            'skipped_total': sum(x['skipped'] for x in results),
+            'results': results}
+
+
 def write_audit_log(action, entity_code, operator, old_values, new_values):
     """写入审计日志（JSONL格式，每行一条）"""
     log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audit_log.jsonl')
@@ -3711,6 +4631,109 @@ def write_audit_log(action, entity_code, operator, old_values, new_values):
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
     except Exception as e:
         print(f"Audit log write failed: {e}")
+
+
+# ============ v1.5.11b 数据同步变更留痕 ============
+# 背景：原"数据同步"页的变化记录只写浏览器 localStorage（换电脑即丢），且只在
+# 手动点击同步按钮时产生。现改为服务端自动留痕：stats 每次重算（缓存过期 /
+# 手动同步 / 部署重启后首次访问）都与上次落盘快照对比，节点/关系/证据/实体/
+# 属性种类任一变化即追加 sync_log.jsonl。快照存文件（sync_snapshot.json），
+# Redis FLUSHALL 不会丢失对比基线。
+_SYNC_LOG_KEYS = {
+    'disease_category_count': '疾病大类',
+    'disease_count': '疾病种类',
+    'total_nodes': '总节点数',
+    'visual_entity_count': '临床实体',
+    'evidence_count': '证据节点',
+    'total_relationships': '总关系数',
+    'property_key_count': '属性种类',
+    'rel_type_count': '关系类型',
+}
+
+
+def _sync_files():
+    base = os.path.dirname(os.path.abspath(__file__))
+    return (os.path.join(base, 'sync_log.jsonl'),
+            os.path.join(base, 'sync_snapshot.json'))
+
+
+def record_stats_change(after, trigger='auto', operator=''):
+    """对比 stats 与上次落盘快照，任一关键计数变化则追加 sync_log.jsonl。
+    返回本次 diff（无变化返回 None）。幂等：与快照相同则不写日志。
+    同时把结果记到全局 _LAST_SYNC_RECORD，供 flush-cache 响应直接引用。"""
+    global _LAST_SYNC_RECORD
+    log_file, snap_file = _sync_files()
+    before = None
+    try:
+        with open(snap_file, 'r', encoding='utf-8') as f:
+            before = json.load(f)
+    except Exception:
+        before = None
+    diff = {}
+    has_change = False
+    for k, label in _SYNC_LOG_KEYS.items():
+        b = before.get(k) if before else None
+        a = after.get(k)
+        # 首次建档不算"变化"，只落基线
+        if before is not None and b is not None and a is not None and b != a:
+            diff[k] = {'label': label, 'before': b, 'after': a, 'diff': a - b}
+            has_change = True
+    if has_change:
+        entry = {
+            'timestamp': datetime.datetime.now().isoformat(timespec='seconds'),
+            'trigger': trigger,           # manual=手动点同步按钮 / auto=缓存过期重算 / deploy=部署后首次访问
+            'operator': operator or '',
+            'diff': diff,
+            'stats': {k: after.get(k) for k in _SYNC_LOG_KEYS},
+        }
+        try:
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        except Exception as e:
+            print(f"Sync log write failed: {e}")
+    else:
+        entry = None
+    # 无论是否变化都刷新基线快照
+    try:
+        with open(snap_file, 'w', encoding='utf-8') as f:
+            json.dump({k: after.get(k) for k in _SYNC_LOG_KEYS}, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"Sync snapshot write failed: {e}")
+    _LAST_SYNC_RECORD = {'trigger': trigger, 'entry': entry}
+    return diff if has_change else None
+
+
+# 最近一次留痕结果（process 内），flush-cache 用来向前端回传 diff
+_LAST_SYNC_RECORD = None
+
+
+def read_sync_log(limit=50):
+    """读取最近的同步变更日志（倒序，最新在前）。日志文件过大时仅读尾部。"""
+    log_file, _ = _sync_files()
+    lines = []
+    try:
+        with open(log_file, 'rb') as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            f.seek(max(0, size - 512 * 1024))  # 最多回读 512KB
+            data = f.read().decode('utf-8', 'ignore')
+            lines = data.splitlines()
+            if size > 512 * 1024 and lines:
+                lines = lines[1:]  # 丢弃可能被截断的首行
+    except Exception:
+        return []
+    out = []
+    for ln in reversed(lines):
+        ln = ln.strip()
+        if not ln:
+            continue
+        try:
+            out.append(json.loads(ln))
+        except Exception:
+            continue
+        if len(out) >= limit:
+            break
+    return out
 
 
 def query_entities_search(q='', entity_type='', limit=50, offset=0, category=''):
@@ -4164,9 +5187,22 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 r = get_redis()
                 if r:
                     r.flushall()
-                    self._json_response({"status": "ok", "message": "Redis cache cleared"})
-                else:
-                    self._json_response({"status": "ok", "message": "No Redis, using memory cache"})
+                # v1.5.11b：手动同步也走服务端留痕（trigger=manual）
+                # stats 缓存刚被清掉，此处重算，query_global_stats 内部完成对比落日志
+                diff = None
+                try:
+                    query_global_stats(sync_trigger='manual')
+                    rec = _LAST_SYNC_RECORD or {}
+                    if rec.get('trigger') == 'manual' and rec.get('entry'):
+                        diff = rec['entry'].get('diff')
+                except Exception as e:
+                    print(f"flush-cache record_stats_change failed: {e}")
+                msg = "Redis cache cleared"
+                if diff:
+                    msg += "；检测到数据变化，已记录同步日志"
+                elif diff is not None:
+                    msg += "，数据无变化"
+                self._json_response({"status": "ok", "message": msg, "diff": diff})
             except Exception as e:
                 self._json_response({"error": str(e)}, 500)
             return
@@ -4193,6 +5229,45 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             result = self._run_diagnose(body, step)
             cache_set(cache_key, result)
             self._json_response(result)
+            return
+
+        # ---- POST /api/kg/meta-model ----
+        # v1.5.7 元模型配置写入：update_entity/update_relation/delete_*/refresh_counts，落审计日志
+        if path == '/api/kg/meta-model':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(length)) if length else {}
+            except Exception:
+                self._json_response({"error": "Invalid JSON body"}, 400)
+                return
+            operator = body.get('operator', 'admin')
+            try:
+                self._json_response(update_meta_model(body, operator))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
+        # ---- POST /api/kg/rs-publish ----
+        # 人工发布通道：勾选疾病列表 + 操作人必填，逐病逐条硬闸门校验后置 formal_cdss_ready=true
+        if path == '/api/kg/rs-publish':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(length)) if length else {}
+            except Exception:
+                self._json_response({"error": "Invalid JSON body"}, 400)
+                return
+            codes = body.get('disease_codes', [])
+            operator = body.get('operator', '')
+            if not isinstance(codes, list) or not codes:
+                self._json_response({"error": "disease_codes (list) required"}, 400)
+                return
+            if len(codes) > 100:
+                self._json_response({"error": "too many diseases (max 100 per batch)"}, 400)
+                return
+            try:
+                self._json_response(publish_rs_batch(codes, operator))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
             return
 
         # ---- POST /api/kg/entity/update ----
@@ -5352,8 +6427,119 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(query_global_stats())
             return
 
+        # ---- GET /api/kg/sync-log?limit=50（v1.5.11b 数据同步变更留痕） ----
+        if path == '/api/kg/sync-log':
+            qs = urllib.parse.parse_qs(parsed.query)
+            try:
+                limit = min(int(qs.get('limit', ['50'])[0]) or 50, 200)
+            except Exception:
+                limit = 50
+            self._json_response({"logs": read_sync_log(limit=limit)})
+            return
+
         if path == '/api/kg/guidelines':
             self._json_response(query_guidelines())
+            return
+
+        # ---- GET /api/kg/guideline/detail?code=XXX（v1.5.11 指南解析数据详情） ----
+        if path == '/api/kg/guideline/detail':
+            qs = urllib.parse.parse_qs(parsed.query)
+            code = (qs.get('code', [''])[0]) or ''
+            if not code:
+                self._json_response({"error": "code required"}, 400)
+                return
+            try:
+                self._json_response(query_guideline_detail(code))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
+        # ---- GET /api/kg/guideline/file?name=XXX.pdf（v1.5.11 指南原文预览） ----
+        # 仅允许 guideline_files/ 目录内的文件，防目录穿越；inline 供浏览器预览
+        if path == '/api/kg/guideline/file':
+            qs = urllib.parse.parse_qs(parsed.query)
+            fname = (qs.get('name', [''])[0]) or ''
+            base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'guideline_files')
+            fpath = os.path.realpath(os.path.join(base_dir, fname))
+            if (not fname or not fpath.startswith(os.path.realpath(base_dir) + os.sep)
+                    or not os.path.isfile(fpath)):
+                self.send_error(404, 'File not found')
+                return
+            size = os.path.getsize(fpath)
+            mime = 'application/pdf' if fpath.lower().endswith('.pdf') else 'application/octet-stream'
+            # 支持 Range（浏览器 PDF 分段加载）；命中发 206，否则发 200
+            range_hdr = self.headers.get('Range', '')
+            start = end = None
+            if range_hdr.startswith('bytes='):
+                try:
+                    m = re.match(r'bytes=(\d*)-(\d*)', range_hdr)
+                    start = int(m.group(1) or 0)
+                    end = int(m.group(2) or size - 1) if m.group(2) else size - 1
+                    end = min(end, size - 1)
+                    if start > end or start >= size:
+                        start = end = None
+                except Exception:
+                    start = end = None
+            body = None
+            if start is not None:
+                with open(fpath, 'rb') as f:
+                    f.seek(start)
+                    body = f.read(end - start + 1)
+                self.send_response(206)
+            else:
+                self.send_response(200)
+            self.send_header('Content-Type', mime)
+            self.send_header('Content-Disposition', 'inline; filename*=UTF-8\'\''
+                             + urllib.parse.quote(os.path.basename(fpath)))
+            self.send_header('Accept-Ranges', 'bytes')
+            if start is not None:
+                self.send_header('Content-Range', 'bytes %d-%d/%d' % (start, end, size))
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            self.send_header('Content-Length', str(size))
+            self.end_headers()
+            with open(fpath, 'rb') as f:
+                while True:
+                    chunk = f.read(1024 * 256)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+            return
+
+        # ---- GET /api/kg/meta-model ----
+        # v1.5.7 元模型配置：实体类型/关系类型/属性口径 + 线上实例数实时对照
+        # v1.5.11d：?include_inactive=0 过滤已停用类型（默认返回全部，含 active 标志）
+        if path == '/api/kg/meta-model':
+            try:
+                qs = urllib.parse.parse_qs(parsed.query)
+                include_inactive = (qs.get('include_inactive', ['1'])[0] != '0')
+                self._json_response(query_meta_model(include_inactive))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
+        if path == '/api/kg/meta-model/sample':
+            qs = urllib.parse.parse_qs(parsed.query)
+            et = (qs.get('entityType', [''])[0]) or ''
+            limit = int(qs.get('limit', ['5'])[0] or 5)
+            if not et:
+                self._json_response({"error": "entityType required"}, 400)
+                return
+            try:
+                self._json_response(query_meta_property_sample(et, limit))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
+        # ---- GET /api/kg/anchor-mapping ----
+        # v1.5.5 挂靠映射确认视图：11 个待挂靠疾病的候选文献清单（写入走既有 relation/add）
+        if path == '/api/kg/anchor-mapping':
+            try:
+                self._json_response(query_anchor_mapping())
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
             return
 
         # ---- GET /api/kg/pathway/ami ----
@@ -5418,6 +6604,12 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
         # ---- GET /api/kg/rs-review ----
         if path == '/api/kg/rs-review':
             self._json_response(query_rs_review_summary())
+            return
+
+        # ---- GET /api/kg/publish-queue ----
+        # v1.5.4 发布控制台数据源：审核通过·待发布疾病清单 + 闸门受阻清单
+        if path == '/api/kg/publish-queue':
+            self._json_response(query_publish_queue())
             return
 
         # ---- GET /api/kg/skeleton-audit ----

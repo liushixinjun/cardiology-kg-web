@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 系统设置</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026100901">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
 <style>
 /* ========== Layout ========== */
 .cfg-wrap{display:flex;height:calc(100vh - 60px);margin:0}
@@ -126,6 +126,7 @@
 .cfg-sync-diff{font-size:11px;color:var(--muted);margin-top:2px}
 .cfg-sync-diff .up{color:#51cf66}
 .cfg-sync-diff .down{color:#ff6b6b}
+.cfg-sync-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(79,140,255,.12);color:var(--accent);vertical-align:1px}
 
 /* ===== 审计报告列表 ===== */
 .audit-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
@@ -297,7 +298,7 @@
       <!-- 同步历史 -->
       <div class="cfg-card">
         <div class="cfg-card-title">📋 同步历史</div>
-        <div class="cfg-card-desc">每次同步自动记录。</div>
+        <div class="cfg-card-desc">服务端自动记录：图谱节点/关系/证据/属性种类等计数有变化时即写入日志（含缓存过期自动检测与手动同步），换浏览器不丢失。</div>
         <div class="cfg-sync-log" id="sync-log"></div>
       </div>
     </div>
@@ -364,11 +365,10 @@
 </div>
 
 <script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026100901"></script>
+<script src="./_shared/js/app.js?v=2026101601"></script>
 <script>
 /* ===== 状态 ===== */
 var _prevStats = null;
-var _syncLog = [];
 
 /* ===== Tab ===== */
 function switchTab(id) {
@@ -382,7 +382,7 @@ function switchTab(id) {
 
 /* ===== 菜单配置 ===== */
 var MENU_ITEMS = [
-  {id:'index', label:'数据总览', icon:'📊', desc:'图谱整体数据概况', defaultOn:true},
+  {id:'index', label:'首页', icon:'🏠', desc:'数据总览首页 · 图谱整体数据概况', defaultOn:true},
   {id:'explore', label:'图谱探索', icon:'🧭', desc:'疾病浏览与诊疗流程', defaultOn:true},
   {id:'network', label:'网络探索', icon:'🕸️', desc:'关系网络可视化', defaultOn:true},
   {id:'heatmap', label:'数据建设进度', icon:'📈', desc:'四步建设进度与缺口分析', defaultOn:true},
@@ -404,7 +404,6 @@ loadData(function(d) {
   renderAuditList();
   checkSyncStatus();
   loadSyncLog();
-  renderSyncLog();
 });
 
 /* ===== 系统状态 ===== */
@@ -611,20 +610,10 @@ function doSync() {
     setFlowStep(4, 'done');
     setFlowStep(5, 'active');
     document.getElementById('sync-hero-title').textContent = '正在记录同步历史...';
-    document.getElementById('sync-hero-desc').textContent = 'Step 5/5 — 保存到本地';
+    document.getElementById('sync-hero-desc').textContent = 'Step 5/5 — 服务端落盘';
 
-    // 记录同步历史
-    var now = new Date();
-    var entry = {
-      time: now.toLocaleString('zh-CN'),
-      stats: afterStats,
-      diff: diff,
-      before: beforeStats
-    };
-    _syncLog.unshift(entry);
-    if (_syncLog.length > 50) _syncLog = _syncLog.slice(0, 50);
-    saveSyncLog();
-    renderSyncLog();
+    // v1.5.11b：变更已由服务端在 flush-cache 时落盘（sync_log.jsonl），这里拉取最新日志
+    loadSyncLog();
 
     // 更新当前状态
     _prevStats = afterStats;
@@ -665,53 +654,50 @@ function doSync() {
   });
 }
 
-/* ===== 同步历史 ===== */
-function loadSyncLog() {
-  try { _syncLog = JSON.parse(localStorage.getItem('kg_sync_log') || '[]'); } catch(e) { _syncLog = []; }
-  // 如果没有历史记录，插入一条初始记录
-  if (_syncLog.length === 0) {
-    _syncLog.push({
-      time: '2026-07-14 07:23:00',
-      stats: { disease_category_count:34, disease_count:115, total_nodes:43715, total_relationships:141361, evidence_count:38212, visual_entity_count:5503 },
-      diff: { disease_category_count:{before:34,after:34,diff:0}, disease_count:{before:76,after:115,diff:39}, total_nodes:{before:26229,after:43715,diff:17486}, total_relationships:{before:53306,after:141361,diff:88055}, evidence_count:{before:25601,after:38212,diff:12611}, visual_entity_count:{before:0,after:5503,diff:5503} },
-      before: { disease_category_count:34, disease_count:76, total_nodes:26229, total_relationships:53306, evidence_count:25601, visual_entity_count:0 }
-    });
-    saveSyncLog();
-  }
-}
+/* ===== 同步历史（v1.5.11b 改读服务端 sync_log.jsonl，不再依赖 localStorage） ===== */
+var _syncLogServer = [];
+var SYNC_TRIGGERS = {manual: '手动同步', auto: '自动检测', deploy: '部署触发'};
 
-function saveSyncLog() {
-  try { localStorage.setItem('kg_sync_log', JSON.stringify(_syncLog)); } catch(e) {}
+function loadSyncLog() {
+  fetch('/api/kg/sync-log?limit=50&t=' + Date.now()).then(function(r) { return r.json(); }).then(function(d) {
+    _syncLogServer = d.logs || [];
+    renderSyncLog();
+  }).catch(function() { renderSyncLog(); });
 }
 
 function renderSyncLog() {
-  if (_syncLog.length === 0) {
-    document.getElementById('sync-log').innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12px">暂无同步记录</div>';
+  var el = document.getElementById('sync-log');
+  var entries = _syncLogServer;
+  if (entries.length === 0) {
+    el.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12px">暂无同步变更记录（图谱计数有变化时会自动记录）</div>';
     return;
   }
   var h = '';
-  _syncLog.forEach(function(entry, idx) {
+  entries.forEach(function(entry, idx) {
     var diffParts = [];
-    var keys = ['disease_count','total_nodes','total_relationships','evidence_count','visual_entity_count'];
-    var names = {disease_count:'疾病',total_nodes:'节点',total_relationships:'关系',evidence_count:'证据',visual_entity_count:'实体'};
-    keys.forEach(function(k) {
-      var d = entry.diff[k];
+    var names = {disease_category_count:'疾病大类', disease_count:'疾病', total_nodes:'节点',
+                 total_relationships:'关系', evidence_count:'证据', visual_entity_count:'实体',
+                 property_key_count:'属性种类', rel_type_count:'关系类型'};
+    Object.keys(names).forEach(function(k) {
+      var d = (entry.diff || {})[k];
       if (d && d.diff !== 0) {
         var sign = d.diff > 0 ? '+' : '';
-        diffParts.push('<span class="' + (d.diff > 0 ? 'up' : 'down') + '">' + (names[k]||k) + ' ' + sign + d.diff.toLocaleString() + '</span>');
+        diffParts.push('<span class="' + (d.diff > 0 ? 'up' : 'down') + '">' + names[k] + ' ' + sign + d.diff.toLocaleString() + '</span>');
       }
     });
     var hasChange = diffParts.length > 0;
+    var t = entry.time || entry.timestamp || '';
+    var trig = entry.trigger ? '<span class="cfg-sync-tag">' + (SYNC_TRIGGERS[entry.trigger] || entry.trigger) + '</span>' : '';
 
     h += '<div class="cfg-sync-entry">';
-    h += '<div class="cfg-sync-time">' + entry.time + (idx === 0 ? '  ← 最近' : '') + '</div>';
-    h += '<div class="cfg-sync-msg">' + (hasChange ? '数据同步完成，检测到变化' : 'Redis缓存已清除，数据无变化') + '</div>';
+    h += '<div class="cfg-sync-time">' + String(t).replace('T',' ').slice(0,19) + (idx === 0 ? '  ← 最近' : '') + trig + '</div>';
+    h += '<div class="cfg-sync-msg">' + (hasChange ? '检测到图谱数据变化' : '数据无变化') + '</div>';
     if (hasChange) {
       h += '<div class="cfg-sync-diff">' + diffParts.join(' · ') + '</div>';
     }
     h += '</div>';
   });
-  document.getElementById('sync-log').innerHTML = h;
+  el.innerHTML = h;
 }
 
 /* ===== 菜单 ===== */

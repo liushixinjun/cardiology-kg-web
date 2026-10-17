@@ -28,7 +28,7 @@ window.ClinicalUI = (() => {
     if(!hasUsableDemoReports())return [];
     if(activeSimulationDisease==='ami')return [
       {id:'pci',name:'经皮冠状动脉介入治疗（PCI）',kind:'手术 / 操作',items:['经皮冠状动脉介入治疗（PCI）'],assessment:'PCI介入治疗术前评估表',content:'治疗目标：评估再灌注方案。结合发病经过、诊断依据、既往治疗与当前风险，核对操作准备，并安排术后观察。',operation:true},
-      {id:'lysis',name:'静脉溶栓治疗',kind:'备选方案',items:['溶栓药物（选择具体品种）'],assessment:'再灌注治疗评估表',content:'备选再灌注方案。先比较当前治疗条件与禁忌，再由医生决定是否采用；与PCI方案不默认同时选择。'},
+      {id:'lysis',name:'静脉溶栓治疗',kind:'备选方案',items:['阿替普酶','瑞替普酶','替奈普酶'],knowledgeOnly:true,assessment:'再灌注治疗评估表',content:'备选再灌注方案。先比较当前治疗条件与禁忌，再由医生决定是否采用；与PCI方案不默认同时选择。'},
       {id:'platelet',name:'抗血小板治疗',kind:'药物治疗',items:['阿司匹林','氯吡格雷','替格瑞洛'],assessment:'抗血小板治疗评估',content:'药名沿用原型已有候选；不是默认联用清单。具体药品、联合方式和处方参数需医生及院内方案确认。'},
       {id:'coagulation',name:'抗凝治疗',kind:'药物治疗',items:['普通肝素','低分子肝素'],assessment:'抗凝治疗评估',content:'结合拟行治疗、既往抗凝、出血风险及肝肾功能选择药物；候选药物不是默认联用。'},
       {id:'lipid',name:'调脂治疗',kind:'药物治疗',items:['调脂药物（选择具体品种）'],assessment:'调脂治疗评估',content:'结合血脂资料、既往治疗及耐受情况制定方案；后续观察用药反应及复查结果。'}
@@ -75,9 +75,9 @@ window.ClinicalUI = (() => {
   function care(){
     const list=plans();
     const empty=current()?'根据当前问题补充资料、制定诊疗计划；有无专病路径均可使用评估、预警及知识检索。':'请先载入患者资料。';
-    return (list.length?'<div data-inline-treatment>'+(admissionConfirmed&&window.PathwayTasks?section('治疗方案',list.length,PathwayTasks.treatments()):section('推荐用药',list.filter(p=>!p.operation).reduce((n,p)=>n+p.items.length,0),list.filter(p=>!p.operation).map(p=>TreatmentWorkspace.card(p)).join(''))+section('推荐手术',list.filter(p=>p.operation).reduce((n,p)=>n+p.items.length,0),list.filter(p=>p.operation).map(p=>TreatmentWorkspace.card(p)).join('')||'<p>暂无适用手术推荐。</p>'))+'</div>':medications().length?medicationList()+section('推荐手术',0,'<p>暂无适用手术推荐。</p>'):`<p class="ui-note">暂无适用治疗方案或药品推荐。${empty}${button('data-ui-tab="search"','查询知识')}</p>`)+
-      `<div class="ui-shortcuts">${button('data-care-note="plan"','记录诊疗计划')}${button('data-care-note="discharge"','出院注意事项')}</div>`+(procedure?procedurePanel():'')+(qualityEnrolled?quality():'')+
-      ['诊疗计划','出院注意事项'].filter(k=>clinicalTaskRecords[k]).map(k=>`<div class="action-detail-card"><strong>${k}</strong><p>${h(clinicalTaskRecords[k].note)}</p></div>`).join('');
+    return (list.length?'<div data-inline-treatment>'+(admissionConfirmed&&window.PathwayTasks?section('治疗方案',PathwayTasks.availablePlans().length,PathwayTasks.treatments()):section('推荐用药',list.filter(p=>!p.operation).reduce((n,p)=>n+p.items.length,0),list.filter(p=>!p.operation).map(p=>TreatmentWorkspace.card(p)).join(''))+section('推荐手术',list.filter(p=>p.operation).reduce((n,p)=>n+p.items.length,0),list.filter(p=>p.operation).map(p=>TreatmentWorkspace.card(p)).join('')||'<p>暂无适用手术推荐。</p>'))+'</div>':medications().length?medicationList()+section('推荐手术',0,'<p>暂无适用手术推荐。</p>'):`<p class="ui-note">暂无适用治疗方案或药品推荐。${empty}${button('data-ui-tab="search"','查询知识')}</p>`)+
+      (!admissionConfirmed&&list.length&&picks.size?`<div class="ordinary-review">已选 ${picks.size} 项 ${button('data-order-review','开立核对 ›')}</div>`:'')+(procedure?procedurePanel():'')+(qualityEnrolled?quality():'')+
+      '';
   }
   function planSafety(p){
     if(['lysis','coagulation','platelet'].includes(p.id))return '相关提醒：核对出血、过敏及未解决的高危鉴别。缺少资料与明确禁忌分开判断。';
@@ -146,6 +146,7 @@ window.ClinicalUI = (() => {
   }
   function openQualityTask(id){const q=qualityTasks().find(x=>x.id===id);if(!q)return;modal('单病种质控｜'+q.name,`${detailGrid([['当前依据',h(q.detail)],['关联记录','与诊疗方案、评估、路径使用同一份患者资料']])}<label>处理记录<textarea class="textarea" id="quality-note">${h(qualityNotes[id]?.text||'')}</textarea></label>${button(`data-quality-task-save="${id}"`,'保存处理')}${button(`data-ui-tab="${q.action==='basis'?'assist':q.action}"`,'查看相关内容')}`);}
   function knowledge(title){
+    if(['阿替普酶','瑞替普酶','替奈普酶'].includes(title)){modal('药物知识｜'+title,`<div data-knowledge-content><h4>${h(title)}</h4><p>列于2025 ACS指南的纤溶药物表（表13）。此处为知识候选，不代表当前患者适用或院内可开立。</p><h4>院内药品信息</h4><p>品种、剂型、规格及可用状态待院内字典匹配；本页不提供默认处方。</p><a href="https://www.jacc.org/doi/10.1016/j.jacc.2024.11.009" target="_blank" rel="noopener noreferrer">2025 ACS指南 · 表13 ↗</a></div>`,'');return;}
     const troponin=/肌钙蛋白/.test(title);
     modal('静态知识｜'+title,`<div data-knowledge-content><div class="ui-note">静态条目与当前患者报告分开；不据此生成患者结论。</div><div class="ui-shortcuts">概述　适用范围　注意事项　来源</div><h4>概述</h4><p>${troponin?'肌钙蛋白由TnT、TnI和TnC三个亚基构成。此段为用户提供的现有CDSS知识截图摘录，正式知识全文未接入。':'该项目的正式知识正文尚未接入本地原型。保留条目身份与知识入口，不补造医学说明。'}</p><h4>适用范围与注意事项</h4><p>以正式知识条目、院内项目说明及当前版本为准；此处不展示未经核验的阈值和操作要求。</p><h4>来源</h4><p>${troponin?'用户提供的现有CDSS“血清肌钙蛋白I和肌钙蛋白T”截图；全文版本与授权待对接。':'知识条目及版本待接入，不能以患者报告或演示规则替代。'}</p></div>`,'知识查看交互已提供；全文内容和来源随现有知识库接入');
   }
@@ -154,7 +155,7 @@ window.ClinicalUI = (() => {
   }
   function note(kind){
     const name=kind==='discharge'?'出院注意事项':'诊疗计划';
-    modal(name,`<p>由医生核对并记录；不自动生成处方，不建立随访任务。</p><label>${name}<textarea id="care-note" class="textarea" placeholder="记录本次安排；出院内容可包含复查与随访注意事项">${h(clinicalTaskRecords[name]?.note||'')}</textarea></label>${button(`data-care-note-save="${h(name)}"`,'保存记录')}`);
+    modal(name,`<p>由医生核对并记录；不自动生成处方，不建立随访任务。</p><label>${name}<textarea id="care-note" class="textarea" placeholder="记录本次安排；出院内容可包含复查与随访注意事项">${h(clinicalTaskRecords[name]?.note||fieldValue(kind==='plan'?'treatmentText':'perioperativeText',''))}</textarea></label>${button(`data-care-note-save="${h(name)}"`,'保存记录')}`);
   }
   document.addEventListener('input',e=>{if(e.target.matches('[data-scale-search]'))document.querySelectorAll('[data-scale-name]').forEach(el=>el.hidden=!el.dataset.scaleName.toLowerCase().includes(e.target.value.toLowerCase()));});
   document.addEventListener('change',e=>{if(e.target.id==='demoTreatmentCoverage')refresh();});
@@ -195,9 +196,10 @@ window.ClinicalUI = (() => {
     if(t.hasAttribute('data-procedure-next')&&procedure){const action=t.dataset.procedureNext;if(action==='start'&&procedure.phase==='pre')procedure.phase='intra';else if(action==='end'&&procedure.phase==='intra')procedure.phase='post';else if(action==='cancel')procedure.phase='cancel';else return;events.push({time:now(),operationId:procedure.id,text:action==='start'?'模拟收到开始记录':action==='end'?'模拟收到结束记录':'演示者取消操作'});refresh();}
     if(t.hasAttribute('data-quality-open'))modal(t.dataset.qualityOpen,`${detailGrid([['当前患者资料',factsEdited?'资料已改变，需复核':'本地样例'],['报告',h(fieldValue('assistantExam','未提供'))],['规则判定','未接入质控规则服务，不标通过或不通过']])}<label>处理与待核对事项<textarea id="care-note" class="textarea"></textarea></label>${button(`data-care-note-save="${h(t.dataset.qualityOpen)}"`,'记录处理，不自动结案')}`);
     if(t.hasAttribute('data-care-note'))note(t.dataset.careNote);
-    if(t.hasAttribute('data-care-note-save')){const val=document.getElementById('care-note').value.trim();if(!val){showToast('请填写内容');return;}recordClinicalAction('note',t.dataset.careNoteSave,{note:val,status:'已记录，待医生核对'});closeClinicalActionModal();refresh();}
+    if(t.hasAttribute('data-care-note-save')){const val=document.getElementById('care-note').value.trim();if(!val){showToast('请填写内容');return;}recordClinicalAction('note',t.dataset.careNoteSave,{note:val,status:'已记录，待医生核对'});if(t.dataset.careNoteSave==='诊疗计划')setField('treatmentText',val);if(t.dataset.careNoteSave==='出院注意事项')setField('perioperativeText',val);closeClinicalActionModal();refresh();}
   });
   function toggleTreatment(key){
+    if(plans().some(p=>p.knowledgeOnly&&key.startsWith(p.id+'|'))||/选择具体品种/.test(key)){showToast('院内品种及规格未匹配，当前仅查看知识');return;}
     if(!current()||factsEdited||(activeSimulationDisease!=='no-pathway'&&!hasUsableDemoReports()&&!window.PathwayTasks?.accepts(key)))return;
     if(window.OrderBridge?.accepted(key)){showToast('已有开立记录，请在医嘱记录查看');return;}
     if(selectionSignature&&selectionSignature!==signature()){showToast('患者资料已变化，请先核对原选择或重载病例');window.TreatmentWorkspace?.sync();return;}
@@ -207,6 +209,7 @@ window.ClinicalUI = (() => {
     document.querySelectorAll('[data-care-add]').forEach(b=>{if(b.dataset.careAdd===key){b.textContent=picks.has(key)?'−':'+';b.setAttribute('aria-pressed',String(picks.has(key)));}});
     window.TreatmentWorkspace?.sync();
     showToast(picks.has(key)?'已加入本次选择':'已移除本次新选项目');
+    renderRecommendations();
     if(document.getElementById('pathwayEngineModal')?.classList.contains('open'))renderPatientWorkbench();
   }
   return {reset,care,assessment,riskView,qualityView,tags,alerts,knowledge,network,
