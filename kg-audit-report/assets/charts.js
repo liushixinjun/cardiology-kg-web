@@ -138,7 +138,7 @@
     });
   })();
 
-  /* ===== 4. 17-Dimension Coverage Radar (REQUIRED) ===== */
+  /* ===== 4. 17-Dimension Coverage Radar（2026-07-30 / Schema V2.0 历史快照，勿当现状） ===== */
   (function () {
     var chart = init('chart-dim-radar');
     if (!chart) return;
@@ -166,7 +166,7 @@
       tooltip: {
         trigger: 'item', appendToBody: true, ...TOOLTIP_STYLE,
         formatter: function () {
-          var html = '<b style="color:' + C.accent2 + '">17维核心覆盖率</b><br/>';
+          var html = '<b style="color:' + C.accent2 + '">17维核心覆盖率（2026-07-30 快照）</b><br/>';
           dims.forEach(function (d) {
             var tag = d.multi ? ' <span style="color:' + C.muted + '">[多跳]</span>' : '';
             html += d.name + tag + ': <b style="color:' + coverageColor(d.value) + '">' + d.value + '%</b> (' + d.d + '/132, ' + d.e + '实体)<br/>';
@@ -199,7 +199,7 @@
     });
   })();
 
-  /* ===== 5. Disease Dimension Distribution Pie (REQUIRED) ===== */
+  /* ===== 5. Disease Dimension Distribution Pie（同样是 2026-07-30 快照，最大档位为当时 17 维口径） ===== */
   (function () {
     var chart = init('chart-dim-dist');
     if (!chart) return;

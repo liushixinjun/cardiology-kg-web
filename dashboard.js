@@ -151,7 +151,7 @@ function renderFlowBar(stats, groups) {
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
     '<div class="fb-node"><div class="fb-num">' + stats.disease_count + '</div><div class="fb-label">专病数量</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
-    '<div class="fb-node"><div class="fb-num">' + CORE_DIM_KEYS.length + '</div><div class="fb-label">知识维度</div></div>' +
+    '<div class="fb-node"><div class="fb-num">' + coreDimTotal() + '</div><div class="fb-label">知识维度</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
     '<div class="fb-node"><div class="fb-num">' + entityCount.toLocaleString() + '</div><div class="fb-label">可视化实体</div></div>' +
     '<div class="fb-line"><div class="fb-pulse"></div></div>' +
@@ -217,7 +217,7 @@ function openModal(groupIdx) {
     html += '<div class="d-card-name">' + d.name + '</div>';
     html += '<div class="d-card-meta">';
     html += '<span class="tag ' + covCls + '">' + d.pct + '%</span>';
-    html += '<span class="d-card-dim">' + d.dimCount + '/' + CORE_DIM_KEYS.length + ' 维度</span>';
+    html += '<span class="d-card-dim">' + d.dimCount + '/' + coreDimTotal() + ' 维度</span>';
     if (d.medCount > 0) html += '<span class="d-card-med">' + d.medCount + ' 药物</span>';
     html += '</div></a>';
   });
@@ -243,7 +243,7 @@ function renderGraph(groups) {
   var ch = echarts.getInstanceByDom(el) || echarts.init(el, null, { renderer: 'svg' });
   el.setAttribute('role', 'img'); el.setAttribute('aria-label', '疾病知识网络力导向图');
   var nodes = [], links = [];
-  var catColors = getTheme() === 'light'
+  var catColors = isLightTheme()
     ? ['#dc2626','#db2777','#7c3aed','#be185d','#0f766e','#ea580c','#0369a1','#6d28d9','#c2410c','#a16207','#b91c1c','#475569']
     : ['#dc2626','#ec4899','#8b5cf6','#f472b6','#14b8a6','#ef4444','#38bdf8','#a78bfa','#f97316','#fbbf24','#f87171','#94a3b8'];
   /* 预收集所有大类名，避免疾病名与大类名冲突导致 ECharts 重复节点崩溃 */
@@ -298,7 +298,7 @@ function renderGraph(groups) {
           pct: { fontSize: 9, color: cssVar('--accent','#1668dc'), padding: [2, 0, 0, 0] }
         }
       },
-      lineStyle: { color: 'source', curveness: 0.15, width: getTheme() === 'light' ? 1.5 : 1.2, opacity: getTheme() === 'light' ? 0.55 : 0.4 },
+      lineStyle: { color: 'source', curveness: 0.15, width: isLightTheme() ? 1.5 : 1.2, opacity: isLightTheme() ? 0.55 : 0.4 },
       emphasis: { focus: 'adjacency', lineStyle: { width: 3 }, itemStyle: { borderWidth: 3, borderColor: cssVar('--bg2','#ffffff') } },
       categories: [
         { name: '大类', itemStyle: { color: '#dc2626' } },
@@ -325,16 +325,26 @@ function renderRadar() {
   if (!el || typeof echarts === 'undefined') return;
   var ch = echarts.init(el, null, { renderer: 'canvas', devicePixelRatio: kgDpr() });
   el.setAttribute('role', 'img'); el.setAttribute('aria-label', '核心维度覆盖率雷达图');
-  var ds = KG_DATA.diseases, total = Object.keys(ds).length;
   var indicators = [], values = [];
-  CORE_DIM_KEYS.forEach(function(k) {
-    var filled = 0;
-    Object.keys(ds).forEach(function(code) {
-      if (dimHasData(ds[code], k)) filled++;
+  var dc = KG_DATA.dim_coverage;
+  if (dc && dc.dimensions && dc.dimensions.length) {
+    /* 后端真实统计口径：每维 filled/disease_total 直接取后端 coverage_pct */
+    dc.dimensions.forEach(function(x) {
+      indicators.push({ name: x.name_cn || DIM_NAMES[x.key] || x.key, max: 100 });
+      values.push(Math.round(x.coverage_pct));
     });
-    indicators.push({ name: DIM_NAMES[k] || k, max: 100 });
-    values.push(total > 0 ? Math.round(filled / total * 100) : 0);
-  });
+  } else {
+    /* 后端不可用时降级：前端按 dim_counts 现算，与后端同口径 */
+    var ds = KG_DATA.diseases, total = Object.keys(ds).length;
+    CORE_DIM_KEYS.forEach(function(k) {
+      var filled = 0;
+      Object.keys(ds).forEach(function(code) {
+        if (dimHasData(ds[code], k)) filled++;
+      });
+      indicators.push({ name: DIM_NAMES[k] || k, max: 100 });
+      values.push(total > 0 ? Math.round(filled / total * 100) : 0);
+    });
+  }
   ch.setOption({
     tooltip: {
       backgroundColor: cssVar('--tip-bg', '#ffffff'),
@@ -369,16 +379,30 @@ function renderDimChart() {
   if (!el || typeof echarts === 'undefined') return;
   var ch = echarts.init(el, null, { renderer: 'canvas', devicePixelRatio: kgDpr() });
   el.setAttribute('role', 'img'); el.setAttribute('aria-label', '核心维度实体量柱状图');
-  var ds = KG_DATA.diseases, totals = {}, filled = {};
-  CORE_DIM_KEYS.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
-  Object.keys(ds).forEach(function(code) {
-    CORE_DIM_KEYS.forEach(function(k) {
-      var n = dimCountValue(ds[code], k);
-      totals[k] += n;
-      if (n > 0) filled[k]++;
+  var keys = CORE_DIM_KEYS, names = {}, filled = {}, totals = {}, total;
+  var dc = KG_DATA.dim_coverage;
+  if (dc && dc.dimensions && dc.dimensions.length) {
+    /* 后端真实统计：维度清单、有数据疾病数、实体总量全部来自 /api/kg/dimensions/coverage */
+    keys = dc.dimensions.map(function(x) { return x.key; });
+    total = dc.disease_total || 0;
+    dc.dimensions.forEach(function(x) {
+      names[x.key] = x.name_cn;
+      filled[x.key] = x.filled;
+      totals[x.key] = x.entity_total;
     });
-  });
-  var total = Object.keys(ds).length;
+  } else {
+    keys = CORE_DIM_KEYS.slice();
+    totals = {}; filled = {};
+    keys.forEach(function(k) { totals[k] = 0; filled[k] = 0; });
+    Object.keys(KG_DATA.diseases).forEach(function(code) {
+      keys.forEach(function(k) {
+        var n = dimCountValue(KG_DATA.diseases[code], k);
+        totals[k] += n;
+        if (n > 0) filled[k]++;
+      });
+    });
+    total = Object.keys(KG_DATA.diseases).length;
+  }
   ch.setOption({
     tooltip: {
       trigger: 'axis',
@@ -386,14 +410,14 @@ function renderDimChart() {
       borderColor: cssVar('--tip-line', 'rgba(22,104,220,.18)'),
       textStyle: { color: cssVar('--tip-ink', '#1e293b'), fontSize: 12 },
       formatter: function(ps) {
-        var p = ps[0], k = CORE_DIM_KEYS[p.dataIndex];
-        return (DIM_NAMES[k] || k) + '<br/>有数据疾病: ' + filled[k] + '/' + total + '<br/>实体总量: ' + totals[k];
+        var p = ps[0], k = keys[p.dataIndex];
+        return (names[k] || DIM_NAMES[k] || k) + '<br/>有数据疾病: ' + filled[k] + '/' + total + '<br/>实体总量: ' + totals[k];
       }
     },
     grid: { top: 10, bottom: 70, left: 50, right: 18 },
     xAxis: {
       type: 'category',
-      data: CORE_DIM_KEYS.map(function(k) { return DIM_NAMES[k] || k; }),
+      data: keys.map(function(k) { return names[k] || DIM_NAMES[k] || k; }),
       axisLabel: { rotate: 45, fontSize: 10, color: cssVar('--muted','#8b90a0') }
     },
     yAxis: {
@@ -402,10 +426,10 @@ function renderDimChart() {
     },
     series: [{
       name: '有数据疾病数', type: 'bar',
-      data: CORE_DIM_KEYS.map(function(k) { return filled[k]; }),
+      data: keys.map(function(k) { return filled[k]; }),
       itemStyle: {
         color: function(p) {
-          var v = p.value / total;
+          var v = total ? p.value / total : 0;
           return v >= 0.8 ? cssVar('--green','#51cf66') : v >= 0.6 ? cssVar('--accent','#4f8cff') : v >= 0.4 ? cssVar('--yellow','#ffd43b') : cssVar('--accent2','#ff6b6b');
         }
       },
@@ -432,22 +456,35 @@ window.onThemeChange = function() {
 function renderGaps() {
   var el = document.getElementById('gap-list');
   if (!el) return;
-  var ds = KG_DATA.diseases, total = Object.keys(ds).length;
-  var missing = {};
-  CORE_DIM_KEYS.forEach(function(k) { missing[k] = 0; });
-  Object.keys(ds).forEach(function(code) {
-    CORE_DIM_KEYS.forEach(function(k) {
-      if (!dimHasData(ds[code], k)) missing[k]++;
+  var rows = [];
+  var dc = KG_DATA.dim_coverage;
+  if (dc && dc.dimensions && dc.dimensions.length) {
+    /* 后端真实统计：缺口数 = 总疾病数 - 有数据疾病数，与雷达/柱状图同源 */
+    var total = dc.disease_total || 0;
+    rows = dc.dimensions.map(function(x) {
+      return { key: x.key, name: x.name_cn, miss: Math.max(total - (x.filled || 0), 0), total: total };
     });
-  });
-  var sorted = CORE_DIM_KEYS.slice().sort(function(a, b) { return missing[b] - missing[a]; });
+  } else {
+    var ds = KG_DATA.diseases, n = Object.keys(ds).length;
+    var missing = {};
+    CORE_DIM_KEYS.forEach(function(k) { missing[k] = 0; });
+    Object.keys(ds).forEach(function(code) {
+      CORE_DIM_KEYS.forEach(function(k) {
+        if (!dimHasData(ds[code], k)) missing[k]++;
+      });
+    });
+    rows = CORE_DIM_KEYS.map(function(k) {
+      return { key: k, name: DIM_NAMES[k] || k, miss: missing[k], total: n };
+    });
+  }
+  rows.sort(function(a, b) { return b.miss - a.miss; });
   var html = '';
-  sorted.forEach(function(k) {
-    var m = missing[k];
-    var pct = Math.round((total - m) / total * 100);
+  rows.forEach(function(r) {
+    var m = r.miss, total = r.total;
+    var pct = total ? Math.round((total - m) / total * 100) : 0;
     var color = pct >= 80 ? cssVar('--green','#51cf66') : pct >= 60 ? cssVar('--accent','#4f8cff') : pct >= 40 ? cssVar('--yellow','#ffd43b') : cssVar('--accent2','#ff6b6b');
     html += '<div class="gap-row">';
-    html += '<div class="gap-label">' + (DIM_NAMES[k] || k) + '</div>';
+    html += '<div class="gap-label">' + (r.name || r.key) + '</div>';
     html += '<div class="gap-track"><div class="gap-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
     html += '<div class="gap-val" style="color:' + color + '">' + pct + '%<span class="gap-miss">缺' + m + '</span></div>';
     html += '</div>';

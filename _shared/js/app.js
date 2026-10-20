@@ -163,10 +163,18 @@ var ENTITY_LAYER_MAP = {};
 function getEntityLayer(dimKey) { return ENTITY_LAYER_MAP[dimKey] || 'knowledge'; }
 function getLayerInfo(layerKey) { return THREE_LAYERS[layerKey] || THREE_LAYERS.knowledge; }
 
-/* 维度数量注入：把页面中 .dcp 占位数字替换为实际核心维度数 */
+/* 维度数量注入：把页面中 .dcp 占位数字替换为实际核心维度数。
+   口径优先级：后端 /api/kg/dimensions/coverage 的 dimension_count（真实参与统计的维度数）
+   → 后端 /api/kg/dimensions 的 core_dimensions 长度 → 本地静态兜底。 */
+var CORE_DIM_COUNT_FROM_API = 0;
 function injectDimCount() {
+  var n = coreDimTotal();
   var els = document.querySelectorAll('.dcp');
-  for (var i = 0; i < els.length; i++) els[i].textContent = CORE_DIM_KEYS.length;
+  for (var i = 0; i < els.length; i++) els[i].textContent = n;
+}
+/* 维度总数唯一取值入口：优先后端真实统计值，未取到时退回本地口径 */
+function coreDimTotal() {
+  return CORE_DIM_COUNT_FROM_API || CORE_DIM_KEYS.length;
 }
 
 /* 二级层级映射：从 parentCode 提取大类前缀 → 大类名 + 子类名 */
@@ -252,7 +260,7 @@ function sourceTypeName(val) { return SOURCE_TYPE_NAMES[val] || val || ''; }
 
 /* Server config */
 function getServerConfig() {
-  var defaults = { url: 'bolt://192.168.3.27:7687', user: 'neo4j', password: 'zysoft@2024', httpUrl: 'http://192.168.3.27:7474' };
+  var defaults = { url: 'bolt://192.168.3.27:7687', user: 'neo4j', password: '__NEO4J_PWD__', httpUrl: 'http://192.168.3.27:7474' };
   try { var saved = localStorage.getItem('kg_server_config'); return saved ? JSON.parse(saved) : defaults; } catch(e) { return defaults; }
 }
 function saveServerConfig(cfg) { localStorage.setItem('kg_server_config', JSON.stringify(cfg)); }
@@ -264,11 +272,19 @@ function loadData(callback) {
     fetch('/api/kg/diseases?v=' + Date.now()).then(function(r){return r.json()}),
     fetch('/api/kg/stats?v=' + Date.now()).then(function(r){return r.json()}),
     /* 维度口径单一事实源（失败不阻断，用静态兜底） */
-    fetch('/api/kg/dimensions?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return null})
+    fetch('/api/kg/dimensions?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return null}),
+    /* 维度覆盖率：后端真实统计，前端只负责展示，不再自行遍历计算 */
+    fetch('/api/kg/dimensions/coverage?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return null})
   ]).then(function(results){
     var diseaseList = results[0];
     var stats = results[1];
     if (results[2]) applyDimRegistry(results[2]);  /* 先应用口径，再回调渲染 */
+    var dimCoverage = results[3];
+    /* 页面上所有维度数占位一律用后端真实统计值，杜绝前后端口径漂移 */
+    if (dimCoverage && dimCoverage.dimension_count) {
+      CORE_DIM_COUNT_FROM_API = dimCoverage.dimension_count;
+      try { injectDimCount(); } catch(e) {}
+    }
     var diseases = {};
     diseaseList.forEach(function(d){
       diseases[d.code] = { info: d, dimensions: {}, dim_counts: d.dim_counts || {}, relations_summary: [], evidence_count: 0, _loaded: false };
@@ -276,6 +292,7 @@ function loadData(callback) {
     KG_DATA = {
       diseases: diseases,
       stats: stats,
+      dim_coverage: dimCoverage || null,
       data_source: { type: 'Neo4j实时', export_time: new Date().toLocaleString('zh-CN') },
       _loaded: true
     };
@@ -378,7 +395,7 @@ function getCoverage(code) {
       if((!v||!v.length)&&CORE_DIM_ALIAS[k]) v=d.dimensions[CORE_DIM_ALIAS[k]];
       if(v&&v.length>0)f++;
     });
-    return Math.round(f/CORE_DIM_KEYS.length*100);
+    return Math.round(f/coreDimTotal()*100);
   }
   if(d.dim_counts) {
     CORE_DIM_KEYS.forEach(function(k){
@@ -386,7 +403,7 @@ function getCoverage(code) {
       if(!c&&CORE_DIM_ALIAS[k]) c=d.dim_counts[CORE_DIM_ALIAS[k]];
       if(c&&c>0)f++;
     });
-    return Math.round(f/CORE_DIM_KEYS.length*100);
+    return Math.round(f/coreDimTotal()*100);
   }
   return 0;
 }

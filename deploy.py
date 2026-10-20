@@ -33,7 +33,15 @@ redis_cli = cfg["redis"].get("cli_path", "/zoesoft/zoekgRedis/bin/redis-cli")
 # 版本戳：所有 HTML 中的 ?v= 统一用此值（格式 YYYYMMDDNN，NN为当日第几批）
 # v1.4.0 菜单名恢复批次：2026-09-30 深夜开始、10-01 发版，沿用 0930 起始的批次号，
 # 与全站文件内已有戳及 changelog 文案保持一致（勿改回自动拼日期，跨天会对不上）
-VERSION_STAMP = "2026101601"
+# v2026101705 批次：元模型页可读性改造（属性/关联带表头表格、属性 6 组
+# 标准分组、种子 v2 迁移剔 14 个零覆盖错键、standard.html 锚点直连、
+# 入边方向分组与端点对实例数），详见 assets/数据质量问题台账.md D-10/D-11/D-12
+# v2026101706 批次：维度覆盖率改后端真实统计（新增 /api/kg/dimensions/coverage，
+# 首页雷达图/柱状图/缺口列表/维度数占位全部读后端值），清理 17→20 残留文案
+# v2026102001 批次：standard.html 按 Schema V4.1 全量派生对齐（实体 85/关系 122/字段
+# 六面板/补第9-14章/版本戳统一），ai-parse.html status 枚举按第14章改 inactive，
+# 新增第9章覆盖率与验收口径，第14章跨标准台账 2 条
+VERSION_STAMP = "2026102001"
 local_dir = deploy_cfg["local_dir"]
 
 # ============ 部署保护闸 1：作废文件黑名单 ============
@@ -151,7 +159,7 @@ def restart_and_verify(ssh):
     channel = transport.open_channel("session")
     channel.settimeout(5)
     channel.exec_command(
-        "cd %s && setsid bash -c 'python3 server.py >> server.log 2>&1 &'" % deploy_cfg["remote_dir"])
+        "cd %s && setsid bash -c 'python3 -u server.py >> server.log 2>&1 &'" % deploy_cfg["remote_dir"])
     try:
         out = channel.recv(4096).decode().strip()
         if out:

@@ -38,9 +38,9 @@
 |------|------|
 | 服务器地址 | `192.168.3.27` |
 | Web 访问地址 | `http://192.168.3.27:4001` |
-| SSH 用户/密码 | `root` / `zysoft@27` |
+| SSH 用户/密码 | `root` / `__SSH_PWD__` |
 | 远程部署目录 | `/zoesoft/zoekgweb` |
-| Neo4j Bolt | `bolt://192.168.3.27:7687` (neo4j/zysoft@2024) |
+| Neo4j Bolt | `bolt://192.168.3.27:7687` (neo4j/__NEO4J_PWD__) |
 | Redis | `192.168.3.27:6379` |
 
 ---

@@ -302,6 +302,15 @@ footer { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   </div>
 </div>
 
+<!-- 历史快照声明：本页数据冻结在 2026-07-30 / Schema V2.0，勿当作现状 -->
+<div class="card" style="border-left:4px solid #f59e0b;background:rgba(245,158,11,.08)">
+  <p style="margin:0"><strong>历史快照，非现状。</strong>本报告数据冻结于 2026-07-30 08:33、Schema V2.0，
+  当时的核心维度口径为 <strong>17 个</strong>（无护理维度）。当前口径已是 <strong>20 个核心维度</strong>
+  （17 临床 + 3 护理，Schema V4.0 护理批次），实时数据请以
+  <a href="../index.html">首页</a> 与 <code>/api/kg/dimensions/coverage</code> 接口为准。
+  本页保留原始数字用于回溯对比，未按新口径改写。</p>
+</div>
+
 <!-- Score Banner -->
 <div class="score-banner">
   <div class="score-card info"><div class="num">32,762</div><div class="label">总节点数</div></div>
@@ -530,15 +539,15 @@ footer { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 <section>
 <div class="card">
 <h2>维度4：疾病知识覆盖 <span class="badge warn">部分达标</span></h2>
-<p>检查 132 种疾病在 17 个核心知识维度 + 3 个额外维度上的覆盖情况。</p>
+<p>检查 132 种疾病在 17 个核心知识维度 + 3 个额外维度上的覆盖情况（2026-07-30 当时口径，当前为 20 个核心维度）。</p>
 
-<h3>4.1 17 维核心覆盖率雷达图</h3>
+<h3>4.1 17 维核心覆盖率雷达图（当时口径）</h3>
 <figure class="chart-figure">
-  <figcaption>图4：17 个核心维度疾病覆盖率雷达图（悬停查看详情）</figcaption>
+  <figcaption>图4：17 个核心维度疾病覆盖率雷达图（2026-07-30 快照，悬停查看详情）</figcaption>
   <div class="chart-box"><div id="chart-dim-radar" style="width:100%;min-height:560px"></div></div>
 </figure>
 
-<h3>4.2 17 维覆盖率明细</h3>
+<h3>4.2 17 维覆盖率明细（当时口径）</h3>
 <div class="table-wrap" style="max-height:none">
 <table>
 <thead><tr><th>维度</th><th>关系名</th><th class="num">覆盖疾病</th><th class="num">实体数</th><th class="num">覆盖率</th><th>进度</th><th>状态</th></tr></thead>

@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+import threading
 import datetime
 import urllib.parse
 from neo4j import GraphDatabase
@@ -77,7 +78,7 @@ def cache_set(key, data, ttl=CACHE_TTL):
 # ============ Neo4j 配置 ============
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://192.168.3.27:7687")
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PWD = os.environ.get("NEO4J_PWD", "zysoft@2024")
+NEO4J_PWD = os.environ.get("NEO4J_PWD", "__NEO4J_PWD__")
 
 # ============ 空壳实体黑名单 ============
 SHELL_NAMES = {
@@ -86,7 +87,10 @@ SHELL_NAMES = {
     "一般治疗", "药物治疗", "定期随访",
 }
 
-# ============ 维度关系映射（17核心 + 2直接扩展 + 3护理直连） ============
+# ============ 维度关系映射（20 个核心维度 = 17 临床一跳 + 3 护理直连） ============
+# 另有 4 个多跳维度在 MULTI_HOP_DIMS（ExamItem/LabItem/Drug/Procedure），
+# 3 个三跳维度在 TWO_HOP_DIMS（ThresholdRule/ExamObservation/LabSubitem）。
+# 这三处合起来决定 /api/kg/dimensions/coverage 的真实统计口径。
 REL_MAP = {
     "Symptom": "has_symptom",
     "Sign": "has_sign",
@@ -2130,6 +2134,98 @@ def query_dimensions():
     }
 
 
+def query_dim_coverage():
+    """核心维度覆盖率 —— 后端真实统计（单一事实源）。
+    前端首页雷达图/柱状图/覆盖率徽标一律读本接口，不再自己在浏览器里遍历算，
+    避免"前端显示 20 维、后端只统计 17 维"的口径漂移。
+
+    返回：
+      dimension_count   参与统计的核心维度数（CORE_DIM_ORDER 长度）
+      disease_total     参与分母的有效疾病数
+      dimensions[]      每维：key/name_cn/dim_index/rel_chain/filled/total/coverage_pct/entity_total
+    统计口径与 /api/kg/diseases 的 dim_counts 完全一致（含多跳维度），保证两处数字可互相对账。
+    """
+    cached = cache_get('kg:dim_coverage')
+    if cached is not None:
+        return cached
+
+    d = get_driver()
+    with d.session() as sess:
+        active_dis = _active_node_filter('d')
+        active_node = _active_node_filter('n')
+
+        total_row = sess.run(
+            "MATCH (d:Disease) WHERE " + active_dis + " RETURN count(d) AS c").single()
+        disease_total = total_row['c'] if total_row else 0
+
+        # 一跳维度：按关系类型统计「有数据的疾病数 + 实例数」
+        # 实例数口径 = 各疾病去重实体数之和，与 /api/kg/diseases 的 dim_counts 逐病累加完全对得上
+        hop1 = [(k, REL_MAP[k]) for k in CORE_DIM_ORDER if k in REL_MAP]
+        rel_types = [r for _, r in hop1]
+        dim_by_rel = {r: k for k, r in hop1}
+        filled_map, entity_map = {}, {}
+        if rel_types:
+            rows = sess.run("""
+                MATCH (d:Disease)-[r]->(n:KGNode)
+                WHERE type(r) IN $rel_types AND """ + active_dis + """ AND """ + active_node + """
+                WITH type(r) AS rel, d, count(DISTINCT n) AS c
+                RETURN rel, count(d) AS disease_cnt, sum(c) AS entity_sum
+            """, rel_types=rel_types)
+            for r in rows:
+                k = dim_by_rel.get(r['rel'])
+                if k:
+                    filled_map[k] = r['disease_cnt']
+                    entity_map[k] = r['entity_sum']
+
+        # 多跳维度：按关系链统计（ExamItem/LabItem 经 ExamPlan，Drug/Procedure 经 TreatmentPlan）
+        for k in CORE_DIM_ORDER:
+            cfg = MULTI_HOP_DIMS.get(k)
+            if not cfg:
+                continue
+            chain, label = cfg['chain'], cfg['target_label']
+            row = sess.run(f"""
+                MATCH (d:Disease)-[:{chain[0]}]->()-[:{chain[1]}]->(n:{label})
+                WHERE """ + active_dis + """ AND """ + active_node + """
+                WITH d, count(DISTINCT n) AS c
+                RETURN count(d) AS disease_cnt, sum(c) AS entity_sum
+            """).single()
+            if row:
+                filled_map[k] = row['disease_cnt']
+                entity_map[k] = row['entity_sum']
+
+        dims = []
+        for idx, k in enumerate(CORE_DIM_ORDER):
+            filled = filled_map.get(k, 0) or 0
+            if k in REL_MAP:
+                chain_desc = REL_MAP[k]
+            elif k in MULTI_HOP_DIMS:
+                chain_desc = ' → '.join(MULTI_HOP_DIMS[k]['chain'])
+            else:
+                chain_desc = ''
+            dims.append({
+                'key': k,
+                'name_cn': ENTITY_NAME_MAP.get(k, k),
+                'dim_index': idx + 1,
+                'rel_chain': chain_desc,
+                'filled': filled,
+                'total': disease_total,
+                'coverage_pct': round(filled / disease_total * 100, 1) if disease_total else 0,
+                'entity_total': entity_map.get(k, 0) or 0,
+            })
+
+        result = {
+            'dimension_count': len(CORE_DIM_ORDER),
+            'disease_total': disease_total,
+            'dimensions': dims,
+            'source': 'Neo4j 实时统计（一跳关系 + 多跳关系链）',
+            'note': 'filled=有该维度数据的疾病数；entity_total=各疾病该维度去重实体数之和'
+                    '（与 /api/kg/diseases 的 dim_counts 逐病累加可逐一对账）；'
+                    'coverage_pct=filled/disease_total。',
+        }
+        cache_set('kg:dim_coverage', result)
+        return result
+
+
 def query_schema_registry():
     """图谱结构注册表（4001整改 4.9）：以 V4.1 注册表（ENTITY_NAME_MAP/REL_NAME_MAP）为基准，
     对照 Neo4j 实际数据，输出实体类型与关系类型的：
@@ -2411,6 +2507,161 @@ def query_guideline_detail(code):
 
 META_MODEL_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meta_model.json')
 
+# ============ v1.5.14 元模型快照自动校准 ============
+# 背景：instance_count 是元模型登记时的快照，图谱每次重解析灌入后快照就过期，
+# meta 页会成片显示「不一致」——这不是前端展示错误，也不是 Neo4j 数据错误，
+# 而是中间那层快照没跟上。改为自动校准，双保险：
+#   1) 读元模型接口时顺带校准（按 META_SYNC_INTERVAL 节流，默认 10 分钟真正比对一次）；
+#   2) 服务启动后后台线程按同一间隔全局校准；
+#   3) 手动「刷新实例对照」= 强制立即校准。
+# 只有真正发生修正才落盘并写审计（meta_model_autosync），可追溯何时把哪个类型从多少改到多少。
+META_SYNC_INTERVAL = int(os.environ.get('META_SYNC_INTERVAL', '600'))
+_meta_sync_lock = threading.Lock()
+_meta_last_sync = {'ts': 0, 'corrected': 0, 'at': ''}
+
+
+def _meta_live_counts():
+    """线上实测：实体类型实例数 + 关系类型实例数 + 关系端点实际连到的实体类型 + 端点对实例数。
+    pairs 形如 {'has_disease': {'DiseaseSubcategory>Disease': 187, ...}}。
+    端点对实例数用于前端关联列表按「这一对端点」显示真实条数（D-12：原先显示关系级总数，两行都成了 332）。"""
+    d = get_driver()
+    with d.session() as sess:
+        et = {r['et']: r['cnt'] for r in sess.run(
+            "MATCH (n:KGNode) WHERE n.entityType IS NOT NULL "
+            "RETURN n.entityType AS et, count(*) AS cnt")}
+        rt = {r['rt']: r['cnt'] for r in sess.run(
+            "MATCH ()-[r]->() RETURN type(r) AS rt, count(*) AS cnt")}
+        ends, pairs = {}, {}
+        for r in sess.run("MATCH (a:KGNode)-[r]->(b:KGNode) "
+                          "RETURN type(r) AS rt, collect(DISTINCT a.entityType) AS st, "
+                          "collect(DISTINCT b.entityType) AS et2"):
+            ends[r['rt']] = {
+                'start': sorted([x for x in (r['st'] or []) if x]),
+                'end': sorted([x for x in (r['et2'] or []) if x]),
+            }
+        for r in sess.run("MATCH (a:KGNode)-[r]->(b:KGNode) "
+                          "RETURN type(r) AS rt, a.entityType AS s, b.entityType AS t, count(*) AS cnt"):
+            if not r['s'] or not r['t']:
+                continue
+            pairs.setdefault(r['rt'], {})[r['s'] + '>' + r['t']] = r['cnt']
+    return et, rt, ends, pairs
+
+
+# 端点对缓存：与自动校准同周期刷新，避免每次打开元模型页都要跑一次端点对聚合
+_meta_pairs_cache = {'ts': 0, 'pairs': {}}
+
+
+def _meta_pairs():
+    global _meta_pairs_cache
+    now = time.time()
+    if now - _meta_pairs_cache['ts'] < META_SYNC_INTERVAL and _meta_pairs_cache['pairs']:
+        return _meta_pairs_cache['pairs']
+    try:
+        _, _, _, pairs = _meta_live_counts()
+        _meta_pairs_cache = {'ts': now, 'pairs': pairs}
+        return pairs
+    except Exception as ex:
+        print('[meta-pairs] 查询失败:', ex)
+        return _meta_pairs_cache['pairs'] or {}
+
+
+# 单类型属性覆盖率缓存（按 entityType 懒查：132 个节点约几十毫秒，全量聚合要 2 秒以上）
+_meta_prop_cache = {}
+
+
+def query_meta_prop_coverage(entity_type):
+    """GET /api/kg/meta-model/coverage?entityType=X
+    返回该类型每个已登记属性的库内覆盖率，以及库内存在但没登记到口径里的属性（建议补录）。
+    覆盖率 = 拥有该属性的节点数 / 该类型节点总数。"""
+    hit = _meta_prop_cache.get(entity_type)
+    if hit and time.time() - hit['ts'] < META_SYNC_INTERVAL:
+        return hit['data']
+    d = get_driver()
+    with d.session() as sess:
+        total = list(sess.run(
+            "MATCH (n:KGNode {entityType:$et}) RETURN count(n) AS c", et=entity_type))
+        total = total[0]['c'] if total else 0
+        rows = list(sess.run(
+            "MATCH (n:KGNode {entityType:$et}) UNWIND keys(n) AS k "
+            "RETURN k, count(*) AS c ORDER BY c DESC", et=entity_type))
+    counts = {r['k']: r['c'] for r in rows if r['k'] != 'entityType'}
+    out = {'entity_type': entity_type, 'total': total,
+           'counts': counts,
+           'ratio': {k: (round(v * 100.0 / total, 1) if total else 0.0) for k, v in counts.items()}}
+    _meta_prop_cache[entity_type] = {'ts': time.time(), 'data': out}
+    return out
+
+
+def _meta_autosync(force=False, operator='system', trigger=None):
+    """用线上实测校准元模型快照，返回本次修正的类型个数。force=False 时按间隔节流。
+    trigger 用于标注触发来源（auto/manual/scheduler），不传时按 force 推断。"""
+    global _meta_last_sync
+    trig = trigger or ('manual' if force else 'auto')
+    now = time.time()
+    if not force and now - _meta_last_sync['ts'] < META_SYNC_INTERVAL:
+        return _meta_last_sync['corrected']
+    if not _meta_sync_lock.acquire(blocking=False):
+        return 0
+    try:
+        now = time.time()
+        if not force and now - _meta_last_sync['ts'] < META_SYNC_INTERVAL:
+            return _meta_last_sync['corrected']
+        # 先查线上，再读快照，把「读到写」的窗口压到最小，避免覆盖并发的人工编辑
+        et_live, rt_live, rt_ends, _pairs = _meta_live_counts()
+        model = _meta_load()
+        # 防误伤：线上查出 0 个实体但快照登记过实例，视为图库暂时不可用/查询异常，跳过本次校准
+        if not et_live and sum(e.get('instance_count', 0) for e in model.get('entity_types', [])):
+            print('[meta-autosync] 线上实测为空，疑似 Neo4j 异常，跳过本次校准', flush=True)
+            return 0
+        changes = []
+        for e in model.get('entity_types', []):
+            live = et_live.get(e['type'], 0)
+            old = e.get('instance_count', 0)
+            if live != old:
+                e['instance_count'] = live
+                changes.append({'kind': 'entity', 'type': e['type'], 'from': old, 'to': live})
+        for r in model.get('relation_types', []):
+            live = rt_live.get(r['type'], 0)
+            old = r.get('instance_count', 0)
+            if live != old:
+                r['instance_count'] = live
+                changes.append({'kind': 'relation', 'type': r['type'], 'from': old, 'to': live})
+            # 端点对齐：observed_* 每次按线上实测刷新；start_types/end_types 用实测补齐缺失端点。
+            # 声明常只写了单一主类型（如 has_evidence 只写 Disease），其余真实起点/终点会被
+            # 前端「实体关联」漏掉。人工在工作台改过端点的关系（endpoints_locked）不再自动补齐。
+            obs = rt_ends.get(r['type'])
+            if obs:
+                if r.get('observed_start') != obs['start'] or r.get('observed_end') != obs['end']:
+                    r['observed_start'], r['observed_end'] = obs['start'], obs['end']
+                if not r.get('endpoints_locked'):
+                    for field, live_list in (('start_types', obs['start']), ('end_types', obs['end'])):
+                        cur = r.get(field) or []
+                        add = [x for x in live_list if x not in cur]
+                        if add:
+                            r[field] = cur + add
+                            changes.append({'kind': 'relation_endpoints', 'type': r['type'],
+                                            'field': field, 'added': add})
+        ts = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if changes:
+            model['generated_at'] = ts + ' (auto-synced)'
+            model['last_sync'] = {'at': ts, 'corrected': len(changes), 'trigger': trig}
+            _meta_save(model)
+            write_audit_log('meta_model_autosync', '', operator,
+                            {'total': len(changes), 'changes': changes[:50]},
+                            {'trigger': trig})
+            print('[meta-autosync] %s 校准 %d 项元模型快照（实例数/端点）' % (ts, len(changes)), flush=True)
+        else:
+            # 无差异也记下最近一次比对时间，便于前端展示「已校准」
+            _meta_last_sync = {'ts': now, 'corrected': 0, 'at': ts, 'trigger': trig}
+            return 0
+        _meta_last_sync = {'ts': now, 'corrected': len(changes), 'at': ts, 'trigger': trig}
+        return len(changes)
+    except Exception as ex:
+        print('[meta-autosync] 失败:', ex)
+        return 0
+    finally:
+        _meta_sync_lock.release()
+
 # v1.5.11c 层级结构种子（方案B：层级关系从 meta.html 前端硬编码迁到元模型 JSON 持久化）
 # 结构：域(key/tag/icon/name/desc) -> 子分组(icon/name/types) -> 实体类型
 # 与 schema.html ENTITY_TYPES 分层口径一致；未归入任何域的类型由前端自动归入"未归类"域
@@ -2458,8 +2709,12 @@ META_HIERARCHY_SEED = [
      ]},
 ]
 
-# 实体类型属性种子：核心字段口径（code/name 必有，其余为该类型的关键业务属性）
-META_ENTITY_PROP_SEEDS = {
+# 实体类型属性种子 v2（2026-10-17 按 Neo4j 实测重建）：只登记库里真实存在、且属业务口径的属性键。
+# v1 有 14 个键库内覆盖率为 0（Disease: icd_code/icd_name/disease_category/raw_name；
+# Guideline: organization/year/file_path；Evidence: content；ExamItem: exam_type；LabItem: lab_type；
+# TreatmentPlan: plan_type；ClinicalRule: expression；NursingIntervention: intervention_type；
+# NursingAssessment: assessment_type；NursingDiagnosis: diagnosis_domain），已按实测替换。
+META_ENTITY_PROP_SEEDS_V1 = {
     'Disease': ['code', 'name', 'icd_code', 'icd_name', 'disease_category', 'raw_name'],
     'Guideline': ['code', 'name', 'organization', 'year', 'version', 'file_path'],
     'Evidence': ['code', 'name', 'source_name', 'pdf_page', 'evidence_level', 'content'],
@@ -2477,6 +2732,151 @@ META_ENTITY_PROP_SEEDS = {
     'NursingAssessment': ['code', 'name', 'assessment_type'],
     'NursingDiagnosis': ['code', 'name', 'diagnosis_domain'],
 }
+
+# 种子版本号：低于此值的 meta_model.json 会在 _meta_load 时做一次性口径迁移（剔旧错键、补新键）
+META_SEED_REV = 2
+
+META_ENTITY_PROP_SEEDS = {
+    'Disease': [
+        # 身份基础
+        'code', 'name', 'preferred_name', 'display_name', 'aliases', 'name_en',
+        'primary_label', 'canonical_labels', 'entityCategory',
+        # 临床疾病
+        'diagnostic_role', 'is_diagnosable', 'is_emr_writable', 'classification_tags', 'disease_level',
+        'parent_code', 'parent_name', 'directory_category_code', 'directory_category_name',
+        'directory_subcategory_code', 'directory_subcategory_name',
+        # 内容与证据（疾病定义口径）
+        'definition', 'definition_source_type', 'definition_source_name', 'definition_evidence_text',
+        'definition_source_section_path', 'definition_knowledge_layer', 'definition_skeleton_slot',
+        # 标准主数据
+        'cdss_dict_id', 'standard_code', 'icd10', 'standard_mapping_note',
+        # 质量治理
+        'clinical_review_status', 'formal_cdss_ready', 'review_status', 'conflict_status', 'merge_status',
+        'clinical_use_status', 'schema_version', 'batch_id', 'source_type',
+        'knowledge_layer', 'skeleton_slot', 'scope_type', 'scope_target', 'updated_at',
+    ],
+    'Guideline': [
+        'code', 'name', 'title', 'version', 'language', 'document_id',
+        'publication_year', 'page_count', 'source_path', 'sha256',
+        'clinical_review_status', 'formal_cdss_ready',
+    ],
+    'Evidence': [
+        'code', 'name', 'evidence_id', 'evidence_key',
+        'evidence_text', 'evidence_level', 'pathway_element', 'locator_json',
+        'source_name', 'source_section', 'source_page', 'pdf_page_start', 'pdf_page_end', 'document_code',
+        'disease_code', 'disease_name',
+    ],
+    'Symptom': ['code', 'name', 'aliases', 'description',
+                'dictionary_status', 'formal_cdss_ready', 'clinical_review_status'],
+    'Sign': ['code', 'name', 'aliases', 'description',
+             'dictionary_status', 'formal_cdss_ready', 'clinical_review_status'],
+    'Drug': [
+        'code', 'name', 'aliases', 'dosage',
+        'cdss_dict_id', 'standard_code', 'dictionary_validation_status',
+        'clinical_review_status', 'formal_cdss_ready',
+    ],
+    'Procedure': [
+        'code', 'name', 'aliases',
+        'standard_mapping_status', 'standard_mapping_count', 'standard_code', 'dictionary_validation_status',
+    ],
+    'ExamItem': [
+        'code', 'name', 'aliases', 'status',
+        'dictionary_validation_status', 'dictionary_eligible', 'standardization_status',
+        'cdss_orderable', 'active_for_cdss', 'cdss_usage_scope', 'inference_status',
+    ],
+    'LabItem': [
+        'code', 'name', 'aliases', 'status',
+        'cdss_dict_id', 'standard_code', 'standard_data_version', 'source_table',
+        'dictionary_status', 'dictionary_validation_status', 'clinical_review_status',
+    ],
+    'TreatmentPlan': [
+        'code', 'name', 'type_label', 'primary_label', 'description',
+        'review_status', 'formal_cdss_ready', 'clinical_review_status', 'scope_type',
+    ],
+    'RecommendationStatement': [
+        'code', 'name', 'statement_text',
+        'primary_evidence_code', 'primary_guideline_code', 'recommendation_class', 'evidence_level',
+        'release_decision_allowed', 'release_block_reasons', 'disease_code',
+        'clinical_review_status', 'formal_cdss_ready',
+    ],
+    'ClinicalRule': [
+        'code', 'name', 'rule_text', 'applicable_population', 'exclusion_or_contraindication',
+        'rule_type', 'type_label', 'clinical_review_status', 'merge_status', 'conflict_status',
+    ],
+    'NursingCarePlan': [
+        'code', 'name', 'care_context', 'content_completeness', 'plan_level',
+        'applicable_stage', 'applicable_disease_codes',
+        'schema_version', 'review_status', 'clinical_review_status', 'execution_status',
+    ],
+    'NursingIntervention': [
+        'code', 'name', 'intervention_text', 'applicable_stage', 'applicable_disease_codes',
+        'content_completeness', 'is_orderable', 'actor', 'execution_status',
+    ],
+    'NursingAssessment': ['code', 'name', 'assessment_method', 'assessment_scope'],
+    'NursingDiagnosis': ['code', 'name', 'terminology_mapping_status', 'local_term_source_code', 'local_term_row'],
+}
+
+# 属性分组口径：用于前端按业务含义分段展示（组内顺序与种子顺序一致）
+# spec/anchor 指向 standard.html 的字段标准章节，前端可直接跳转
+META_PROP_GROUPS = [
+    {'name': '身份基础', 'desc': '标识这个实体“是谁”的基本字段，所有实体类型都应具备',
+     'spec': '节点必填字段', 'anchor': 'fields-node',
+     'keys': ['code', 'name', 'id', 'entityType', 'entityCategory', 'display_name', 'preferred_name',
+              'original_name', 'name_en', 'aliases', 'alias', 'primary_label', 'canonical_labels',
+              'type_label', 'title', 'language', 'version', 'document_id', 'document_code',
+              'evidence_id', 'evidence_key', 'status', 'source_type', 'batch_id', 'schema_version',
+              'clinical_use_status']},
+    {'name': '临床疾病', 'desc': '疾病的可诊断性、病历可用性与目录层级——临床业务直接读取的字段',
+     'spec': '临床疾病字段', 'anchor': 'fields-disease',
+     'keys': ['diagnostic_role', 'is_diagnosable', 'is_emr_writable', 'classification_tags',
+              'disease_level', 'parent_code', 'parent_name', 'parentCode',
+              'directory_category_code', 'directory_category_name',
+              'directory_subcategory_code', 'directory_subcategory_name',
+              'disease_code', 'disease_name', 'applicable_disease_codes']},
+    {'name': '内容与证据', 'desc': '定义、证据原文与规则正文——知识本身写了什么，以及出自哪里',
+     'spec': '（内容字段，格式见通用字段规则）', 'anchor': 'fields-format',
+     'keys': ['definition', 'definition_source_type', 'definition_source_name', 'definition_evidence_text',
+              'definition_source_section_path', 'definition_knowledge_layer', 'definition_skeleton_slot',
+              'description', 'evidence_text', 'evidence_level', 'pathway_element', 'locator_json',
+              'source_name', 'source_section', 'source_page', 'pdf_page_start', 'pdf_page_end',
+              'publication_year', 'page_count', 'source_path', 'sha256',
+              'statement_text', 'primary_evidence_code', 'primary_guideline_code',
+              'recommendation_class', 'release_decision_allowed', 'release_block_reasons',
+              'rule_text', 'applicable_population', 'exclusion_or_contraindication',
+              'care_context', 'content_completeness', 'intervention_text', 'is_orderable', 'actor',
+              'assessment_method', 'assessment_scope', 'plan_level', 'applicable_stage',
+              'dosage', 'drug_class']},
+    {'name': '标准主数据', 'desc': '与 CDSS 标准字典对齐的编码与校验状态——决定这条知识能不能落地到临床系统',
+     'spec': 'CDSS 标准主数据字段', 'anchor': 'fields-std',
+     'keys': ['cdss_dict_id', 'standard_code', 'standard_mapping_status', 'standard_mapping_count',
+              'standard_mapping_note', 'standard_data_version', 'coding_system', 'coding_system_version',
+              'valid_flag', 'source_table', 'icd10', 'icd_code', 'icd_name',
+              'dictionary_status', 'dictionary_validation_status', 'dictionary_eligible',
+              'standardization_status', 'cdss_orderable', 'active_for_cdss', 'cdss_usage_scope',
+              'inference_status']},
+    {'name': '人群限制', 'desc': '性别、年龄、妊娠、哺乳等适用人群约束——决定推荐能不能推给这位患者',
+     'spec': '基础人群与有效性限制', 'anchor': 'fields-pop',
+     'keys': ['sex_limit_code', 'sex_limit_name', 'age_min', 'age_max', 'age_unit',
+              'pregnancy_limit_code', 'pregnancy_limit_name', 'lactation_limit_code', 'lactation_limit_name',
+              'population_limit_source_types', 'population_limit_evidence_codes',
+              'population_limit_review_status']},
+    {'name': '质量治理', 'desc': '审核、发布与合并状态——数据能不能被正式使用，靠这组字段把关',
+     'spec': '（治理字段，无独立标准章节）', 'anchor': '',
+     'keys': ['clinical_review_status', 'formal_cdss_ready', 'review_status', 'conflict_status',
+              'merge_status', 'execution_status', 'terminology_mapping_status',
+              'local_term_source_code', 'local_term_row', 'scope_type', 'scope_target',
+              'knowledge_layer', 'skeleton_slot', 'created_at', 'updated_at', 'updated_by']},
+]
+# key -> 分组信息 反查表（未收录的键归入“其他属性”）
+META_PROP_META = {}
+for _g in META_PROP_GROUPS:
+    for _k in _g['keys']:
+        META_PROP_META[_k] = {'group': _g['name'], 'spec': _g['spec'], 'anchor': _g['anchor']}
+META_PROP_OTHER = {'group': '其他属性', 'spec': '', 'anchor': ''}
+
+
+def _prop_meta(key):
+    return META_PROP_META.get(key, META_PROP_OTHER)
 
 # 关系类型语义种子（中文说明 + 建议端点），REL_NAME_MAP 提供中文名
 META_REL_SEED_ENDPOINTS = {
@@ -2680,10 +3080,42 @@ def _normalize_props(props, existing=None):
     return out
 
 
+_V1_PROP_KEYS = {et: set(v) for et, v in META_ENTITY_PROP_SEEDS_V1.items()}
+
+
+def _meta_migrate_props(model):
+    """v2 属性口径迁移：按新种子重建各实体类型的属性清单。
+    背景（D-10）：v1 种子有 14 个登记键在库内覆盖率为 0，前端显示成一片死字段。
+    v2 全部按键实测覆盖率 > 0 重新选定。迁移规则：
+      1) 剔除 v1 登记过、v2 判定为库内零覆盖的错键；
+      2) 补齐 v2 新增键；
+      3) 保留已有中文名，也保留人工自行添加（v1/v2 种子都没有）的键。
+    返回逐类型的增删明细，写入 meta_model.json 便于追溯。"""
+    changes = []
+    for e in model.get('entity_types', []):
+        et = e.get('type')
+        seed = META_ENTITY_PROP_SEEDS.get(et)
+        if not seed:
+            continue
+        old = _normalize_props(e.get('key_properties') or [])
+        old_keys = [p['key'] for p in old]
+        cn = {p['key']: p['name_cn'] for p in old}
+        stale = _V1_PROP_KEYS.get(et, set()) - set(seed)
+        manual = [k for k in old_keys if k not in seed and k not in stale]
+        keys = list(seed) + [k for k in manual if k not in seed]
+        if keys != old_keys:
+            changes.append({'type': et,
+                            'removed': [k for k in old_keys if k not in keys],
+                            'added': [k for k in keys if k not in old_keys]})
+            e['key_properties'] = _normalize_props(keys, cn)
+    return changes
+
+
 def _meta_load():
     """读取元模型配置；文件不存在时构建种子并落盘。
     v1.5.11c：旧文件缺 hierarchy 字段时自动补层级种子（不覆盖已有配置）。
-    v1.5.11d：key_properties 旧字符串数组形态自动迁移为 [{key,name_cn}] 对象形态（种子补中文名）。"""
+    v1.5.11d：key_properties 旧字符串数组形态自动迁移为 [{key,name_cn}] 对象形态（种子补中文名）。
+    v1.5.15：seed_rev 低于 META_SEED_REV 时按新属性口径做一次性迁移（D-10）。"""
     if os.path.exists(META_MODEL_FILE):
         try:
             with open(META_MODEL_FILE, 'r', encoding='utf-8') as f:
@@ -2698,6 +3130,13 @@ def _meta_load():
                     old_cn = {p['key']: p.get('name_cn', '') for p in props if isinstance(p, dict)}
                     e['key_properties'] = _normalize_props(props, old_cn)
                     changed = True
+            if int(model.get('seed_rev') or 1) < META_SEED_REV:
+                mig = _meta_migrate_props(model)
+                model['seed_rev'] = META_SEED_REV
+                model['seed_rev_at'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                model['seed_rev_changes'] = mig[:60]
+                changed = True
+                print('[meta] 属性口径迁移到 v%d：%d 个类型有增删' % (META_SEED_REV, len(mig)), flush=True)
             if changed:
                 _meta_save(model)
             return model
@@ -2743,11 +3182,20 @@ def build_meta_model_seed():
     for rt in sorted(set(list(REL_NAME_MAP.keys()) + list(rel_obs.keys()))):
         obs = rel_obs.get(rt, {'count': 0, 'start_types': [], 'end_types': []})
         seed = META_REL_SEED_ENDPOINTS.get(rt, [])
+        # 声明端点 ∪ 线上实测端点：声明常只写单一主类型，只取声明会把真实存在的其他起点/终点漏掉
+        def _union(seed_side, live_side):
+            out = list(seed_side)
+            for x in live_side:
+                if x not in out:
+                    out.append(x)
+            return out
+        starts = _union(seed[0:1], obs['start_types'])
+        ends = _union(seed[1:2], obs['end_types'])
         relations.append({
             'type': rt,
             'name_cn': REL_NAME_MAP.get(rt, ''),
-            'start_types': seed[0:1] if seed else [],
-            'end_types': seed[1:2] if seed else [],
+            'start_types': starts,
+            'end_types': ends,
             'observed_start': obs['start_types'],
             'observed_end': obs['end_types'],
             'instance_count': obs['count'],
@@ -2756,6 +3204,7 @@ def build_meta_model_seed():
     return {
         'version': SCHEMA_STANDARD_VERSION,
         'generated_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'seed_rev': META_SEED_REV,
         'entity_types': entities,
         'relation_types': relations,
         'hierarchy': json.loads(json.dumps(META_HIERARCHY_SEED, ensure_ascii=False)),
@@ -2768,7 +3217,9 @@ def build_meta_model_seed():
 def query_meta_model(include_inactive=True):
     """GET /api/kg/meta-model：返回配置 + 线上实例数实时对照
     v1.5.11d：key_properties 归一为 [{key,name_cn}] 对象形态输出（读时兜底，不改盘）；
-    include_inactive=0 时过滤已停用（active=false）的实体/关系类型。"""
+    include_inactive=0 时过滤已停用（active=false）的实体/关系类型。
+    v1.5.14：读之前先按间隔自动校准快照，避免前端成片显示"不一致"。"""
+    _meta_autosync()
     model = _meta_load()
     d = get_driver()
     with d.session() as sess:
@@ -2789,15 +3240,25 @@ def query_meta_model(include_inactive=True):
             e['key_properties'] = _normalize_props(e['key_properties'], old_cn)
         entities.append(e)
     relations = []
+    pairs = _meta_pairs()
     for r in model.get('relation_types', []):
         if not include_inactive and r.get('active') is False:
             continue
         r['live_count'] = rel_rows.get(r['type'], 0)
         r['drift'] = 'match' if rel_rows.get(r['type'], 0) == r.get('instance_count', 0) else 'drift'
+        # 端点对实例数：key 形如 'DiseaseSubcategory>Disease'，供前端按「这一对端点」显示真实条数
+        r['endpoint_stats'] = pairs.get(r['type'], {})
         relations.append(r)
     out = dict(model)
     out['entity_types'] = entities
     out['relation_types'] = relations
+    # 属性分组口径：前端按业务含义分段展示，并据此跳转 standard.html 字段标准
+    out['prop_groups'] = META_PROP_GROUPS
+    # 若最近一次比对无差异（不落盘），把内存里的比对时间带给前端，避免显示成旧时间
+    mem = dict(_meta_last_sync)
+    if mem.get('at') and (mem['at'] >= (model.get('last_sync') or {}).get('at', '')):
+        mem.pop('ts', None)
+        out['last_sync'] = mem
     return out
 
 
@@ -2836,12 +3297,21 @@ def update_meta_model(body, operator):
         old = next((x for x in model['relation_types'] if x['type'] == rt), None)
         if old:
             old.update({k: item[k] for k in ('name_cn', 'start_types', 'end_types') if k in item})
+            # 人工删掉了线上真实存在的端点 → 锁定端点，避免自动校准下一次又把它补回来
+            removed_live = any(
+                set(old.get('observed_' + side) or []) - set(old.get(k) or [])
+                for k, side in (('start_types', 'start'), ('end_types', 'end')))
+            if removed_live:
+                old['endpoints_locked'] = True
+                old['endpoints_locked_at'] = now
+                old['endpoints_locked_by'] = operator
         else:
             model['relation_types'].append({
                 'type': rt, 'name_cn': item.get('name_cn', ''),
                 'start_types': item.get('start_types', []),
                 'end_types': item.get('end_types', []),
                 'observed_start': [], 'observed_end': [],
+                'endpoints_locked': True, 'endpoints_locked_at': now, 'endpoints_locked_by': operator,
                 'instance_count': 0, 'source': 'manual',
             })
         model['relation_types'].sort(key=lambda x: x['type'])
@@ -2911,16 +3381,35 @@ def update_meta_model(body, operator):
         model['hierarchy'] = new_hier
     elif action == 'refresh_counts':
         # 用线上实测刷新快照 instance_count（消除 drift）
+        # v1.5.14：改走统一的自动校准实现，同时刷新端点观测值
+        _meta_pairs_cache['ts'] = 0
+        _meta_prop_cache.clear()
         fresh = build_meta_model_seed()
         live_et = {e['type']: e['instance_count'] for e in fresh['entity_types']}
         live_rt = {r['type']: r['instance_count'] for r in fresh['relation_types']}
+        corrected = 0
         for e in model['entity_types']:
-            e['instance_count'] = live_et.get(e['type'], 0)
+            v = live_et.get(e['type'], 0)
+            if e.get('instance_count', 0) != v:
+                corrected += 1
+            e['instance_count'] = v
         for r in model['relation_types']:
-            r['instance_count'] = live_rt.get(r['type'], 0)
+            v = live_rt.get(r['type'], 0)
+            if r.get('instance_count', 0) != v:
+                corrected += 1
+            r['instance_count'] = v
             f = next((x for x in fresh['relation_types'] if x['type'] == r['type']), None)
             if f:
                 r['observed_start'], r['observed_end'] = f['observed_start'], f['observed_end']
+                # 端点补齐：声明端点 ∪ 实测端点（与自动校准口径一致；人工改过的端点不动）
+                if not r.get('endpoints_locked'):
+                    for field in ('start_types', 'end_types'):
+                        cur = r.get(field) or []
+                        add = [x for x in (f.get(field) or []) if x not in cur]
+                        if add:
+                            r[field] = cur + add
+                            corrected += 1
+        model['last_sync'] = {'at': now, 'corrected': corrected, 'trigger': 'manual'}
     else:
         return {'error': 'action 必须为 update_entity/update_relation/delete_entity/delete_relation/'
                          'restore_entity/restore_relation/move_entity_domain/update_hierarchy/refresh_counts'}
@@ -6418,6 +6907,14 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(query_schema_registry())
             return
 
+        if path == '/api/kg/dimensions/coverage':
+            # 核心维度覆盖率后端真实统计（首页雷达/柱状图唯一事实源）
+            try:
+                self._json_response(query_dim_coverage())
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
         if path == '/api/kg/dimensions':
             # 维度口径单一事实源：前端启动时动态拉取，Schema升级后前端零改动
             self._json_response(query_dimensions())
@@ -6516,6 +7013,18 @@ class KGHandler(http.server.SimpleHTTPRequestHandler):
                 qs = urllib.parse.parse_qs(parsed.query)
                 include_inactive = (qs.get('include_inactive', ['1'])[0] != '0')
                 self._json_response(query_meta_model(include_inactive))
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+            return
+
+        if path == '/api/kg/meta-model/coverage':
+            qs = urllib.parse.parse_qs(parsed.query)
+            et = (qs.get('entityType', [''])[0]) or ''
+            if not et:
+                self._json_response({"error": "entityType required"}, 400)
+                return
+            try:
+                self._json_response(query_meta_prop_coverage(et))
             except Exception as e:
                 self._json_response({"error": str(e)}, 500)
             return
@@ -6765,12 +7274,26 @@ def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 4001
     # 切换到脚本所在目录（即 kg-test-page）
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    # v1.5.14 元模型快照定时校准：服务启动即校一次，之后按 META_SYNC_INTERVAL 周期执行。
+    # 图谱每次重解析灌入后，快照会自动跟上，meta 页不再成片显示"不一致"。
+    def _meta_sync_loop():
+        time.sleep(5)   # 等 Neo4j 驱动/服务就绪
+        while True:
+            try:
+                _meta_autosync(force=True, operator='system-scheduler', trigger='scheduler')
+            except Exception as ex:
+                print('[meta-scheduler] 校准异常:', ex)
+            time.sleep(META_SYNC_INTERVAL)
+    threading.Thread(target=_meta_sync_loop, name='meta-autosync', daemon=True).start()
+
     http.server.HTTPServer.allow_reuse_address = True
     server = ThreadedHTTPServer(('0.0.0.0', port), KGHandler)
     print(f"知识图谱动态服务启动: http://0.0.0.0:{port}")
     print(f"Neo4j: {NEO4J_URI}")
     print(f"API: /api/kg/diseases | /api/kg/stats | /api/kg/disease/<code> | /api/kg/guidelines")
     print(f"NEW: POST /api/kg/diagnose | GET /api/kg/pathway/ami")
+    print(f"元模型快照自动校准: 每 {META_SYNC_INTERVAL}s 一次")
     server.serve_forever()
 
 

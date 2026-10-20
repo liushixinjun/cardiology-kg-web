@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>专科知识图谱 · 心血管内科 - 图谱元模型配置</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
-<script src="./_shared/js/app.js?v=2026101601"></script>
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026102001">
+<script src="./_shared/js/theme.js?v=2026102001"></script>
+<script src="./_shared/js/app.js?v=2026102001"></script>
 <style>
 .mm-layout{padding:20px;max-width:1440px;margin:0 auto}
 .mm-header{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(81,207,102,.05));border:1px solid var(--rule);border-radius:12px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -200,6 +201,42 @@ tr.mm-inactive>td{opacity:.5}
 .mm-wb-dd-new:hover{background:rgba(79,140,255,.08)}
 .mm-wb-dd-hint{padding:6px 8px;font-size:10px;color:var(--muted)}
 .mm-wb-dd-item.mm-wb-dd-hi{background:rgba(79,140,255,.12)}
+
+/* ===== v1.5.15 工作台可读性改造：带表头的属性/关联表格 ===== */
+.mm-wb-table{width:100%;border-collapse:collapse;font-size:12px}
+.mm-wb-table thead th{background:var(--bg3);color:var(--muted);font-size:10px;font-weight:700;text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.mm-wb-table td{padding:3px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.mm-wb-table tbody tr:hover td{background:var(--bg3)}
+.mm-wb-table input{width:100%;padding:4px 7px;background:var(--bg2);border:1px solid transparent;border-radius:5px;color:var(--ink);font-family:ui-monospace,Consolas,monospace;font-size:11px;outline:none;box-sizing:border-box}
+.mm-wb-table input:hover{border-color:var(--rule)}
+.mm-wb-table input:focus{border-color:var(--accent);background:var(--bg)}
+.mm-wb-table tr.dirty td{background:rgba(79,140,255,.05)}
+.mm-wb-table .mm-wb-idx{color:var(--muted);font-size:10px;text-align:right;width:28px}
+.mm-wb-grp td{background:var(--bg3);padding:7px 8px}
+.mm-wb-grp .g-name{font-size:12px;font-weight:800;color:var(--ink)}
+.mm-wb-grp .g-desc{font-size:10px;color:var(--muted);margin-left:8px;font-weight:600}
+.mm-wb-grp .g-spec{float:right;font-size:10px;color:var(--accent);text-decoration:none;font-weight:700}
+.mm-wb-grp .g-spec:hover{text-decoration:underline}
+.mm-cov{font-family:ui-monospace,Consolas,monospace;font-size:10px;white-space:nowrap;display:inline-flex;align-items:center}
+.mm-cov.full{color:#40c057}
+.mm-cov.part{color:#f59f00}
+.mm-cov.zero{color:#fa5252}
+.mm-cov.none{color:var(--muted)}
+.mm-cov-bar{display:inline-block;width:40px;height:4px;border-radius:2px;background:var(--rule);margin-right:6px;overflow:hidden;flex-shrink:0}
+.mm-cov-bar i{display:block;height:100%;background:currentColor}
+.mm-dir{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap;display:inline-block}
+.mm-dir.out{background:rgba(79,140,255,.12);color:var(--accent)}
+.mm-dir.in{background:rgba(12,166,120,.14);color:#0ca678}
+.mm-ep-role{font-size:9px;color:var(--muted);font-weight:700;margin-right:4px;flex-shrink:0}
+.mm-ep-cell{display:flex;align-items:center;gap:2px}
+.mm-ep-cell input{flex:1}
+.mm-ep-link{cursor:pointer;color:var(--accent);font-size:11px;margin-left:2px;flex-shrink:0;opacity:.75}
+.mm-ep-link:hover{opacity:1;text-decoration:underline}
+.mm-std-links{display:flex;flex-wrap:wrap;gap:8px}
+.mm-std-link{display:flex;flex-direction:column;gap:2px;padding:8px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;text-decoration:none;min-width:150px;flex:1}
+.mm-std-link:hover{border-color:var(--accent)}
+.mm-std-link b{font-size:12px;color:var(--ink)}
+.mm-std-link span{font-size:10px;color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body>
@@ -360,12 +397,17 @@ function mmLoad(){
     var nEt = m.entity_types.length, nRt = m.relation_types.length;
     var driftEt = m.entity_types.filter(function(x){return x.drift==='drift';}).length;
     var zeroEt = m.entity_types.filter(function(x){return (x.live_count||0)===0;}).length;
+    var ls = m.last_sync || null;
+    var lsLabel = ls && ls.trigger === 'scheduler' ? '定时校准' :
+                  (ls && ls.trigger === 'manual' ? '手动校准' : '自动校准');
     document.getElementById('mm-meta-info').textContent =
-      'Schema基准 ' + (m.version||'-') + ' · 生成于 ' + (m.generated_at||'-');
+      'Schema基准 ' + (m.version||'-') + ' · 生成于 ' + (m.generated_at||'-')
+      + (ls && ls.at ? ' · 快照已' + lsLabel + '（' + ls.at + (ls.corrected ? '，修正 ' + ls.corrected + ' 项' : '，无差异') + '）'
+                     : ' · 快照自动校准已启用（每 10 分钟）');
     document.getElementById('mm-kpis').innerHTML =
       '<div class="mm-kpi"><b>'+nEt+'</b><span>实体类型</span></div>' +
       '<div class="mm-kpi"><b>'+nRt+'</b><span>关系类型</span></div>' +
-      '<div class="mm-kpi'+(driftEt?' warn':'')+'" title="登记时的实例数（快照）与现在线上 Neo4j 实际数不一致的类型个数——数据在登记后又增减过，属正常演进，点开实体类型表可看每个类型快照数 vs 实测数"><b>'+driftEt+'</b><span>登记数与实际不一致</span><span class="tip">登记后又增减过数据</span></div>' +
+      '<div class="mm-kpi'+(driftEt?' warn':'')+'" title="登记快照与线上 Neo4j 实测实例数不一致的类型个数。系统会定时自动校准（默认每 10 分钟），正常情况下应为 0；若刚灌入数据、还没到下次校准时点，这里会短暂显示差异"><b>'+driftEt+'</b><span>登记数与实际不一致</span><span class="tip">'+(driftEt?'待下次自动校准':'已自动校准')+'</span></div>' +
       '<div class="mm-kpi'+(zeroEt?' warn':'')+'" title="在元模型里登记了、但线上 Neo4j 里一个数据节点都没有的类型个数——属规划中未落地的类型，等数据建设方（Codex）解析灌入后才会有实例"><b>'+zeroEt+'</b><span>登记了但无数据</span><span class="tip">规划中、尚未落地</span></div>';
     var sel = document.getElementById('mm-ck-type');
     sel.innerHTML = '<option value="">选择要核对的实体类型...</option>' +
@@ -639,23 +681,40 @@ function mmHierPick(t){
   mmRenderHierarchy();
 }
 
-/* 收集某实体类型相关的全部关系端点（含出边/入边，端点可多个则拆行） */
+/* 收集某实体类型相关的全部关系端点（含出边/入边，端点可多个则拆行）
+   v1.5.15：每行带上「这一对端点」的真实条数 endpointLive、共用类型数 shared。
+   D-12 修复：原先只取关系级 live_count，has_disease 的两行都显示 332，
+   而真实是 DiseaseSubcategory→Disease 187、DiseaseCategory→Disease 145。 */
 function mmHierRelsOf(t){
   var rels = [];
   MM.relation_types.forEach(function(r){
-    var ends = (r.end_types||[]);
-    (ends.length?ends:[null]).forEach(function(tg){
-      if ((r.start_types||[]).indexOf(t)>=0)
-        rels.push({key:'o|'+r.type+'|'+tg, dir:'out', rel:r.type, relName:r.name_cn||'',
-          origEnd:(tg===null?'':tg), endpt:(tg===null?'':tg), live:r.live_count||0, drift:r.drift});
-    });
-    (r.start_types||[]).forEach(function(src){
-      if ((r.end_types||[]).indexOf(t)>=0 && src!==t)
-        rels.push({key:'i|'+r.type+'|'+src, dir:'in', rel:r.type, relName:r.name_cn||'',
-          origEnd:(src===null?'':src), endpt:(src===null?'':src), live:r.live_count||0, drift:r.drift});
-    });
+    var starts = (r.start_types||[]), ends = (r.end_types||[]);
+    var st = r.endpoint_stats || {};
+    var peers = {};
+    starts.concat(ends).forEach(function(x){ if (x && x!==t) peers[x] = 1; });
+    var shared = Object.keys(peers).length;
+    var base = {rel:r.type, relName:r.name_cn||'', live:r.live_count||0,
+      shared:shared, drift:r.drift, startTypes:starts, endTypes:ends};
+    function push(dir, self, other){
+      var pair = dir==='out' ? (self+'>'+other) : (other+'>'+self);
+      var cnt = st[pair];
+      rels.push({key:(dir==='out'?'o|':'i|')+r.type+'|'+other, dir:dir, rel:base.rel,
+        relName:base.relName, origEnd:other, endpt:other,
+        live:base.live, endpointLive:(cnt===undefined?null:cnt),
+        shared:base.shared, drift:base.drift});
+    }
+    if (!starts.length && !ends.length) return;
+    if (!ends.length){ if (starts.indexOf(t)>=0) push('out', t, ''); }
+    else ends.forEach(function(tg){ if (starts.indexOf(t)>=0) push('out', t, tg); });
+    starts.forEach(function(src){ if (src!==t && ends.indexOf(t)>=0) push('in', t, src); });
   });
   return rels;
+}
+/* 分组/共用情况的白话说明 */
+function mmRelShareText(r){
+  if (r.shared===0) return {t:'仅本类型使用', cls:'schema', tip:'该关系只在这两个实体类型之间使用'};
+  return {t:'另有 '+r.shared+' 类共用', cls:'db',
+    tip:'该关系还被其它 '+r.shared+' 个实体类型用于类似端点，删改会影响它们'};
 }
 
 function mmHierDetail(t){
@@ -671,7 +730,7 @@ function mmHierDetail(t){
   /* 构建工作台状态（v1.5.11d：属性对象形态 {key, name_cn}，双输入维护） */
   var rels = mmHierRelsOf(t);
   var normProps = mmNormProps(e.key_properties||[]);
-  WB = {type:t, name_cn:e.name_cn||'', category:e.category||'临床', saving:false,
+  WB = {type:t, name_cn:e.name_cn||'', category:e.category||'临床', saving:false, cov:null,
     props:normProps.map(function(p){return {key:p.key, cn:p.name_cn, origKey:p.key, origCn:p.name_cn};}),
     origProps:normProps.map(function(p){return p.key+'|'+p.name_cn;}),
     rels:rels,
@@ -715,6 +774,15 @@ function mmHierDetail(t){
     + '<div class="mm-wb-card" style="grid-column:1/-1"><h6>🔗 实体关联（'+t+' 的出边 / 入边，端点即另一实体类型，可直接改） <span class="cnt" id="mm-wb-rel-cnt"></span></h6>'
     + '<div id="mm-wb-rels"></div>'
     + '<button class="mm-wb-add" onclick="mmWbAddRel()">＋ 添加关联（搜索既有关系或新建）</button></div>'
+    + '<div class="mm-wb-card" style="grid-column:1/-1"><h6>📐 字段标准口径 <span class="cnt">（规范原文见字段标准页，点卡片直达对应章节）</span></h6>'
+    + '<div class="mm-std-links">'
+    + '<a class="mm-std-link" href="./standard.html#fields-node" target="_blank"><b>节点必填字段</b><span>所有实体都必须有的 8 个基础字段（code / entityType / name / aliases 等）</span></a>'
+    + '<a class="mm-std-link" href="./standard.html#fields-disease" target="_blank"><b>临床疾病字段</b><span>可诊断性、病历可用性、分类标签——疾病类实体专用</span></a>'
+    + '<a class="mm-std-link" href="./standard.html#fields-std" target="_blank"><b>CDSS 标准主数据字段</b><span>标准字典对齐、编码体系、校验状态，决定能否落地临床</span></a>'
+    + '<a class="mm-std-link" href="./standard.html#fields-pop" target="_blank"><b>人群限制字段</b><span>性别 / 年龄 / 妊娠 / 哺乳等适用人群约束</span></a>'
+    + '<a class="mm-std-link" href="./standard.html#fields-rel" target="_blank"><b>关系必填字段</b><span>关系的 8 个基础字段（id / source_code / relationType 等）</span></a>'
+    + '<a class="mm-std-link" href="./standard.html#fields-format" target="_blank"><b>字段格式规则</b><span>编码、日期、布尔、多值字段的书写规范</span></a>'
+    + '</div></div>'
     + '<div class="mm-wb-savebar" id="mm-wb-savebar">'
     + '<span class="mm-wb-status" id="mm-wb-status">所有修改将一次性提交（实体定义+属性+关联端点），逐项落审计日志</span>'
     + '<input type="text" id="mm-wb-op" placeholder="操作人" style="padding:7px 10px;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;color:var(--ink);font-size:12px;width:120px;outline:none">'
@@ -722,6 +790,21 @@ function mmHierDetail(t){
     + '<button class="mm-btn" id="mm-wb-save-btn" onclick="mmWbSave()">💾 一键保存全部修改</button>'
     + '</div>';
   mmWbRenderProps(); mmWbRenderRels();
+  mmWbLoadCoverage(t);
+}
+
+/* 拉取该实体类型的属性覆盖率（按类型懒查，结果服务端缓存 10 分钟） */
+function mmWbLoadCoverage(t){
+  WB.covLoading = true;
+  fetch('/api/kg/meta-model/coverage?entityType='+encodeURIComponent(t))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if (!WB || WB.type!==t) return;
+      WB.covLoading = false;
+      WB.cov = (d && !d.error) ? d : null;
+      mmWbRenderProps();
+    })
+    .catch(function(){ if (WB && WB.type===t){ WB.covLoading=false; mmWbRenderProps(); } });
 }
 
 function mmEsc(s){
@@ -771,60 +854,147 @@ function mmHierMoveSave(t){
   }).catch(function(e){ alert('网络错误：'+e); });
 }
 
-/* ---- 工作台：属性区（v1.5.11d 双输入：属性名 + 中文名） ---- */
+/* ---- 工作台：属性区（v1.5.15 带表头表格 + 按业务口径分组 + 库内覆盖率） ---- */
+function mmPropGroupMeta(key){
+  var gs = (MM && MM.prop_groups) || [];
+  for (var i=0;i<gs.length;i++){
+    if ((gs[i].keys||[]).indexOf(key)>=0) return gs[i];
+  }
+  return {name:'其他属性', desc:'未纳入标准分组的自定义字段', spec:'', anchor:''};
+}
+/* 覆盖率徽标：full 满覆盖 / part 部分覆盖 / zero 库内无值 / none 未查询到 */
+function mmCovCell(key){
+  if (!WB.cov){
+    return '<span class="mm-cov none" title="'+(WB.covLoading?'正在统计库内覆盖率…':'未取到覆盖率数据')+'">'+(WB.covLoading?'统计中…':'—')+'</span>';
+  }
+  var total = WB.cov.total||0, n = (WB.cov.counts||{})[key];
+  if (n===undefined){
+    return '<span class="mm-cov zero" title="元模型登记了这个字段，但库内 '+(total?total+' 个':'')+'节点都没有它——口径与实际数据不符"><span class="mm-cov-bar"><i style="width:0"></i></span>0/'+total+'</span>';
+  }
+  var pct = total ? Math.round(n*1000/total)/10 : 0;
+  var cls = (total && n>=total) ? 'full' : (n>0?'part':'zero');
+  return '<span class="mm-cov '+cls+'" title="库内 '+n+'/'+total+' 个节点有该字段，覆盖率 '+pct+'%">'
+    + '<span class="mm-cov-bar"><i style="width:'+Math.max(2,Math.min(100,pct))+'%"></i></span>'
+    + n+'/'+total+' · '+pct+'%</span>';
+}
 function mmWbRenderProps(){
-  var h = '';
+  var order = [], bucket = {};
+  var gs = ((MM && MM.prop_groups) || []).map(function(g){return g.name;}).concat(['其他属性']);
+  gs.forEach(function(n){ bucket[n] = []; });
   WB.props.forEach(function(p,i){
-    var dirty = p.key!==p.origKey || p.cn!==p.origCn;
-    h += '<div class="mm-wb-prop'+(dirty?' dirty':'')+'" id="mm-wb-prop-'+i+'">'
-      + '<span style="color:var(--muted);font-size:11px;width:14px">'+(i+1)+'</span>'
-      + '<span class="mm-wb-flab">属性编码</span>'
-      + '<input type="text" value="'+mmEsc(p.key)+'" oninput="mmWbPropVal('+i+',\'key\',this.value)" placeholder="如 code / disease_code（snake_case）" title="属性编码：如 code、name、disease_code（snake_case）">'
-      + '<span class="mm-wb-flab">代码名称</span>'
-      + '<input type="text" class="cn-in" value="'+mmEsc(p.cn)+'" oninput="mmWbPropVal('+i+',\'cn\',this.value)" placeholder="如 编码 / 名称" style="max-width:130px" title="代码名称：该属性编码对应的中文名称，可空">'
-      + '<span class="mm-wb-x" onclick="mmWbDelProp('+i+')" title="删除该属性">✕</span></div>';
+    var g = mmPropGroupMeta(p.key||'').name;
+    if (!bucket[g]){ bucket[g] = []; gs.push(g); }
+    bucket[g].push(i);
+    if (order.indexOf(g)<0) order.push(g);
   });
-  document.getElementById('mm-wb-props').innerHTML = h || '<div class="mm-rel-name" style="padding:4px 0">未定义关键属性</div>';
-  document.getElementById('mm-wb-prop-cnt').textContent = '('+WB.props.length+')';
+  var h = '<table class="mm-wb-table"><thead><tr>'
+    + '<th style="width:28px">#</th><th style="width:34%">属性编码</th><th style="width:22%">中文名称</th>'
+    + '<th style="width:120px">库内覆盖</th><th>标准归属</th><th style="width:34px"></th></tr></thead><tbody>';
+  var shown = 0;
+  order.forEach(function(g){
+    var idxs = bucket[g] || [];
+    if (!idxs.length) return;
+    var meta = mmPropGroupMeta(WB.props[idxs[0]].key||'');
+    h += '<tr class="mm-wb-grp"><td colspan="6">'
+      + '<span class="g-name">'+mmEsc(meta.name)+'</span>'
+      + '<span class="g-desc">'+mmEsc(meta.desc||'')+'</span>'
+      + (meta.anchor?'<a class="g-spec" href="./standard.html#'+meta.anchor+'" target="_blank" title="查看该组字段的标准定义">标准：'+mmEsc(meta.spec||'')+' ↗</a>'
+                   :(meta.spec?'<span class="g-spec" style="color:var(--muted)">'+mmEsc(meta.spec)+'</span>':''))
+      + '</td></tr>';
+    idxs.forEach(function(i){
+      var p = WB.props[i];
+      var dirty = p.key!==p.origKey || p.cn!==p.origCn;
+      shown++;
+      var pm = mmPropGroupMeta(p.key||'');
+      h += '<tr class="'+(dirty?'dirty':'')+'" id="mm-wb-prop-'+i+'">'
+        + '<td class="mm-wb-idx">'+shown+'</td>'
+        + '<td><input type="text" value="'+mmEsc(p.key)+'" oninput="mmWbPropVal('+i+',\'key\',this.value)" placeholder="如 code / disease_code" title="属性编码：库内真实字段名，snake_case"></td>'
+        + '<td><input type="text" value="'+mmEsc(p.cn)+'" oninput="mmWbPropVal('+i+',\'cn\',this.value)" placeholder="如 编码 / 名称" title="中文名称：给业务同事看的字段含义"></td>'
+        + '<td>'+mmCovCell(p.key)+'</td>'
+        + '<td style="font-size:10px;color:var(--muted)">'+(pm.anchor?'<a href="./standard.html#'+pm.anchor+'" target="_blank" style="color:var(--accent);text-decoration:none">'+mmEsc(pm.spec||pm.name)+' ↗</a>':mmEsc(pm.spec||pm.name))+'</td>'
+        + '<td><span class="mm-wb-x" onclick="mmWbDelProp('+i+')" title="删除该属性">✕</span></td></tr>';
+    });
+  });
+  h += '</tbody></table>';
+  if (!WB.props.length) h = '<div class="mm-rel-name" style="padding:4px 0">未定义关键属性口径</div>';
+  document.getElementById('mm-wb-props').innerHTML = h;
+  document.getElementById('mm-wb-prop-cnt').textContent = '('+WB.props.length+' 项)';
   mmWbStatus();
 }
 function mmWbPropVal(i,f,v){ WB.props[i][f] = v; mmWbStatus(); }
 function mmWbAddProp(){ WB.props.push({key:'',cn:'',origKey:'',origCn:''}); mmWbRenderProps(); mmWbStatus(); }
 function mmWbDelProp(i){ WB.props.splice(i,1); mmWbRenderProps(); mmWbStatus(); }
 
-/* ---- 工作台：关联区 ---- */
+/* ---- 工作台：关联区（v1.5.15 带表头表格 + 出边/入边分段 + 端点级实例数 + 共用分析） ---- */
+function mmRelLiveCell(r){
+  if (r._new) return '<span class="mm-badge manual">待保存</span>';
+  if (r.endpointLive===null || r.endpointLive===undefined){
+    return '<span class="mm-rel-name" title="库内暂未实测到这条端点对，可能尚未落数据">未实测</span>';
+  }
+  if (r.endpointLive===0){
+    return '<span style="color:#f59f00;font-weight:700" title="元模型登记了这条关联，但库内这一对端点之间还没有任何关系实例">0 实例</span>';
+  }
+  return '<b style="font-family:ui-monospace,Consolas,monospace;font-size:11px">'+r.endpointLive.toLocaleString()+'</b>';
+}
 function mmWbRenderRels(){
   var t = WB.type;
-  var h = '';
+  var outs = [], ins = [], news = [];
   WB.rels.forEach(function(r,i){
-    var isNew = r._new;
-    h += '<div class="mm-wb-rel'+((!isNew && r.endpt!==r.origEnd)?' dirty':'')+(isNew?' mm-wb-newrel':'')+'">'
-      + '<span class="mm-node-dot" style="background:'+(r.drift==='drift'?'#fa5252':((r.live||0)>0?'#40c057':'#f59f00'))+'"></span>'
-      + (r.dir==='out'
-          ? '<span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;color:var(--ink)">'+t+'</span> <span class="mm-rel-arrow">—</span>'
-          : '<span class="mm-wb-endpt"><input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="起点实体类型"></span> <span class="mm-rel-arrow">—</span>')
-      + (isNew
-          ? '<span class="mm-wb-combo"><input type="text" id="mm-wb-rel-in-'+i+'" value="'+mmEsc(r.rel)+'" autocomplete="off"'
-            + ' oninput="mmWbRelName('+i+',this.value);mmWbComboInput('+i+')" onfocus="mmWbComboOpen('+i+')" onkeydown="mmWbComboKey(event,'+i+')"'
-            + ' placeholder="🔎 关系名：搜索既有 / 新建"></span>'
-          : '<span class="mm-wb-endpt" style="min-width:130px"><input type="text" value="'+mmEsc(r.rel)+'" readonly></span>')
-      + '<span class="mm-rel-arrow">→</span> '
-      + (r.dir==='out'
-          ? '<span class="mm-wb-endpt"><input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="终点实体类型"></span>'
-          : '<span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;color:var(--ink)">'+t+'</span>')
-      + (isNew && r._mode!=='exist'
-          ? '<span class="mm-wb-endpt" style="min-width:104px"><input type="text" value="'+mmEsc(r.relName)+'" oninput="WB.rels['+i+'].relName=this.value" placeholder="中文名(新关系)"></span>'
-          : (r.relName?'<span class="mm-rel-name">'+mmEsc(r.relName)+'</span>':''))
-      + (isNew
-          ? (r._mode==='exist' ? '<span class="mm-badge schema">既有·合并端点</span>'
-              : (r._mode==='new' ? '<span class="mm-badge manual">新建关系</span>' : '<span class="mm-badge manual">新增</span>'))
-          : '<span class="mm-wb-live">'+(r.live||0).toLocaleString()+' 实例</span>')
-      + (r.drift==='drift'&&!isNew?'<span class="mm-badge drift" title="登记时 '+(r.instance_count||0)+' 条，现在实测 '+(r.live||0)+' 条——数据在登记后有增减">不一致</span>':'')
-      + '<span style="flex:1"></span>'
-      + '<span class="mm-wb-x" onclick="mmWbDelRel('+i+')" title="'+(isNew?'取消新增':'从该关系端点列表移除')+'">✕</span></div>';
+    r._i = i;
+    if (r._new) news.push(r);
+    else if (r.dir==='in') ins.push(r);
+    else outs.push(r);
   });
-  document.getElementById('mm-wb-rels').innerHTML = h || '<div class="mm-rel-name" style="padding:4px 0">元模型未定义任何关联</div>';
-  document.getElementById('mm-wb-rel-cnt').textContent = '('+WB.rels.length+' 条，含出边与入边)';
+  var h = '<table class="mm-wb-table"><thead><tr>'
+    + '<th style="width:44px">方向</th><th style="width:26%">关系</th><th style="width:34%">对端实体</th>'
+    + '<th style="width:80px">实例数</th><th style="width:112px">共用情况</th><th style="width:34px"></th></tr></thead><tbody>';
+  function sec(title, desc, rows){
+    h += '<tr class="mm-wb-grp"><td colspan="6"><span class="g-name">'+title+'</span><span class="g-desc">'+desc+'</span></td></tr>';
+    if (!rows.length){
+      h += '<tr><td colspan="6" style="color:var(--muted);font-size:11px;padding:6px 8px">无</td></tr>';
+      return;
+    }
+    rows.forEach(function(r){
+      var i = r._i;
+      h += '<tr>'
+        + '<td>'+(r.dir==='in'?'<span class="mm-dir in">入→本</span>':'<span class="mm-dir out">本→出</span>')+'</td>'
+        + '<td><b style="font-size:12px">'+mmEsc(r.relName||'（未登记中文名）')+'</b>'
+        + '<div class="mono" style="font-size:10px;color:var(--muted)">'+mmEsc(r.rel)+'</div></td>'
+        + '<td><div class="mm-ep-cell">'
+        + '<span class="mm-ep-role">'+(r.dir==='in'?'起点':'终点')+'</span>'
+        + '<input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="对端实体类型">'
+        + (r.endpt?'<span class="mm-ep-link" onclick="mmHierPick(\''+mmEsc(r.endpt)+'\')" title="在左侧层级树中定位 '+mmEsc(r.endpt)+'">↗</span>':'')
+        + '</div></td>'
+        + '<td>'+mmRelLiveCell(r)+'</td>'
+        + '<td>'+(function(){var s=mmRelShareText(r);
+            return '<span class="mm-badge '+s.cls+'" title="'+s.tip+'">'+s.t+'</span>';})()+'</td>'
+        + '<td><span class="mm-wb-x" onclick="mmWbDelRel('+i+')" title="从该关系端点列表移除">✕</span></td></tr>';
+    });
+  }
+  sec('出边 · '+t+' 作为起点', '本类型指向别的实体类型', outs);
+  sec('入边 · '+t+' 作为终点', '别的实体类型指向本类型（原先进来的一行会显示成输入框，已改为可读表格）', ins);
+  if (news.length){
+    h += '<tr class="mm-wb-grp"><td colspan="6"><span class="g-name">待新增</span><span class="g-desc">保存后写入元模型</span></td></tr>';
+    news.forEach(function(r){
+      var i = r._i;
+      h += '<tr class="dirty"><td><span class="mm-badge manual">新增</span></td>'
+        + '<td><span class="mm-wb-combo"><input type="text" id="mm-wb-rel-in-'+i+'" value="'+mmEsc(r.rel)+'" autocomplete="off"'
+        + ' oninput="mmWbRelName('+i+',this.value);mmWbComboInput('+i+')" onfocus="mmWbComboOpen('+i+')" onkeydown="mmWbComboKey(event,'+i+')"'
+        + ' placeholder="🔎 搜索既有关系 / 新建"></span>'
+        + (r._mode!=='exist'?'<div style="margin-top:3px"><input type="text" value="'+mmEsc(r.relName)+'" oninput="WB.rels['+i+'].relName=this.value" placeholder="中文名（新关系必填）"></div>':'')
+        + '</td>'
+        + '<td><div class="mm-ep-cell"><span class="mm-ep-role">终点</span>'
+        + '<input type="text" value="'+mmEsc(r.endpt)+'" oninput="mmWbRelVal('+i+',this.value)" placeholder="终点实体类型"></div></td>'
+        + '<td><span class="mm-badge manual">'+(r._mode==='exist'?'合并端点':(r._mode==='new'?'新建关系':'未确认'))+'</span></td>'
+        + '<td></td>'
+        + '<td><span class="mm-wb-x" onclick="mmWbDelRel('+i+')">✕</span></td></tr>';
+    });
+  }
+  h += '</tbody></table>';
+  document.getElementById('mm-wb-rels').innerHTML = h;
+  var zero = WB.rels.filter(function(r){return !r._new && r.endpointLive===0;}).length;
+  document.getElementById('mm-wb-rel-cnt').textContent =
+    '('+outs.length+' 条出边 / '+ins.length+' 条入边'+(news.length?' / '+news.length+' 条待新增':'')+(zero?'，'+zero+' 条库内无实例':'')+')';
   mmWbStatus();
 }
 function mmWbRelVal(i,v){ WB.rels[i].endpt = v; mmWbStatus(); }

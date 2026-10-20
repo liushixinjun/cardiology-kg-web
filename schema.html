@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 图谱数据字典</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026102001">
 <script src="./_shared/js/echarts.min.js"></script>
 <style>
 .si-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 48px);overflow:hidden}
@@ -413,8 +413,8 @@
 
 <div class="si-notify" id="si-notify"></div>
 
-<script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026101601"></script>
+<script src="./_shared/js/theme.js?v=2026102001"></script>
+<script src="./_shared/js/app.js?v=2026102001"></script>
 <script>
 /* ========== 状态 ========== */
 var SI_STATE = {
@@ -453,7 +453,7 @@ var ENTITY_TYPES = [
   /* 第一层：疾病知识层 — 检查与检验（V4.1：ExamPlan 中转方案） */
   {code:'ExamPlan',cn:'检查检验方案',icon:'📋',color:'#4dabf7',shape:'square',desc:'疾病下的检查/检验方案中转节点（has_exam_plan）'},
   {code:'ExamItem',cn:'检查项目',icon:'🔬',color:cssVar('--accent','#4f8cff'),shape:'square',desc:'影像、心电、超声等检查项目'},
-  {code:'ExamObservation',cn:'检查发现',icon:'📏',color:getTheme() === 'light' ? '#1668dc' : '#74c0fc',shape:'dot',desc:'检查报告中的结构化发现'},
+  {code:'ExamObservation',cn:'检查发现',icon:'📏',color:isLightTheme() ? '#1668dc' : '#74c0fc',shape:'dot',desc:'检查报告中的结构化发现'},
   {code:'LabItem',cn:'检验项目',icon:'🧪',color:'#9966ff',shape:'diamond',desc:'血液、生化、标志物等检验项目'},
   {code:'LabSubitem',cn:'检验细项',icon:'🔬',color:'#b197fc',shape:'dot',desc:'检验项目下的具体可报告指标'},
   {code:'LabSample',cn:'检验标本',icon:'🧫',color:'#b197fc',shape:'dot',desc:'血清、血浆等检验标本（uses_lab_sample）'},
@@ -513,7 +513,7 @@ var ENTITY_TYPES = [
   {code:'SecondaryCause',cn:'继发病因',icon:'🔁',color:'#e599f7',shape:'dot',desc:'需排除的继发性病因（disease_needs_secondary_cause_exclusion）'},
   {code:'HemodynamicIndicator',cn:'血流动力学指标',icon:'🌊',color:cssVar('--cyan','#66d9e8'),shape:'dot',desc:'诊断标准使用的血流动力学指标'},
   {code:'TargetOrganDamage',cn:'靶器官损害',icon:'🎯',color:'#4dabf7',shape:'dot',desc:'高血压等疾病导致的靶器官损害'},
-  {code:'BloodPressureGrade',cn:'血压分级',icon:'🩸',color:getTheme() === 'light' ? '#1668dc' : '#74c0fc',shape:'dot',desc:'血压水平分级（disease_has_blood_pressure_grade）'},
+  {code:'BloodPressureGrade',cn:'血压分级',icon:'🩸',color:isLightTheme() ? '#1668dc' : '#74c0fc',shape:'dot',desc:'血压水平分级（disease_has_blood_pressure_grade）'},
   {code:'VolumeStatus',cn:'容量状态',icon:'💧',color:'#3bc9db',shape:'dot',desc:'推荐动作依赖的患者容量状态'},
   {code:'SeverityGrade',cn:'严重程度',icon:'⚠️',color:'#ffe066',shape:'dot',desc:'推荐动作适用的严重程度分级'},
   {code:'TimeWindow',cn:'时间窗',icon:'⏱️',color:'#fab005',shape:'dot',desc:'推荐动作适用的时间窗（recommendation_has_time_window）'},
@@ -2180,7 +2180,7 @@ function renderAuditView(diseaseData){
   });
   var coveredCore = 0;
   CORE_DIM_KEYS.forEach(function(k){ if(dims[k] && dims[k].length>0) coveredCore++; });
-  var coverage = CORE_DIM_KEYS.length>0 ? Math.round(coveredCore/CORE_DIM_KEYS.length*100) : 0;
+  var coverage = coreDimTotal()>0 ? Math.round(coveredCore/coreDimTotal()*100) : 0;
   var verified = 0;
   entityCodes.forEach(function(c){ if(allStatus[c] && allStatus[c].status) verified++; });
   var auditPct = totalEntities>0 ? Math.round(verified/totalEntities*100) : 0;
@@ -2194,7 +2194,7 @@ function renderAuditView(diseaseData){
   html += '<div class="si-audit-meta">';
   if(info.icd_code) html += '<span>🏷️ ICD-10: <b>'+siEsc(info.icd_code)+'</b></span>';
   html += '<span>🔢 编码: '+siEsc(diseaseCode)+'</span>';
-  html += '<span>📊 核心维度覆盖: <b>'+coveredCore+'/'+CORE_DIM_KEYS.length+' ('+coverage+'%)</b></span>';
+  html += '<span>📊 核心维度覆盖: <b>'+coveredCore+'/'+coreDimTotal()+' ('+coverage+'%)</b></span>';
   html += '<span>📦 实体总数: <b>'+totalEntities+'</b></span>';
   html += '</div>';
   html += '<div class="si-audit-progress">';

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>建设与审核 - 专科知识图谱</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026102001">
 <style>
 /* ===== 页面布局 v1.5.11f：左侧边栏导航 + 右侧内容（主次分明，替代顶部 8-tab 横排） ===== */
 html, body { height: 100%; overflow: hidden; margin: 0; }
@@ -491,8 +491,8 @@ html, body { height: 100%; overflow: hidden; margin: 0; }
 </button>
 
 <!-- 加载共享导航 -->
-<script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026101601"></script>
+<script src="./_shared/js/theme.js?v=2026102001"></script>
+<script src="./_shared/js/app.js?v=2026102001"></script>
 <script>
 /* ================================================================
    临床审核工作台 - 可视化交互界面
@@ -1305,10 +1305,15 @@ function loadCoverageData() {
     fetch('/api/kg/stats?v=' + Date.now()).then(function(r){return r.json()}),
     fetch('/api/kg/diseases?v=' + Date.now()).then(function(r){return r.json()}),
     /* v1.5.11j: 拉挂靠映射，区分「有指南未解析完」vs「缺指南」 */
-    fetch('/api/kg/anchor-mapping?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return {}})
+    fetch('/api/kg/anchor-mapping?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return {}}),
+    /* 维度总数取后端真实统计值，与首页同源，避免前后端口径漂移 */
+    fetch('/api/kg/dimensions/coverage?v=' + Date.now()).then(function(r){return r.json()}).catch(function(){return null})
   ]).then(function(results){
     COV_DATA = results[0] || [];
     GLOBAL_STATS = results[1] || {};
+    if (results[4] && results[4].dimension_count) {
+      CORE_DIM_COUNT_FROM_API = results[4].dimension_count;
+    }
     CATEGORIES = {};  // 联动刷新时重拉需重置，避免大类计数累加
     /* 指南挂靠状态：linked=已挂靠(解析依据就绪) / candidate=有候选待确认 / none=库内缺指南 */
     GUIDE_MAP = {};
@@ -1322,7 +1327,7 @@ function loadCoverageData() {
       if (d.dim_counts) {
         CORE_DIM_KEYS.forEach(function(k) { if (d.dim_counts[k] && d.dim_counts[k] > 0) f++; });
       }
-      DISEASE_DIMS[d.code] = { dimCount: f, pct: Math.round(f / CORE_DIM_KEYS.length * 100) };
+      DISEASE_DIMS[d.code] = { dimCount: f, pct: Math.round(f / coreDimTotal() * 100) };
     });
     COV_DATA.forEach(function(d){
       var g = parseParentCode(d.parent_code).group;
@@ -1370,7 +1375,7 @@ function renderCovFunnel(){
   var dimSum = 0;
   COV_DATA.forEach(function(d){ dimSum += (d.dim_pct || 0); });
   var avgDimPct = COV_DATA.length > 0 ? Math.round(dimSum / COV_DATA.length) : 0;
-  h += '<div class="fn-step"><div class="fn-num">📊 ' + avgDimPct + '%</div><div class="fn-label">知识维度平均覆盖</div><div class="fn-pct">' + CORE_DIM_KEYS.length + '个知识维度（与首页一致）</div></div>';
+  h += '<div class="fn-step"><div class="fn-num">📊 ' + avgDimPct + '%</div><div class="fn-label">知识维度平均覆盖</div><div class="fn-pct">' + coreDimTotal() + '个知识维度（与首页一致）</div></div>';
   document.getElementById('cov-funnel').innerHTML = h;
 
   var usableN = COV_DATA.filter(function(d){return d.usable_ready}).length;
@@ -1533,7 +1538,7 @@ function renderCovTable(){
   var h = '<table class="cov-table">';
   h += '<thead><tr>';
   h += '<th></th><th>疾病</th><th>大类</th>';
-  h += '<th title="' + CORE_DIM_KEYS.length + '个核心知识维度中有数据的维度数，与首页一致">知识维度</th>';
+  h += '<th title="' + coreDimTotal() + '个核心知识维度中有数据的维度数，与首页一致">知识维度</th>';
   h += '<th title="推荐意见条数（悬停看审核通过/受阻明细）">推荐意见</th>';
   h += '<th title="该疾病当前待审核的推荐条数，点击直达疾病级审核">待审队列</th>';
   h += '<th title="1建路径 2有推荐 3审核通过 4可正式使用，实心=已完成">建设进度</th>';
@@ -1579,7 +1584,7 @@ function renderCovTable(){
     h += '<td style="width:20px;font-size:10px;color:var(--muted)">' + (expanded ? '▼' : '▶') + '</td>';
     h += '<td><a class="disease-name" style="color:var(--accent);text-decoration:none;cursor:pointer" title="在图谱探索中查看 ' + escHtml(d.disease_name) + '" onclick="event.stopPropagation();location.href=\'explore.html?code=' + d.disease_code + '\'">' + escHtml(d.disease_name) + '</a></td>';
     h += '<td style="color:var(--muted);font-size:11px">' + escHtml(g) + '</td>';
-    h += '<td><span class="' + dimCls + '" title="' + dimCount + '/' + CORE_DIM_KEYS.length + ' 个知识维度">' + dimCount + '/' + CORE_DIM_KEYS.length + '</span></td>';
+    h += '<td><span class="' + dimCls + '" title="' + dimCount + '/' + coreDimTotal() + ' 个知识维度">' + dimCount + '/' + coreDimTotal() + '</span></td>';
     h += '<td><span class="cov-num' + (d.rec_count === 0 ? ' zero' : '') + '" title="共 ' + (d.rec_count||0) + ' 条 · 审核通过 ' + (d.reviewed_count||0) + ' 条 · 受阻 ' + (d.blocked_rec_count||0) + ' 条">' + (d.rec_count || 0) + '</span></td>';
     h += '<td>' + pendCell + '</td>';
     h += '<td>' + covProgressDots(d) + '</td>';

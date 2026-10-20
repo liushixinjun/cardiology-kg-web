@@ -1,0 +1,4 @@
+#!/bin/sh
+# 提交前密钥守卫：防止明文密码进入仓库
+# 安装：git config core.hooksPath .githooks
+python "$(git rev-parse --show-toplevel)/tools/pre_commit_secret_guard.py" || exit 1

@@ -1,0 +1,10 @@
+# 密码脱敏：工作区保留真实密码，进出仓库时自动替换为占位符
+# clean  = 提交前（真实密码 -> 占位符）
+# smudge = 检出时（占位符 -> 真实密码）
+# 真实密码来源：.server-config.json（已 gitignore，不进仓库）
+#
+# 只覆盖实测含明文密码的文件，避免对 kg_full_data.json 等大文件做无谓过滤
+README.md          filter=secret
+PROJECT_CONTEXT.md filter=secret
+server.py          filter=secret
+_shared/js/app.js  filter=secret

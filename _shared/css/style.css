@@ -26,6 +26,39 @@ html[data-theme="dark"] {
 
   --tip-bg:#1f2b3d; --tip-ink:#f0f4f8; --tip-line:rgba(255,255,255,.1);
   --green-text:#51cf66; --yellow-text:#ffd43b; --red-text:#ff6b6b;}
+
+/* ====== v1.5.12 新增第三套主题：青玉 · Azure 光感（浅色高级版）
+   —— 纯新增，浅色医疗风 / 深色科技风两套 token 未作任何改动。
+   仅在 html[data-theme="azure"] 下生效，页面通过 var() 自动继承。 ====== */
+html[data-theme="azure"] {
+  --bg:#e7f3f1; --bg2:#ffffff; --bg3:#dbecea; --bg4:#cbe4e1;
+  --ink:#122e2b; --muted:#547772; --rule:#c8e0dd;
+  --accent:#0d9488; --accent2:#e11d48; --green:#059669; --yellow:#d97706;
+  --orange:#ea580c; --purple:#7c3aed; --cyan:#0891b2; --pink:#db2777;
+  --green-bg:rgba(5,150,105,.13); --accent-bg:rgba(13,148,136,.12);
+  --yellow-bg:rgba(217,119,6,.15); --red-bg:rgba(225,29,72,.10);
+  --shadow:0 1px 2px rgba(10,50,45,.05), 0 6px 16px rgba(10,50,45,.06), 0 16px 40px rgba(10,50,45,.07);
+
+  --tip-bg:#ffffff; --tip-ink:#122e2b; --tip-line:rgba(13,148,136,.22);
+  --green-text:#047857; --yellow-text:#b45309; --red-text:#be123c;
+
+  /* azure 专属增强变量（渐变主色 / 光晕 / 磨砂面） */
+  --accent-grad:linear-gradient(135deg,#0d9488 0%,#0ea5e9 100%);
+  --glow:rgba(13,148,136,.20);
+  --glass-nav:rgba(255,255,255,.78);
+  --glass-card:rgba(255,255,255,.82);
+}
+/* 页面底：青玉渐变 + 极光光晕（挂在 html 上，避免覆盖内容的层叠问题） */
+html[data-theme="azure"] {
+  background:
+    radial-gradient(700px 460px at 12% -6%, rgba(13,148,136,.18), transparent 62%),
+    radial-gradient(760px 520px at 96% 6%, rgba(14,165,233,.13), transparent 66%),
+    radial-gradient(560px 420px at 58% 104%, rgba(45,212,191,.16), transparent 62%),
+    linear-gradient(180deg,#e3f1ef 0%,#e9f6f3 58%,#eef7f6 100%);
+  background-attachment:fixed;
+}
+html[data-theme="azure"] body { background:transparent; }
+
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; font-size:15px; line-height:1.5; }
 a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
@@ -41,6 +74,10 @@ a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:under
 .nav-stats { font-size:13px; color:var(--muted); }
 .nav-config-btn { font-size:13px; padding:5px 12px; background:var(--bg3); border:1px solid var(--rule); border-radius:4px; color:var(--muted); cursor:pointer; }
 .nav-config-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* v1.5.13 导航栏配色下拉框（位置在 ⚙ 左侧，⚙ 保持最右） */
+.nav-theme-select { font-family:inherit; padding:4px 8px; outline:none; }
+.nav-theme-select:focus { border-color:var(--accent); }
 
 /* ====== v1.4.3 导航分组（浏览蓝/治理绿/标准紫/应用橙） ====== */
 .nav-sep { width:1px; height:18px; background:var(--rule); margin:0 6px; align-self:center; flex-shrink:0; }
@@ -184,3 +221,56 @@ html[data-theme="dark"]{
   --row-hover:rgba(79,140,255,.08);
   --orange-bg:rgba(255,146,43,.12); --orange-line:rgba(255,146,43,.4);
 }
+/* v1.5.12 青玉 Azure：维度色板 + 状态色（与浅色同源，饱和度对齐青玉主色） */
+html[data-theme="azure"]{
+  --dim-lab:#7c3aed; --dim-patho:#4f46e5; --dim-clinical-rule:#0891b2;
+  --dim-evidence:#059669; --dim-guideline:#b45309; --dim-threshold:#0d9488; --dim-nursing:#0d9488;
+  --ok-bg:rgba(5,150,105,.14); --ok-ink:#047857; --ok-line:rgba(5,150,105,.35); --ok-bg-faint:rgba(5,150,105,.07);
+  --warn-bg:rgba(217,119,6,.16); --warn-ink:#b45309; --warn-line:rgba(217,119,6,.38); --warn-bg-faint:rgba(217,119,6,.07);
+  --bad-bg:rgba(225,29,72,.12); --bad-ink:#be123c; --bad-line:rgba(225,29,72,.32); --bad-bg-faint:rgba(225,29,72,.05);
+  --neutral-bg:rgba(18,46,43,.06); --neutral-line:rgba(18,46,43,.14);
+  --row-hover:rgba(13,148,136,.08);
+  --orange-bg:rgba(234,88,12,.10); --orange-line:rgba(234,88,12,.32);
+}
+
+/* ====== v1.5.12 青玉 Azure 专属组件增强（磨砂面 / 渐变主色 / 柔光投影）
+   全部 scope 在 html[data-theme="azure"] 下，不影响浅色与深色两套。 ====== */
+html[data-theme="azure"] .nav {
+  background:var(--glass-nav);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);
+  backdrop-filter:blur(14px) saturate(1.4);
+  border-bottom-color:rgba(13,148,136,.18);
+}
+html[data-theme="azure"] .nav-brand {
+  background:var(--accent-grad);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+html[data-theme="azure"] .card,
+html[data-theme="azure"] .stat-card {
+  background:var(--glass-card);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);
+  backdrop-filter:blur(16px) saturate(1.3);
+  border-color:rgba(13,148,136,.16);
+  box-shadow:var(--shadow);
+}
+/* 导航按钮 / 首页徽标 / 主按钮：渐变主色 */
+html[data-theme="azure"] .nav-config-btn {
+  background:rgba(255,255,255,.72);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+}
+html[data-theme="azure"] .nav-home {
+  background:rgba(13,148,136,.10);
+  border-color:rgba(13,148,136,.30);
+}
+html[data-theme="azure"] .nav-home.active {
+  background:var(--accent-grad); border-color:transparent; color:#fff;
+}
+html[data-theme="azure"] .btn-primary {
+  background:var(--accent-grad);
+  box-shadow:0 4px 14px rgba(13,148,136,.30);
+}
+html[data-theme="azure"] .btn-primary:hover { opacity:1; filter:brightness(1.06); }
+html[data-theme="azure"] .input:focus { box-shadow:0 0 0 3px rgba(13,148,136,.15); }
+html[data-theme="azure"] tr:hover td { background:rgba(13,148,136,.06); }
+html[data-theme="azure"] .modal { box-shadow:0 24px 70px rgba(10,50,45,.28); }

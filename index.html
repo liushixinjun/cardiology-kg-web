@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>专科知识图谱 · 心血管内科 - 首页</title>
-<link rel="stylesheet" href="./_shared/css/style.css?v=2026101601">
+<link rel="stylesheet" href="./_shared/css/style.css?v=2026102001">
 <style>
 /* ====== Page ====== */
 .page{width:100%;padding:24px 32px;box-sizing:border-box}
@@ -229,6 +229,14 @@ html[data-theme="dark"]{
   --glass-line:rgba(255,255,255,.08);
   --glass-line2:rgba(255,255,255,.06);
 }
+/* v1.5.12 新增青玉 Azure：首页 hero / 玻璃卡片变量对齐（不影响浅色与深色） */
+html[data-theme="azure"]{
+  --hero-grad:linear-gradient(135deg,#d9efec 0%,#e6f6f4 45%,#e3f4f7 100%);
+  --hero-blue:#0d9488;
+  --glass:rgba(255,255,255,.62);
+  --glass-line:rgba(13,148,136,.22);
+  --glass-line2:rgba(13,148,136,.15);
+}
 </style>
 </head>
 <body>
@@ -269,8 +277,8 @@ html[data-theme="dark"]{
       <div id="chart-graph"></div>
     </div>
     <div class="panel">
-      <div class="panel-title"><span><span class="dcp">17</span>维度全局覆盖率</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
-      <div class="panel-note">雷达图展示<span class="dcp">17</span>个核心临床维度在全库专病中的覆盖比例。<b>20个核心临床维度</b> = 17个基础临床维度（症状、体征、检查项目、检验项目、药物、手术、危险因素、并发症、鉴别诊断、风险分层、预后、随访、治疗方案、诊断标准、病因、流行病学、病理生理）+ 3个护理维度（护理计划、护理评估、护理诊断）（CORE_DIM_KEYS，与图谱探索/覆盖分析页一致）。<b>覆盖率计算</b>：某维度覆盖率 = 有该维度数据的疾病数 ÷ 全库疾病总数 × 100%。100%表示所有疾病均已填充该维度数据，数值越低说明该维度缺失越严重。<b>解读要点</b>：症状、体征、检查、检验等基础临床维度通常覆盖率较高；风险分层、随访、流行病学等维度往往是建设初期的短板。护理3维度为20260906候选批次（待临床审核），目前仅5个疾病有数据，覆盖率低属正常，将随后续批次扩展。点击图谱探索页面可查看单个疾病的维度明细。</div>
+      <div class="panel-title"><span><span class="dcp">20</span>维度全局覆盖率</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
+      <div class="panel-note">雷达图展示<span class="dcp">20</span>个核心知识维度（17 临床 + 3 护理）在全库专病中的覆盖比例。17 个基础临床维度 = 症状、体征、检查项目、检验项目、药物、手术、危险因素、并发症、鉴别诊断、风险分层、预后、随访、治疗方案、诊断标准、病因、流行病学、病理生理；3 个护理维度 = 护理计划、护理评估、护理诊断（CORE_DIM_KEYS，与图谱探索/覆盖分析页一致）。<b>覆盖率计算</b>：某维度覆盖率 = 有该维度数据的疾病数 ÷ 全库疾病总数 × 100%。100%表示所有疾病均已填充该维度数据，数值越低说明该维度缺失越严重。<b>解读要点</b>：症状、体征、检查、检验等基础临床维度通常覆盖率较高；风险分层、随访、流行病学等维度往往是建设初期的短板。护理维度的覆盖数据由后端实时统计（护理计划 / 护理评估 / 护理诊断各自按关系直连疾病计数），各维度差异较大属正常，后续批次会继续扩展。点击图谱探索页面可查看单个疾病的维度明细。</div>
       <div id="chart-radar"></div>
     </div>
   </section>
@@ -292,7 +300,7 @@ html[data-theme="dark"]{
   <section class="bottom-grid">
     <div class="panel">
       <div class="panel-title"><span>各维度实体数量分布</span><span class="panel-help" onclick="togglePanelNote(this)" title="说明">?</span></div>
-      <div class="panel-note">柱状图展示<span class="dcp">17</span>个核心临床维度中有数据的疾病数量，颜色反映覆盖率等级。</div>
+      <div class="panel-note">柱状图展示<span class="dcp">20</span>个核心知识维度（17 临床 + 3 护理）中有数据的疾病数量，颜色反映覆盖率等级。</div>
       <div id="chart-dim"></div>
     </div>
     <div class="panel">
@@ -312,7 +320,7 @@ html[data-theme="dark"]{
       <a class="nav-card" href="explore.html">
         <div class="nc-icon">&#x1f9ed;</div>
         <h3>图谱探索</h3>
-        <p>查看专病<span class="dcp">17</span>维度详情、CDSS诊疗链路、可用/受阻推荐</p>
+        <p>查看专病<span class="dcp">20</span>维度详情、CDSS诊疗链路、可用/受阻推荐</p>
       </a>
       <a class="nav-card" href="network.html">
         <div class="nc-icon">&#x1f578;&#xfe0f;</div>
@@ -360,9 +368,9 @@ html[data-theme="dark"]{
 <div class="modal" id="modal"></div>
 
 <script src="./_shared/js/echarts.min.js"></script>
-<script src="./_shared/js/theme.js"></script>
-<script src="./_shared/js/app.js?v=2026101601"></script>
-<script src="dashboard.js?v=2026101601"></script>
+<script src="./_shared/js/theme.js?v=2026102001"></script>
+<script src="./_shared/js/app.js?v=2026102001"></script>
+<script src="dashboard.js?v=2026102001"></script>
 <script>
 injectDimCount();renderNav('index');
 /* Dashboard 只需要 disease list + stats + dim_counts，不需要全量维度数据 */
