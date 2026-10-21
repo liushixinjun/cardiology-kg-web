@@ -30,6 +30,20 @@
 .si-type-item.si-slot .cnt{background:rgba(206,212,218,.4);color:var(--muted)}
 .si-type-item.si-slot.active{opacity:.85}
 .si-type-item.active .cnt{background:var(--accent-bg);color:var(--accent)}
+/* 注册表左栏二级分类（域 / 子分组） */
+.si-reg-group{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 10px;cursor:pointer;font-size:12px;color:var(--ink);border-left:3px solid transparent}
+.si-reg-group:hover{background:var(--bg3)}
+.si-reg-group.active{background:var(--accent-bg);border-left-color:var(--accent);color:var(--accent)}
+.si-reg-group .tag{font-size:9px;padding:1px 5px;border-radius:4px;color:#fff;font-weight:700;white-space:nowrap}
+.si-reg-group .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.si-reg-group .cnt{font-size:10px;background:var(--bg3);border-radius:999px;padding:1px 7px;color:var(--muted);font-weight:600}
+.si-reg-group.active .cnt{background:var(--accent-bg);color:var(--accent)}
+.si-reg-sub{display:flex;align-items:center;gap:6px;padding:5px 12px 5px 26px;cursor:pointer;font-size:11px;color:var(--muted);border-left:3px solid transparent}
+.si-reg-sub:hover{background:var(--bg3);color:var(--ink)}
+.si-reg-sub.active{color:var(--accent);background:var(--accent-bg);border-left-color:var(--accent)}
+.si-reg-sub .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.si-reg-sub .cnt{font-size:10px;opacity:.85}
+.si-reg-toggle{width:12px;font-size:9px;color:var(--muted);flex:none}
 .si-dim-list{padding:4px 0}
 .si-dim-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer}
 .si-dim-item:hover{color:var(--ink)}
@@ -1979,7 +1993,50 @@ function siSwitchMainView(view){
 
 /* ========== 1.5 结构注册表视图（4001整改：图谱数据字典核心） ========== */
 var SI_REGISTRY_DATA = null;
-var SI_REGISTRY_FILTER = { kind:'overview', q:'', status:'', extOnly:false };
+var SI_REGISTRY_FILTER = { kind:'overview', q:'', status:'', extOnly:false, group:'', sub:'' };
+var SI_REG_OPEN = {};   /* 左栏域展开状态 */
+
+/* 实体类型分层：与 server.py META_HIERARCHY_SEED / meta_model.json hierarchy 同口径（7 域 15 子域） */
+var REG_ENTITY_HIER = [
+  {key:'d1', tag:'第一层', tagColor:'#4f8cff', icon:'🫀', name:'疾病知识层',
+   subs:[
+     {icon:'📂', name:'目录与疾病', types:['Specialty','DiseaseCategory','DiseaseSubcategory','Disease']},
+     {icon:'📖', name:'定义与基础医学', types:['Definition','DefinitionComponent','Symptom','Sign','Etiology','Pathophysiology','Epidemiology','RiskFactor','Complication','Prognosis','Prevention']},
+     {icon:'🔬', name:'检查与检验', types:['ExamPlan','ExamItem','ExamObservation','LabItem','LabSubitem','LabSample','VitalSignItem','ThresholdRule']},
+     {icon:'📋', name:'诊断与风险', types:['DiagnosisCriteria','DiagnosisCriteriaComponent','DifferentialDiagnosis','RiskStratification','ClinicalRule']},
+     {icon:'💊', name:'治疗与管理', types:['Drug','Procedure','TreatmentPlan','TreatmentItem','Contraindication','FollowUp']}
+   ]},
+  {key:'d2', tag:'结构层', tagColor:'#0ca678', icon:'🏥', name:'专科应用结构层',
+   subs:[
+     {icon:'📊', name:'评估五件套', types:['AssessmentScale','AssessmentItem','AssessmentScoreRule','AssessmentResultLevel','AssessmentActionRule']},
+     {icon:'🩺', name:'护理十件套', types:['NursingAssessment','NursingAssessmentItem','NursingDiagnosis','NursingIntervention','NursingOutcome','NursingCarePlan','NursingGrade','NursingContraindication','NursingRecordItem','NursingOrderCheckRule']},
+     {icon:'🗺️', name:'路径与质控', types:['SpecialtyCarePathway','InpatientClinicalPathway','PathwayStage','PathwayTask','PathwayVariationReason','PathwayExitCriteria','QualityControlPoint','QualityControlRule']}
+   ]},
+  {key:'d3', tag:'治理层', tagColor:'#845ef7', icon:'🔖', name:'证据治理层',
+   subs:[{icon:'🔖', name:'术语治理', types:['MedicalTermAlias']}]},
+  {key:'d4', tag:'扩展槽位', tagColor:'#f59f00', icon:'🧬', name:'专病扩展槽位',
+   subs:[{icon:'🧬', name:'心血管专病扩展', types:['ClinicalSubtype','ECGPattern','ElectrophysiologyMechanism','HeartFailurePhenotype','InfarctLocation','InheritancePattern','FamilyHistory','Gene','GeneticVariant','SecondaryCause','HemodynamicIndicator','TargetOrganDamage','BloodPressureGrade','VolumeStatus','SeverityGrade','TimeWindow','Device','DeviceParameter','AblationTarget','ValveAnatomy','ValveLesionType','VascularTerritory']}]},
+  {key:'d5', tag:'第二层', tagColor:'#ff922b', icon:'🏷️', name:'CDSS标准主数据层',
+   subs:[{icon:'🏷️', name:'标准字典', types:['StandardDiagnosis','StandardProcedure']}]},
+  {key:'d6', tag:'第三层', tagColor:'#e64980', icon:'⚖️', name:'临床决策层',
+   subs:[{icon:'⚖️', name:'决策与证据', types:['RecommendationStatement','SourceAdjudication','Evidence','Guideline']}]},
+  {key:'d7', tag:'内部', tagColor:'#868e96', icon:'📑', name:'内部管理',
+   subs:[{icon:'📑', name:'来源追溯', types:['SourceSection']}]}
+];
+
+/* 关系类型分层：与 standard.html 第 4 章 4.1~4.9 + 第 10.2 节分组一致 */
+var REG_REL_GROUPS = [
+  {key:'r41', icon:'📂', name:'疾病目录和诊断关系', types:['has_alias','has_category','has_clinical_subtype','has_disease','has_standard_diagnosis','has_subcategory']},
+  {key:'r42', icon:'📖', name:'医学事实关系', types:['has_clinical_rule','has_complication','has_definition','has_definition_component','has_diagnostic_component','has_diagnostic_criteria','has_differential_diagnosis','has_differential_rule','has_epidemiology','has_etiology','has_followup','has_pathophysiology','has_prevention','has_prognosis','has_risk_factor','has_risk_stratification','has_sign','has_symptom','has_threshold_rule','requires_exclusion_exam','requires_exclusion_lab']},
+  {key:'r421', icon:'📊', name:'评估评分与风险分层关系', types:['assessment_supported_by_evidence','determines_result_level','has_assessment_scale','has_result_level','has_score_rule','has_total_score_rule','includes_assessment_item','level_supported_by_evidence','supports_risk_stratification','triggers_assessment_action']},
+  {key:'r43', icon:'🔬', name:'检查和检验关系', types:['exam_item_has_observation','has_exam_plan','has_lab_plan','includes_exam_item','includes_lab_item','lab_item_has_observation','lab_item_has_subitem','uses_lab_sample']},
+  {key:'r44', icon:'💊', name:'治疗和正式推荐关系', types:['blocked_by_differential','blocks_action','has_alternative_action','has_contraindication','has_recommendation_statement','has_specific_drug','has_treatment_plan','includes_drug','includes_procedure','includes_treatment_item','interacts_with','recommends_action','requires_pre_treatment_exam','requires_pre_treatment_lab','targets_differential_diagnosis','triggers_recommendation']},
+  {key:'r45', icon:'📚', name:'来源和证据关系', types:['based_on_guideline','has_evidence','has_source_section','supported_by_evidence','uses_primary_guideline','uses_source_section']},
+  {key:'r47', icon:'🩺', name:'护理扩展关系', types:['achieves_nursing_outcome','checks_target','determines_nursing_grade','has_nursing_assessment','has_nursing_assessment_item','has_nursing_care_plan','has_nursing_diagnosis','has_nursing_intervention','includes_nursing_intervention','plan_has_nursing_diagnosis','plan_targets_outcome','plan_uses_assessment','records_nursing_item','restricts_nursing_intervention','targets_nursing_outcome','uses_assessment_scale']},
+  {key:'r48', icon:'🗺️', name:'路径扩展关系', types:['depends_on_task','has_exit_criteria','has_inpatient_clinical_pathway','has_specialty_care_pathway','has_variation_reason','includes_pathway_stage','includes_pathway_task','maps_to_pathway_task','next_pathway_stage','pathway_task_uses_action']},
+  {key:'r49', icon:'✅', name:'质控扩展关系', types:['checks_assessment_level','checks_contraindication','checks_pathway_task','checks_required_exam','checks_required_lab','has_quality_control_point','has_quality_control_rule','quality_rule_supported_by_evidence']},
+  {key:'r4102', icon:'🧬', name:'专病扩展关系（第 10.2 节）', types:['device_has_parameter','diagnosis_criteria_uses_hemodynamic_indicator','disease_associated_gene','disease_has_blood_pressure_grade','disease_has_clinical_subtype','disease_has_ecg_pattern','disease_has_electrophysiology_mechanism','disease_has_heart_failure_phenotype','disease_has_infarct_location','disease_has_inheritance_pattern','disease_has_valve_anatomy','disease_has_valve_lesion_type','disease_needs_secondary_cause_exclusion','exam_observation_indicates_vascular_territory','procedure_targets_ablation_site','procedure_uses_device','recommendation_has_time_window','recommendation_requires_severity_grade','recommendation_requires_volume_status','risk_stratification_uses_family_history','risk_stratification_uses_target_organ_damage']}
+];
 
 function siLoadRegistry(){
   var el = document.getElementById('si-registry-view');
@@ -2045,8 +2102,8 @@ function siRenderRegistry(){
   } else {
     /* 明细视图：紧凑标题（说明当前在类型层的哪一类）+ 筛选工具栏 */
     var isEnt = (f.kind==='entity');
-    h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">';
-    h += '<div style="font-size:15px;font-weight:700;color:var(--ink)">' + (isEnt?'📦 实体类型':'🔗 关系类型') + '</div>';
+    h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap">';
+    h += '<div style="font-size:15px;font-weight:700;color:var(--ink)">' + (isEnt?'📦 实体类型':'🔗 关系类型') + siRegCrumbText() + '</div>';
     h += '<div style="font-size:11px;color:var(--muted)">共 <b>' + (isEnt?nEnt:nRel) + '</b> 项 · 基准 ' + siEsc(d.schema_standard_version||'-') + ' · 类型层（非具体实体）</div>';
     h += '<div style="margin-left:auto"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="siRegSetKind(\'overview\')">← 返回注册表总览</span></div>';
     h += '</div>';
@@ -2079,24 +2136,46 @@ function siRegCard(kind, icon, cn, num, en, sub){
     + '</div>';
 }
 
-/* 结构注册表左栏导航（类型层）：切换 总览 / 实体类型 / 关系类型 */
+/* 结构注册表左栏导航（类型层）：总览 → 实体类型/关系类型（可展开二级分类） */
 function siRenderRegNav(){
   var el = document.getElementById('si-reg-nav');
   if(!el) return;
   var d = SI_REGISTRY_DATA || {};
   var f = SI_REGISTRY_FILTER;
-  var items = [
-    {k:'overview', icon:'📐', cn:'总览', cnt:''},
-    {k:'entity',   icon:'📦', cn:'实体类型', cnt:(d.entity_types||[]).length},
-    {k:'relation', icon:'🔗', cn:'关系类型', cnt:(d.relation_types||[]).length}
-  ];
   var h = '';
-  items.forEach(function(it){
-    h += '<div class="si-type-item' + (f.kind===it.k?' active':'') + '" onclick="siRegSetKind(\'' + it.k + '\')">'
-       + it.icon + ' ' + it.cn
-       + (it.cnt!=='' ? '<span class="cnt">' + it.cnt + '</span>' : '')
-       + '</div>';
-  });
+
+  h += '<div class="si-type-item' + (f.kind==='overview'?' active':'') + '" onclick="siRegSetKind(\'overview\')">📐 总览</div>';
+
+  /* 实体类型：7 域 + 未归类 */
+  h += siRegNavParent('entity', '📦', '实体类型', (d.entity_types||[]).length);
+  if(f.kind==='entity'){
+    siRegEntityGroups().forEach(function(g){
+      var open = !!SI_REG_OPEN[g.key];
+      h += '<div class="si-reg-group' + (f.group===g.key?' active':'') + '" onclick="siRegSetGroup(\'' + g.key + '\')">'
+         + '<span class="si-reg-toggle">' + (open?'▾':'▸') + '</span>'
+         + '<span class="tag" style="background:' + g.tagColor + '">' + g.tag + '</span>'
+         + '<span class="nm" title="' + siEscAttr(g.name) + '">' + g.icon + ' ' + siEsc(g.name) + '</span>'
+         + '<span class="cnt">' + g.n + '</span></div>';
+      if(open){
+        g.subs.forEach(function(s, i){
+          h += '<div class="si-reg-sub' + (f.group===g.key && f.sub===String(i)?' active':'') + '" onclick="event.stopPropagation();siRegSetSub(\'' + g.key + '\',' + i + ')">'
+             + s.icon + ' <span class="nm">' + siEsc(s.name) + '</span><span class="cnt">' + s.n + '</span></div>';
+        });
+      }
+    });
+  }
+
+  /* 关系类型：standard.html 第 4 章 4.1~4.9 + 10.2 */
+  h += siRegNavParent('relation', '🔗', '关系类型', (d.relation_types||[]).length);
+  if(f.kind==='relation'){
+    siRegRelationGroups().forEach(function(g){
+      h += '<div class="si-reg-group' + (f.group===g.key?' active':'') + '" onclick="siRegSetGroup(\'' + g.key + '\')">'
+         + '<span class="si-reg-toggle"></span>'
+         + '<span class="nm" title="' + siEscAttr(g.name) + '">' + g.icon + ' ' + siEsc(g.name) + '</span>'
+         + '<span class="cnt">' + g.n + '</span></div>';
+    });
+  }
+
   var ue = (d.unregistered_entity_types||[]).length;
   var ur = (d.unregistered_relation_types||[]).length;
   if(ue + ur > 0){
@@ -2106,15 +2185,113 @@ function siRenderRegNav(){
   el.innerHTML = h;
 }
 
+/* 父节点：点击进入该类全部（分组分节），展开由下方分组节点控制 */
+function siRegNavParent(kind, icon, cn, cnt){
+  var f = SI_REGISTRY_FILTER;
+  return '<div class="si-type-item' + (f.kind===kind?' active':'') + '" onclick="siRegSetKind(\'' + kind + '\')">'
+    + icon + ' ' + cn + '<span class="cnt">' + cnt + '</span></div>';
+}
+
+/* 实体一级分组（7 域 + 未归类），n 为该域在注册表中实际命中的类型数 */
+function siRegEntityGroups(){
+  var rows = (SI_REGISTRY_DATA && SI_REGISTRY_DATA.entity_types) || [];
+  var byType = {};
+  rows.forEach(function(r){ byType[r.type] = r; });
+  var used = {};
+  var out = [];
+  REG_ENTITY_HIER.forEach(function(dom){
+    var subs = [];
+    var n = 0;
+    dom.subs.forEach(function(s){
+      var hit = 0;
+      s.types.forEach(function(t){ if(byType[t]){ hit++; used[t]=1; } });
+      n += hit;
+      if(hit > 0) subs.push({icon:s.icon, name:s.name, types:s.types, n:hit});
+    });
+    if(n > 0) out.push({key:dom.key, tag:dom.tag, tagColor:dom.tagColor, icon:dom.icon, name:dom.name, subs:subs, n:n});
+  });
+  var extra = [];
+  rows.forEach(function(r){ if(!used[r.type]) extra.push(r.type); });
+  if(extra.length){
+    out.push({key:'dx', tag:'未归类', tagColor:'#868e96', icon:'⚙️', name:'未归类', n:extra.length,
+              subs:[{icon:'⚙️', name:'待归类', types:extra, n:extra.length}]});
+  }
+  return out;
+}
+
+/* 关系一级分组（standard.html 第 4 章），未命中的归入「其他」 */
+function siRegRelationGroups(){
+  var rows = (SI_REGISTRY_DATA && SI_REGISTRY_DATA.relation_types) || [];
+  var byType = {};
+  rows.forEach(function(r){ byType[r.type] = r; });
+  var used = {};
+  var out = [];
+  REG_REL_GROUPS.forEach(function(g){
+    var n = 0;
+    g.types.forEach(function(t){ if(byType[t]){ n++; used[t]=1; } });
+    if(n > 0) out.push({key:g.key, icon:g.icon, name:g.name, types:g.types, n:n});
+  });
+  var extra = [];
+  rows.forEach(function(r){ if(!used[r.type]) extra.push(r.type); });
+  if(extra.length){
+    out.push({key:'rx', icon:'⚙️', name:'其他（标准未分组）', types:extra, n:extra.length});
+  }
+  return out;
+}
+
+/* 当前分组面包屑 */
+function siRegCrumbText(){
+  var f = SI_REGISTRY_FILTER;
+  if(!f.group) return '<span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">按标准分组分节展示</span>';
+  var g = null, sub = null;
+  if(f.kind==='entity'){
+    siRegEntityGroups().forEach(function(x){
+      if(x.key!==f.group) return;
+      g = x;
+      if(f.sub!==''){ x.subs.forEach(function(s,i){ if(String(i)===String(f.sub)) sub = s; }); }
+    });
+  } else {
+    siRegRelationGroups().forEach(function(x){ if(x.key===f.group) g = x; });
+  }
+  if(!g) return '';
+  var nm = g.icon + ' ' + siEsc(g.name) + (sub ? ' · ' + siEsc(sub.name) : '');
+  return '<span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:8px">/ ' + nm + '</span>';
+}
+
 function siRegSetQ(q){ SI_REGISTRY_FILTER.q=q; siRenderRegistryTable(); }
 function siRegSetStatus(s){ SI_REGISTRY_FILTER.status=s; siRenderRegistryTable(); }
 function siRegSetExt(b){ SI_REGISTRY_FILTER.extOnly=b; siRenderRegistryTable(); }
 function siRegSetKind(k){
   SI_REGISTRY_FILTER.kind = k;
+  SI_REGISTRY_FILTER.group = '';
+  SI_REGISTRY_FILTER.sub = '';
   SI_REGISTRY_FILTER.q = '';
   SI_REGISTRY_FILTER.status = '';
   SI_REGISTRY_FILTER.extOnly = false;
   if(SI_REGISTRY_DATA){ siRenderRegistry(); } else { siLoadRegistry(); }
+}
+/* 点一级分组：选中并展开；再点同一分组则收起并回到该类全部 */
+function siRegSetGroup(k){
+  var f = SI_REGISTRY_FILTER;
+  if(f.group === k){
+    var open = !SI_REG_OPEN[k];
+    SI_REG_OPEN[k] = open;
+    f.group = open ? k : '';
+  } else {
+    SI_REG_OPEN[k] = true;
+    f.group = k;
+  }
+  f.sub = '';
+  f.q = ''; f.status = ''; f.extOnly = false;
+  siRenderRegistry();
+}
+/* 点二级子分组 */
+function siRegSetSub(gk, i){
+  var f = SI_REGISTRY_FILTER;
+  SI_REG_OPEN[gk] = true;
+  f.group = gk; f.sub = String(i);
+  f.q = ''; f.status = ''; f.extOnly = false;
+  siRenderRegistry();
 }
 
 function siRenderRegistryTable(){
@@ -2122,57 +2299,77 @@ function siRenderRegistryTable(){
   if(!el || !SI_REGISTRY_DATA) return;
   var f = SI_REGISTRY_FILTER;
   if(f.kind==='overview' || f.kind==='unreg'){ el.innerHTML=''; return; }
+  var isEnt = (f.kind==='entity');
+  var groups = isEnt ? siRegEntityGroups() : siRegRelationGroups();
   var q = (f.q||'').toLowerCase();
-  var rows = [];
-  if(f.kind==='relation'){
-    (SI_REGISTRY_DATA.relation_types||[]).forEach(function(r){
-      if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
-      if(f.status==='inst' && !(r.instance_count>0 && r.registered)) return;
-      if(f.status==='slot' && !(r.registered && r.instance_count<=0)) return;
-      if(f.status==='unreg' && r.registered) return;
-      if(f.extOnly && !r.is_extension_slot) return;
-      rows.push(r);
-    });
-    var h = '<div class="si-dict-section"><h3>🔗 关系类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
-    h += '<tr><th>关系类型</th><th class="si-col-cn">中文语义</th><th>注册</th><th>实例数</th><th>观测起点实体</th><th>观测终点实体</th><th>状态</th></tr>';
-    rows.forEach(function(r){
-      h += '<tr>';
-      h += '<td style="font-family:monospace;font-size:12px">' + siEsc(r.type||'') + '</td>';
-      h += '<td class="si-col-cn">' + (r.name_cn ? siEsc(r.name_cn) : '<span style="color:var(--muted)">未定义中文</span>') + '</td>';
-      h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
-      h += '<td>' + (r.instance_count||0) + '</td>';
-      h += '<td style="font-size:11px;color:var(--muted)">' + siEsc((r.start_entity_types||[]).join(', ')) + '</td>';
-      h += '<td style="font-size:11px;color:var(--muted)">' + siEsc((r.end_entity_types||[]).join(', ')) + '</td>';
-      h += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td>';
-      h += '</tr>';
-    });
-    h += '</table></div></div>';
-    el.innerHTML = h;
-  } else {
-    (SI_REGISTRY_DATA.entity_types||[]).forEach(function(r){
-      if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
-      if(f.status==='inst' && !(r.instance_count>0 && r.registered)) return;
-      if(f.status==='slot' && !(r.registered && r.instance_count<=0)) return;
-      if(f.status==='unreg' && r.registered) return;
-      if(f.extOnly && !r.is_extension_slot) return;
-      rows.push(r);
-    });
-    var h = '<div class="si-dict-section"><h3>📦 实体类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
-    h += '<tr><th>实体类型</th><th class="si-col-cn">中文名称</th><th>注册</th><th>实例数</th><th>状态</th></tr>';
-    rows.forEach(function(r){
-      h += '<tr>';
-      h += '<td style="font-family:monospace;font-size:12px">' + siEsc(r.type||'') + '</td>';
-      h += '<td class="si-col-cn">' + (r.name_cn ? siEsc(r.name_cn) : '<span style="color:var(--muted)">未定义中文</span>') + '</td>';
-      h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
-      h += '<td>' + (r.instance_count||0) + '</td>';
-      h += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td>';
-      h += '</tr>';
-    });
-    h += '</table></div></div>';
-    el.innerHTML = h;
+
+  function keep(r){
+    if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return false;
+    if(f.status==='inst' && !(r.instance_count>0 && r.registered)) return false;
+    if(f.status==='slot' && !(r.registered && r.instance_count<=0)) return false;
+    if(f.status==='unreg' && r.registered) return false;
+    if(f.extOnly && !r.is_extension_slot) return false;
+    return true;
   }
+  function head(){
+    return isEnt
+      ? '<tr><th>实体类型</th><th class="si-col-cn">中文名称</th><th>注册</th><th>实例数</th><th>状态</th></tr>'
+      : '<tr><th>关系类型</th><th class="si-col-cn">中文语义</th><th>注册</th><th>实例数</th><th>观测起点实体</th><th>观测终点实体</th><th>状态</th></tr>';
+  }
+  function row(r){
+    var s = '<tr><td style="font-family:monospace;font-size:12px">' + siEsc(r.type||'') + '</td>'
+      + '<td class="si-col-cn">' + (r.name_cn ? siEsc(r.name_cn) : '<span style="color:var(--muted)">未定义中文</span>') + '</td>'
+      + '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>'
+      + '<td>' + (r.instance_count||0) + '</td>';
+    if(!isEnt){
+      s += '<td style="font-size:11px;color:var(--muted)">' + siEsc((r.start_entity_types||[]).join(', ')) + '</td>'
+        + '<td style="font-size:11px;color:var(--muted)">' + siEsc((r.end_entity_types||[]).join(', ')) + '</td>';
+    }
+    s += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td></tr>';
+    return s;
+  }
+
+  var src = (isEnt ? SI_REGISTRY_DATA.entity_types : SI_REGISTRY_DATA.relation_types) || [];
+  var byType = {};
+  src.forEach(function(r){ byType[r.type] = r; });
+
+  var h = '', total = 0;
+  groups.forEach(function(g){
+    if(f.group && g.key !== f.group) return;
+    var sections = [];
+    if(isEnt && g.subs && g.subs.length){
+      g.subs.forEach(function(s, i){
+        if(f.sub!=='' && g.key===f.group && String(i)!==String(f.sub)) return;
+        var rows = s.types.map(function(t){ return byType[t]; }).filter(function(r){ return r && keep(r); });
+        if(rows.length) sections.push({name:s.icon + ' ' + s.name, rows:rows});
+      });
+    } else {
+      var rows = g.types.map(function(t){ return byType[t]; }).filter(function(r){ return r && keep(r); });
+      if(rows.length) sections.push({name:g.icon + ' ' + g.name, rows:rows});
+    }
+    if(!sections.length) return;
+    var gn = 0;
+    sections.forEach(function(x){ gn += x.rows.length; });
+    total += gn;
+    h += '<div class="si-dict-section">';
+    h += '<h3>' + (g.tag ? '<span style="font-size:9px;background:' + g.tagColor + ';color:#fff;padding:1px 6px;border-radius:4px;margin-right:7px;vertical-align:middle;font-weight:700">' + g.tag + '</span>' : '')
+       + siEsc(g.name) + '<span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">' + gn + ' 项</span></h3>';
+    sections.forEach(function(x){
+      if(sections.length > 1 || (isEnt && g.subs.length > 1)){
+        h += '<div style="padding:7px 16px;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--rule)">' + x.name + ' · ' + x.rows.length + ' 项</div>';
+      }
+      h += '<div class="si-dict-table"><table>' + head();
+      x.rows.forEach(function(r){ h += row(r); });
+      h += '</table></div>';
+    });
+    h += '</div>';
+  });
+  if(!h){
+    h = '<div class="si-dict-empty" style="padding:40px">当前筛选条件下没有匹配的类型</div>';
+  }
+  el.innerHTML = h;
   var cnt = document.getElementById('si-reg-count');
-  if(cnt) cnt.textContent = '共 ' + rows.length + ' 条';
+  if(cnt) cnt.textContent = '共 ' + total + ' 条';
 }
 
 /* ========== 2. 疾病审核视图 ========== */
