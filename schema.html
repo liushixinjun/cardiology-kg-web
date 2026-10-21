@@ -2009,33 +2009,24 @@ function siRenderRegistry(){
   var f = SI_REGISTRY_FILTER;
   var h = '';
 
-  /* 头部统计（页面身份，常驻） */
-  h += '<div class="si-dict-section" style="margin-bottom:14px">';
-  h += '<h3>📐 图谱结构注册表 · 基准 ' + siEsc(d.schema_standard_version||'-') + '</h3>';
-  h += '<div class="si-dict-summary" style="flex-wrap:wrap;gap:8px 20px">';
-  h += '<span>实体类型：已注册 <b>' + (sum.entity_types_registered||0) + '</b> · 扩展槽位 <b>' + (sum.entity_types_extension_slots||0) + '</b> · 未注册 <b>' + (sum.entity_types_unregistered||0) + '</b></span>';
-  h += '<span>关系类型：已注册 <b>' + (sum.relation_types_registered||0) + '</b> · 扩展槽位 <b>' + (sum.relation_types_extension_slots||0) + '</b> · 未注册 <b>' + (sum.relation_types_unregistered||0) + '</b></span>';
-  h += '</div>';
-  h += '<div style="padding:10px 16px;font-size:11px;color:var(--muted);line-height:1.7">' + siEsc(d.note||'') + '</div>';
-  h += '</div>';
+  var ue = d.unregistered_entity_types||[], ur = d.unregistered_relation_types||[];
+  var nEnt = (d.entity_types||[]).length, nRel = (d.relation_types||[]).length;
+  var nUnreg = ue.length + ur.length;
 
   if(f.kind==='overview'){
-    var ue = d.unregistered_entity_types||[], ur = d.unregistered_relation_types||[];
-    var nEnt = (d.entity_types||[]).length, nRel = (d.relation_types||[]).length;
-
-    /* 总览：三个入口，点进去看明细 */
-    h += '<div class="si-reg-cards">';
+    /* 总览：页面身份 = 标题 + 三张统计入口卡，不再重复统计文字 */
+    h += '<div class="si-dict-section" style="margin-bottom:14px">';
+    h += '<h3>📐 图谱结构注册表 · 基准 ' + siEsc(d.schema_standard_version||'-') + '</h3>';
+    h += '<div style="padding:8px 16px 12px;font-size:11px;color:var(--muted);line-height:1.7">'
+       + '统计对象是<b>类型层</b>（库里有哪些实体类型/关系类型、是否登记在 V4.1、各有多少实例）；'
+       + '要看<b>具体实体</b>请切到顶部「🔍 实体检索」。'
+       + (d.note ? '<br>' + siEsc(d.note) : '') + '</div>';
+    h += '<div class="si-reg-cards" style="padding:0 16px">';
     h += siRegCard('entity', '📦', '实体类型', nEnt, 'Entity Types', '已注册 ' + (sum.entity_types_registered||0) + ' · 扩展槽位 ' + (sum.entity_types_extension_slots||0));
     h += siRegCard('relation', '🔗', '关系类型', nRel, 'Relation Types', '已注册 ' + (sum.relation_types_registered||0) + ' · 扩展槽位 ' + (sum.relation_types_extension_slots||0));
-    h += siRegCard('unreg', '⚠️', '待复核', ue.length + ur.length, 'Unregistered', '实体 ' + ue.length + ' · 关系 ' + ur.length);
-    h += '</div>';
-
-    h += '<div class="si-dict-section">';
-    h += '<h3>📖 这张表在讲什么</h3>';
-    h += '<div style="padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.9">';
-    h += '这里统计的是<b>结构（类型层）</b>：库中有哪些实体类型、关系类型，是否在 V4.1 注册表中登记，各有多少实例。<br>';
-    h += '要看<b>具体实体（实例层）</b>，请用顶部「🔍 实体检索」，左栏「实体类别」也只服务于那些视图。<br>';
-    h += '两者是不同层级，故左栏内容随 Tab 自动切换，不会同时出现。';
+    if(nUnreg > 0){
+      h += siRegCard('unreg', '⚠️', '待复核', nUnreg, 'Unregistered', '实体 ' + ue.length + ' · 关系 ' + ur.length);
+    }
     h += '</div></div>';
   } else if(f.kind==='unreg'){
     /* 待复核：库中存在但注册表未定义 */
@@ -2052,7 +2043,13 @@ function siRenderRegistry(){
     }
     h += '</div>';
   } else {
-    /* 明细视图筛选工具栏（左栏已负责切换实体/关系，此处不再重复 Tab） */
+    /* 明细视图：紧凑标题（说明当前在类型层的哪一类）+ 筛选工具栏 */
+    var isEnt = (f.kind==='entity');
+    h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">';
+    h += '<div style="font-size:15px;font-weight:700;color:var(--ink)">' + (isEnt?'📦 实体类型':'🔗 关系类型') + '</div>';
+    h += '<div style="font-size:11px;color:var(--muted)">共 <b>' + (isEnt?nEnt:nRel) + '</b> 项 · 基准 ' + siEsc(d.schema_standard_version||'-') + ' · 类型层（非具体实体）</div>';
+    h += '<div style="margin-left:auto"><span class="si-link" style="font-size:12px;cursor:pointer" onclick="siRegSetKind(\'overview\')">← 返回注册表总览</span></div>';
+    h += '</div>';
     h += '<div class="si-topbar" style="margin-bottom:12px">';
     h += '<input type="text" value="' + siEscAttr(f.q) + '" placeholder="搜索类型/中文语义…" oninput="siRegSetQ(this.value)" style="width:220px">';
     h += '<select onchange="siRegSetStatus(this.value)">';
