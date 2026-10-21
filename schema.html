@@ -119,6 +119,7 @@
 .si-dict-table th{padding:8px 14px;text-align:left;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;border-bottom:1px solid var(--rule);background:var(--bg3)}
 .si-dict-table td{padding:8px 14px;border-bottom:1px solid var(--rule);color:var(--ink)}
 .si-dict-table tr:last-child td{border-bottom:none}
+.si-dict-table th.si-col-cn,.si-dict-table td.si-col-cn{min-width:88px;white-space:nowrap}
 .si-dict-status{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
 .si-dict-status.match{background:rgba(81,207,102,.12);color:#40c057}
 .si-dict-status.partial{background:rgba(255,212,59,.15);color:#f59f00}
@@ -750,14 +751,14 @@ function siFilterList(){
 
 function initTypeList(){
   fetch('/api/kg/type-stats').then(function(r){return r.json()}).then(function(data){
-    var html = '<div class="si-type-item'+(SI_STATE.typeFilter===''?' active':'')+'" onclick="siSetTypeFilter(\'\')">全部实体<span class="cnt">—</span></div>';
+    var html = '<div class="si-type-item'+(SI_STATE.typeFilter===''?' active':'')+'" onclick="siSetTypeFilter(\'\',this)">全部实体<span class="cnt">—</span></div>';
     var slotHtml = '';
     ENTITY_TYPES.forEach(function(t){
       var cnt = (data.entity_types||{})[t.code] || 0;
       if(cnt > 0){
-        html += '<div class="si-type-item'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\')">'+t.cn+(t.desc?'<span class="si-type-desc">'+t.desc+'</span>':'')+'<span class="cnt">'+cnt+'</span></div>';
+        html += '<div class="si-type-item'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\',this)">'+t.cn+(t.desc?'<span class="si-type-desc">'+t.desc+'</span>':'')+'<span class="cnt">'+cnt+'</span></div>';
       } else {
-        slotHtml += '<div class="si-type-item si-slot'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\')">'+t.cn+'<span class="cnt">待落地</span></div>';
+        slotHtml += '<div class="si-type-item si-slot'+(SI_STATE.typeFilter===t.code?' active':'')+'" onclick="siSetTypeFilter(\''+t.code+'\',this)">'+t.cn+'<span class="cnt">待落地</span></div>';
       }
     });
     if(slotHtml){
@@ -767,13 +768,18 @@ function initTypeList(){
   }).catch(function(){});
 }
 
-function siSetTypeFilter(type){
+function siSetTypeFilter(type, el){
   SI_STATE.typeFilter = type;
-  document.querySelectorAll('.si-type-item').forEach(function(el){
-    el.classList.remove('active');
-  });
-  event.target.classList.add('active');
-  // 实体类别切换与大类条件自由组合：未选类别=该范围内全部类型实体
+  var items = document.querySelectorAll('.si-type-item');
+  for(var i=0;i<items.length;i++){ items[i].classList.remove('active'); }
+  if(el){ el.classList.add('active'); }
+  if(SI_STATE.mainView === 'dim'){
+    /* 维度视角下：切换实体类别 = 切换维度类型 */
+    siLoadDimEntities(type || '');
+    return;
+  }
+  /* 结构注册表视图下点左侧实体类别：切到实体检索视图并展示结果 */
+  if(SI_STATE.mainView !== 'search'){ siSwitchMainView('search'); }
   siLoadSearchResults(type || '');
 }
 
@@ -2031,11 +2037,11 @@ function siRenderRegistryTable(){
       rows.push(r);
     });
     var h = '<div class="si-dict-section"><h3>🔗 关系类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
-    h += '<tr><th>关系类型</th><th>中文语义</th><th>注册</th><th>实例数</th><th>允许起点实体</th><th>允许终点实体</th><th>状态</th></tr>';
+    h += '<tr><th>关系类型</th><th class="si-col-cn">中文语义</th><th>注册</th><th>实例数</th><th>允许起点实体</th><th>允许终点实体</th><th>状态</th></tr>';
     rows.forEach(function(r){
       h += '<tr>';
       h += '<td style="font-family:monospace;font-size:12px">' + (r.type||'') + '</td>';
-      h += '<td>' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
+      h += '<td class="si-col-cn">' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
       h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
       h += '<td>' + (r.instance_count||0) + '</td>';
       h += '<td style="font-size:11px;color:var(--muted)">' + (r.start_entity_types||[]).join(', ') + '</td>';
@@ -2054,11 +2060,11 @@ function siRenderRegistryTable(){
       rows.push(r);
     });
     var h = '<div class="si-dict-section"><h3>📦 实体类型注册表（' + rows.length + '）</h3><div class="si-dict-table"><table>';
-    h += '<tr><th>实体类型</th><th>中文名称</th><th>注册</th><th>实例数</th><th>状态</th></tr>';
+    h += '<tr><th>实体类型</th><th class="si-col-cn">中文名称</th><th>注册</th><th>实例数</th><th>状态</th></tr>';
     rows.forEach(function(r){
       h += '<tr>';
       h += '<td style="font-family:monospace;font-size:12px">' + (r.type||'') + '</td>';
-      h += '<td>' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
+      h += '<td class="si-col-cn">' + (r.name_cn||'<span style="color:var(--muted)">未定义中文</span>') + '</td>';
       h += '<td>' + siRegBadge(r.registered, false, r.registered?'已注册':'未注册') + '</td>';
       h += '<td>' + (r.instance_count||0) + '</td>';
       h += '<td>' + siRegBadge(r.instance_count>0, true, r.instance_count>0?'实例已存在':(r.is_extension_slot?'扩展槽位':'实例未落地')) + '</td>';
