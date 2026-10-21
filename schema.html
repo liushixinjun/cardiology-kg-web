@@ -2048,7 +2048,7 @@ function siRenderRegistry(){
     h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">';
     h += '<div style="font-size:15px;font-weight:700;color:var(--ink)">' + (isEnt?'📦 实体类型':'🔗 关系类型') + '</div>';
     h += '<div style="font-size:11px;color:var(--muted)">共 <b>' + (isEnt?nEnt:nRel) + '</b> 项 · 基准 ' + siEsc(d.schema_standard_version||'-') + ' · 类型层（非具体实体）</div>';
-    h += '<div style="margin-left:auto"><span class="si-link" style="font-size:12px;cursor:pointer" onclick="siRegSetKind(\'overview\')">← 返回注册表总览</span></div>';
+    h += '<div style="margin-left:auto"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="siRegSetKind(\'overview\')">← 返回注册表总览</span></div>';
     h += '</div>';
     h += '<div class="si-topbar" style="margin-bottom:12px">';
     h += '<input type="text" value="' + siEscAttr(f.q) + '" placeholder="搜索类型/中文语义…" oninput="siRegSetQ(this.value)" style="width:220px">';
