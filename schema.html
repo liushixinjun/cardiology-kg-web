@@ -322,9 +322,7 @@
     <!-- 疾病驱动视图（疾病审核/字典对比）的左栏提示 -->
     <div class="si-left-section" id="si-left-hint" style="display:none">
       <div class="si-left-title">操作入口</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.7;padding:2px 2px 6px">
-        本视图按疾病展开，请在右侧顶部「疾病大类 → 疾病」中选择目标疾病。
-      </div>
+      <div id="si-left-hint-body" style="font-size:11px;color:var(--muted);line-height:1.7;padding:2px 2px 6px"></div>
     </div>
     <div class="si-left-section" id="si-dim-section" style="display:none">
       <div class="si-left-title">关联维度筛选</div>
@@ -754,9 +752,9 @@ function siCascadeCategory(){
   var disSel = document.getElementById('si-sel-disease');
   if(!group){
     disSel.innerHTML = '<option value="">选择疾病...</option>';
-    // 清空大类时恢复当前实体类别的默认列表（全库）
+    /* 只在列表型视图刷新列表；审核/字典对比按疾病展开，选大类不应把用户踢走 */
     if(SI_STATE.mainView === 'dim'){ siLoadDimEntities(SI_DIM_CUR_TYPE); }
-    else { siLoadSearchResults(SI_STATE.typeFilter || ''); }
+    else if(SI_STATE.mainView === 'search'){ siLoadSearchResults(SI_STATE.typeFilter || ''); }
     return;
   }
   var list = SI_STATE.hierarchy[group] || [];
@@ -765,9 +763,9 @@ function siCascadeCategory(){
     html += '<option value="'+dis.code+'">'+dis.name+'</option>';
   });
   disSel.innerHTML = html;
-  // 级联过滤：按大类刷新当前视图（实体检索/维度视角均按已选条件组合，不强制维度类型）
+  /* 级联过滤：按大类刷新当前视图（实体检索/维度视角均按已选条件组合，不强制维度类型） */
   if(SI_STATE.mainView === 'dim'){ siLoadDimEntities(SI_DIM_CUR_TYPE); }
-  else { siLoadSearchResults(SI_STATE.typeFilter || ''); }
+  else if(SI_STATE.mainView === 'search'){ siLoadSearchResults(SI_STATE.typeFilter || ''); }
 }
 
 /* ========== 查询检索 ========== */
@@ -955,9 +953,8 @@ function siSelectDisease(code){
   /* 根据当前视图加载对应内容 */
   var mv = SI_STATE.mainView || 'search';
   if(mv === 'search'){
-    /* 实体检索视图下选择疾病 → 自动切换到疾病审核 */
-    siSwitchMainView('audit');
-    siLoadAuditView(code);
+    /* 实体检索视图下选择疾病 → 留在本视图看该疾病实体详情，不再强制跳转到疾病审核 */
+    siLoadEntity(code);
   } else if(mv === 'audit'){
     siLoadAuditView(code);
   } else if(mv === 'dict'){
@@ -1928,6 +1925,20 @@ function siSwitchMainView(view){
   document.getElementById('si-reg-nav-section').style.display = isReg ? 'block' : 'none';
   var leftHint = document.getElementById('si-left-hint');
   if(leftHint){ leftHint.style.display = (view==='audit' || view==='dict') ? 'block' : 'none'; }
+  var hintBody = document.getElementById('si-left-hint-body');
+  if(hintBody){
+    if(view==='audit'){
+      hintBody.innerHTML = '按疾病展开实例：'
+        + '<br>1. 顶部选「疾病大类」'
+        + '<br>2. 再选「具体疾病」'
+        + '<br>3. 右侧按维度查看该病的实体与关系';
+    } else if(view==='dict'){
+      hintBody.innerHTML = '核对标准字典映射：'
+        + '<br>· 进入即可看到全库映射体检，无需先选疾病'
+        + '<br>· 点表格任意一行 → 展开该病的单病对照'
+        + '<br>· 红色「不一致」需人工复核映射关系';
+    }
+  }
   var dimSection = document.getElementById('si-dim-section');
   /* 关联维度筛选只属于实体检索的实体详情，其他视图一律隐藏 */
   if(dimSection){
@@ -1981,12 +1992,8 @@ function siSwitchMainView(view){
     }
   } else if(view==='dict'){
     dictView.style.display='block';
-    /* 已有疾病选中时自动加载字典对比 */
-    if(SI_STATE.currentCode){
-      siLoadDictView(SI_STATE.currentCode);
-    } else if(!dictView.innerHTML.trim()){
-      dictView.innerHTML='<div class="si-empty" style="padding:60px;text-align:center">请先在上方选择疾病，再查看字典对比</div>';
-    }
+    /* 字典对比不依赖疾病选择：直接渲染全库映射体检，选疾病只是在同页展开单病对照 */
+    siLoadDictView(SI_STATE.currentCode || null);
   }
 }
 
@@ -2831,20 +2838,31 @@ function siDimOpenDisease(code){
   siLoadAuditView(code);
 }
 
-/* ========== 4. 字典对比视图 ========== */
+/* ========== 4. 字典对比视图 ==========
+   用途：核对「图谱疾病」与「CDSS 标准诊断字典（ICD-10）」的映射是否完整、名称是否对得上。
+   映射缺失或名称不一致，会导致 EMR 回写、CDSS 规则匹配取不到标准编码。 */
 var SI_DICT_CUR_CODE = null;
+var SI_DICT_DATA = null;
+var SI_DICT_FILTER = { q:'', only:'', code:'' };
+
+var SI_DICT_MT = {'exact':'精确映射', 'broader_fallback':'宽口径回退', '语义等价':'语义等价'};
 
 function siLoadDictView(code){
-  if(!code) return;
-  SI_DICT_CUR_CODE = code;
-  SI_STATE.currentCode = code;
+  if(code){ SI_DICT_CUR_CODE = code; SI_STATE.currentCode = code; SI_DICT_FILTER.code = code; }
   var view = document.getElementById('si-dict-view');
-  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载疾病数据中...</div>';
-  siFetchDisease(code, function(d){
-    if(!d){ view.innerHTML = '<div class="si-empty">疾病数据加载失败</div>'; return; }
-    renderDictView(d);
-  });
+  if(SI_DICT_DATA){ renderDictView(); return; }
+  view.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">加载字典映射数据...</div>';
+  fetch('/api/kg/diseases?v=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(list){
+      SI_DICT_DATA = Array.isArray(list) ? list : [];
+      renderDictView();
+    })
+    .catch(function(e){
+      view.innerHTML = '<div class="si-empty" style="padding:60px;text-align:center;color:#ff6b6b">字典数据加载失败：' + siEsc(e.message||e) + '</div>';
+    });
 }
+
 function siNameMatch(graphName, stdName){
   if(!stdName) return 'missing';
   var g = String(graphName||'').toLowerCase().replace(/\s+/g,'');
@@ -2854,72 +2872,171 @@ function siNameMatch(graphName, stdName){
   if(g && (g.indexOf(s)!==-1 || s.indexOf(g)!==-1)) return 'partial';
   /* 字符重叠度 */
   var gMap = {}; var common = 0;
-  for(var i=0;i<g.length;i++){ gMap[g[i]] = (gMap[g[i]]||0)+1; }
+  for(var i=0;i<g.length;i++){ gMap[g[i]] = (gMap[g[i]])+1 || 1; }
   for(var j=0;j<s.length;j++){ if(gMap[s[j]]>0){ common++; gMap[s[j]]--; } }
   var maxLen = Math.max(g.length, s.length);
   if(maxLen>0 && common/maxLen>=0.6) return 'partial';
   return 'mismatch';
 }
-function siDictStat(label, cnt, cls){
-  return '<div style="background:var(--bg3);border-radius:8px;padding:10px 16px;text-align:center">'+
-    '<div class="si-dict-status '+cls+'" style="margin-bottom:4px">'+label+'</div>'+
-    '<div style="font-size:20px;font-weight:800;color:var(--ink)">'+cnt+'</div></div>';
-}
-function renderDictView(diseaseData){
-  var info = diseaseData.info || {};
-  var dims = diseaseData.dimensions || {};
-  var stdList = dims.StandardDiagnosis || [];
-  var view = document.getElementById('si-dict-view');
-  var html = '';
-  /* 头部 */
-  html += '<div class="si-dict-section"><h3>🏷️ 字典对比 — '+siEsc(info.name||'')+'</h3>';
-  html += '<div style="padding:16px">';
-  html += '<div style="font-size:13px;color:var(--muted);margin-bottom:12px">';
-  html += '疾病编码: <b>'+siEsc(info.code||'')+'</b> | 图谱ICD-10: <b>'+siEsc(info.icd_code||'无')+'</b>';
-  html += '</div>';
-  if(stdList.length===0){
-    html += '<div class="si-empty" style="padding:24px;text-align:center">该疾病暂无标准诊断（StandardDiagnosis）实体，无法进行字典对比</div>';
-    html += '</div></div>';
-    view.innerHTML = html;
-    return;
+
+/* 取某疾病的全部标准诊断映射；无 std_diagnoses 时用 icd_code 回落 */
+function siDictRows(d){
+  var arr = d.std_diagnoses || [];
+  if(!arr.length){
+    if(!d.icd_code && !d.icd_name) return [];
+    return [{ name: d.icd_name || '', standard_code: d.icd_code || '', coding_system: d.coding_system || '', mapping_type: d.std_mapping_type || '' }];
   }
-  /* 统计 */
-  var matchCnt=0, partialCnt=0, mismatchCnt=0, missingCnt=0;
-  stdList.forEach(function(s){
-    var stdName = s.standard_name || s.name || cleanName(s);
-    var st = siNameMatch(info.name, stdName);
-    if(st==='match')matchCnt++; else if(st==='partial')partialCnt++; else if(st==='mismatch')mismatchCnt++; else missingCnt++;
+  return arr;
+}
+/* 单病取「最差」状态，作为列表里的整体一致性 */
+function siDictWorst(d){
+  var rows = siDictRows(d);
+  if(!rows.length) return 'missing';
+  var order = {match:0, partial:1, mismatch:2, missing:3};
+  var worst = 'match';
+  rows.forEach(function(r){
+    var st = siNameMatch(d.name, r.name || '');
+    if(order[st] > order[worst]) worst = st;
   });
-  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">';
-  html += siDictStat('完全匹配', matchCnt, 'match');
-  html += siDictStat('部分匹配', partialCnt, 'partial');
-  html += siDictStat('不匹配', mismatchCnt, 'mismatch');
-  html += siDictStat('缺失', missingCnt, 'missing');
-  html += '</div>';
+  return worst;
+}
+function siDictStat(label, cnt, cls, sub){
+  return '<div style="background:var(--bg3);border-radius:8px;padding:10px 16px;text-align:center;min-width:96px">'
+    + '<div class="si-dict-status '+cls+'" style="margin-bottom:4px">'+label+'</div>'
+    + '<div style="font-size:20px;font-weight:800;color:var(--ink)">'+cnt+'</div>'
+    + (sub ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+sub+'</div>' : '')
+    + '</div>';
+}
+function siDictSetQ(v){
+  SI_DICT_FILTER.q = v; renderDictView();
+  /* 整块重绘会丢焦点，重新聚焦并恢复光标位置 */
+  var inp = document.getElementById('si-dict-q');
+  if(inp){ inp.focus(); var n = inp.value.length; try{ inp.setSelectionRange(n,n); }catch(e){} }
+}
+function siDictSetOnly(v){ SI_DICT_FILTER.only = v; renderDictView(); }
+function siDictPick(code){
+  SI_DICT_FILTER.code = (SI_DICT_FILTER.code===code ? '' : code);
+  renderDictView();
+  /* 单病对照在上方，点击表格后滚动过去，避免用户以为没反应 */
+  if(SI_DICT_FILTER.code){
+    var el = document.getElementById('si-dict-detail');
+    if(el && el.scrollIntoView){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  }
+}
+
+function renderDictView(){
+  var view = document.getElementById('si-dict-view');
+  var all = SI_DICT_DATA || [];
+  var f = SI_DICT_FILTER;
+  var stMap = {match:'✓ 一致', partial:'◐ 部分一致', mismatch:'✗ 不一致', missing:'— 无标准诊断'};
+  var stCls = {match:'match', partial:'partial', mismatch:'mismatch', missing:'missing'};
+
+  /* 全库口径统计 */
+  var mapped = 0, unmapped = 0, nameBad = 0, mtEmpty = 0;
+  all.forEach(function(d){
+    var rows = siDictRows(d);
+    if(!rows.length){ unmapped++; return; }
+    mapped++;
+    if(siDictWorst(d) !== 'match') nameBad++;
+    if(rows.some(function(r){ return !r.mapping_type; })) mtEmpty++;
+  });
+
+  var html = '';
+
+  /* ① 用途说明 + 全库体检卡 */
+  html += '<div class="si-dict-section"><h3>🏷️ 字典映射体检 · 图谱疾病 ↔ ICD-10 标准诊断</h3>';
+  html += '<div style="padding:12px 16px 0;font-size:12px;color:var(--muted);line-height:1.8">'
+       + '本视图核对<b>图谱里的疾病</b>与<b>CDSS 标准诊断字典（ICD-10）</b>的映射质量。'
+       + '映射缺失或名称对不上时，EMR 回写和 CDSS 规则匹配取不到标准编码，会直接导致规则不命中。'
+       + '<br>「名称一致」= 疾病名与标准诊断名完全相同；「部分一致」= 一方包含另一方或字符重合度 ≥60%；「不一致」视为需人工复核。'
+       + '</div>';
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;padding:14px 16px 16px">';
+  html += siDictStat('疾病总数', all.length, 'missing');
+  html += siDictStat('已映射', mapped, 'match', all.length ? '覆盖 ' + Math.round(mapped/all.length*100) + '%' : '');
+  html += siDictStat('未映射', unmapped, 'mismatch', '无标准诊断关系');
+  html += siDictStat('名称待复核', nameBad, 'partial', '不一致 / 部分一致');
+  html += siDictStat('映射类型未标注', mtEmpty, 'partial', '关系缺 mapping_type');
   html += '</div></div>';
-  /* 明细表 */
-  html += '<div class="si-dict-section"><h3>对比明细（'+stdList.length+' 条标准诊断）</h3>';
+
+  /* ② 单病明细（点击某行后显示） */
+  if(f.code){
+    var cur = null;
+    all.forEach(function(d){ if(d.code===f.code) cur = d; });
+    if(cur){
+      var rows = siDictRows(cur);
+      html += '<div class="si-dict-section" id="si-dict-detail"><h3>🔎 单病对照 — ' + siEsc(cur.name||'') + '</h3>';
+      html += '<div style="padding:12px 16px;font-size:12px;color:var(--muted)">疾病编码 <b style="color:var(--ink)">' + siEsc(cur.code) + '</b>'
+           + ' · 疾病大类 ' + siEsc(cur.category_name || '未归类')
+           + ' · 标准诊断 <b style="color:var(--ink)">' + rows.length + '</b> 条</div>';
+      if(!rows.length){
+        html += '<div class="si-dict-empty">该疾病未关联任何 StandardDiagnosis，建议补建 has_standard_diagnosis 关系后再回写 EMR</div>';
+      } else {
+        html += '<table class="si-dict-table"><thead><tr><th>一致性</th><th>图谱疾病名</th><th>ICD-10 标准名称</th><th>标准编码</th><th>编码体系</th><th>映射类型</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          var st = siNameMatch(cur.name, r.name || '');
+          html += '<tr>';
+          html += '<td><span class="si-dict-status '+stCls[st]+'">'+stMap[st]+'</span></td>';
+          html += '<td>'+siEsc(cur.name||'')+'</td>';
+          html += '<td>'+siEsc(r.name||'')+'</td>';
+          html += '<td style="font-family:monospace">'+siEsc(r.standard_code||'')+'</td>';
+          html += '<td>'+siEsc(r.coding_system||'—')+'</td>';
+          html += '<td>'+(r.mapping_type ? siEsc(SI_DICT_MT[r.mapping_type]||r.mapping_type) : '<span style="color:var(--muted)">未标注</span>')+'</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+    }
+  }
+
+  /* ③ 全库映射表 */
+  var q = (f.q||'').toLowerCase();
+  var list = all.filter(function(d){
+    var rows = siDictRows(d);
+    var w = siDictWorst(d);
+    if(q && (d.name||'').toLowerCase().indexOf(q)<0 && (d.code||'').toLowerCase().indexOf(q)<0 && (d.icd_code||'').toLowerCase().indexOf(q)<0) return false;
+    if(f.only==='unmapped' && rows.length) return false;
+    if(f.only==='bad' && (w==='match' || w==='missing')) return false;
+    if(f.only==='mt' && !rows.some(function(r){ return !r.mapping_type; })) return false;
+    return true;
+  });
+
+  html += '<div class="si-dict-section"><h3>📋 全库映射清单<span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">' + list.length + ' / ' + all.length + ' 个疾病</span></h3>';
+  html += '<div class="si-topbar" style="padding:12px 16px 0;margin-bottom:0">';
+  html += '<input type="text" id="si-dict-q" value="'+siEscAttr(f.q)+'" placeholder="搜索疾病名 / 编码 / ICD" oninput="siDictSetQ(this.value)" style="width:240px">';
+  html += '<select onchange="siDictSetOnly(this.value)">';
+  html += '<option value=""'+(f.only===''?' selected':'')+'>全部疾病</option>';
+  html += '<option value="unmapped"'+(f.only==='unmapped'?' selected':'')+'>仅未映射</option>';
+  html += '<option value="bad"'+(f.only==='bad'?' selected':'')+'>仅名称待复核</option>';
+  html += '<option value="mt"'+(f.only==='mt'?' selected':'')+'>仅映射类型未标注</option>';
+  html += '</select>';
+  html += '<span style="font-size:11px;color:var(--muted)">点击任意行查看单病对照</span>';
+  html += '</div>';
   html += '<table class="si-dict-table"><thead><tr>';
-  html += '<th>状态</th><th>图谱疾病名称</th><th>ICD-10 标准名称</th><th>标准编码</th><th>编码体系</th><th>映射类型</th>';
+  html += '<th>一致性</th><th>疾病名称</th><th>疾病编码</th><th>ICD-10</th><th>标准诊断名称</th><th>映射类型</th><th>疾病大类</th>';
   html += '</tr></thead><tbody>';
-  stdList.forEach(function(s){
-    var stdName = s.standard_name || s.name || cleanName(s);
-    var st = siNameMatch(info.name, stdName);
-    var stMap = {match:'✓ 匹配', partial:'◐ 部分', mismatch:'✗ 不匹配', missing:'— 缺失'};
-    var stdCode = s.standard_code || s.icd_code || '';
-    var codingSys = s.coding_system || 'ICD-10';
-    var mtMap = {'broader_fallback':'宽口径回退', 'exact':'精确映射', '语义等价':'语义等价'};
-    var mt = s.mapping_type ? (mtMap[s.mapping_type] || s.mapping_type) : '—';
-    html += '<tr>';
-    html += '<td><span class="si-dict-status '+st+'">'+stMap[st]+'</span></td>';
-    html += '<td>'+siEsc(info.name||'')+'</td>';
-    html += '<td>'+siEsc(stdName)+'</td>';
-    html += '<td>'+siEsc(stdCode)+'</td>';
-    html += '<td>'+siEsc(codingSys)+'</td>';
-    html += '<td>'+siEsc(mt)+'</td>';
+  if(!list.length){
+    html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">当前筛选条件下没有疾病</td></tr>';
+  }
+  list.forEach(function(d){
+    var rows = siDictRows(d);
+    var w = siDictWorst(d);
+    var codes = rows.map(function(r){ return r.standard_code || ''; }).filter(Boolean).join(' / ');
+    var names = rows.map(function(r){ return r.name || ''; }).filter(Boolean).join(' / ');
+    var mts = rows.map(function(r){ return r.mapping_type ? (SI_DICT_MT[r.mapping_type]||r.mapping_type) : '未标注'; }).join(' / ');
+    var act = (f.code===d.code ? ' style="background:var(--accent-bg)"' : '');
+    html += '<tr'+act+' onclick="siDictPick(\''+d.code+'\')" style="cursor:pointer">';
+    html += '<td><span class="si-dict-status '+stCls[w]+'">'+stMap[w]+'</span></td>';
+    html += '<td>'+siEsc(d.name||'')+'</td>';
+    html += '<td style="font-family:monospace;font-size:11px;color:var(--muted)">'+siEsc(d.code||'')+'</td>';
+    html += '<td style="font-family:monospace">'+(codes ? siEsc(codes) : '<span style="color:var(--muted)">—</span>')+'</td>';
+    html += '<td>'+(names ? siEsc(names) : '<span style="color:var(--muted)">—</span>')+'</td>';
+    html += '<td style="font-size:11px">'+siEsc(mts||'—')+'</td>';
+    html += '<td style="font-size:11px;color:var(--muted)">'+siEsc(d.category_name||'—')+'</td>';
     html += '</tr>';
   });
   html += '</tbody></table></div>';
+
   view.innerHTML = html;
 }
 
