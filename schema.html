@@ -768,18 +768,34 @@ function initTypeList(){
   }).catch(function(){});
 }
 
+function siSyncTypeHighlight(type){
+  var items = document.querySelectorAll('.si-type-item');
+  for(var i=0;i<items.length;i++){
+    var oc = items[i].getAttribute('onclick') || '';
+    if(type){ items[i].classList.toggle('active', oc.indexOf("siSetTypeFilter('"+type+"'") >= 0); }
+    else { items[i].classList.toggle('active', oc.indexOf('siSetTypeFilter(\'\'') >= 0); }
+  }
+}
+
 function siSetTypeFilter(type, el){
   SI_STATE.typeFilter = type;
-  var items = document.querySelectorAll('.si-type-item');
-  for(var i=0;i<items.length;i++){ items[i].classList.remove('active'); }
+  siSyncTypeHighlight(type);
   if(el){ el.classList.add('active'); }
   if(SI_STATE.mainView === 'dim'){
     /* 维度视角下：切换实体类别 = 切换维度类型 */
     siLoadDimEntities(type || '');
     return;
   }
-  /* 结构注册表视图下点左侧实体类别：切到实体检索视图并展示结果 */
-  if(SI_STATE.mainView !== 'search'){ siSwitchMainView('search'); }
+  if(SI_STATE.mainView === 'registry'){
+    /* 结构注册表内聚焦：保留当前子视图（关系/实体），只按该类型过滤 */
+    SI_REGISTRY_FILTER.type = type || '';
+    SI_REGISTRY_FILTER.q = '';
+    SI_REGISTRY_FILTER.status = '';
+    SI_REGISTRY_FILTER.extOnly = false;
+    if(SI_REGISTRY_DATA){ siRenderRegistry(); } else { siLoadRegistry(); }
+    return;
+  }
+  /* 实体检索视图下：按类别过滤实例列表 */
   siLoadSearchResults(type || '');
 }
 
@@ -1946,7 +1962,7 @@ function siSwitchMainView(view){
 
 /* ========== 1.5 结构注册表视图（4001整改：图谱数据字典核心） ========== */
 var SI_REGISTRY_DATA = null;
-var SI_REGISTRY_FILTER = { kind:'relation', q:'', status:'', extOnly:false };
+var SI_REGISTRY_FILTER = { kind:'relation', q:'', status:'', extOnly:false, type:'' };
 
 function siLoadRegistry(){
   var el = document.getElementById('si-registry-view');
@@ -2009,6 +2025,11 @@ function siRenderRegistry(){
   h += '<option value="slot"' + (f.status==='slot'?' selected':'') + '>结构已定义·实例未落地</option>';
   h += '</select>';
   h += '<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer"><input type="checkbox" ' + (f.extOnly?'checked':'') + ' onchange="siRegSetExt(this.checked)"> 仅专科扩展槽位</label>';
+  if(f.type){
+    var tCn = f.type;
+    ENTITY_TYPES.forEach(function(t){ if(t.code===f.type){ tCn = t.cn; } });
+    h += '<span style="font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(79,140,255,.14);color:var(--accent);white-space:nowrap">左栏聚焦：' + tCn + '（' + f.type + '）<b style="cursor:pointer;margin-left:6px" onclick="siRegClearType()" title="清除聚焦">×</b></span>';
+  }
   h += '<span id="si-reg-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>';
   h += '</div>';
 
@@ -2021,6 +2042,11 @@ function siRegSetKind(k){ SI_REGISTRY_FILTER.kind=k; siRenderRegistry(); }
 function siRegSetQ(q){ SI_REGISTRY_FILTER.q=q; siRenderRegistryTable(); }
 function siRegSetStatus(s){ SI_REGISTRY_FILTER.status=s; siRenderRegistryTable(); }
 function siRegSetExt(b){ SI_REGISTRY_FILTER.extOnly=b; siRenderRegistryTable(); }
+function siRegClearType(){
+  SI_REGISTRY_FILTER.type='';
+  siSyncTypeHighlight('');
+  siRenderRegistry();
+}
 
 function siRenderRegistryTable(){
   var el = document.getElementById('si-registry-table');
@@ -2030,6 +2056,7 @@ function siRenderRegistryTable(){
   var rows = [];
   if(f.kind==='relation'){
     (SI_REGISTRY_DATA.relation_types||[]).forEach(function(r){
+      if(f.type && (r.start_entity_types||[]).indexOf(f.type)<0 && (r.end_entity_types||[]).indexOf(f.type)<0) return;
       if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
       if(f.status==='inst' && r.instance_count<=0) return;
       if(f.status==='slot' && r.instance_count>0) return;
@@ -2053,6 +2080,7 @@ function siRenderRegistryTable(){
     el.innerHTML = h;
   } else {
     (SI_REGISTRY_DATA.entity_types||[]).forEach(function(r){
+      if(f.type && (r.type||'')!==f.type) return;
       if(q && (r.type||'').toLowerCase().indexOf(q)<0 && (r.name_cn||'').toLowerCase().indexOf(q)<0) return;
       if(f.status==='inst' && r.instance_count<=0) return;
       if(f.status==='slot' && r.instance_count>0) return;
