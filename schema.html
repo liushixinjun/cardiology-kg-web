@@ -43,7 +43,6 @@
 .si-reg-sub.active{color:var(--accent);background:var(--accent-bg);border-left-color:var(--accent)}
 .si-reg-sub .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .si-reg-sub .cnt{font-size:10px;opacity:.85}
-.si-reg-toggle{width:12px;font-size:9px;color:var(--muted);flex:none}
 .si-dim-list{padding:4px 0}
 .si-dim-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer}
 .si-dim-item:hover{color:var(--ink)}
@@ -1994,7 +1993,6 @@ function siSwitchMainView(view){
 /* ========== 1.5 结构注册表视图（4001整改：图谱数据字典核心） ========== */
 var SI_REGISTRY_DATA = null;
 var SI_REGISTRY_FILTER = { kind:'overview', q:'', status:'', extOnly:false, group:'', sub:'' };
-var SI_REG_OPEN = {};   /* 左栏域展开状态 */
 
 /* 实体类型分层：与 server.py META_HIERARCHY_SEED / meta_model.json hierarchy 同口径（7 域 15 子域） */
 var REG_ENTITY_HIER = [
@@ -2146,31 +2144,26 @@ function siRenderRegNav(){
 
   h += '<div class="si-type-item' + (f.kind==='overview'?' active':'') + '" onclick="siRegSetKind(\'overview\')">📐 总览</div>';
 
-  /* 实体类型：7 域 + 未归类 */
+  /* 实体类型：7 域 + 未归类（默认全部展开） */
   h += siRegNavParent('entity', '📦', '实体类型', (d.entity_types||[]).length);
   if(f.kind==='entity'){
     siRegEntityGroups().forEach(function(g){
-      var open = !!SI_REG_OPEN[g.key];
-      h += '<div class="si-reg-group' + (f.group===g.key?' active':'') + '" onclick="siRegSetGroup(\'' + g.key + '\')">'
-         + '<span class="si-reg-toggle">' + (open?'▾':'▸') + '</span>'
+      h += '<div class="si-reg-group' + (f.group===g.key && f.sub===''?' active':'') + '" onclick="siRegSetGroup(\'' + g.key + '\')">'
          + '<span class="tag" style="background:' + g.tagColor + '">' + g.tag + '</span>'
          + '<span class="nm" title="' + siEscAttr(g.name) + '">' + g.icon + ' ' + siEsc(g.name) + '</span>'
          + '<span class="cnt">' + g.n + '</span></div>';
-      if(open){
-        g.subs.forEach(function(s, i){
-          h += '<div class="si-reg-sub' + (f.group===g.key && f.sub===String(i)?' active':'') + '" onclick="event.stopPropagation();siRegSetSub(\'' + g.key + '\',' + i + ')">'
-             + s.icon + ' <span class="nm">' + siEsc(s.name) + '</span><span class="cnt">' + s.n + '</span></div>';
-        });
-      }
+      g.subs.forEach(function(s, i){
+        h += '<div class="si-reg-sub' + (f.group===g.key && f.sub===String(i)?' active':'') + '" onclick="siRegSetSub(\'' + g.key + '\',' + i + ')">'
+           + s.icon + ' <span class="nm">' + siEsc(s.name) + '</span><span class="cnt">' + s.n + '</span></div>';
+      });
     });
   }
 
-  /* 关系类型：standard.html 第 4 章 4.1~4.9 + 10.2 */
+  /* 关系类型：standard.html 第 4 章 4.1~4.9 + 10.2（默认全部展示） */
   h += siRegNavParent('relation', '🔗', '关系类型', (d.relation_types||[]).length);
   if(f.kind==='relation'){
     siRegRelationGroups().forEach(function(g){
       h += '<div class="si-reg-group' + (f.group===g.key?' active':'') + '" onclick="siRegSetGroup(\'' + g.key + '\')">'
-         + '<span class="si-reg-toggle"></span>'
          + '<span class="nm" title="' + siEscAttr(g.name) + '">' + g.icon + ' ' + siEsc(g.name) + '</span>'
          + '<span class="cnt">' + g.n + '</span></div>';
     });
@@ -2270,17 +2263,10 @@ function siRegSetKind(k){
   SI_REGISTRY_FILTER.extOnly = false;
   if(SI_REGISTRY_DATA){ siRenderRegistry(); } else { siLoadRegistry(); }
 }
-/* 点一级分组：选中并展开；再点同一分组则收起并回到该类全部 */
+/* 点一级分组：只看该分组；再点一次回到全部 */
 function siRegSetGroup(k){
   var f = SI_REGISTRY_FILTER;
-  if(f.group === k){
-    var open = !SI_REG_OPEN[k];
-    SI_REG_OPEN[k] = open;
-    f.group = open ? k : '';
-  } else {
-    SI_REG_OPEN[k] = true;
-    f.group = k;
-  }
+  f.group = (f.group === k && f.sub === '') ? '' : k;
   f.sub = '';
   f.q = ''; f.status = ''; f.extOnly = false;
   siRenderRegistry();
@@ -2288,7 +2274,6 @@ function siRegSetGroup(k){
 /* 点二级子分组 */
 function siRegSetSub(gk, i){
   var f = SI_REGISTRY_FILTER;
-  SI_REG_OPEN[gk] = true;
   f.group = gk; f.sub = String(i);
   f.q = ''; f.status = ''; f.extOnly = false;
   siRenderRegistry();
